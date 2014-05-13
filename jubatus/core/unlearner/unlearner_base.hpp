@@ -43,12 +43,27 @@ class unlearner_base {
   virtual std::string type() const = 0;
   virtual void clear() = 0;
 
+  // Tests if the given id can be touched.
+  //
+  // This function returns true if the given |id| can be touched (i.e., the
+  // number of registered unique ids is less than the limit, or the number of
+  // registered unique ids reached the limit but there are at least one ID that
+  // is available for unlearning), and false otherwise.
+  virtual bool can_touch(const std::string& id) = 0;
+
   // Informs that the item of given id is updated in the model.
   //
   // If the number of unique ids reaches to the predefined upper bound, one or
-  // more ids are unlearned. On unlearning an id X, a callback given by
-  // |set_callback| is called by passing X as an argument.
-  virtual void touch(const std::string& id) = 0;
+  // more ids are unlearned. In that case, when there are no IDs available for
+  // unlearning, this function returns false. On unlearning an id X, a callback
+  // given by |set_callback| is called by passing X as an argument.
+  virtual bool touch(const std::string& id) = 0;
+
+  // Informs that the item of given id is removed from the model.
+  //
+  // This function returns true when succeed to remove |id|. If |id| does not
+  // exist in memory, it returns false.
+  virtual bool remove(const std::string& id) = 0;
 
   // Checks that a given id is still begin in memory.
   //

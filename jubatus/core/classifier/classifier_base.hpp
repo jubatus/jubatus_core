@@ -90,10 +90,14 @@ class classifier_base {
   const storage::storage_base* get_storage() const;
 
   static float squared_norm(const common::sfv_t& sfv);
+  void check_touchable(const std::string& label);
   void touch(const std::string& label);
 
   storage_ptr storage_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
+
+ private:
+  bool unlearn_label(const std::string& label);
 };
 
 }  // namespace classifier

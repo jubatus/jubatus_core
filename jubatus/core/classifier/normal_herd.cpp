@@ -47,6 +47,8 @@ normal_herd::normal_herd(
 }
 
 void normal_herd::train(const common::sfv_t& sfv, const string& label) {
+  check_touchable(label);
+
   string incorrect_label;
   float variance = 0.f;
   float margin = -calc_margin_and_variance(sfv, label, incorrect_label,

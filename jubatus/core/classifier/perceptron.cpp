@@ -29,6 +29,8 @@ perceptron::perceptron(storage_ptr storage)
 }
 
 void perceptron::train(const common::sfv_t& sfv, const std::string& label) {
+  check_touchable(label);
+
   std::string predicted_label = classify(sfv);
   if (label == predicted_label) {
     return;

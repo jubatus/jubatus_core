@@ -50,7 +50,7 @@ void classifier_base::set_label_unlearner(
         label_unlearner) {
   label_unlearner->set_callback(
       jubatus::util::lang::bind(
-          &classifier_base::delete_label, this, jubatus::util::lang::_1));
+          &classifier_base::unlearn_label, this, jubatus::util::lang::_1));
   unlearner_ = label_unlearner;
 }
 
@@ -91,7 +91,14 @@ vector<string> classifier_base::get_labels() const {
 }
 
 bool classifier_base::set_label(const string& label) {
-  return storage_->set_label(label);
+  check_touchable(label);
+
+  bool result = storage_->set_label(label);
+  if (unlearner_ && result) {
+    result = unlearner_->touch(label);
+  }
+
+  return result;
 }
 
 void classifier_base::get_status(std::map<string, string>& status) const {
@@ -186,12 +193,36 @@ storage_ptr classifier_base::get_storage() {
 }
 
 void classifier_base::touch(const std::string& label) {
+  check_touchable(label);
+
   if (unlearner_) {
     unlearner_->touch(label);
   }
 }
 
+void classifier_base::check_touchable(const std::string& label) {
+  if (unlearner_ && !unlearner_->can_touch(label)) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "no more space available to add new label: " + label));
+  }
+}
+
 bool classifier_base::delete_label(const std::string& label) {
+  // Remove the label from the model.
+  bool result = get_storage()->delete_label(label);
+
+  if (unlearner_ && result) {
+    // Notify unlearner that the label was removed.
+    result = unlearner_->remove(label);
+  }
+
+  return result;
+}
+
+/**
+ * Callback function to delete the label via unlearner.
+ */
+bool classifier_base::unlearn_label(const std::string& label) {
   return get_storage()->delete_label(label);
 }
 

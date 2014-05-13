@@ -46,6 +46,8 @@ confidence_weighted::confidence_weighted(
 }
 
 void confidence_weighted::train(const common::sfv_t& sfv, const string& label) {
+  check_touchable(label);
+
   const float C = config_.C;
   string incorrect_label;
   float variance = 0.f;

@@ -59,6 +59,51 @@ TEST(lru_unlearner, trivial) {
   EXPECT_FALSE(unlearner.exists_in_memory(callback.unlearned_id()));
 }
 
+TEST(lru_unlearner, sticky) {
+  lru_unlearner::config config;
+  config.max_size = 3;
+  config.sticky_pattern = "sticky-*";
+  lru_unlearner unlearner(config);
+
+  mock_callback callback;
+  unlearner.set_callback(callback);
+
+  std::vector<std::string> touch_sequence;
+  touch_sequence.push_back("id1");
+  touch_sequence.push_back("id2");
+  touch_sequence.push_back("sticky-1");
+
+  for (size_t i = 0; i < touch_sequence.size(); ++i) {
+    unlearner.touch(touch_sequence[i]);
+    EXPECT_EQ("", callback.unlearned_id());
+    EXPECT_TRUE(unlearner.exists_in_memory(touch_sequence[i]));
+  }
+
+  unlearner.touch("id3");
+  EXPECT_EQ("id1", callback.unlearned_id());
+  EXPECT_FALSE(unlearner.exists_in_memory(callback.unlearned_id()));
+
+  unlearner.touch("id4");
+  EXPECT_EQ("id2", callback.unlearned_id());
+
+  unlearner.touch("id5");
+  EXPECT_EQ("id3", callback.unlearned_id());
+
+  unlearner.touch("sticky-2");
+  EXPECT_EQ("id4", callback.unlearned_id());
+
+  unlearner.touch("sticky-3");
+  EXPECT_EQ("id5", callback.unlearned_id());
+
+  EXPECT_FALSE(unlearner.touch("id6"));
+
+  unlearner.remove("sticky-1");
+  EXPECT_FALSE(unlearner.exists_in_memory("sticky-1"));
+
+  EXPECT_TRUE(unlearner.touch("id6"));
+}
+
+
 }  // namespace unlearner
 }  // namespace core
 }  // namespace jubatus

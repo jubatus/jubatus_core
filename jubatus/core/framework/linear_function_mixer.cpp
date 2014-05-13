@@ -91,6 +91,7 @@ bool linear_function_mixer::put_diff(const diffv& v) {
     for (size_t i = 0; i < v.v.diff.size(); ++i) {
       const feature_val3_t& classes = v.v.diff[i].second;
       for (size_t j = 0; j < classes.size(); ++j) {
+        // ignore error returned by touch
         label_unlearner_->touch(classes[j].first);
       }
     }
