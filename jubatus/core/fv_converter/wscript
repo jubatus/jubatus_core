@@ -52,11 +52,13 @@ def build(bld):
     ]
   headers = [
       'word_splitter.hpp',
+      'string_feature_factory.hpp',
       'string_filter.hpp',
+      'string_filter_factory.hpp',
       'num_feature.hpp',
+      'num_feature_factory.hpp',
       'num_filter.hpp',
-      'string_feature.hpp',
-      'string_filter.hpp',
+      'num_filter_factory.hpp',
       'binary_feature.hpp',
       'datum_to_fv_converter.hpp',
       'datum.hpp',
