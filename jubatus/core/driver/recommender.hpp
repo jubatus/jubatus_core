@@ -24,10 +24,9 @@
 #include "../recommender/recommender_base.hpp"
 #include "../framework/mixable.hpp"
 #include "../framework/diffv.hpp"
-#include "mixable_versioned_table.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
-#include "../fv_converter/mixable_weight_manager.hpp"
+#include "mixable_versioned_table.hpp"
 #include "driver.hpp"
 
 namespace jubatus {
