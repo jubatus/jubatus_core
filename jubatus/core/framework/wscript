@@ -22,6 +22,7 @@ def build(bld):
       'model.hpp',
       'packer.hpp',
       'push_mixable.hpp',
+      'stream_writer.hpp',
       ]
   use = ['jubatus_util']
 

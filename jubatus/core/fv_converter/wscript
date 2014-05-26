@@ -55,6 +55,8 @@ def build(bld):
       'string_filter.hpp',
       'num_feature.hpp',
       'num_filter.hpp',
+      'string_feature.hpp',
+      'string_filter.hpp',
       'binary_feature.hpp',
       'datum_to_fv_converter.hpp',
       'datum.hpp',
@@ -67,6 +69,8 @@ def build(bld):
       'revert.hpp',
       'exception.hpp',
       'type.hpp',
+      'factory.hpp',
+      'util.hpp',
       ]
   use = ['jubatus_util', 'MSGPACK']
 
