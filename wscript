@@ -5,12 +5,12 @@ from functools import partial
 import os
 import sys
 
-VERSION = '0.5.3'
-APPNAME = 'jubatus'
+VERSION = '0.0.1'
+APPNAME = 'jubatus_core'
 
 top = '.'
 out = 'build'
-subdirs = ['config', 'jubatus', 'plugin']
+subdirs = ['jubatus']
 
 def options(opt):
   opt.load('compiler_cxx')
@@ -39,16 +39,11 @@ def configure(conf):
   conf.load('gnu_dirs')
 
   # Generate config.hpp
-  conf.env.JUBATUS_PLUGIN_DIR = conf.env['LIBDIR'] + '/jubatus/plugin'
-  conf.define('JUBATUS_VERSION', VERSION)
-  conf.define('JUBATUS_APPNAME', APPNAME)
-  conf.define('JUBATUS_PLUGIN_DIR', conf.env.JUBATUS_PLUGIN_DIR)
-  conf.write_config_header('jubatus/config.hpp', guard="JUBATUS_CONFIG_HPP_", remove=False)
+  conf.define('JUBATUS_CORE_VERSION', VERSION)
+  conf.define('JUBATUS_CORE_APPNAME', APPNAME)
+  conf.write_config_header('jubatus/core_config.hpp', guard="JUBATUS_CORE_CONFIG_HPP_", remove=False)
 
   conf.check_cxx(lib = 'msgpack')
-  conf.check_cxx(lib = 'jubatus_mpio')
-  conf.check_cxx(lib = 'jubatus_msgpack-rpc')
-  conf.check_cxx(lib = 'dl')
 
   # pkg-config tests
   conf.find_program('pkg-config') # make sure that pkg-config command exists
@@ -59,46 +54,14 @@ def configure(conf):
     conf.to_log("PKG_CONFIG_PATH: " + os.environ.get('PKG_CONFIG_PATH', ''))
     conf.fatal("Failed to find the library. Please confirm that PKG_CONFIG_PATH environment variable is correctly set.", e)
 
-  conf.check_cxx(header_name = 'unistd.h')
-  conf.check_cxx(header_name = 'sys/types.h')
-  conf.check_cxx(header_name = 'sys/wait.h')
-  conf.check_cxx(header_name = 'sys/stat.h')
-  conf.check_cxx(header_name = 'cxxabi.h')
-  conf.check_cxx(header_name = 'sys/socket.h net/if.h')
-  conf.check_cxx(header_name = 'sys/ioctl.h')
-  conf.check_cxx(header_name = 'fcntl.h')
-  conf.check_cxx(header_name = 'netinet/in.h')
-  conf.check_cxx(header_name = 'arpa/inet.h')
-  conf.check_cxx(header_name = 'dlfcn.h')
-
   if not Options.options.debug:
     conf.define('NDEBUG', 1)
     conf.define('JUBATUS_DISABLE_ASSERTIONS', 1)
-
-  if Options.options.enable_zookeeper:
-    if (conf.check_cxx(header_name = 'c-client-src/zookeeper.h',
-                           define_name = 'HAVE_ZOOKEEPER_H',
-                           mandatory = False)):
-      conf.define('ZOOKEEPER_HEADER', 'c-client-src/zookeeper.h')
-    else:
-      conf.check_cxx(header_name = 'zookeeper/zookeeper.h',
-                     define_name = 'HAVE_ZOOKEEPER_H',
-                     errmsg = 'ZooKeeper c-binding is not found. Please install c-binding.',
-                     mandatory = True)
-      conf.define('ZOOKEEPER_HEADER', 'zookeeper/zookeeper.h')
-
-    conf.check_cxx(lib = 'zookeeper_mt', errmsg = 'ZK not found')
-
-    if Options.options.zktest:
-      conf.env.INTEGRATION_TEST = True
 
   if Options.options.gcov:
     conf.env.append_value('CXXFLAGS', '-fprofile-arcs')
     conf.env.append_value('CXXFLAGS', '-ftest-coverage')
     conf.env.append_value('LINKFLAGS', '-lgcov')
-
-  if Options.options.rpc_test_port_base:
-    conf.define('JUBATUS_RPC_TEST_PORT_BASE', int(Options.options.rpc_test_port_base))
 
   conf.define('BUILD_DIR',  conf.bldnode.abspath())
 
@@ -122,25 +85,17 @@ def build(bld):
   bld.core_headers = []
   bld.core_use = []
 
+  if not bld.is_defined('JUBATUS_DISABLE_ASSERTIONS'):
+    bld.core_use.extend(['LIBGLOG'])
+
   bld.recurse(subdirs)
 
-  if not bld.is_defined('JUBATUS_DISABLE_ASSERTIONS'):
-    bld.core_use = ['LIBGLOG']
-
   # core
-  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = bld.env['JUBATUS_VERSION'])
+  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = bld.env['JUBATUS_CORE_VERSION'])
   bld.install_files('${PREFIX}/include/', list(set(bld.core_headers)), relative_trick=True)
 
 
-  bld(source = 'jubatus.pc.in',
-      prefix = bld.env['PREFIX'],
-      exec_prefix = '${prefix}',
-      libdir = bld.env['LIBDIR'],
-      includedir = '${prefix}/include',
-      PACKAGE = APPNAME,
-      VERSION = VERSION)
-
-  bld(source = 'jubatus-client.pc.in',
+  bld(source = 'jubatus_core.pc.in',
       prefix = bld.env['PREFIX'],
       exec_prefix = '${prefix}',
       libdir = bld.env['LIBDIR'],
@@ -153,14 +108,7 @@ def cpplint(ctx):
   cpplint = ctx.path.find_node('tools/codestyle/cpplint/cpplint.py')
   src_dir = ctx.path.find_node('jubatus')
   file_list = []
-  excludes = ['jubatus/server/third_party/*',
-              'jubatus/server/server/*_impl.cpp',
-              'jubatus/server/server/*_proxy.cpp',
-              'jubatus/server/server/*_client.hpp',
-              'jubatus/server/server/*_types.hpp',
-              'jubatus/client/*_client.hpp',
-              'jubatus/client/*_types.hpp',
-              'jubatus/core/third_party/*',
+  excludes = ['jubatus/core/third_party/*',
               'jubatus/util/*.h',
               'jubatus/util/*.cpp',
               'jubatus/util/*/*.h',
@@ -176,45 +124,6 @@ def cpplint(ctx):
   tmp_file.flush()
   ctx.exec_command('cat ' + tmp_file.name + ' | xargs "' + cpplint.abspath() + '" --filter=-runtime/references,-runtime/rtti 2>&1')
   tmp_file.close()
-
-def regenerate(ctx):
-  server_node = ctx.path.find_node('jubatus/server/server')
-  jenerator_node = ctx.path.find_node('tools/jenerator/src/jenerator')
-  if not jenerator_node:
-    raise TaskNotReady('jenerator is not built yet')
-  for idl_node in server_node.ant_glob('*.idl'):
-    idl = idl_node.name
-    service_name = os.path.splitext(idl)[0]
-    jenerator_command = [jenerator_node.abspath(), '-l', 'server', '-o', '.', '-i', '-n', 'jubatus', '-g', 'JUBATUS_SERVER_SERVER_', idl]
-    try:
-      idl_hash = ctx.cmd_and_log(['git', 'log', '-1', '--format=%H', '--', idl], cwd=server_node.abspath()).strip()
-      idl_ver = ctx.cmd_and_log(['git', 'describe', idl_hash], cwd=server_node.abspath()).strip()
-      jenerator_command += ['--idl-version', idl_ver]
-    except Exception:
-      pass
-    ctx.cmd_and_log(jenerator_command, cwd=server_node.abspath())
-    print()
-    if not service_name in ['graph', 'anomaly']:
-      server_node.find_node('%s_client.hpp' % service_name).delete()
-
-def regenerate_client(ctx):
-  server_node = ctx.path.find_node('jubatus/server/server')
-  client_node = ctx.path.find_node('jubatus/client')
-  jenerator_node = ctx.path.find_node('tools/jenerator/src/jenerator')
-  if not jenerator_node:
-    raise TaskNotReady('jenerator is not built yet')
-  for idl_node in server_node.ant_glob('*.idl'):
-    idl = idl_node.name
-    service_name = os.path.splitext(idl)[0]
-    jenerator_command = [jenerator_node.abspath(), '-l', 'cpp', '-o', client_node.abspath(), '-i', '-n', 'jubatus::' + service_name, '-g', 'JUBATUS_CLIENT_', idl]
-    try:
-      idl_hash = ctx.cmd_and_log(['git', 'log', '-1', '--format=%H', '--', idl], cwd=server_node.abspath()).strip()
-      idl_ver = ctx.cmd_and_log(['git', 'describe', idl_hash], cwd=server_node.abspath()).strip()
-      jenerator_command += ['--idl-version', idl_ver]
-    except Exception:
-      pass
-    ctx.cmd_and_log(jenerator_command, cwd=server_node.abspath())
-    print()
 
 def check_cmath(ctx):
   ctx.cmd_and_log('tools/codestyle/cmath_finder.sh')

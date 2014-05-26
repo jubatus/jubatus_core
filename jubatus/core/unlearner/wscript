@@ -12,9 +12,17 @@ def build(bld):
       ]
 
   use = ['jubatus_util']
+  headers = [
+      'lru_unlearner.hpp',
+      'random_unlearner.hpp',
+      'unlearner.hpp',
+      'unlearner_base.hpp',
+      'unlearner_factory.hpp',
+      ]
 
   bld.core_use.extend(use)
   bld.core_sources.extend(bld.add_prefix(source))
+  bld.core_headers.extend(bld.add_prefix(headers))
 
   bld.program(
     features = 'gtest',
