@@ -51,6 +51,7 @@ void classifier_base::set_label_unlearner(
   label_unlearner->set_callback(
       jubatus::util::lang::bind(
           &classifier_base::delete_label, this, jubatus::util::lang::_1));
+  unlearner_ = label_unlearner;
 }
 
 void classifier_base::classify_with_scores(
