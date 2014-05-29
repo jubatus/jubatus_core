@@ -51,6 +51,7 @@ def build(bld):
     'word_splitter.cpp',
     ]
   headers = [
+      'string_feature.hpp',
       'word_splitter.hpp',
       'string_feature_factory.hpp',
       'string_filter.hpp',
