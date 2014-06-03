@@ -65,7 +65,6 @@ struct internal_diff_object : diff_object_raw {
 }  // namespace
 
 void linear_function_mixer::mix(const diffv& lhs, diffv& mixed) const {
-  // TODO(suma): Is this rhs removed change OK?> kumagi
   if (lhs.v.expect_version == mixed.v.expect_version) {
     features3_t l(lhs.v.diff);
     const features3_t& r(mixed.v.diff);
@@ -75,7 +74,6 @@ void linear_function_mixer::mix(const diffv& lhs, diffv& mixed) const {
         bind(mix_feature, lhs.count, mixed.count, _1, _2));
     mixed.v.diff.swap(l);
     mixed.count = lhs.count + mixed.count;
-    mixed.v.expect_version = lhs.v.expect_version;
   } else if (lhs.v.expect_version > mixed.v.expect_version) {
     mixed = lhs;
   }
