@@ -251,11 +251,7 @@ class column_table {
 
   void get_row(const uint64_t id, framework::packer& pk) const {
     jubatus::util::concurrent::scoped_rlock lk(table_lock_);
-    if (tuples_ <= id) {
-      // TODO(kumagi): Should we return nil object?
-      // or raise assertion?
-      return;
-    }
+    JUBATUS_ASSERT_GE(tuples_, id, "specified index is bigger than table size");
     pk.pack_array(3);  // [key, [owner, id], [data]]
     pk.pack(keys_[id]);  // key
     pk.pack(versions_[id]);  // [version]
