@@ -131,10 +131,14 @@ class stub_storage : public storage_base {
   }
 
   bool delete_label(const string& name) {
+    if (labels_.find(name) == labels_.end()) {
+      return false;
+    }
     for (map<string, map<string, val3_t> >::iterator it = data_.begin();
          it != data_.end(); ++it) {
       it->second.erase(name);
     }
+    labels_.erase(name);
     return true;
   }
 
@@ -619,7 +623,8 @@ TYPED_TEST_P(storage_test, delete_label) {
     EXPECT_EQ(1u, val.size());
   }
 
-  s.delete_label("c1");
+  EXPECT_TRUE(s.delete_label("c1"));
+  EXPECT_FALSE(s.delete_label("c2"));
 
   {
     feature_val1_t val;
