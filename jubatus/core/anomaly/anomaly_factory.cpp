@@ -41,18 +41,13 @@ namespace {
 struct lof_config : public lof_storage::config {
   std::string method;
   jubatus::core::common::jsonconfig::config parameter;
-  jubatus::util::data::optional<std::string> unlearner;
-  jubatus::util::data::optional<config>
-      unlearner_parameter;
 
   template <typename Ar>
   void serialize(Ar& ar) {
     lof_storage::config::serialize(ar);
     ar
         & JUBA_MEMBER(method)
-        & JUBA_MEMBER(parameter)
-        & JUBA_MEMBER(unlearner)
-        & JUBA_MEMBER(unlearner_parameter);
+        & JUBA_MEMBER(parameter);
   }
 };
 
