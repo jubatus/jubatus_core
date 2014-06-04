@@ -120,7 +120,7 @@ TEST_F(bit_vector_nearest_neighbor_base_test, get_all_row_ids) {
   EXPECT_EQ(expect, actual);
 }
 
-TEST_F(bit_vector_nearest_neighbor_base_test, neighbor_row_from_data) {
+TEST_F(bit_vector_nearest_neighbor_base_test, neighbor_row_from_datum) {
   set_bitnum(4);
   mock_->add_bv("A", make_bv("0000"));
   mock_->add_bv("B", make_bv("0001"));

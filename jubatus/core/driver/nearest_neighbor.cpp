@@ -69,7 +69,7 @@ nearest_neighbor::neighbor_row_from_id(const std::string& id, size_t size) {
 }
 
 std::vector<std::pair<std::string, float> >
-nearest_neighbor::neighbor_row_from_data(
+nearest_neighbor::neighbor_row_from_datum(
     const fv_converter::datum& datum,
     size_t size) {
   common::sfv_t v;
