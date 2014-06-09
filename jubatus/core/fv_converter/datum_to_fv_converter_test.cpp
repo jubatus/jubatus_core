@@ -310,6 +310,7 @@ TEST(datum_to_fv_converter, register_string_filter) {
     EXPECT_EQ(1u, feature.size());
   }
 
+#if defined(HAVE_RE2) || defined(HAVE_ONIGURUMA)
   conv.register_string_filter(shared_ptr<key_matcher>(new match_all()),
       shared_ptr<string_filter>(new regexp_filter("<[^>]*>", "")),
       "_filtered");
@@ -320,6 +321,7 @@ TEST(datum_to_fv_converter, register_string_filter) {
     EXPECT_EQ(2u, feature.size());
     EXPECT_EQ("/text_filtered$aaa@str#bin/bin", feature[1].first);
   }
+#endif
 }
 
 TEST(datum_to_fv_converter, register_num_filter) {

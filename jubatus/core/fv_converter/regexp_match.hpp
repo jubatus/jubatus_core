@@ -17,10 +17,12 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_REGEXP_MATCH_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_REGEXP_MATCH_HPP_
 
-#ifndef HAVE_RE2
+#if defined HAVE_RE2
+#include "re2_match.hpp"
+#elif defined HAVE_ONIGURUMA
 #include "onig_match.hpp"
 #else
-#include "re2_match.hpp"
+#include "null_regexp_match.hpp"
 #endif
 
 #endif  // JUBATUS_CORE_FV_CONVERTER_REGEXP_MATCH_HPP_
