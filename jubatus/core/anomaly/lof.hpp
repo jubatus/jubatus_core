@@ -53,6 +53,10 @@ class lof : public anomaly_base {
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
 
+  bool is_updatable() const {
+    return true;
+  }
+
  private:
   jubatus::util::lang::shared_ptr<mixable_lof_storage> mixable_storage_;
   jubatus::util::lang::shared_ptr<recommender::recommender_base> nn_engine_;

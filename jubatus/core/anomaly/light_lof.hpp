@@ -85,6 +85,10 @@ class light_lof : public anomaly_base {
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
 
+  bool is_updatable() const {
+    return false;
+  }
+
  private:
   // Parameters of each data point.
   struct parameter {
