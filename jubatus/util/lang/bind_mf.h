@@ -60,7 +60,7 @@ bind(R (MF_CC T::*f)() const, A1 a1)
   {									\
     typedef _mfi::MF_NAME(mf##ANUM)<R,T BTYPES> F;			\
     typedef typename _bi::list##CNUM<A1 ATYPES> L;			\
-    return _bi::bind_t<R, F, L>(mem_fn(f), L(a1 RARG));			\
+      return _bi::bind_t<R, F, L>(::jubatus::util::lang::mem_fn(f), L(a1 RARG)); \
   }									\
   template <class R, class T, class A1					\
             AARG BARG >							\
@@ -69,7 +69,7 @@ bind(R (MF_CC T::*f)() const, A1 a1)
   {									\
     typedef const _mfi::MF_NAME(cmf##ANUM)<R,T BTYPES> F;		\
     typedef typename _bi::list##CNUM<A1 ATYPES> L;		\
-    return _bi::bind_t<R, F, L>(mem_fn(f), L(a1 RARG));			\
+      return _bi::bind_t<R, F, L>(::jubatus::util::lang::mem_fn(f), L(a1 RARG)); \
   }
 
 #define AARG , class A2

@@ -33,16 +33,26 @@
 #define JUBATUS_UTIL_LANG_ENABLE_SHARED_FROM_THIS_H_
 
 #include <memory>
+#ifdef __GLIBCXX__
 #include <tr1/memory>
+#endif
 #include "shared_ptr.h"
 
 namespace jubatus {
 namespace util {
 namespace lang {
 
+namespace detail {
+#ifdef __GLIBCXX__
+namespace enable_shared_from_this_ns = ::std::tr1;
+#else
+namespace enable_shared_from_this_ns = ::std;
+#endif
+}
+
 template <class T>
-class enable_shared_from_this : public std::tr1::enable_shared_from_this<T> {
-  typedef std::tr1::enable_shared_from_this<T> base;
+class enable_shared_from_this : public detail::enable_shared_from_this_ns::enable_shared_from_this<T> {
+  typedef detail::enable_shared_from_this_ns::enable_shared_from_this<T> base;
 
 protected:
   enable_shared_from_this() {}
@@ -57,14 +67,14 @@ public:
   shared_ptr<T> shared_from_this() {
     try {
       return shared_ptr<T>(base::shared_from_this());
-    } catch (std::tr1::bad_weak_ptr&) {
+    } catch (detail::enable_shared_from_this_ns::bad_weak_ptr&) {
       throw jubatus::util::lang::bad_weak_ptr();
     }
   }
   shared_ptr<const T> shared_from_this() const {
     try {
       return shared_ptr<const T>(base::shared_from_this());
-    } catch (std::tr1::bad_weak_ptr&) {
+    } catch (detail::enable_shared_from_this_ns::bad_weak_ptr&) {
       throw jubatus::util::lang::bad_weak_ptr();
     }
   }

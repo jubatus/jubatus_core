@@ -33,6 +33,7 @@
 #define JUBATUS_UTIL_DATA_STRING_KMP_H_
 
 #include <iterator>
+#include <string>
 #include <vector>
 
 namespace jubatus {

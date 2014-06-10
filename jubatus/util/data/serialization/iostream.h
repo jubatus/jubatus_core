@@ -41,7 +41,6 @@
 #include <unistd.h>
 
 #include "../../lang/shared_ptr.h"
-#include "../../system/file.h"
 
 namespace jubatus {
 namespace util{
@@ -60,18 +59,6 @@ public:
 template <class PathFunc=path::tmp_path>
 class stream{
 public:
-  stream()
-    : fname(PathFunc()()+std::string("/serializeXXXXXX"))
-    , spios(jubatus::util::system::file::tmpstream(fname))
-    , pios(spios.get()){
-  }
-
-  stream(PathFunc pf)
-    : fname(pf()+std::string("/serializeXXXXXX"))
-    , spios(jubatus::util::system::file::tmpstream(fname))
-    , pios(spios.get()){
-  }
-
   stream(std::iostream &ios)
     :pios(&ios){}
 

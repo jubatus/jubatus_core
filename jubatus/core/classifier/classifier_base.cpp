@@ -45,12 +45,21 @@ classifier_base::classifier_base(storage_ptr storage)
 classifier_base::~classifier_base() {
 }
 
+namespace {
+// This function is a workaround for libc++.
+// libc++'s std::function<void (<any types>)> does not accept functions which returns other than void.
+void delete_label_wrapper(classifier_base* cb, const std::string& label)
+{
+    cb->delete_label(label);
+}
+}
+
 void classifier_base::set_label_unlearner(
     jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
         label_unlearner) {
   label_unlearner->set_callback(
       jubatus::util::lang::bind(
-          &classifier_base::delete_label, this, jubatus::util::lang::_1));
+          delete_label_wrapper, this, jubatus::util::lang::_1));
   unlearner_ = label_unlearner;
 }
 
