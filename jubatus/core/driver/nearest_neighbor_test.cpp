@@ -180,7 +180,7 @@ TEST_P(nearest_neighbor_test, similar_row_from_id) {
   ASSERT_EQ("b", result[1].first);
 }
 
-TEST_P(nearest_neighbor_test, similar_row_from_data) {
+TEST_P(nearest_neighbor_test, similar_row_from_datum) {
   nn_driver_->set_row("a", single_str_datum("x", "hoge"));
   nn_driver_->set_row("b", single_str_datum("y", "fuga"));
   vector<pair<string, float> > result =
@@ -200,11 +200,11 @@ TEST_P(nearest_neighbor_test, neighbor_row_from_id) {
   ASSERT_EQ("b", result[1].first);
 }
 
-TEST_P(nearest_neighbor_test, neighbor_row2_from_data) {
+TEST_P(nearest_neighbor_test, neighbor_row2_from_datum) {
   nn_driver_->set_row("a", single_str_datum("x", "hoge"));
   nn_driver_->set_row("b", single_str_datum("y", "fuga"));
   vector<pair<string, float> > result =
-      nn_driver_->neighbor_row_from_data(
+      nn_driver_->neighbor_row_from_datum(
           single_str_datum("x", "hoge"), 100);
   ASSERT_EQ(2, result.size());
   ASSERT_EQ("a", result[0].first);
@@ -227,7 +227,7 @@ TEST_P(nearest_neighbor_test, neighbor_row_and_similar_row) {
     datum d = single_str_datum("x" + key, "a");
 
     vector<pair<string, float> > nr_result =
-        nn_driver_->neighbor_row_from_data(d, 100);
+        nn_driver_->neighbor_row_from_datum(d, 100);
     vector<pair<string, float> > sr_result =
         nn_driver_->similar_row(d, 100);
     ASSERT_EQ(nr_result.size(), sr_result.size());
@@ -244,7 +244,7 @@ TEST_P(nearest_neighbor_test, clear) {
   }
   {
     vector<pair<string, float> > result =
-        nn_driver_->neighbor_row_from_data(
+        nn_driver_->neighbor_row_from_datum(
             single_num_datum("x", 1), 100);
     ASSERT_EQ("a1", result[0].first);
   }
@@ -252,7 +252,7 @@ TEST_P(nearest_neighbor_test, clear) {
   {
     for (int i = 0; i < 100; ++i) {
     vector<pair<string, float> > result =
-        nn_driver_->neighbor_row_from_data(
+        nn_driver_->neighbor_row_from_datum(
           single_num_datum("a" + lexical_cast<string>(i), i), 100);
       ASSERT_EQ(0u, result.size());
     }
@@ -297,7 +297,7 @@ TEST_P(nearest_neighbor_test, small) {
   nn_driver_->neighbor_row_from_id("id2", 2);
   nn_driver_->neighbor_row_from_id("id3", 2);
 
-  nn_driver_->neighbor_row_from_data(create_datum_2d(1.f, 1.f), 2);
+  nn_driver_->neighbor_row_from_datum(create_datum_2d(1.f, 1.f), 2);
 }
 
 INSTANTIATE_TEST_CASE_P(nearest_neighbor_test_instance,
@@ -326,7 +326,7 @@ class nearest_neighbor_with_unlearning_test
       const fv_converter::datum& d,
       size_t size) const {
     std::vector<std::pair<std::string, float> > hit =
-        nn_driver_->neighbor_row_from_data(d, size);
+        nn_driver_->neighbor_row_from_datum(d, size);
     for (size_t i = 0; i < hit.size(); ++i) {
       if (hit[i].first == should_hit_id) {
         return true;

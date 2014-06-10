@@ -65,7 +65,7 @@ class nearest_neighbor : public driver_base {
   neighbor_row_from_id(const std::string& id, size_t size);
 
   std::vector<std::pair<std::string, float> >
-  neighbor_row_from_data(const fv_converter::datum& datum, size_t size);
+  neighbor_row_from_datum(const fv_converter::datum& datum, size_t size);
 
   std::vector<std::pair<std::string, float> >
   similar_row(const std::string& id, size_t ret_num);
