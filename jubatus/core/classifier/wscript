@@ -40,7 +40,7 @@ def build(bld):
      source = [
          'classifier_factory_test.cpp',
      ],
-     target = "classifier_test",
+     target = "classifier_factory_test",
      includes = '.',
      use = ['jubatus_util', 'jubatus_core'])
 
