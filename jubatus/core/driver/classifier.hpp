@@ -20,10 +20,16 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "jubatus/util/text/json.h"
+#include "jubatus/util/data/serialization.h"
 #include "jubatus/util/lang/shared_ptr.h"
+#include "../common/jsonconfig.hpp"
+#include "../common/byte_buffer.hpp"
 #include "../classifier/classifier_type.hpp"
+#include "../classifier/classifier_config.hpp"
 #include "../framework/mixable.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
+#include "../fv_converter/converter_config.hpp"
 #include "driver.hpp"
 
 namespace jubatus {
@@ -37,16 +43,29 @@ class classifier_base;
 }  // namespace classifier
 namespace driver {
 
+struct classifier_driver_config {
+  std::string method;
+  jubatus::util::data::optional<core::classifier::classifier_config> parameter;
+  core::fv_converter::converter_config converter;
+
+  void swap(classifier_driver_config& other) {
+    method.swap(other.method);
+    parameter.swap(other.parameter);
+    converter.swap(other.converter);
+  }
+
+  template<typename Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(method) & JUBA_MEMBER(parameter) & JUBA_MEMBER(converter);
+  }
+};
+
 class classifier : public driver_base {
  public:
   typedef core::classifier::classifier_base classifier_base;
 
   // TODO(suma): where is the owner of model, mixer, and converter?
-  classifier(
-      jubatus::util::lang::shared_ptr<classifier_base>
-          classifier_method,
-      jubatus::util::lang::shared_ptr<fv_converter::datum_to_fv_converter>
-          converter);
+  classifier(const classifier_driver_config& conf);
   virtual ~classifier();
 
   void train(const std::string&, const fv_converter::datum&);
@@ -61,10 +80,17 @@ class classifier : public driver_base {
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
 
+  void import_model(common::byte_buffer& src);
+  common::byte_buffer export_model() const;
+
   std::vector<std::string> get_labels() const;
   bool set_label(const std::string& label);
 
+  void swap(classifier& other);
+
  private:
+  classifier_driver_config conf_;
+  jubatus::util::lang::shared_ptr<fv_converter::factory_extender> extender_;
   jubatus::util::lang::shared_ptr<fv_converter::datum_to_fv_converter>
       converter_;
   jubatus::util::lang::shared_ptr<classifier_base> classifier_;

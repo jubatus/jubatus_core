@@ -23,6 +23,7 @@
 #include "jubatus/util/concurrent/lock.h"
 #include "classifier_util.hpp"
 #include "../common/exception.hpp"
+#include "../storage/local_storage_mixture.hpp"
 
 using std::string;
 
@@ -30,17 +31,10 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-confidence_weighted::confidence_weighted(storage_ptr storage)
-    : linear_classifier(storage) {
-}
-
-confidence_weighted::confidence_weighted(
-    const classifier_config& config,
-    storage_ptr storage)
-    : linear_classifier(storage),
-      config_(config) {
-
-  if (!(0.f < config.regularization_weight)) {
+confidence_weighted::confidence_weighted(float regularization_weight)
+    : linear_classifier(),
+      regularization_weight_(regularization_weight) {
+  if (!(0.f < regularization_weight_)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));
   }
@@ -49,7 +43,7 @@ confidence_weighted::confidence_weighted(
 void confidence_weighted::train(const common::sfv_t& sfv, const string& label) {
   check_touchable(label);
 
-  const float C = config_.regularization_weight;
+  const float C = regularization_weight_;
   string incorrect_label;
   float variance = 0.f;
   float margin = -calc_margin_and_variance(sfv, label, incorrect_label,
@@ -81,7 +75,7 @@ void confidence_weighted::update(
     storage::val2_t neg_val(0.f, 1.f);
     ClassifierUtil::get_two(val2, pos_label, neg_label, pos_val, neg_val);
 
-    const float C = config_.regularization_weight;
+    const float C = regularization_weight_;
     float covar_pos_step = 2.f * step_width * val * val * C;
     float covar_neg_step = 2.f * step_width * val * val * C;
 

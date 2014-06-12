@@ -107,6 +107,11 @@ void nearest_neighbor_classifier::set_label_unlearner(
   unlearner_ = label_unlearner;
 }
 
+shared_ptr<unlearner::unlearner_base>
+nearest_neighbor_classifier::get_label_unlearner() const {
+  return unlearner_;
+}
+
 std::string nearest_neighbor_classifier::classify(
     const common::sfv_t& fv) const {
   classify_result result;
@@ -231,6 +236,14 @@ void nearest_neighbor_classifier::unpack(msgpack::object o) {
     labels_.insert(label);
   }
 }
+
+void nearest_neighbor_classifier::export_model(framework::packer& pk) const {
+  // TODO
+}
+void nearest_neighbor_classifier::import_model(msgpack::object o) {
+  // TODO
+}
+
 
 framework::mixable* nearest_neighbor_classifier::get_mixable() {
   return nearest_neighbor_engine_->get_mixable();

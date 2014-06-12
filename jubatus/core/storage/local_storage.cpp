@@ -285,6 +285,10 @@ void local_storage::unpack(msgpack::object o) {
   o.convert(this);
 }
 
+void local_storage::import_model(msgpack::object o) {
+  o.convert(this);
+}
+
 std::string local_storage::type() const {
   return "local_storage";
 }

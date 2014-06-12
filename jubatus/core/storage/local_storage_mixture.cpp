@@ -339,6 +339,30 @@ void local_storage_mixture::unpack(msgpack::object o) {
   o.convert(this);
 }
 
+void local_storage_mixture::export_model(framework::packer& pk) const {
+  pk.pack_array(3);  // tbl_(diff_), class2id_, model_version_
+  if (tbl_.empty()) {  // standalone jubatus
+    pk.pack(tbl_diff_);
+  } else {
+    pk.pack(tbl_);
+  }
+  pk.pack(class2id_);
+  pk.pack(model_version_);
+}
+
+void local_storage_mixture::import_model(msgpack::object o) {
+  if(o.type != msgpack::type::ARRAY) {
+    throw msgpack::type_error();
+  }
+  const size_t size = o.via.array.size;
+  JUBATUS_ASSERT_EQ(3, size, "importing array length must be 3");
+  o.via.array.ptr[0].convert(&tbl_);
+  o.via.array.ptr[1].convert(&class2id_);
+  o.via.array.ptr[2].convert(&model_version_);
+  tbl_diff_.clear();
+}
+
+
 std::string local_storage_mixture::type() const {
   return "local_storage_mixture";
 }

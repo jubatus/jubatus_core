@@ -29,19 +29,30 @@ namespace core {
 namespace unlearner {
 
 shared_ptr<unlearner_base> create_unlearner(
-    const std::string& name,
-    const common::jsonconfig::config& config) {
-  if (name == "lru") {
-    return shared_ptr<unlearner_base>(
-        new lru_unlearner(common::jsonconfig::config_cast_check<
-                          lru_unlearner::config>(config)));
-  } else if (name == "random") {
-    return shared_ptr<unlearner_base>(
-        new random_unlearner(common::jsonconfig::config_cast_check<
-                             random_unlearner::config>(config)));
+    const shared_ptr<unlearner_config_base> conf) {
+  if (conf->name == "lru") {
+    lru_unlearner::lru_unlearner_config* lconf =
+      dynamic_cast<lru_unlearner::lru_unlearner_config*>(conf.get());
+    if (lconf) {
+      return shared_ptr<unlearner_base>(
+        new lru_unlearner(*lconf));
+    } else {
+      throw JUBATUS_EXCEPTION(common::unsupported_method(
+                                  "invaild lru unlearner config"));
+    }
+  } else if (conf->name == "random") {
+    random_unlearner::random_unlearner_config* rconf =
+      dynamic_cast<random_unlearner::random_unlearner_config*>(conf.get());
+    if (rconf) {
+      return shared_ptr<unlearner_base>(
+        new random_unlearner(*rconf));
+    } else {
+      throw JUBATUS_EXCEPTION(common::unsupported_method(
+                                  "invaild random unlearner config"));
+    }
   } else {
     throw JUBATUS_EXCEPTION(common::unsupported_method(
-                                "unlearner(" + name + ')'));
+                                "unlearner(" + conf->name + ')'));
   }
 }
 

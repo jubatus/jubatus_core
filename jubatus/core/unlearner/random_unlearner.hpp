@@ -19,11 +19,15 @@
 
 #include <string>
 #include <vector>
+#include <msgpack.hpp>
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/math/random.h"
 #include "unlearner_base.hpp"
+#include "unlearner_config.hpp"
+#include "../common/porting_model.hpp"
+#include "../common/unordered_set.hpp"
 
 namespace jubatus {
 namespace core {
@@ -32,13 +36,13 @@ namespace unlearner {
 // Unlearner that chooses an item to be removed by uniformly random sampling.
 class random_unlearner : public unlearner_base {
  public:
-  struct config {
+  struct random_unlearner_config : public unlearner_config_base {
     int32_t max_size;
     jubatus::util::data::optional<int64_t> seed;
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_MEMBER(max_size) & JUBA_MEMBER(seed);
+      ar & JUBA_MEMBER(name) & JUBA_MEMBER(max_size) & JUBA_MEMBER(seed);
     }
   };
 
@@ -51,14 +55,18 @@ class random_unlearner : public unlearner_base {
     ids_.clear();
   }
 
-  explicit random_unlearner(const config& conf);
+  explicit random_unlearner(const unlearner_config_base& conf);
 
   bool can_touch(const std::string& id);
   bool touch(const std::string& id);
   bool remove(const std::string& id);
   bool exists_in_memory(const std::string& id) const;
 
+  void export_model(framework::packer& pk) const;
+  void import_model(msgpack::object o);
+
  private:
+  void rebuild_map();
   /**
    * Map of ID and its position in ids_.
    */

@@ -24,13 +24,11 @@
 namespace jubatus {
 namespace core {
 namespace classifier {
+struct classifier_parameter;
 
 class normal_herd : public linear_classifier {
  public:
-  explicit normal_herd(storage_ptr storage);
-  normal_herd(
-      const classifier_config& config,
-      storage_ptr storage);
+  normal_herd(float regularization_weight);
   void train(const common::sfv_t& fv, const std::string& label);
   std::string name() const;
  private:
@@ -40,7 +38,7 @@ class normal_herd : public linear_classifier {
       float variance,
       const std::string& pos_label,
       const std::string& neg_label);
-  classifier_config config_;
+  float regularization_weight_;
 };
 
 }  // namespace classifier

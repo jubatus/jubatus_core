@@ -28,6 +28,7 @@
 #include "../framework/model.hpp"
 #include "../common/type.hpp"
 #include "../common/version.hpp"
+#include "../common/export_model.hpp"
 #include "keyword_weights.hpp"
 
 namespace jubatus {
@@ -94,6 +95,8 @@ class weight_manager : public framework::model {
   }
 
   MSGPACK_DEFINE(version_, diff_weights_, master_weights_);
+  JUBATUS_EXPORT_MODEL(version_, master_weights_);
+  void import_model(msgpack::object o);
 
   void pack(framework::packer& pk) const {
     util::concurrent::scoped_lock lk(mutex_);

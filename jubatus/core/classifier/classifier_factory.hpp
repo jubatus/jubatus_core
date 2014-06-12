@@ -40,13 +40,12 @@ class config;
 namespace classifier {
 
 class classifier_base;
+class classifier_config;
 
 class classifier_factory {
  public:
   static jubatus::util::lang::shared_ptr<classifier_base> create_classifier(
-    const std::string& name,
-    const common::jsonconfig::config& param,
-    jubatus::util::lang::shared_ptr<storage::storage_base> storage);
+      const classifier_config& conf);
 };
 
 }  // namespace classifier

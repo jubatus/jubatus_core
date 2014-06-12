@@ -30,6 +30,7 @@
 #include "../common/exception.hpp"
 #include "../common/type.hpp"
 #include "../framework/model.hpp"
+#include "../framework/packer.hpp"
 
 namespace jubatus {
 namespace core {
@@ -82,6 +83,8 @@ class storage_base : public framework::model {
 
   virtual void pack(framework::packer& packer) const = 0;
   virtual void unpack(msgpack::object o) = 0;
+  virtual void export_model(framework::packer& pk) const = 0;
+  virtual void import_model(msgpack::object o) = 0;
 
   virtual version get_version() const = 0;
 

@@ -24,6 +24,7 @@
 #include "../common/exception.hpp"
 #include "../common/jsonconfig.hpp"
 #include "../nearest_neighbor/nearest_neighbor_factory.hpp"
+#include "../unlearner/unlearner_config.hpp"
 #include "../unlearner/unlearner_factory.hpp"
 #include "../storage/column_table.hpp"
 #include "../recommender/recommender_factory.hpp"
@@ -100,10 +101,11 @@ shared_ptr<anomaly_base> anomaly_factory::create_anomaly(
             << common::exception::error_message(
               "unlearner is set but unlearner_parameter is not found"));
       }
+      shared_ptr<unlearner::unlearner_config_base> unl_conf(
+          unlearner::create_unlearner_config(*conf.unlearner,
+                                             *conf.unlearner_parameter));
       jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner(
-          unlearner::create_unlearner(
-              *conf.unlearner,
-              *conf.unlearner_parameter));
+          unlearner::create_unlearner(unl_conf));
       return shared_ptr<anomaly_base>(
           new light_lof(conf, id, nearest_neighbor_engine, unlearner));
     }

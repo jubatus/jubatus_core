@@ -19,6 +19,11 @@
 
 #include <string>
 #include "jubatus/util/lang/function.h"
+#include "jubatus/core/framework/packer.hpp"
+
+namespace msgpack {
+class object;
+}
 
 namespace jubatus {
 namespace core {
@@ -71,6 +76,9 @@ class unlearner_base {
   // not been touched since then, this function returns false. If |id| has been
   // touched and not unlearned since then, it returns true.
   virtual bool exists_in_memory(const std::string& id) const = 0;
+
+  virtual void export_model(framework::packer& pk) const = 0;
+  virtual void import_model(msgpack::object o) = 0;
 
  protected:
   void unlearn(const std::string& id) const {

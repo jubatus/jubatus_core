@@ -17,6 +17,7 @@
 #include "passive_aggressive.hpp"
 
 #include <string>
+#include "../storage/local_storage_mixture.hpp"
 
 using std::string;
 
@@ -24,8 +25,8 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-passive_aggressive::passive_aggressive(storage_ptr storage)
-    : linear_classifier(storage) {
+passive_aggressive::passive_aggressive()
+    : linear_classifier() {
 }
 
 void passive_aggressive::train(const common::sfv_t& sfv, const string& label) {

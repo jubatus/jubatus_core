@@ -82,9 +82,11 @@ shared_ptr<recommender_base> recommender_factory::create_recommender(
             common::config_exception() << common::exception::error_message(
                 "unlearner is set but unlearner_parameter is not found"));
       }
-      shared_ptr<unlearner::unlearner_base> unl(unlearner::create_unlearner(
-          *conf.unlearner, common::jsonconfig::config(
-              *conf.unlearner_parameter)));
+      shared_ptr<unlearner::unlearner_config_base> uconf =
+        unlearner::create_unlearner_config(*conf.unlearner,
+                                           *conf.unlearner_parameter);
+      shared_ptr<unlearner::unlearner_base> unl(
+          unlearner::create_unlearner(uconf));
       return shared_ptr<recommender_base>(
           new nearest_neighbor_recommender(nearest_neighbor_engine, unl));
     }

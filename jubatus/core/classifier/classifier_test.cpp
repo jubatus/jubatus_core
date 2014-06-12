@@ -249,7 +249,7 @@ INSTANTIATE_TYPED_TEST_CASE_P(cl, classifier_test, classifier_types);
 
 TEST(classifier_config_test, regularization_weight) {
   storage_ptr s(new local_storage);
-  classifier_config c;
+  classifier_parameter c;
 
   c.regularization_weight = std::numeric_limits<float>::quiet_NaN();
   ASSERT_THROW(passive_aggressive_1 p1(c, s), common::invalid_parameter);

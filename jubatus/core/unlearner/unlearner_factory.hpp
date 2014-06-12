@@ -20,7 +20,8 @@
 #include <string>
 #include "../common/jsonconfig.hpp"
 #include "jubatus/util/lang/shared_ptr.h"
-
+#include "jubatus/util/data/optional.h"
+#include "unlearner_config.hpp"
 
 namespace jubatus {
 namespace core {
@@ -29,8 +30,7 @@ namespace unlearner {
 class unlearner_base;
 
 util::lang::shared_ptr<unlearner_base> create_unlearner(
-    const std::string& name,
-    const common::jsonconfig::config& config);
+    util::lang::shared_ptr<unlearner_config_base> config);
 
 }  // namespace unlearner
 }  // namespace core

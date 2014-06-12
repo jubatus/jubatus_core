@@ -20,6 +20,7 @@
 #include <string>
 
 #include "../common/exception.hpp"
+#include "../storage/local_storage_mixture.hpp"
 
 using std::string;
 
@@ -27,17 +28,10 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-passive_aggressive_2::passive_aggressive_2(storage_ptr storage)
-    : linear_classifier(storage) {
-}
+passive_aggressive_2::passive_aggressive_2(float regularization_weight)
+  : regularization_weight_(regularization_weight) {
 
-passive_aggressive_2::passive_aggressive_2(
-    const classifier_config& config,
-    storage_ptr storage)
-    : linear_classifier(storage),
-      config_(config) {
-
-  if (!(0.f < config.regularization_weight)) {
+  if (!(0.f < regularization_weight_)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));
   }
@@ -62,7 +56,7 @@ void passive_aggressive_2::train(const common::sfv_t& sfv,
   }
   update_weight(
       sfv,
-      loss / (2 * sfv_norm + 1 / (2 * config_.regularization_weight)),
+      loss / (2 * sfv_norm + 1 / (2 * regularization_weight_)),
       label,
       incorrect_label);
   touch(label);

@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
+#include "../common/byte_buffer.hpp"
 #include "../recommender/recommender_base.hpp"
 #include "../framework/mixable.hpp"
 #include "../framework/diffv.hpp"

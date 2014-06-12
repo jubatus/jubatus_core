@@ -18,23 +18,20 @@
 #define JUBATUS_CORE_CLASSIFIER_PASSIVE_AGGRESSIVE_1_HPP_
 
 #include <string>
-
 #include "linear_classifier.hpp"
 
 namespace jubatus {
 namespace core {
 namespace classifier {
+struct classifier_parameter;
 
 class passive_aggressive_1 : public linear_classifier {
  public:
-  explicit passive_aggressive_1(storage_ptr storage);
-  passive_aggressive_1(
-      const classifier_config& config,
-      storage_ptr storage);
+  passive_aggressive_1(float regularization_weight);
   void train(const common::sfv_t& fv, const std::string& label);
   std::string name() const;
  private:
-  classifier_config config_;
+  float regularization_weight_;
 };
 
 }  // namespace classifier
