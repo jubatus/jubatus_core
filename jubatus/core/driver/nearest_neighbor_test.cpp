@@ -145,9 +145,12 @@ class nearest_neighbor_test
     : public ::testing::TestWithParam<
         shared_ptr<core::nearest_neighbor::nearest_neighbor_base> > {
  protected:
+  shared_ptr<core::driver::nearest_neighbor> create_driver() const {
+    return shared_ptr<core::driver::nearest_neighbor>(
+         new core::driver::nearest_neighbor(GetParam(), make_fv_converter()));
+   }
   void SetUp() {
-    nn_driver_ = shared_ptr<core::driver::nearest_neighbor>(
-        new core::driver::nearest_neighbor(GetParam(), make_fv_converter()));
+    nn_driver_ = create_driver();
   }
   void TearDown() {
     nn_driver_->clear();
@@ -298,6 +301,44 @@ TEST_P(nearest_neighbor_test, small) {
   nn_driver_->neighbor_row_from_id("id3", 2);
 
   nn_driver_->neighbor_row_from_datum(create_datum_2d(1.f, 1.f), 2);
+}
+
+TEST_P(nearest_neighbor_test, small_mix) {
+  framework::linear_mixable* nn_mixable =
+    dynamic_cast<framework::linear_mixable*>(nn_driver_->get_mixable());
+  shared_ptr<driver::nearest_neighbor> other = create_driver();
+  framework::linear_mixable* other_mixable =
+    dynamic_cast<framework::linear_mixable*>(other->get_mixable());
+  ASSERT_TRUE(nn_mixable);
+  ASSERT_TRUE(other_mixable);
+
+  nn_driver_->set_row("a", single_str_datum("x", "hoge"));
+  nn_driver_->set_row("b", single_str_datum("y", "fuga"));
+
+  msgpack::sbuffer data;
+  {
+    core::framework::stream_writer<msgpack::sbuffer> st(data);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer pk(jp);
+    nn_mixable->get_diff(pk);
+  }
+  {
+    msgpack::sbuffer sbuf;
+    core::framework::stream_writer<msgpack::sbuffer> st(sbuf);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer pk(jp);
+    other_mixable->get_diff(pk);
+
+    msgpack::unpacked msg;
+    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+    framework::diff_object diff = other_mixable->convert_diff_object(msg.get());
+
+    msgpack::unpacked data_msg;
+    msgpack::unpack(&data_msg, data.data(), data.size());
+
+    other_mixable->mix(data_msg.get(), diff);
+    other_mixable->put_diff(diff);
+  }
 }
 
 INSTANTIATE_TEST_CASE_P(nearest_neighbor_test_instance,
