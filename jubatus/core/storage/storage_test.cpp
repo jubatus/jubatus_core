@@ -610,6 +610,7 @@ TYPED_TEST_P(storage_test, set_get_label) {
   ASSERT_TRUE(s.set_label("b"));
   vector<string> labels = s.get_labels();
   ASSERT_EQ(2u, labels.size());
+  std::sort(labels.begin(), labels.end());
   ASSERT_EQ("a", labels[0]);
   ASSERT_EQ("b", labels[1]);
 }
