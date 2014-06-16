@@ -112,17 +112,13 @@ def build(bld):
   use = ['jubatus_util', 'MSGPACK']
 
   if bld.env.HAVE_RE2:
-    source.append('re2_match.cpp')
-    source.append('re2_filter.cpp')
-    source.append('re2_splitter.cpp')
-    test_source.append(regex_test_source)
-    use.append('RE2')
+    source += ['re2_match.cpp', 're2_filter.cpp', 're2_splitter.cpp' ]
+    test_source += regex_test_source
+    use += ['RE2']
   elif bld.env.HAVE_ONIGURUMA:
-    source.append('onig_match.cpp')
-    source.append('onig_filter.cpp')
-    source.append('onig_splitter.cpp')
-    test_source.append(regex_test_source)
-    use.append('ONIG')
+    source += ['onig_match.cpp', 'onig_filter.cpp', 'onig_splitter.cpp']
+    test_source += regex_test_source
+    use += ['ONIG']
 
   bld.core_sources.extend(bld.add_prefix(source))
   bld.core_headers.extend(bld.add_prefix(headers))
