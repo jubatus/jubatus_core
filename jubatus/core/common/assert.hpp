@@ -27,13 +27,13 @@
     if (!(expr)) { \
       std::cerr << "ASSERTION FAILED: " << message << ": " \
                 << #expr << std::endl; \
-      abort(); \
+      std::terminate(); \
     }}
 
 // declares expr to be true
 // unlike glog CHECK, this macro cannot take trailing `<<';
 // please use JUBATUS_ASSERT_MSG if you need extra messages.
-#define JUBATUS_ASSERT(expr) do { CHECK((expr), ""); } while (0)
+#define JUBATUS_ASSERT(expr) do { CHECK(expr, ""); } while (0)
 
 // declares expr to be true; if false, messages are shown
 #define JUBATUS_ASSERT_MSG(expr, messages)  \
