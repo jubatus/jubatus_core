@@ -84,6 +84,9 @@ string classifier_base::classify(const common::sfv_t& fv) const {
 
 void classifier_base::clear() {
   storage_->clear();
+  if (unlearner_) {
+    unlearner_->clear();
+  }
 }
 
 vector<string> classifier_base::get_labels() const {
