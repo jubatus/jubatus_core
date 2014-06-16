@@ -148,7 +148,7 @@ class nearest_neighbor_test
   shared_ptr<core::driver::nearest_neighbor> create_driver() const {
     return shared_ptr<core::driver::nearest_neighbor>(
          new core::driver::nearest_neighbor(GetParam(), make_fv_converter()));
-   }
+  }
   void SetUp() {
     nn_driver_ = create_driver();
   }
