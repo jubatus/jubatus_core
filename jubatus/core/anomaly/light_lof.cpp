@@ -147,6 +147,9 @@ float light_lof::calc_anomaly_score(const std::string& id) const {
 void light_lof::clear() {
   nearest_neighbor_engine_->clear();
   mixable_scores_->get_model()->clear();
+  if (unlearner_) {
+    unlearner_->clear();
+  }
 }
 
 void light_lof::clear_row(const std::string& id) {
@@ -393,8 +396,7 @@ void light_lof::unpack(msgpack::object o) {
   }
 
   // clear before load
-  nearest_neighbor_engine_->clear();
-  mixable_scores_->clear();
+  clear();
 
   nearest_neighbor_engine_->unpack(o.via.array.ptr[0]);
   mixable_scores_->get_model()->unpack(o.via.array.ptr[1]);
