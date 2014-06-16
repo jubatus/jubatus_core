@@ -28,7 +28,8 @@ regexp_match::regexp_match(const std::string& regexp)
   const UChar* pattern = reinterpret_cast<const UChar*>(regexp.c_str());
   if (ONIG_NORMAL != onig_new(&reg_, pattern, pattern + regexp.size(),
         ONIG_OPTION_DEFAULT, ONIG_ENCODING_UTF8, ONIG_SYNTAX_PERL, NULL)) {
-    throw JUBATUS_EXCEPTION(converter_exception("invalid regular expression"));
+    throw JUBATUS_EXCEPTION(converter_exception(
+        "invalid regular expression: " + regexp));
   }
 }
 

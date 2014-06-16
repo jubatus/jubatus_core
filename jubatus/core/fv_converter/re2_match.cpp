@@ -26,7 +26,8 @@ namespace fv_converter {
 regexp_match::regexp_match(const std::string& regexp)
     : re_(regexp) {
   if (!re_.ok()) {
-    throw JUBATUS_EXCEPTION(converter_exception("invalid regular expression"));
+    throw JUBATUS_EXCEPTION(converter_exception(
+        "invalid regular expression: " + regexp));
   }
 }
 

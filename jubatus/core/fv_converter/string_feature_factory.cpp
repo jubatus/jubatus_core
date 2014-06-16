@@ -23,6 +23,7 @@
 #include "exception.hpp"
 #include "util.hpp"
 
+using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
 
 namespace jubatus {
@@ -35,8 +36,8 @@ shared_ptr<character_ngram> create_character_ngram(
     const param_t& params) {
   int n = get_int_or_die(params, "char_num");
   if (n <= 0) {
-    throw JUBATUS_EXCEPTION(
-        converter_exception(std::string("char_num must be positive integer")));
+    throw JUBATUS_EXCEPTION(converter_exception(
+        "char_num must be positive integer: " + lexical_cast<std::string>(n)));
   }
   size_t m = static_cast<size_t>(n);
   return shared_ptr<character_ngram>(new character_ngram(m));
