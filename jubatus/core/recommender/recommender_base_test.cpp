@@ -85,7 +85,9 @@ class recommender_impl : public recommender_base {
     return string("recommender_impl");
   }
 
-  framework::mixable* get_mixable() const {}
+  framework::mixable* get_mixable() const {
+    return NULL;
+  }
 
   void pack(framework::packer&) const {
   }
