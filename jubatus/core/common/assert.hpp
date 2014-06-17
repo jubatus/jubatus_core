@@ -26,9 +26,8 @@
 #include <string>
 #include "jubatus/util/lang/cast.h"
 
-using jubatus::util::lang::lexical_cast;
-
 #define JUBA_CHECK(a, op, b, message) { \
+    using jubatus::util::lang::lexical_cast; \
     if (! ((a) op (b))) { \
       std::cerr << "ASSERTION FAILED: " << message << ": " \
                 << #a << " " << #op << " " << #b \
