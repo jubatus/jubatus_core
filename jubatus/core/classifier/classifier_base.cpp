@@ -47,9 +47,9 @@ classifier_base::~classifier_base() {
 
 namespace {
 // This function is a workaround for libc++.
-// libc++'s std::function<void (<any types>)> does not accept functions which returns other than void.
-void delete_label_wrapper(classifier_base* cb, const std::string& label)
-{
+// libc++'s std::function<void (<any types>)> does not accept
+// functions which returns other than void.
+void delete_label_wrapper(classifier_base* cb, const std::string& label) {
     cb->delete_label(label);
 }
 }

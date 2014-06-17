@@ -91,7 +91,8 @@ class derived_exception
 
 }  // namespace test_exception
 
-const exception_thrower_ptr null_exception_thrower_ptr = exception_thrower_ptr();
+const exception_thrower_ptr null_exception_thrower_ptr =
+  exception_thrower_ptr();
 
 TEST(exception, custom_exception) {
   exception_thrower_ptr thrower;
