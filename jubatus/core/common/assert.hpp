@@ -23,39 +23,50 @@
 #include <assert.h>
 #include <iostream>
 
-#define JUBA_CHECK(expr, message) { \
-    if (!(expr)) { \
+#include <string>
+#include "jubatus/util/lang/cast.h"
+
+using jubatus::util::lang::lexical_cast;
+
+#define JUBA_CHECK(a, op, b, message) { \
+    if (! ((a) op (b))) { \
       std::cerr << "ASSERTION FAILED: " << message << ": " \
-                << #expr << std::endl; \
+                << #a << " " << #op << " " << #b \
+                << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl; \
+      std::cerr << "... where  " << #a << " = " \
+                << lexical_cast<std::string>(a) << std::endl \
+                << "      and  " << #b << " = " \
+                << lexical_cast<std::string>(b) << std::endl; \
       std::terminate(); \
     }}
 
 // declares expr to be true
 // unlike glog CHECK, this macro cannot take trailing `<<';
 // please use JUBATUS_ASSERT_MSG if you need extra messages.
-#define JUBATUS_ASSERT(expr) do { JUBA_CHECK(expr, ""); } while (0)
+#define JUBATUS_ASSERT(expr)  \
+    do { JUBATUS_ASSERT_MSG(expr, ""); } while (0)
 
 // declares expr to be true; if false, messages are shown
 #define JUBATUS_ASSERT_MSG(expr, messages)  \
-    do { JUBA_CHECK(expr, messages); } while (0)
+    do { JUBA_CHECK(expr, ==, true, messages); } while (0)
 
 // declares control flow not to reach here
-#define JUBATUS_ASSERT_UNREACHABLE()   \
-    do { JUBA_CHECK(0, "control flow not to reach here"); } while (0)
+#define JUBATUS_ASSERT_UNREACHABLE()  \
+    do { JUBA_CHECK(0, !=, 0, "control flow not to reach here"); } while (0)
 
 // helpers to compare values
 #define JUBATUS_ASSERT_EQ(a, b, messages)   \
-    do { JUBA_CHECK((a) == (b), messages); } while (0)
+    do { JUBA_CHECK(a, ==, b, messages); } while (0)
 #define JUBATUS_ASSERT_NE(a, b, messages)   \
-    do { JUBA_CHECK((a) != (b), messages); } while (0)
+    do { JUBA_CHECK(a, !=, b, messages); } while (0)
 #define JUBATUS_ASSERT_LE(a, b, messages)   \
-    do { JUBA_CHECK((a) <= (b), messages); } while (0)
+    do { JUBA_CHECK(a, <=, b, messages); } while (0)
 #define JUBATUS_ASSERT_LT(a, b, messages)   \
-    do { JUBA_CHECK((a) < (b), messages);  } while (0)
+    do { JUBA_CHECK(a, <, b, messages);  } while (0)
 #define JUBATUS_ASSERT_GE(a, b, messages)   \
-    do { JUBA_CHECK((a) >= (b), messages); } while (0)
+    do { JUBA_CHECK(a, >=, b, messages); } while (0)
 #define JUBATUS_ASSERT_GT(a, b, messages)   \
-    do { JUBA_CHECK((a) > (b), messages);  } while (0)
+    do { JUBA_CHECK(a, >, b, messages);  } while (0)
 
 #else  // #ifndef JUBATUS_DISABLE_ASSERTIONS
 
