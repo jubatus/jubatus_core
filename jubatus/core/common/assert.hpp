@@ -42,10 +42,8 @@
 // declares expr to be true; if false, messages are shown
 #define JUBATUS_ASSERT_MSG(expr, message)  \
     do { \
-      using jubatus::util::lang::lexical_cast; \
       if (!(expr)) { \
-        std::cerr << "ASSERTION FAILED: " << message << ": " \
-                  << #expr << " == " << lexical_cast<std::string>(expr) \
+        std::cerr << "ASSERTION FAILED: " << message << ": " << #expr \
                   << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl; \
         std::terminate(); \
       } \
