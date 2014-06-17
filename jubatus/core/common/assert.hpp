@@ -37,7 +37,7 @@
 
 // declares expr to be true; if false, messages are shown
 #define JUBATUS_ASSERT_MSG(expr, messages)  \
-    do { CHECK((expr), messages); } while (0)
+    do { CHECK(expr, messages); } while (0)
 
 // declares control flow not to reach here
 #define JUBATUS_ASSERT_UNREACHABLE()   \
