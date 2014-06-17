@@ -179,7 +179,7 @@ void mixable_versioned_table::pull_impl(
   for (uint64_t i = 0; i < table_size; ++i) {
     const version_t version = table->get_version(i);
     version_clock::const_iterator it = vc.find(version.first);
-    if (it != vc.end() && it->second >= version.second) {
+    if (it == vc.end() || it->second < version.second) {
       pack_size++;
     }
   }
