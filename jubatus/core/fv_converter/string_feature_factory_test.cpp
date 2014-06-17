@@ -48,6 +48,7 @@ TEST(string_feature_factory, ngram) {
   jubatus::util::lang::shared_ptr<string_feature> s(f.create("ngram", param));
 }
 
+#if defined(HAVE_RE2) || defined(HAVE_ONIGURUMA)
 TEST(string_feature_factory, regexp) {
   string_feature_factory f;
   std::map<std::string, std::string> param;
@@ -69,6 +70,7 @@ TEST(string_feature_factory, regexp) {
   param.erase("group");
   jubatus::util::lang::shared_ptr<string_feature>(f.create("regexp", param));
 }
+#endif
 
 }  // namespace fv_converter
 }  // namespace core

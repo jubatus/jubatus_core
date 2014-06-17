@@ -38,7 +38,9 @@ TEST(fv_converter, key_matcher_factory) {
   ASSERT_FALSE(m_t(f.create_matcher("hogehoge"))->match("hogefuga"));
   ASSERT_TRUE(m_t(f.create_matcher("hogehoge"))->match("hogehoge"));
 
+#if defined(HAVE_RE2) || defined(HAVE_ONIGURUMA)
   ASSERT_TRUE(m_t(f.create_matcher("/.*/hoge/"))->match("fuga/hoge"));
+#endif
 }
 
 }  // namespace fv_converter
