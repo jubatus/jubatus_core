@@ -28,7 +28,7 @@
 
 #define JUBA_CHECK(a, op, b, message) { \
     using jubatus::util::lang::lexical_cast; \
-    if (! ((a) op (b))) { \
+    if (!((a)op(b))) { \
       std::cerr << "ASSERTION FAILED: " << message << ": " \
                 << #a << " " << #op << " " << #b \
                 << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl; \
@@ -43,7 +43,7 @@
 #define JUBATUS_ASSERT_MSG(expr, message)  \
     do { \
       using jubatus::util::lang::lexical_cast; \
-      if (! (expr)) { \
+      if (!(expr)) { \
         std::cerr << "ASSERTION FAILED: " << message << ": " \
                   << #expr << " == " << lexical_cast<std::string>(expr) \
                   << " (" << __FILE__ << ":" << __LINE__ << ")" << std::endl; \
