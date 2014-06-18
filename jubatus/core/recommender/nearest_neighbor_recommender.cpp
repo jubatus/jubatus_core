@@ -88,7 +88,10 @@ void nearest_neighbor_recommender::update_row(
     const std::string& id,
     const common::sfv_t& diff) {
   if (unlearner_) {
-    unlearner_->touch(id);
+    if (!unlearner_->touch(id)) {
+      throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+          "no more space available to add new ID: " + id));
+    }
   }
   orig_.set_row(id, diff);
   common::sfv_t row;

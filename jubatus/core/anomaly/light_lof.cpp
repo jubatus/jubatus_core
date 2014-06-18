@@ -201,7 +201,10 @@ std::vector<framework::mixable*> light_lof::get_mixables() const {
 
 void light_lof::touch(const std::string& id) {
   if (unlearner_) {
-    unlearner_->touch(id);
+    if (!unlearner_->touch(id)) {
+      throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+          "no more space available to add new ID: " + id));
+    }
   }
 }
 
