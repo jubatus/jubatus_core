@@ -34,13 +34,16 @@
 
 #include <sys/types.h>
 #include <iostream>
+#ifdef __GLIBCXX__
 #include <ext/stdio_filebuf.h>
+#endif
 
 namespace jubatus {
 namespace util{
 namespace system{
 namespace file{
 
+#ifdef __GLIBCXX__
 class fd_stream : public std::iostream{
 public:
   explicit fd_stream(int fd)
@@ -52,6 +55,8 @@ private:
 };
 
 std::iostream *tmpstream(std::string &tmpl);
+#endif
+
 ssize_t get_file_size(const std::string & fn);
 
 } // file

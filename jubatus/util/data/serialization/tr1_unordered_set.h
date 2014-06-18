@@ -34,7 +34,10 @@
 
 #include "base.h"
 
+#include <utility> // include a lightweight header for __GLIBCXX__.
+#ifdef __GLIBCXX__
 #include <tr1/unordered_set>
+#endif
 
 #include "pair.h"
 
@@ -42,6 +45,8 @@ namespace jubatus {
 namespace util{
 namespace data{
 namespace serialization{
+
+#ifdef __GLIBCXX__
 
 template <class Archive, class T, class H, class P, class A>
 void serialize(Archive &ar, std::tr1::unordered_set<T, H, P, A> &s)
@@ -65,6 +70,8 @@ void serialize(Archive &ar, std::tr1::unordered_set<T, H, P, A> &s)
     }
   }
 }
+
+#endif
 
 } // serialization
 } // data

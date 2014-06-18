@@ -68,10 +68,14 @@ TEST(local_storage_mixture, pack_and_unpack) {
   st2.get("b", b2);
 
   ASSERT_EQ(a1.size(), a2.size());
+  std::sort(a1.begin(), a1.end());
+  std::sort(a2.begin(), a2.end());
   for (size_t i = 0; i < a1.size(); ++i) {
     EXPECT_EQ(a1[i], a2[i]);
   }
   ASSERT_EQ(b1.size(), b2.size());
+  std::sort(b1.begin(), b1.end());
+  std::sort(b2.begin(), b2.end());
   for (size_t i = 0; i < b1.size(); ++i) {
     EXPECT_EQ(b1[i], b2[i]);
   }

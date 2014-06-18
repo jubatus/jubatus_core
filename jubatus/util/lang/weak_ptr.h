@@ -33,18 +33,28 @@
 #define JUBATUS_UTIL_LANG_WEAK_PTR_H_
 
 #include <memory>
+#ifdef __GLIBCXX__
 #include <tr1/memory>
+#endif
 
 namespace jubatus {
 namespace util {
 namespace lang {
 
+namespace detail {
+#ifdef __GLIBCXX__
+namespace weak_ptr_ns = ::std::tr1;
+#else
+namespace weak_ptr_ns = ::std;
+#endif
+}
+
 template <class T, class TM>
 class shared_ptr;
 
 template <class T>
-class weak_ptr : public std::tr1::weak_ptr<T> {
-  typedef std::tr1::weak_ptr<T> base;
+class weak_ptr : public detail::weak_ptr_ns::weak_ptr<T> {
+  typedef detail::weak_ptr_ns::weak_ptr<T> base;
 
 public:
   weak_ptr() {}

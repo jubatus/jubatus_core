@@ -98,16 +98,16 @@ public:
 
 private:
 
-  mutable mutex m;
+  mutable jubatus::util::concurrent::mutex m;
   volatile bool f;
 };
 
 void producer_func(pcbuf<int>* q_ptr, int min, int max,
-                   map<int, int>* histgram_ptr, mutex* histgram_mutex_ptr)
+                   map<int, int>* histgram_ptr, jubatus::util::concurrent::mutex* histgram_mutex_ptr)
 {
   pcbuf<int>& q = *q_ptr;
   map<int, int>& histgram = *histgram_ptr;
-  mutex& histgram_mutex = *histgram_mutex_ptr;
+  jubatus::util::concurrent::mutex& histgram_mutex = *histgram_mutex_ptr;
 
   map<int, int> local_histgram;
   for (int i = min; i <= max; i++) {
@@ -126,12 +126,12 @@ void producer_func(pcbuf<int>* q_ptr, int min, int max,
 }
 
 void consumer_func(pcbuf<int>* q_ptr, flag* shutdown_flag_ptr,
-                   map<int, int>* histgram_ptr, mutex* histgram_mutex_ptr)
+                   map<int, int>* histgram_ptr, jubatus::util::concurrent::mutex* histgram_mutex_ptr)
 {
   pcbuf<int>& q = *q_ptr;
   flag& shutdown_flag = *shutdown_flag_ptr;
   map<int, int>& histgram = *histgram_ptr;
-  mutex& histgram_mutex = *histgram_mutex_ptr;
+  jubatus::util::concurrent::mutex& histgram_mutex = *histgram_mutex_ptr;
 
   int value = 0;
   map<int, int> local_histgram;
@@ -163,7 +163,7 @@ TEST(pcbuf, normal)
   flag shutdown_flag;
   pcbuf<int> q(pcbuf_capacity);
   map<int, int> producer_histgram, consumer_histgram;
-  mutex producer_histgram_mutex, consumer_histgram_mutex;
+  jubatus::util::concurrent::mutex producer_histgram_mutex, consumer_histgram_mutex;
 
   // start consumers
   vector<jubatus::util::lang::shared_ptr<thread> > consumers(consumer_num);

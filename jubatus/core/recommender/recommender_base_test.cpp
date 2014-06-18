@@ -122,6 +122,7 @@ TEST(recommender_base, decode_row) {
   common::sfv_t v;
   r.decode_row("r1", v);
   ASSERT_EQ(2u, v.size());
+  std::sort(v.begin(), v.end());
   EXPECT_EQ("a1", v[0].first);
   EXPECT_EQ(1.0, v[0].second);
   EXPECT_EQ("a2", v[1].first);
