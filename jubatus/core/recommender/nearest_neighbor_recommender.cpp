@@ -78,6 +78,9 @@ void nearest_neighbor_recommender::neighbor_row(
 void nearest_neighbor_recommender::clear() {
   orig_.clear();
   nearest_neighbor_engine_->clear();
+  if (unlearner_) {
+    unlearner_->clear();
+  }
 }
 
 void nearest_neighbor_recommender::clear_row(const std::string& id) {
