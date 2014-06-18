@@ -45,16 +45,6 @@ def configure(conf):
 
   conf.check_cxx(lib = 'msgpack')
 
-  # pkg-config tests
-  if Options.options.debug:
-    conf.find_program('pkg-config') # make sure that pkg-config command exists
-    try:
-      conf.check_cfg(package = 'libglog', args = '--cflags --libs')
-    except conf.errors.ConfigurationError:
-      e = sys.exc_info()[1]
-      conf.to_log("PKG_CONFIG_PATH: " + os.environ.get('PKG_CONFIG_PATH', ''))
-      conf.fatal("Failed to find the library. Please confirm that PKG_CONFIG_PATH environment variable is correctly set.", e)
-
   if not Options.options.debug:
     conf.define('NDEBUG', 1)
     conf.define('JUBATUS_DISABLE_ASSERTIONS', 1)
@@ -86,13 +76,10 @@ def build(bld):
   bld.core_headers = []
   bld.core_use = []
 
-  if not bld.is_defined('JUBATUS_DISABLE_ASSERTIONS'):
-    bld.core_use.extend(['LIBGLOG'])
-
   bld.recurse(subdirs)
 
   # core
-  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = bld.env['JUBATUS_CORE_VERSION'])
+  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = VERSION)
   bld.install_files('${PREFIX}/include/', list(set(bld.core_headers)), relative_trick=True)
 
 

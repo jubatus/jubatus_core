@@ -35,7 +35,8 @@ regexp_splitter::regexp_splitter(const std::string& regexp, int group)
     : re_(regexp),
       group_(group) {
   if (group < 0) {
-    throw JUBATUS_EXCEPTION(converter_exception("'group' must be positive"));
+    throw JUBATUS_EXCEPTION(converter_exception(
+        "'group' must be positive: " + lexical_cast<std::string>(group)));
   }
   if (!re_.ok()) {
     throw JUBATUS_EXCEPTION(

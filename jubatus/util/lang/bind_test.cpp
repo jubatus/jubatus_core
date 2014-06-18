@@ -124,7 +124,7 @@ TEST(bind, bind_test)
   }
   {
     bar2 b(100);
-    bind(&bar2::foo, ref(b), _1)(1);
+    bind(&bar2::foo, ::jubatus::util::lang::ref(b), _1)(1);
     ASSERT_EQ(101, b.n);
   }
   {
@@ -144,7 +144,7 @@ TEST(bind, bind_test)
   }
   {
     bar21 b(100);
-    bind(&bar2::foo, ref(b), _1)(1);
+    bind(&bar2::foo, ::jubatus::util::lang::ref(b), _1)(1);
     ASSERT_EQ(101, b.n);
   }
   {
@@ -155,7 +155,7 @@ TEST(bind, bind_test)
   {
     bar3 b("Hello");
     string w=", world!";
-    ASSERT_EQ("Hello, world!", bind(&bar3::foo, ref(b), _1)(w));
+    ASSERT_EQ("Hello, world!", bind(&bar3::foo, ::jubatus::util::lang::ref(b), _1)(w));
   }
   {
     bar3 b("Hello");
@@ -165,6 +165,6 @@ TEST(bind, bind_test)
   {
     bar3 b("Hello");
     string w=", world!";
-    ASSERT_EQ("Hello, world!",  bind(&bar3::foo2, ref(b), _1)(w));
+    ASSERT_EQ("Hello, world!",  bind(&bar3::foo2, ::jubatus::util::lang::ref(b), _1)(w));
   }
 }

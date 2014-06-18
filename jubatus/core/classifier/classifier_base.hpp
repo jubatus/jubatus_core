@@ -54,6 +54,7 @@ class classifier_base {
   void classify_with_scores(const common::sfv_t& fv,
                             classify_result& scores) const;
   bool delete_label(const std::string& label);
+  bool unlearn_label(const std::string& label);
   void clear();
 
   std::vector<std::string> get_labels() const;
@@ -95,9 +96,6 @@ class classifier_base {
 
   storage_ptr storage_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
-
- private:
-  bool unlearn_label(const std::string& label);
 };
 
 }  // namespace classifier

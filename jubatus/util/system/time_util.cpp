@@ -99,6 +99,7 @@ calendar_time::calendar_time(
   , min(min)
   , sec(sec)
   , usec(usec)
+  , isdst(false)
 {
   clock_time ct(*this);
   *this=calendar_time(ct);

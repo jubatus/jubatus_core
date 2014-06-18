@@ -59,6 +59,7 @@ TEST(sparse_matrix_storage, set_row) {
 
   vector<pair<string, float> > p;
   s.get_row("r1", p);
+  std::sort(p.begin(), p.end());
   ASSERT_EQ(r1, p);
 
   EXPECT_EQ(2.0, s.get("r1", "c2"));

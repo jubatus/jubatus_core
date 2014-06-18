@@ -32,15 +32,26 @@
 #ifndef JUBATUS_UTIL_LANG_REF_H_
 #define JUBATUS_UTIL_LANG_REF_H_
 
+#include <functional>
+#ifdef __GLIBCXX__
 #include <tr1/functional>
+#endif
 
 namespace jubatus {
 namespace util {
 namespace lang {
 
+namespace detail {
+#ifdef __GLIBCXX__
+namespace ref_ns = ::std::tr1;
+#else
+namespace ref_ns = ::std;
+#endif
+}
+
 template <class T>
-class reference_wrapper : public std::tr1::reference_wrapper<T> {
-  typedef std::tr1::reference_wrapper<T> base;
+class reference_wrapper : public detail::ref_ns::reference_wrapper<T> {
+  typedef detail::ref_ns::reference_wrapper<T> base;
 
 public:
   explicit reference_wrapper(T& x) : base(x) {}

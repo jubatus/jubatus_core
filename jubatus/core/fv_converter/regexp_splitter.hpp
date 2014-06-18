@@ -17,10 +17,12 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_REGEXP_SPLITTER_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_REGEXP_SPLITTER_HPP_
 
-#ifndef HAVE_RE2
+#if defined HAVE_RE2
+#include "re2_splitter.hpp"
+#elif defined HAVE_ONIGURUMA
 #include "onig_splitter.hpp"
 #else
-#include "re2_splitter.hpp"
+#include "null_regexp_splitter.hpp"
 #endif
 
 #endif  // JUBATUS_CORE_FV_CONVERTER_REGEXP_SPLITTER_HPP_

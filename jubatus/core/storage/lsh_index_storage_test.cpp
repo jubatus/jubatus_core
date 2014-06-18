@@ -359,6 +359,7 @@ TEST(lsh_index_storage, set_and_remove_around_mix) {
 
   s1.similar_row(h1, 1, 80, 3, ids);
   EXPECT_EQ(2u, ids.size());
+  std::sort(ids.begin(), ids.end());
   EXPECT_EQ("r1", ids[0].first) << "score: " << ids[0].second;
   EXPECT_EQ("r2", ids[1].first) << "score: " << ids[1].second;
   ids.clear();

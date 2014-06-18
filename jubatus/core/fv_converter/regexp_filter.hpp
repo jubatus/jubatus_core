@@ -17,10 +17,12 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_REGEXP_FILTER_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_REGEXP_FILTER_HPP_
 
-#ifndef HAVE_RE2
+#if defined HAVE_RE2
+#include "re2_filter.hpp"
+#elif defined HAVE_ONIGURUMA
 #include "onig_filter.hpp"
 #else
-#include "re2_filter.hpp"
+#include "null_regexp_filter.hpp"
 #endif
 
 #endif  // JUBATUS_CORE_FV_CONVERTER_REGEXP_FILTER_HPP_

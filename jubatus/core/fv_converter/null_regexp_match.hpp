@@ -14,27 +14,30 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "re2_match.hpp"
+#ifndef JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_MATCH_HPP_
+#define JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_MATCH_HPP_
 
-#include <string>
+#include "key_matcher.hpp"
 #include "exception.hpp"
 
 namespace jubatus {
 namespace core {
 namespace fv_converter {
 
-regexp_match::regexp_match(const std::string& regexp)
-    : re_(regexp) {
-  if (!re_.ok()) {
-    throw JUBATUS_EXCEPTION(converter_exception(
-        "invalid regular expression: " + regexp));
+class regexp_match : public key_matcher {
+ public:
+  explicit regexp_match(const std::string& regexp) {
+    throw JUBATUS_EXCEPTION(
+        converter_exception("regexp support is disabled"));
   }
-}
 
-bool regexp_match::match(const std::string& key) {
-  return re2::RE2::FullMatch(key, re_);
-}
+  bool match(const std::string& key) {
+    return false;
+  }
+};
 
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus
+
+#endif  // JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_MATCH_HPP_

@@ -35,6 +35,7 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
+#if defined(HAVE_RE2) || defined(HAVE_ONIGURUMA)
 TEST(converter_config, config) {
   try {
     std::ifstream ifs("./test_input/config.json");
@@ -77,6 +78,7 @@ TEST(converter_config, config) {
     throw;
   }
 }
+#endif
 
 TEST(converter_config, hash) {
   converter_config config;

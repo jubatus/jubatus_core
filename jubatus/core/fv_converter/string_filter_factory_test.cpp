@@ -25,6 +25,7 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
+#if defined(HAVE_RE2) || defined(HAVE_ONIGURUMA)
 TEST(string_filter_factory, trivial) {
   string_filter_factory f;
   std::map<std::string, std::string> p;
@@ -34,6 +35,7 @@ TEST(string_filter_factory, trivial) {
   jubatus::util::lang::shared_ptr<string_filter> filter(f.create("regexp", p));
   EXPECT_TRUE(typeid(*filter) == typeid(regexp_filter));
 }
+#endif
 
 TEST(string_filter_factory, unknown) {
   string_filter_factory f;

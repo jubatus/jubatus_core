@@ -45,10 +45,8 @@ TEST(function, constructor)
   function<void (int**** const**** const** const&, function<void ()>)> f2;
 
   function<int (const char*)> f3(printf);
-  function<void (const char*)> f4(printf);
 
-  function<int (const char*)> f5(f3);
-  function<void (const char*)> f6(f5);
+  function<int (const char*)> f4(f3);
 }
 
 TEST(function, assignment)

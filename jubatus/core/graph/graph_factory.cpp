@@ -35,7 +35,7 @@ shared_ptr<graph_wo_index> graph_factory::create_graph(
     return shared_ptr<graph_wo_index>(new graph_wo_index(
       common::jsonconfig::config_cast_check<graph_wo_index::config>(param)));
   } else {
-    throw JUBATUS_EXCEPTION(unknown_graph(name));
+    throw JUBATUS_EXCEPTION(unknown_graph("unknown method name: " + name));
   }
 }
 

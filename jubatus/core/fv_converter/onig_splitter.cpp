@@ -33,13 +33,15 @@ regexp_splitter::regexp_splitter(const std::string& regexp, int group)
     : reg_(NULL),
       group_(group) {
   if (group < 0) {
-    throw JUBATUS_EXCEPTION(converter_exception("'group' must be positive"));
+    throw JUBATUS_EXCEPTION(converter_exception(
+        "'group' must be positive: " + lexical_cast<std::string>(group)));
   }
 
   const UChar* pattern = reinterpret_cast<const UChar*>(regexp.data());
   if (ONIG_NORMAL != onig_new(&reg_, pattern, pattern + regexp.size(),
         ONIG_OPTION_DEFAULT, ONIG_ENCODING_UTF8, ONIG_SYNTAX_PERL, NULL)) {
-    throw JUBATUS_EXCEPTION(converter_exception("invalid regular expression"));
+    throw JUBATUS_EXCEPTION(converter_exception(
+        "invalid regular expression: " + regexp));
   }
 
   const int num_capture = onig_number_of_captures(reg_);

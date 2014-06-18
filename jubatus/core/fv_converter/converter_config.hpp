@@ -88,7 +88,7 @@ struct binary_rule {
   friend class jubatus::util::data::serialization::access;
   template<class Archive>
   void serialize(Archive& ar) {
-    ar & JUBA_MEMBER(key) & JUBA_MEMBER(type);
+    ar & JUBA_MEMBER(key) & JUBA_MEMBER(except) & JUBA_MEMBER(type);
   }
 };
 

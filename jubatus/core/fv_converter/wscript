@@ -1,17 +1,22 @@
 import Options
 
 def options(opt):
-  opt.add_option('--enable-re2',
-                 action='store_true',
-                 default=False,
-                 help='do use re2 instead of oniguruma')
+  opt.add_option('--regexp-library',
+                 default='oniguruma',
+                 help='use regexp library: oniguruma (default), re2 or none')
 
 def configure(conf):
-  if Options.options.enable_re2:
+  regexp_lib = Options.options.regexp_library
+  if regexp_lib == 're2':
     conf.check_cxx(lib = 're2', define_name = 'HAVE_RE2',
                    errmsg = 'not found')
+  elif regexp_lib == 'oniguruma':
+    conf.check_cxx(lib = 'onig', define_name = 'HAVE_ONIGURUMA',
+                   errmsg = 'not found')
+  elif regexp_lib == 'none':
+    pass
   else:
-    conf.check_cxx(lib = 'onig', define_name = 'HAVE_ONIGURUMA')
+    conf.fatal('unsupported regexp library specified: ' + regexp_lib)
 
 def make_test(bld, use, src):
   bld.program(
@@ -74,30 +79,7 @@ def build(bld):
       'type.hpp',
       'factory.hpp',
       'util.hpp',
-      ]
-  use = ['jubatus_util', 'MSGPACK']
-
-  if bld.env.HAVE_RE2:
-    source.append('re2_match.cpp')
-    source.append('re2_filter.cpp')
-    source.append('re2_splitter.cpp')
-    use.append('RE2')
-  else:
-    source.append('onig_match.cpp')
-    source.append('onig_filter.cpp')
-    source.append('onig_splitter.cpp')
-    use.append('ONIG')
-
-  bld.core_sources.extend(bld.add_prefix(source))
-  bld.core_headers.extend(bld.add_prefix(headers))
-  bld.core_use.extend(use)
-
-  n = bld.path.get_bld().make_node('test_input')
-  n.mkdir()
-  bld(rule = 'cp ${SRC} ${TGT}',
-      source = bld.path.ant_glob('test_input/*'),
-      target = n)
-
+  ]
   test_source = [
       'json_converter_test.cpp',
       'msgpack_converter_test.cpp',
@@ -119,12 +101,35 @@ def build(bld):
       'keyword_weights_test.cpp',
       'feature_hasher_test.cpp',
       'except_match_test.cpp',
+      'mixable_weight_manager_test.cpp',
+  ]
+  regex_test_source = [
       'regexp_match_test.cpp',
       'regexp_filter_test.cpp',
       'regexp_splitter_test.cpp',
-      'mixable_weight_manager_test.cpp',
-      ]
+  ]
+
+  use = ['jubatus_util', 'MSGPACK']
+
+  if bld.env.HAVE_RE2:
+    source += ['re2_match.cpp', 're2_filter.cpp', 're2_splitter.cpp' ]
+    test_source += regex_test_source
+    use += ['RE2']
+  elif bld.env.HAVE_ONIGURUMA:
+    source += ['onig_match.cpp', 'onig_filter.cpp', 'onig_splitter.cpp']
+    test_source += regex_test_source
+    use += ['ONIG']
+
+  bld.core_sources.extend(bld.add_prefix(source))
+  bld.core_headers.extend(bld.add_prefix(headers))
+  bld.core_use.extend(use)
+
+  n = bld.path.get_bld().make_node('test_input')
+  n.mkdir()
+  bld(rule = 'cp ${SRC} ${TGT}',
+      source = bld.path.ant_glob('test_input/*'),
+      target = n)
+
   test_use = ['jubatus_util', 'jubatus_core']
 
   make_tests(bld, test_use, test_source)
-
