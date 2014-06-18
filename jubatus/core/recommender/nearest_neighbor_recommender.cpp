@@ -32,18 +32,15 @@ namespace recommender {
 class nearest_neighbor_recommender::unlearning_callback {
  public:
   explicit unlearning_callback(nearest_neighbor_recommender* recommender)
-      : recommender_(recommender),
-        table_(recommender_->get_table()) {
+      : recommender_(recommender) {
   }
 
   void operator()(const std::string& id) {
-    recommender_->orig_.remove_row(id);
-    table_->delete_row(id);
+    recommender_->clear_row(id);
   }
 
  private:
   nearest_neighbor_recommender* recommender_;
-  jubatus::util::lang::shared_ptr<table::column_table> table_;
 };
 
 nearest_neighbor_recommender::nearest_neighbor_recommender(
@@ -84,7 +81,11 @@ void nearest_neighbor_recommender::clear() {
 }
 
 void nearest_neighbor_recommender::clear_row(const std::string& id) {
-  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+  orig_.remove_row(id);
+  get_table()->delete_row(id);
+  if (unlearner_) {
+    unlearner_->remove(id);
+  }
 }
 
 void nearest_neighbor_recommender::update_row(
