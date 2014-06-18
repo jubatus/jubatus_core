@@ -66,8 +66,8 @@ bool lru_unlearner::touch(const std::string& id) {
     if (it != entry_map_.end()) {
       // Non-sticky ID that is already on memory; mark the ID
       // as most recently used.
-      lru_.erase(it->second);
       lru_.push_front(id);
+      lru_.erase(it->second);
       it->second = lru_.begin();
       return true;
     }
