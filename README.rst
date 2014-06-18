@@ -1,88 +1,67 @@
-Jubatus
-=======
+jubatus_core
+============
 
-The Jubatus library is an online machine learning framework which runs in distributed environment.
+jubatus_core is the core library of Jubatus.
 
-See http://jubat.us/ for details.
+See http://jubat.us/ for details of Jubatus.
 
-Quick Start
+How to install
 -----------
 
 We officially support Ubuntu Server 12.04 LTS (x86_64) and Red Hat Enterprise Linux 6.2 or later (x86_64).
 
-See `QuickStart <http://jubat.us/en/quickstart.html>`_ for detailed description.
-
-Red Hat Enterprise Linux 6.2 or later (x86_64)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Run the following command to register Jubatus Yum repository to the system.
-
-::
-
-  $ sudo rpm -Uvh http://download.jubat.us/yum/rhel/6/stable/x86_64/jubatus-release-6-1.el6.x86_64.rpm
-
-Then install ``jubatus`` and ``jubatus-client`` package.
+If you have already installed Jubatus 0.6.0 or later, you can already use jubatus_core.
+`QuickStart <http://jubat.us/en/quickstart.html>`_ describes how to install Jubatus.
+If you do not want to install whole Jubatus, you can install jubatus_core only.
+Before installation, you should install msgpack and oniguruma (oniguruma is optional).
+Then type as following:
 
 ::
 
-  $ sudo yum install jubatus jubatus-client
+    wget -O jubatus_core-master.tar.gz https://github.com/jubatus/jubatus_core/archive/master.tar.gz
+    tar xf jubatus_core-master.tar.gz
+    cd jubatus_core-master
+    ./waf configure --prefix=<prefix>
+    ./waf
+    ./waf --checkall
+    ./waf install
 
-Now Jubatus is installed in ``/usr/bin/juba*``.
 
-::
-
-  $ jubaclassifier -f /usr/share/jubatus/example/config/classifier/pa.json
-
-Ubuntu Server 12.04 LTS (x86_64)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Write the following line to ``/etc/apt/sources.list.d/jubatus.list`` to register Jubatus Apt repository to the system.
+If you do not need oniguruma, type
 
 ::
 
-  deb http://download.jubat.us/apt binary/
+    ./waf configure --regexp-library=none --prefix=<prefix>
 
-Now install ``jubatus`` package.
 
-::
-
-  $ sudo apt-get update
-  $ sudo apt-get install -y --force-yes jubatus
-
-Now Jubatus is installed in ``/opt/jubatus/bin/juba*``.
+instead of
 
 ::
 
-  $ source /opt/jubatus/profile
-  $ jubaclassifier -f /opt/jubatus/share/jubatus/example/config/classifier/pa.json
+    ./waf configure --prefix=<prefix>
 
-Other Platforms
-~~~~~~~~~~~~~~~
-
-For other platforms, refer to the `documentation <http://jubat.us/en/build.html>`_.
+If you want to use re2 instead of oniguruma, add ``--regexp-library=re2`` to ``./waf configure``.
 
 License
 -------
 
 LGPL 2.1
 
-Third-party libraries included in Jubatus
------------------------------------------
+Third-party library included in jubatus_core
+----------------------------------------------
 
-Jubatus source tree includes following third-party libraries.
+Jubatus source tree includes following third-party library.
 
-- cmdline_ (under BSD 3-Clause License)
 - Eigen_ (mainly under MPL2 License, while some codes are under LPGL2.1 or LGPL2.1+)
 
-.. _cmdline: https://github.com/tanakh/cmdline
 .. _Eigen: http://eigen.tuxfamily.org
 
 Update history
 --------------
 
-Update history can be found from `ChangeLog <https://github.com/jubatus/jubatus/blob/master/ChangeLog.rst>`_ or `WikiPage <https://github.com/jubatus/jubatus/wiki/ChangeLog>`_.
+Update history can be found from `ChangeLog <https://github.com/jubatus/jubatus_core/blob/master/ChangeLog.rst>`_.
 
 Contributors
 ------------
 
-Patches contributed by `those people <https://github.com/jubatus/jubatus/contributors>`_.
+Contributors are listed at https://github.com/jubatus/jubatus/contributors and https://github.com/jubatus/jubatus_core/contributors.
