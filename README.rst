@@ -59,7 +59,7 @@ Jubatus source tree includes following third-party library.
 Update history
 --------------
 
-Update history can be found from `ChangeLog <https://github.com/jubatus/jubatus/blob/master/ChangeLog.rst>`_ or `WikiPage <https://github.com/jubatus/jubatus/wiki/ChangeLog>`_.
+Update history can be found from `ChangeLog <https://github.com/jubatus/jubatus_core/blob/master/ChangeLog.rst>`_.
 
 Contributors
 ------------
