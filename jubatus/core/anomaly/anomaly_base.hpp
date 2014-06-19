@@ -47,6 +47,8 @@ class anomaly_base : public framework::model {
   virtual void pack(framework::packer& packer) const = 0;
   virtual void unpack(msgpack::object o) = 0;
 
+  virtual bool is_updatable() const = 0;
+
   // Clears all rows.
   virtual void clear() = 0;
 

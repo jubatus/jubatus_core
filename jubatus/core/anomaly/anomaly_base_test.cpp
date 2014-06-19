@@ -76,6 +76,10 @@ class anomaly_impl : public anomaly_base {
   }
   void unpack(msgpack::object o) {
   }
+
+  bool is_updatable() const {
+    return true;
+  }
 };
 
 TEST(anomaly_base, find_max_int_id) {
