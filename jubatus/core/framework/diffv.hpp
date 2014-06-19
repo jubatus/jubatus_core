@@ -50,4 +50,4 @@ struct diffv {
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_DRIVER_FRAMEWORK_HPP_
+#endif  // JUBATUS_CORE_FRAMEWORK_DIFFV_HPP_

@@ -46,4 +46,4 @@ typedef msgpack::packer<jubatus_packer> packer;
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_FRAMEWORK_PACKE_HPP_
+#endif  // JUBATUS_CORE_FRAMEWORK_PACKER_HPP_
