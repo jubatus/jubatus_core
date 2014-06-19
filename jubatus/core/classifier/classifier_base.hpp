@@ -54,6 +54,7 @@ class classifier_base {
   void classify_with_scores(const common::sfv_t& fv,
                             classify_result& scores) const;
   bool delete_label(const std::string& label);
+  bool unlearn_label(const std::string& label);
   void clear();
 
   std::vector<std::string> get_labels() const;
@@ -90,6 +91,7 @@ class classifier_base {
   const storage::storage_base* get_storage() const;
 
   static float squared_norm(const common::sfv_t& sfv);
+  void check_touchable(const std::string& label);
   void touch(const std::string& label);
 
   storage_ptr storage_;

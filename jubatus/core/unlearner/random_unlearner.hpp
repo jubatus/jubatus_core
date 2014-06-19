@@ -53,7 +53,9 @@ class random_unlearner : public unlearner_base {
 
   explicit random_unlearner(const config& conf);
 
-  void touch(const std::string& id);
+  bool can_touch(const std::string& id);
+  bool touch(const std::string& id);
+  bool remove(const std::string& id);
   bool exists_in_memory(const std::string& id) const;
 
  private:

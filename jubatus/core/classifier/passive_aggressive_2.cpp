@@ -45,6 +45,8 @@ passive_aggressive_2::passive_aggressive_2(
 
 void passive_aggressive_2::train(const common::sfv_t& sfv,
                                  const string& label) {
+  check_touchable(label);
+
   string incorrect_label;
   float margin = calc_margin(sfv, label, incorrect_label);
   float loss = 1.f + margin;

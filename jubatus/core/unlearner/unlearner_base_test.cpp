@@ -32,11 +32,20 @@ class mock_unlearner : public unlearner_base {
   void clear() {
   }
 
-  void touch(const std::string& id) {
+  bool can_touch(const std::string& id) {
+    return true;
+  }
+
+  bool touch(const std::string& id) {
+    return true;
   }
 
   void call_unlearn(const std::string& id) const {
     unlearn(id);
+  }
+
+  bool remove(const std::string& id) {
+    return false;
   }
 
   bool exists_in_memory(const std::string& id) const {

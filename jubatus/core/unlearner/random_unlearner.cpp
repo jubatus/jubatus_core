@@ -43,9 +43,13 @@ random_unlearner::random_unlearner(const config& conf)
   ids_.reserve(max_size_);
 }
 
-void random_unlearner::touch(const std::string& id) {
+bool random_unlearner::can_touch(const std::string& id) {
+  return true;
+}
+
+bool random_unlearner::touch(const std::string& id) {
   if (id_set_.count(id) > 0) {
-    return;
+    return true;
   }
 
   if (id_set_.size() < max_size_) {
@@ -57,6 +61,14 @@ void random_unlearner::touch(const std::string& id) {
     ids_[replace_at] = id;
   }
   id_set_.insert(id);
+
+  return true;
+}
+
+bool random_unlearner::remove(const std::string& id) {
+  // TODO(kmaehashi) As we don't provide sticky ID feature for
+  // random_unlearner so far, we don't have to implement this for now.
+  return true;
 }
 
 bool random_unlearner::exists_in_memory(const std::string& id) const {
