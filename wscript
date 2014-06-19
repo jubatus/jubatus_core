@@ -32,11 +32,19 @@ def options(opt):
   opt.recurse(subdirs)
 
 def configure(conf):
-  conf.env.CXXFLAGS += ['-O2', '-Wall', '-g', '-pipe', '-fPIC'];
+  env = conf.env
+
+  env.append_unique('CXXFLAGS', ['-O2', '-Wall', '-g', '-pipe', '-fno-omit-frame-pointer', '-pthread'])
 
   conf.load('compiler_cxx')
   conf.load('unittest_gtest')
   conf.load('gnu_dirs')
+
+  ver = env.CC_VERSION
+  if env.COMPILER_CXX != 'g++' or int(ver[0]) < 4 or (int(ver[0]) == 4 and int(ver[1]) < 6):
+    env.append_unique('CXXFLAGS', '-D_FORTIFY_SOURCE=1')
+
+  conf.check_cxx(lib = 'pthread')
 
   # Generate config.hpp
   conf.define('JUBATUS_CORE_VERSION', VERSION)
