@@ -17,6 +17,8 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_FILTER_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_FILTER_HPP_
 
+#include <string>
+
 #include "string_filter.hpp"
 #include "exception.hpp"
 

@@ -17,6 +17,8 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_MATCH_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_MATCH_HPP_
 
+#include <string>
+
 #include "key_matcher.hpp"
 #include "exception.hpp"
 

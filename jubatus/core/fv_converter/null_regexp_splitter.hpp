@@ -17,6 +17,10 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_SPLITTER_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_NULL_REGEXP_SPLITTER_HPP_
 
+#include <utility>
+#include <string>
+#include <vector>
+
 #include "word_splitter.hpp"
 #include "exception.hpp"
 
@@ -33,7 +37,7 @@ class regexp_splitter : public word_splitter {
 
   void split(
       const std::string& str,
-      std::vector<std::pair<size_t, size_t> >& bounds) const {};
+      std::vector<std::pair<size_t, size_t> >& bounds) const {}
 };
 
 }  // namespace fv_converter
