@@ -36,10 +36,12 @@ void increase(val3_t& a, const val3_t& b) {
 }
 
 void delete_label_from_weight(uint64_t delete_id, id_features3_t& tbl) {
-  for (id_features3_t::iterator it = tbl.begin(); it != tbl.end(); ++it) {
+  for (id_features3_t::iterator it = tbl.begin(); it != tbl.end(); ) {
     it->second.erase(delete_id);
     if (it->second.empty()) {
-      tbl.erase(it);
+      it = tbl.erase(it);
+    } else {
+      ++it;
     }
   }
 }
