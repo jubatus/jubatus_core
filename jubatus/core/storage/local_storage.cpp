@@ -195,10 +195,12 @@ bool local_storage::delete_label(const std::string& label) {
   }
   for (id_features3_t::iterator it = tbl_.begin();
        it != tbl_.end();
-       ++it) {
+       ) {
     const bool deleted = it->second.erase(delete_id);
     if (deleted && it->second.empty()) {
-      tbl_.erase(it);
+      it = tbl_.erase(it);
+    } else {
+      ++it;
     }
   }
   class2id_.delete_key(label);
