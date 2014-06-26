@@ -56,7 +56,7 @@ float calculate_lof(
     sum_neighbor_lrd += it->second;
   }
 
-  if (isinf(sum_neighbor_lrd) && isinf(lrd)) {
+  if (std::isinf(sum_neighbor_lrd) && std::isinf(lrd)) {
     return 1;
   }
 
