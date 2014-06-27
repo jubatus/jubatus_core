@@ -51,7 +51,8 @@ void partition(
   hashes.resize(num_hash_tables);
   for (size_t i = 0; i < num_hash_tables; ++i) {
     hashes[i].resize(hash_size);
-    copy(&hash[i * hash_size], &hash[(i + 1) * hash_size], &hashes[i][0]);
+    std::vector<float>::const_iterator begin = hash.begin();
+    copy(begin + i*hash_size, begin + (i+1)*hash_size, hashes[i].begin());
   }
 }
 
