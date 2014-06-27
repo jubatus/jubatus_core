@@ -220,9 +220,8 @@ TEST_P(clustering_test, get_nearest_members) {
     ASSERT_EQ(2u, result.size());
   }
 
-  for (set<check_points, check_point_compare>::const_iterator it = points.begin();
-       it != points.end();
-       ++it) {
+  set<check_points, check_point_compare>::const_iterator it;
+  for (it = points.begin(); it != points.end(); ++it) {
     datum x;
     x.num_values_.push_back(make_pair("a", it->a));
     x.num_values_.push_back(make_pair("b", it->b));
