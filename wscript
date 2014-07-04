@@ -29,6 +29,10 @@ def options(opt):
                  action='store_true', default=False,
                  dest='disable_eigen', help='disable internal Eigen and algorithms using it')
 
+  opt.add_option('--fsanitize',
+                 action='store', default="",
+                 dest='fsanitize', help='specify sanitizer')
+
   opt.recurse(subdirs)
 
 def configure(conf):
@@ -61,6 +65,11 @@ def configure(conf):
     conf.env.append_value('CXXFLAGS', '-fprofile-arcs')
     conf.env.append_value('CXXFLAGS', '-ftest-coverage')
     conf.env.append_value('LINKFLAGS', '-lgcov')
+
+  sanitizer_names = Options.options.fsanitize
+  if len(sanitizer_names) > 0:
+    conf.env.append_unique('CXXFLAGS', '-fsanitize=' + sanitizer_names)
+    conf.env.append_unique('LINKFLAGS', '-fsanitize=' + sanitizer_names)
 
   conf.define('BUILD_DIR',  conf.bldnode.abspath())
 
