@@ -14,7 +14,8 @@ def build(bld):
       'anomaly.cpp',
       'graph.cpp',
       'nearest_neighbor.cpp',
-      'clustering.cpp'
+      'clustering.cpp',
+      'burst.cpp',
       ]
   headers = [
       'driver.hpp',
