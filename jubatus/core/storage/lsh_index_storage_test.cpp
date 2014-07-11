@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -117,7 +118,11 @@ TEST(lsh_index_storage, set_row_to_multiple_table) {
   vector<pair<string, float> > expect;
   expect.push_back(make_pair("r1", -distance(1, 1, 0.25f)));
 
-  EXPECT_EQ(expect, res);
+  EXPECT_EQ(expect.size(), res.size());
+  for (std::size_t i = 0; i < expect.size(); ++i) {
+    EXPECT_EQ(expect[i].first, res[i].first);
+    EXPECT_FLOAT_EQ(expect[i].second, res[i].second);
+  }
 }
 
 TEST(lsh_index_storage, try_removing_empty_row) {

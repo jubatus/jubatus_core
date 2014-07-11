@@ -95,7 +95,7 @@ TEST(compressive_storage, carry_up) {
     s.add(p);
     wplist mine = s.get_mine();
     EXPECT_EQ(1u, mine.size());
-    EXPECT_EQ(decay * decay, mine[0].weight);
+    EXPECT_DOUBLE_EQ(decay * decay, mine[0].weight);
   }
 }
 
