@@ -102,13 +102,6 @@ struct bit_vector_base {
   static const size_t BASE_BITS = sizeof(bit_base) * 8;
   static const size_t BLOCKSIZE = sizeof(bit_base);
 
-  bit_vector_base(bit_base* bits, size_t bit_num)
-      : bits_(NULL),
-        bit_num_(bit_num),
-        own_(false) {
-    alloc_memory();
-    memcpy(bits_, bits, used_bytes());
-  }
   bit_vector_base(const bit_base* bits, size_t bit_num)
       : bits_(NULL),
         bit_num_(bit_num),
