@@ -14,8 +14,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_DRIVER_MIXABLE_VERSIONED_TABLE_HPP_
-#define JUBATUS_CORE_DRIVER_MIXABLE_VERSIONED_TABLE_HPP_
+#ifndef JUBATUS_CORE_FRAMEWORK_MIXABLE_VERSIONED_TABLE_HPP_
+#define JUBATUS_CORE_FRAMEWORK_MIXABLE_VERSIONED_TABLE_HPP_
 
 #include <map>
 #include <string>
@@ -28,7 +28,7 @@
 
 namespace jubatus {
 namespace core {
-namespace driver {
+namespace framework {
 
 typedef std::map<table::owner, uint64_t> version_clock;
 
@@ -78,8 +78,8 @@ class mixable_versioned_table : public core::framework::push_mixable,
   version_clock vc_;
 };
 
-}  // namespace driver
+}  // namespace framework
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_DRIVER_MIXABLE_VERSIONED_TABLE_HPP_
+#endif  // JUBATUS_CORE_FRAMEWORK_MIXABLE_VERSIONED_TABLE_HPP_

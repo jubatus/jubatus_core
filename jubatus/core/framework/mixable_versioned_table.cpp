@@ -36,7 +36,7 @@ using std::vector;
 
 namespace jubatus {
 namespace core {
-namespace driver {
+namespace framework {
 namespace {
 
 std::string get_row_key(const std::string& packed) {
@@ -216,6 +216,6 @@ void mixable_versioned_table::update_version(const version_t& version) {
   }
 }
 
-}  // namespace driver
+}  // namespace framework
 }  // namespace core
 }  // namespace jubatus

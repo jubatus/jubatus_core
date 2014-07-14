@@ -24,7 +24,7 @@
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../common/type.hpp"
-#include "../driver/mixable_versioned_table.hpp"
+#include "../framework/mixable_versioned_table.hpp"
 #include "../framework/mixable.hpp"
 #include "../table/column/column_table.hpp"
 
@@ -84,7 +84,7 @@ class nearest_neighbor_base {
   std::string my_id_;
 
  private:
-  jubatus::util::lang::shared_ptr<driver::mixable_versioned_table>
+  jubatus::util::lang::shared_ptr<framework::mixable_versioned_table>
       mixable_table_;
 };
 

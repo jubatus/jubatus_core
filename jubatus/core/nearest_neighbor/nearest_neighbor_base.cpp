@@ -34,7 +34,7 @@ nearest_neighbor_base::nearest_neighbor_base(
     shared_ptr<table::column_table> table,
     const std::string& id)
     : my_id_(id),
-      mixable_table_(new driver::mixable_versioned_table) {
+      mixable_table_(new framework::mixable_versioned_table) {
   mixable_table_->set_model(table);
 }
 
