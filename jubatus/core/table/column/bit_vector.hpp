@@ -374,7 +374,7 @@ struct bit_vector_base {
     for (size_t i = 0; i < data.size; i += BLOCKSIZE) {
       buf.push_back(common::read_big_endian<bit_base>(&data.ptr[i]));
     }
-    bit_vector_base(const_cast<const uint64_t*>(&buf[0]), bit_num).swap(*this);
+    bit_vector_base(&buf[0], bit_num).swap(*this);
     JUBATUS_ASSERT(own_ || bits_ == NULL);
   }
 
