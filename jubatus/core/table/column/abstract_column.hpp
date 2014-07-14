@@ -321,11 +321,11 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
     return (bytes_per_value_() + sizeof(uint64_t) - 1) / sizeof(uint64_t);
   }
 
-  void* get_data_at_(size_t index) {
+  uint64_t* get_data_at_(size_t index) {
     JUBATUS_ASSERT_LT(index, size(), "");
     return &array_[blocks_per_value_() * index];
   }
-  const void* get_data_at_(size_t index) const {
+  const uint64_t* get_data_at_(size_t index) const {
     JUBATUS_ASSERT_LT(index, size(), "");
     return &array_[blocks_per_value_() * index];
   }
