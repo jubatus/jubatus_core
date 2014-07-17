@@ -60,7 +60,6 @@ bool storage::put_diff(const diff_t& diff) {
       common_.push_back(*it);
     }
   }
-  wplist all = get_all();
   increment_revision();
 
   // TODO(kumagi): return false if we want to reject the diff
