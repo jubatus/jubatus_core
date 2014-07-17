@@ -23,7 +23,6 @@
 
 #include "jubatus/util/lang/shared_ptr.h"
 
-#include "../driver/mixable_versioned_table.hpp"
 #include "../table/column/column_table.hpp"
 #include "anomaly_base.hpp"
 

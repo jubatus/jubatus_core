@@ -26,7 +26,6 @@
 #include "../framework/diffv.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
-#include "mixable_versioned_table.hpp"
 #include "driver.hpp"
 
 namespace jubatus {
