@@ -31,7 +31,7 @@ namespace classifier {
 
 normal_herd::normal_herd(storage_ptr storage)
     : classifier_base(storage) {
-  config_.C = 0.1f;
+  config_.regularization_weight = 0.1f;
 }
 
 normal_herd::normal_herd(
@@ -40,7 +40,7 @@ normal_herd::normal_herd(
     : classifier_base(storage),
       config_(config) {
 
-  if (!(0.f < config.C)) {
+  if (!(0.f < config.regularization_weight)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));
   }
@@ -79,7 +79,7 @@ void normal_herd::update(
     float val_covariance_pos = val * pos_val.v2;
     float val_covariance_neg = val * neg_val.v2;
 
-    const float C = config_.C;
+    const float C = config_.regularization_weight;
     storage_->set2(
         feature,
         pos_label,

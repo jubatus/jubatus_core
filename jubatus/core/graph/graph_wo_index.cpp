@@ -98,7 +98,7 @@ void normalize(eigen_vector_diff& v) {
 graph_wo_index::graph_wo_index(const config& config)
     : config_(config) {
 
-  if (!(0.0 < config.alpha && config.alpha < 1.0)) {
+  if (!(0.0 < config.damping_factor && config.damping_factor < 1.0)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < damping_factor < 1.0"));
   }
@@ -118,8 +118,8 @@ graph_wo_index::graph_wo_index() {
 graph_wo_index::~graph_wo_index() {
 }
 
-void graph_wo_index::alpha(double a) {
-  config_.alpha = a;
+void graph_wo_index::damping_factor(double a) {
+  config_.damping_factor = a;
 }
 
 void graph_wo_index::clear() {
@@ -475,8 +475,8 @@ void graph_wo_index::get_diff_eigen_score(eigen_vector_query_diff& diff) const {
       }
 
       eigen_vector_info ei;
-      ei.score = config_.alpha * score + 1 - config_.alpha
-          + config_.alpha * dist;
+      ei.score = config_.damping_factor * score + 1 - config_.damping_factor
+          + config_.damping_factor * dist;
 
       if (is_empty_query(query)) {
         ei.out_degree_num = node_it->second.out_edges.size();
