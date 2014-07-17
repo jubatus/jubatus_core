@@ -6,6 +6,7 @@ import os
 import sys
 
 VERSION = '0.0.1'
+ABI_VERSION = VERSION
 APPNAME = 'jubatus_core'
 
 top = '.'
@@ -51,6 +52,10 @@ def configure(conf):
   conf.define('JUBATUS_CORE_APPNAME', APPNAME)
   conf.write_config_header('jubatus/core_config.hpp', guard="JUBATUS_CORE_CONFIG_HPP_", remove=False)
 
+  # Version constants
+  conf.env.VERSION = VERSION
+  conf.env.ABI_VERSION = ABI_VERSION
+
   conf.check_cxx(lib = 'msgpack')
 
   if not Options.options.debug:
@@ -87,7 +92,7 @@ def build(bld):
   bld.recurse(subdirs)
 
   # core
-  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = VERSION)
+  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = ABI_VERSION)
   bld.install_files('${PREFIX}/include/', list(set(bld.core_headers)), relative_trick=True)
 
 

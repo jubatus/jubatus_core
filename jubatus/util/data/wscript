@@ -63,7 +63,7 @@ def build(bld):
       ],
     target = 'jubatus_util_data',
     includes = incdirs,
-    vnum = bld.env['VERSION'],
+    vnum = bld.env['ABI_VERSION'],
     use = 'jubatus_util_system core_headers')
 
   def t(src):

@@ -19,7 +19,7 @@ def build(bld):
     source = 'thread.cpp mutex.cpp rwmutex.cpp condition.cpp internal.cpp',
     target = 'jubatus_util_concurrent',
     includes = '.',
-    vnum = bld.env['VERSION'],
+    vnum = bld.env['ABI_VERSION'],
     use = 'jubatus_util_system PTHREAD')
 
   bld.program(
