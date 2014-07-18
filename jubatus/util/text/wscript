@@ -16,7 +16,7 @@ def build(bld):
     source = 'xhtml.cpp csv.cpp json/parser.cpp',
     target = 'jubatus_util_text',
     includes = '. json',
-    vnum = bld.env['VERSION'],
+    vnum = bld.env['ABI_VERSION'],
     use = 'jubatus_util_data jubatus_util_system')
   
   bld.program(

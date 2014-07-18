@@ -14,7 +14,7 @@ def build(bld):
   bld.shlib(
     source = 'random/mersenne_twister.cpp',
     target = 'jubatus_util_math',
-    vnum = bld.env['VERSION'],
+    vnum = bld.env['ABI_VERSION'],
     includes = '.')
   
   def t(src):

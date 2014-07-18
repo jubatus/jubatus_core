@@ -29,7 +29,7 @@ def build(bld):
   b = bld.shlib(
     source = 'empty.cpp',
     target = 'jubatus_util',
-    vnum = bld.env['VERSION'],
+    vnum = bld.env['ABI_VERSION'],
     use = [
       'core_headers',
       'jubatus_util_concurrent',
