@@ -34,23 +34,23 @@ namespace jubatus {
 namespace core {
 namespace recommender {
 
-static const uint64_t DEFAULT_BASE_NUM = 64;  // should be in config
+static const uint64_t DEFAULT_HASH_NUM = 64;  // should be in config
 
 lsh::config::config()
-    : hash_num(DEFAULT_BASE_NUM) {
+    : hash_num(DEFAULT_HASH_NUM) {
 }
 
-lsh::lsh(uint64_t base_num)
-    : base_num_(base_num) {
-  if (!(1 <= base_num)) {
+lsh::lsh(uint64_t hash_num)
+    : hash_num_(hash_num) {
+  if (!(1 <= hash_num)) {
     throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("1 <= base_num"));
+        common::invalid_parameter("1 <= hash_num"));
   }
   initialize_model();
 }
 
 lsh::lsh(const config& config)
-    : base_num_(config.hash_num) {
+    : hash_num_(config.hash_num) {
 
   if (!(1 <= config.hash_num)) {
     throw JUBATUS_EXCEPTION(
@@ -61,7 +61,7 @@ lsh::lsh(const config& config)
 }
 
 lsh::lsh()
-    : base_num_(DEFAULT_BASE_NUM) {
+    : hash_num_(DEFAULT_HASH_NUM) {
   initialize_model();
 }
 
@@ -108,7 +108,7 @@ void lsh::calc_lsh_values(const common::sfv_t& sfv, bit_vector& bv) const {
   const_cast<lsh*>(this)->generate_column_bases(sfv);
 
   vector<float> lsh_vals;
-  prod_invert_and_vector(column2baseval_, sfv, base_num_, lsh_vals);
+  prod_invert_and_vector(column2baseval_, sfv, hash_num_, lsh_vals);
   set_bit_vector(lsh_vals, bv);
 }
 
@@ -123,7 +123,7 @@ void lsh::generate_column_base(const string& column) {
     return;
   }
   const uint32_t seed = common::hash_util::calc_string_hash(column);
-  generate_random_vector(base_num_, seed, column2baseval_[column]);
+  generate_random_vector(hash_num_, seed, column2baseval_[column]);
 }
 
 void lsh::update_row(const string& id, const sfv_diff_t& diff) {

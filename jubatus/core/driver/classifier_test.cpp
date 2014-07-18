@@ -355,7 +355,7 @@ vector<shared_ptr<classifier_base> > create_classifiers() {
           new core::classifier::passive_aggressive_2(config, storage)));
 
   storage.reset(new core::storage::local_storage);
-  config.C = 0.1f;
+  config.regularization_weight = 0.1f;
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::normal_herd(config, storage)));
 

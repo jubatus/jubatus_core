@@ -29,16 +29,16 @@ class passive_aggressive : public regression_base {
  public:
   struct config {
     config()
-        : C(std::numeric_limits<float>::max()),
-          epsilon(0.1f) {
+        : regularization_weight(std::numeric_limits<float>::max()),
+          sensitivity(0.1f) {
     }
-    float C;
-    float epsilon;
+    float regularization_weight;
+    float sensitivity;
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_NAMED_MEMBER("regularization_weight", C)
-          & JUBA_NAMED_MEMBER("sensitivity", epsilon);
+      ar & JUBA_NAMED_MEMBER("regularization_weight", regularization_weight)
+         & JUBA_NAMED_MEMBER("sensitivity", sensitivity);
     }
   };
 

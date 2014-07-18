@@ -37,7 +37,7 @@ passive_aggressive_2::passive_aggressive_2(
     : classifier_base(storage),
       config_(config) {
 
-  if (!(0.f < config.C)) {
+  if (!(0.f < config.regularization_weight)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));
   }
@@ -61,7 +61,10 @@ void passive_aggressive_2::train(const common::sfv_t& sfv,
     return;
   }
   update_weight(
-      sfv, loss / (2 * sfv_norm + 1 / (2 * config_.C)), label, incorrect_label);
+      sfv,
+      loss / (2 * sfv_norm + 1 / (2 * config_.regularization_weight)),
+      label,
+      incorrect_label);
   touch(label);
 }
 

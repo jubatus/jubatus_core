@@ -126,29 +126,29 @@ TYPED_TEST_P(regression_test, config_validation) {
   typename TypeParam::config c;
 
   // 0.0 < regularization_weight
-  c.C = std::numeric_limits<float>::quiet_NaN();
+  c.regularization_weight = std::numeric_limits<float>::quiet_NaN();
   ASSERT_THROW(TypeParam p(c, s), common::invalid_parameter);
 
-  c.C = -1.f;
+  c.regularization_weight = -1.f;
   ASSERT_THROW(TypeParam p(c, s), common::invalid_parameter);
 
-  c.C = 0.f;
+  c.regularization_weight = 0.f;
   ASSERT_THROW(TypeParam p(c, s), common::invalid_parameter);
 
-  c.C = 1.f;
+  c.regularization_weight = 1.f;
   ASSERT_NO_THROW(TypeParam p(c, s));
 
   // 0.0 <= sensitivity
-  c.epsilon = std::numeric_limits<float>::quiet_NaN();
+  c.sensitivity = std::numeric_limits<float>::quiet_NaN();
   ASSERT_THROW(TypeParam p(c, s), common::invalid_parameter);
 
-  c.epsilon = -1.f;
+  c.sensitivity = -1.f;
   ASSERT_THROW(TypeParam p(c, s), common::invalid_parameter);
 
-  c.epsilon = 0.f;
+  c.sensitivity = 0.f;
   ASSERT_NO_THROW(TypeParam p(c, s));
 
-  c.epsilon = 1.f;
+  c.sensitivity = 1.f;
   ASSERT_NO_THROW(TypeParam p(c, s));
 }
 

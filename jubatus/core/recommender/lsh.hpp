@@ -43,7 +43,7 @@ class lsh : public recommender_base {
     }
   };
 
-  explicit lsh(uint64_t base_num);
+  explicit lsh(uint64_t hash_num);
   explicit lsh(const config& config);
   lsh();
   ~lsh();
@@ -81,7 +81,7 @@ class lsh : public recommender_base {
   jubatus::util::lang::shared_ptr<storage::mixable_bit_index_storage>
       mixable_storage_;
 
-  const uint64_t base_num_;
+  const uint64_t hash_num_;
 };
 
 }  // namespace recommender

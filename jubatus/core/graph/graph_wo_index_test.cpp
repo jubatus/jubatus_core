@@ -649,7 +649,7 @@ TEST(graph, eigen_value_one_way) {
 
   graph_wo_index g;
   g.add_centrality_query(preset_query());
-  g.alpha(3/4.);
+  g.damping_factor(3/4.);
 
   for (node_id_t i = 1; i <= 4u; ++i) {
     g.create_global_node(i);
@@ -750,7 +750,7 @@ TEST(graph, eigen_value_isolated_node) {
 
   graph_wo_index g;
   g.add_centrality_query(preset_query());
-  g.alpha(3/4.);
+  g.damping_factor(3/4.);
 
   for (node_id_t i = 1; i <= 4u; ++i) {
     g.create_node(i);
@@ -796,7 +796,7 @@ TEST(graph, eigen_value_edge_query_failure) {
   vector<graph_wo_index> gs(2);
   for (size_t i = 0; i < gs.size(); ++i) {
     gs[i].add_centrality_query(query);
-    gs[i].alpha(3/4.);
+    gs[i].damping_factor(3/4.);
   }
 
   gs[0].create_node(1);
@@ -847,18 +847,18 @@ TEST(graph_wo_index, config_validation) {
   shared_ptr<graph_wo_index> g;
   graph_wo_index::config c;
 
-  // 0.0 < alpha (a.k.a damping_factor) < 1.0
-  c.alpha = std::numeric_limits<double>::quiet_NaN();
+  // 0.0 < damping_factor < 1.0
+  c.damping_factor = std::numeric_limits<double>::quiet_NaN();
   ASSERT_THROW(g.reset(new graph_wo_index(c)), common::invalid_parameter);
-  c.alpha = -1.0;
+  c.damping_factor = -1.0;
   ASSERT_THROW(g.reset(new graph_wo_index(c)), common::invalid_parameter);
-  c.alpha = 0.0;
+  c.damping_factor = 0.0;
   ASSERT_THROW(g.reset(new graph_wo_index(c)), common::invalid_parameter);
-  c.alpha = 1.0;
+  c.damping_factor = 1.0;
   ASSERT_THROW(g.reset(new graph_wo_index(c)), common::invalid_parameter);
-  c.alpha = 2.0;
+  c.damping_factor = 2.0;
   ASSERT_THROW(g.reset(new graph_wo_index(c)), common::invalid_parameter);
-  c.alpha = 0.5;
+  c.damping_factor = 0.5;
   ASSERT_NO_THROW(g.reset(new graph_wo_index(c)));
 
   // 0 <= landmark_num

@@ -25,14 +25,14 @@ namespace classifier {
 
 struct classifier_config {
   classifier_config()
-      : C(1.0f) {
+      : regularization_weight(1.0f) {
   }
 
-  float C;
+  float regularization_weight;
 
   template<typename Ar>
   void serialize(Ar& ar) {
-    ar & JUBA_NAMED_MEMBER("regularization_weight", C);
+    ar & JUBA_NAMED_MEMBER("regularization_weight", regularization_weight);
   }
 };
 

@@ -39,7 +39,7 @@ arow::arow(
     : classifier_base(storage),
       config_(config) {
 
-  if (!(0.f < config.C)) {
+  if (!(0.f < config.regularization_weight)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));
   }
@@ -57,7 +57,7 @@ void arow::train(const common::sfv_t& sfv, const string& label) {
     return;
   }
 
-  float beta = 1.f / (variance + 1.f / config_.C);
+  float beta = 1.f / (variance + 1.f / config_.regularization_weight);
   float alpha = (1.f - margin) * beta;  // max(0, 1 - margin) = 1 - margin
   update(sfv, alpha, beta, label, incorrect_label);
 }
