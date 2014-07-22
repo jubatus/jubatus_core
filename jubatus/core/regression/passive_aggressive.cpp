@@ -33,12 +33,12 @@ passive_aggressive::passive_aggressive(
       sq_sum_(0.f),
       count_(0.f) {
 
-  if (!(0.f < config.C)) {
+  if (!(0.f < config.regularization_weight)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));
   }
 
-  if (!(0.f <= config.epsilon)) {
+  if (!(0.f <= config.sensitivity)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 <= sensitivity"));
   }
@@ -69,10 +69,11 @@ void passive_aggressive::train(const common::sfv_t& fv, float value) {
   float predict = estimate(fv);
   float error = value - predict;
   float sign_error = error > 0.f ? 1.0f : -1.0f;
-  float loss = sign_error * error - config_.epsilon * std_dev;
+  float loss = sign_error * error - config_.sensitivity * std_dev;
 
   if (loss > 0.f) {
-    float coeff = sign_error * std::min(config_.C, loss) / squared_norm(fv);
+    float C = config_.regularization_weight;
+    float coeff = sign_error * std::min(C, loss) / squared_norm(fv);
     if (!std::isinf(coeff)) {
       update(fv, coeff);
     }

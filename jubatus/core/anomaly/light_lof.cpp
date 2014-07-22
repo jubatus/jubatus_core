@@ -27,7 +27,6 @@
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../common/exception.hpp"
 
-using std::isinf;
 using jubatus::util::data::unordered_map;
 using jubatus::util::data::unordered_set;
 using jubatus::util::lang::shared_ptr;
@@ -62,7 +61,7 @@ float calculate_lof(float lrd, const std::vector<float>& neighbor_lrds) {
   const float sum_neighbor_lrd = std::accumulate(
       neighbor_lrds.begin(), neighbor_lrds.end(), 0.0f);
 
-  if (isinf(sum_neighbor_lrd) && isinf(lrd)) {
+  if (std::isinf(sum_neighbor_lrd) && std::isinf(lrd)) {
     return 1;
   }
 
@@ -81,8 +80,8 @@ light_lof::light_lof(
     const std::string& id,
     shared_ptr<nearest_neighbor_base> nearest_neighbor_engine)
     : nearest_neighbor_engine_(nearest_neighbor_engine),
-      mixable_nearest_neighbor_(new driver::mixable_versioned_table),
-      mixable_scores_(new driver::mixable_versioned_table),
+      mixable_nearest_neighbor_(new framework::mixable_versioned_table),
+      mixable_scores_(new framework::mixable_versioned_table),
       config_(conf),
       my_id_(id) {
   if (!(2 <= conf.nearest_neighbor_num)) {
@@ -112,8 +111,8 @@ light_lof::light_lof(
     shared_ptr<unlearner::unlearner_base> unlearner)
     : nearest_neighbor_engine_(nearest_neighbor_engine),
       unlearner_(unlearner),
-      mixable_nearest_neighbor_(new driver::mixable_versioned_table),
-      mixable_scores_(new driver::mixable_versioned_table),
+      mixable_nearest_neighbor_(new framework::mixable_versioned_table),
+      mixable_scores_(new framework::mixable_versioned_table),
       config_(conf),
       my_id_(id) {
   shared_ptr<column_table> nn_table = nearest_neighbor_engine_->get_table();

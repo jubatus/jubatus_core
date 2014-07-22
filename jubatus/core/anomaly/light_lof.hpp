@@ -24,7 +24,7 @@
 #include "jubatus/util/data/unordered_set.h"
 #include "jubatus/util/lang/shared_ptr.h"
 
-#include "../driver/mixable_versioned_table.hpp"
+#include "../framework/mixable_versioned_table.hpp"
 #include "../nearest_neighbor/nearest_neighbor_base.hpp"
 #include "../table/column/column_table.hpp"
 #include "../unlearner/unlearner_base.hpp"
@@ -124,10 +124,10 @@ class light_lof : public anomaly_base {
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
 
   // Mixable of nearest neighbor model.
-  jubatus::util::lang::shared_ptr<driver::mixable_versioned_table>
+  jubatus::util::lang::shared_ptr<framework::mixable_versioned_table>
       mixable_nearest_neighbor_;
   // Mixable of score table that contains k-dists and LRDs.
-  jubatus::util::lang::shared_ptr<driver::mixable_versioned_table>
+  jubatus::util::lang::shared_ptr<framework::mixable_versioned_table>
       mixable_scores_;
 
   config config_;

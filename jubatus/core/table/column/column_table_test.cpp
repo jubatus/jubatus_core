@@ -158,8 +158,7 @@ TEST(add, bit_vector) {
   schema.push_back(column_type(column_type::bit_vector_type, 80));
   base.init(schema);
 
-  char buff[10];
-  memset(buff, 0, 10);
+  uint64_t buff[2] = {};
   bit_vector vec(buff, 80);
   vec.reverse_bit(8);
   vec.reverse_bit(3);

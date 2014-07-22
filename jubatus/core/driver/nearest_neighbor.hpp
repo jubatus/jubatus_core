@@ -28,7 +28,6 @@
 #include "../nearest_neighbor/nearest_neighbor_base.hpp"
 #include "../table/column/column_table.hpp"
 #include "../unlearner/unlearner_base.hpp"
-#include "mixable_versioned_table.hpp"
 #include "driver.hpp"
 
 namespace jubatus {

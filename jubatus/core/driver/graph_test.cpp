@@ -40,7 +40,7 @@ class graph_test : public ::testing::Test {
  protected:
   void SetUp() {
     core::graph::graph_wo_index::config config;
-    config.alpha = 0.9f;
+    config.damping_factor = 0.9f;
     config.landmark_num = 5;
     graph_.reset(new core::driver::graph(
           jubatus::util::lang::shared_ptr<core::graph::graph_wo_index>(

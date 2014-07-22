@@ -50,8 +50,8 @@ class regression_test : public ::testing::Test {
   void SetUp() {
     shared_ptr<storage::storage_base> storage(new storage::local_storage);
     core::regression::passive_aggressive::config config;
-    config.C = std::numeric_limits<float>::max();
-    config.epsilon = 0.1f;
+    config.regularization_weight = std::numeric_limits<float>::max();
+    config.sensitivity = 0.1f;
     shared_ptr<core::regression::regression_base> method(
         new core::regression::passive_aggressive(config, storage));
     regression_.reset(

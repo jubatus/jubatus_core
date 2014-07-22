@@ -30,6 +30,7 @@ namespace driver {
 
 class driver_base {
  public:
+  driver_base() {}
   virtual ~driver_base() {}
   virtual framework::mixable* get_mixable() {
     return &holder_;
@@ -66,6 +67,10 @@ class driver_base {
   };
 
   mixable_holder holder_;
+
+ private:
+  driver_base(const driver_base&);
+  void operator=(const driver_base&);
 };
 
 }  // namespace driver

@@ -102,12 +102,7 @@ struct bit_vector_base {
   static const size_t BASE_BITS = sizeof(bit_base) * 8;
   static const size_t BLOCKSIZE = sizeof(bit_base);
 
-  bit_vector_base(void* bits, size_t bit_num)
-      : bits_(reinterpret_cast<bit_base*>(bits)),
-        bit_num_(bit_num),
-        own_(false) {
-  }
-  bit_vector_base(const void* bits, size_t bit_num)
+  bit_vector_base(const bit_base* bits, size_t bit_num)
       : bits_(NULL),
         bit_num_(bit_num),
         own_(false) {
@@ -379,8 +374,7 @@ struct bit_vector_base {
     for (size_t i = 0; i < data.size; i += BLOCKSIZE) {
       buf.push_back(common::read_big_endian<bit_base>(&data.ptr[i]));
     }
-    bit_vector_base(
-        reinterpret_cast<const char*>(&buf[0]), bit_num).swap(*this);
+    bit_vector_base(&buf[0], bit_num).swap(*this);
     JUBATUS_ASSERT(own_ || bits_ == NULL);
   }
 

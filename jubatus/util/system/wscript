@@ -20,7 +20,7 @@ def build(bld):
       'sysstat.cpp',
       'mmapper.cpp'],
     target = 'jubatus_util_system',
-    vnum = bld.env['VERSION'],
+    vnum = bld.env['ABI_VERSION'],
     includes = '.')
 
   bld.program(

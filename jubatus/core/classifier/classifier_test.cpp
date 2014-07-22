@@ -232,28 +232,28 @@ TEST(classifier_config_test, regularization_weight) {
   storage_ptr s(new local_storage);
   classifier_config c;
 
-  c.C = std::numeric_limits<float>::quiet_NaN();
+  c.regularization_weight = std::numeric_limits<float>::quiet_NaN();
   ASSERT_THROW(passive_aggressive_1 p1(c, s), common::invalid_parameter);
   ASSERT_THROW(passive_aggressive_2 p2(c, s), common::invalid_parameter);
   ASSERT_THROW(confidence_weighted cw(c, s), common::invalid_parameter);
   ASSERT_THROW(arow ar(c, s), common::invalid_parameter);
   ASSERT_THROW(normal_herd nh(c, s), common::invalid_parameter);
 
-  c.C = -0.1f;
+  c.regularization_weight = -0.1f;
   ASSERT_THROW(passive_aggressive_1 p1(c, s), common::invalid_parameter);
   ASSERT_THROW(passive_aggressive_2 p2(c, s), common::invalid_parameter);
   ASSERT_THROW(confidence_weighted cw(c, s), common::invalid_parameter);
   ASSERT_THROW(arow ar(c, s), common::invalid_parameter);
   ASSERT_THROW(normal_herd nh(c, s), common::invalid_parameter);
 
-  c.C = 0.f;
+  c.regularization_weight = 0.f;
   ASSERT_THROW(passive_aggressive_1 p1(c, s), common::invalid_parameter);
   ASSERT_THROW(passive_aggressive_2 p2(c, s), common::invalid_parameter);
   ASSERT_THROW(confidence_weighted cw(c, s), common::invalid_parameter);
   ASSERT_THROW(arow ar(c, s), common::invalid_parameter);
   ASSERT_THROW(normal_herd nh(c, s), common::invalid_parameter);
 
-  c.C = 0.1f;
+  c.regularization_weight = 0.1f;
   ASSERT_NO_THROW(passive_aggressive_1 p1(c, s));
   ASSERT_NO_THROW(passive_aggressive_2 p2(c, s));
   ASSERT_NO_THROW(confidence_weighted cw(c, s));

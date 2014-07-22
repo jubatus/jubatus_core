@@ -52,17 +52,17 @@ class graph_wo_index
 
   struct config {
     config()
-        : alpha(0.9),
+        : damping_factor(0.9),
           landmark_num(5) {
     }
 
-    double alpha;
+    double damping_factor;
     int landmark_num;
 
     template<typename Ar>
     void serialize(Ar& ar) {
       ar
-          & JUBA_NAMED_MEMBER("damping_factor", alpha)
+          & JUBA_NAMED_MEMBER("damping_factor", damping_factor)
           & JUBA_MEMBER(landmark_num);
     }
   };
@@ -71,7 +71,7 @@ class graph_wo_index
   graph_wo_index();
   ~graph_wo_index();
 
-  void alpha(double a);
+  void damping_factor(double a);
 
   void clear();
   void create_node(node_id_t id);

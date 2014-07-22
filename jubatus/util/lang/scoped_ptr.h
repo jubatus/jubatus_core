@@ -43,7 +43,7 @@ template <class T>
 class scoped_ptr : public safe_bool<scoped_ptr<T> > {
 public:
   explicit scoped_ptr(T* p = 0) : p_(p) {}
-  ~scoped_ptr(){ delete p_; }
+  ~scoped_ptr(){ checked_delete_(p_); }
 
   bool bool_test() const { return p_; }
 
@@ -64,6 +64,12 @@ private:
   scoped_ptr& operator=(scoped_ptr const&);
 
   T* p_;
+
+  static void checked_delete_(T* p) {
+    typedef char valid_if_complete[sizeof(T) > 0 ? 1 : -1];
+    (void)sizeof(valid_if_complete);
+    delete p;
+  }
 };
 
 template <typename T>
