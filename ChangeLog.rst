@@ -1,3 +1,17 @@
+Release 0.0.2 - 2014/07/22
+--------------------------
+
+* Improvements
+    * Support for OS X Mavericks (#20, #23)
+    * Make parameter name consistent with config (#38)
+    * Add ABI version number to object file (#39)
+    * #34, #35, #36, #40
+* Bug fixes
+    * classifier, regression: Fix a misused iterator (#21)
+    * Remove out-of-bound access to vectors (#25)
+    * Make bit_vector safer (#33)
+    * Fix test for x86 machine (#31)
+
 Release 0.0.1 - 2014/06/23
 --------------------------
 
