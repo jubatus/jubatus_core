@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_BURST_INPUT_WINDOW_HPP_
 
 #include <stdint.h>
+#include <algorithm>
 #include <cmath>
 #include <vector>
 #include <msgpack.hpp>
@@ -93,6 +94,16 @@ class basic_window {
     return batch_length_;
   }
 
+  void swap(basic_window& x) {
+    using std::swap;
+    swap(batches_, x.batches_);
+    swap(start_pos_, x.start_pos_);
+    swap(batch_length_, x.batch_length_);
+  }
+  friend void swap(basic_window& x, basic_window& y) {
+    x.swap(y);
+  }
+
  protected:
   std::vector<batch_type> batches_;
   double start_pos_;
@@ -135,6 +146,13 @@ class input_window : private basic_window<batch_input> {
   using base_::get_batches;
   using base_::get_batch_size;
   using base_::get_batch_length;
+
+  void swap(input_window& x) {
+    base_::swap(static_cast<base_&>(x));
+  }
+  friend void swap(input_window& x, input_window& y) {
+    x.swap(y);
+  }
 };
 
 }  // namespace burst
