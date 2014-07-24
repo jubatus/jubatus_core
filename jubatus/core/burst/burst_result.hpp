@@ -39,6 +39,8 @@ class burst_result {
                double costcut_threshold,
                const burst_result& prev_result,
                int max_reuse_batches);
+  // for testing
+  explicit burst_result(const result_window& src);
 
   // copy ctor is not user-defined (uses shared_ptr's one, CoW)
   // window(const window& x);

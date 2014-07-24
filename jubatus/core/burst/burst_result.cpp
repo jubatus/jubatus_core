@@ -77,6 +77,10 @@ burst_result::burst_result(
   p_.reset(new result_window(input, burst_weights));
 }
 
+burst_result::burst_result(const result_window& src)
+    : p_(new result_window(src)) {
+}
+
 bool burst_result::is_valid() const {
   return p_.get() != NULL;
 }

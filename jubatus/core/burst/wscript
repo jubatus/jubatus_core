@@ -27,6 +27,7 @@ def build(bld):
       'burst_result_test.cpp',
       'engine_test.cpp',
       'input_window_test.cpp',
+      'result_storage_test.cpp',
       'result_window_test.cpp',
       ]
 
