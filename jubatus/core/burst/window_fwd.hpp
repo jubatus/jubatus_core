@@ -57,6 +57,10 @@ struct batch_result {
   }
 
   MSGPACK_DEFINE(d, r, burst_weight);
+
+  bool is_bursted() const {
+    return burst_weight > 0;
+  }
 };
 
 class result_window;

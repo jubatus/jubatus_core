@@ -109,6 +109,22 @@ const std::vector<batch_result>& burst_result::get_batches() const {
   return p_ ? p_->get_batches() : empty_batch_results;
 }
 
+bool burst_result::is_bursted_at(double pos) const {
+  int i = p_ ? p_->get_index(pos) : -1;
+  if (i < 0) {
+    throw std::out_of_range("burst_result: pos is out of range");
+  }
+  return p_->get_batches()[i].is_bursted();
+}
+
+bool burst_result::is_bursted_at_latest_batch() const {
+  if (!p_) {
+    return false;
+  }
+  const std::vector<batch_result>& batches = p_->get_batches();
+  return !batches.empty() && batches.back().is_bursted();
+}
+
 }  // namespace burst
 }  // namespace core
 }  // namespace jubatus
