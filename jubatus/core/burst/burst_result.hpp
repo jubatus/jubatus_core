@@ -60,7 +60,7 @@ class burst_result {
 
   int get_batch_size() const;
   double get_batch_length() const;
-  const std::vector<batch_result>& get_batch_results() const;
+  const std::vector<batch_result>& get_batches() const;
 
   bool is_bursted_at(double pos) const;
   bool is_bursted_at_latest_batch() const;

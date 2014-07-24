@@ -87,17 +87,26 @@ double burst_result::get_start_pos() const {
 double burst_result::get_end_pos() const {
   return p_ ? p_->get_end_pos() : invalid_pos;
 }
+
 bool burst_result::contains(double pos) const {
   return p_ && p_->contains(pos);
 }
+
 double burst_result::get_all_length() const {
   return p_ ? p_->get_all_length() : 0;
 }
+
 int burst_result::get_batch_size() const {
   return p_ ? p_->get_batch_size() : 0;
 }
 double burst_result::get_batch_length() const {
   return p_ ? p_->get_batch_length() : 0;
+}
+
+const std::vector<batch_result> empty_batch_results;
+
+const std::vector<batch_result>& burst_result::get_batches() const {
+  return p_ ? p_->get_batches() : empty_batch_results;
 }
 
 }  // namespace burst
