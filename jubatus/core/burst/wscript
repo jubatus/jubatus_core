@@ -24,6 +24,7 @@ def build(bld):
   bld.core_use.extend(use)
 
   tests = [
+      'burst_result_test.cpp',
       'engine_test.cpp',
       'input_window_test.cpp',
       'result_window_test.cpp',
