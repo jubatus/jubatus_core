@@ -16,11 +16,71 @@
 
 #include "result_storage.hpp"
 
+#include <stddef.h>
+#include <deque>
+
+#include "../common/assert.hpp"
+
 namespace jubatus {
 namespace core {
 namespace burst {
 
-// unimplemented
+class result_storage::impl_ {
+  typedef std::deque<result_t> results_t;
+  results_t results_;
+  size_t results_max_;
+
+ public:
+  explicit impl_(int stored_results_max)
+      : results_max_(stored_results_max) {
+  }
+
+  void store(const result_t& result) {
+    results_.push_front(result);
+    while (results_.size() > results_max_) {
+      results_.pop_back();
+    }
+  }
+
+  result_t get_latest_result() const {
+    if (results_.empty()) {
+      return result_t();
+    }
+    return results_.front();
+  }
+  result_t get_result_at(double pos) const {
+    typedef results_t::const_iterator iterator_t;
+    for (iterator_t iter = results_.begin(), end = results_.end();
+        iter != end; ++iter) {
+      if (iter->contains(pos)) {
+        return *iter;
+      }
+    }
+    return result_t();
+  }
+};
+
+result_storage::result_storage(int stored_results_max)
+    : p_(new impl_(stored_results_max)) {
+}
+
+result_storage::~result_storage() {
+}
+
+void result_storage::store(const result_t& result) {
+  JUBATUS_ASSERT(p_);
+  p_->store(result);
+}
+
+burst_result result_storage::get_latest_result() const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_latest_result();
+}
+
+burst_result result_storage::get_result_at(double pos) const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_result_at(pos);
+}
 
 }  // namespace burst
 }  // namespace core

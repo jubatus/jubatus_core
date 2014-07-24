@@ -17,7 +17,6 @@
 #ifndef JUBATUS_CORE_BURST_RESULT_STORAGE_HPP_
 #define JUBATUS_CORE_BURST_RESULT_STORAGE_HPP_
 
-#include <stdint.h>
 #include <vector>
 #include <msgpack.hpp>
 #include "jubatus/util/lang/scoped_ptr.h"
@@ -32,10 +31,10 @@ class result_storage {
  public:
   typedef burst_result result_t;
 
-  explicit result_storage(int32_t stored_results_max);
+  explicit result_storage(int stored_results_max);
   ~result_storage();
 
-  void store(result_t result);
+  void store(const result_t& result);
 
   result_t get_latest_result() const;
   result_t get_result_at(double pos) const;
