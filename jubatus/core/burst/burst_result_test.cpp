@@ -101,7 +101,7 @@ TEST(burst_result, reuse) {
     }
   }
 
-  input_window prev_input(start_pos, batch_length*2, 2);
+  input_window prev_input(start_pos - batch_length*3, batch_length*5, 5);
   burst_result prev_result =
       make_result_with_default_params(prev_input, burst_result(), 0);
 

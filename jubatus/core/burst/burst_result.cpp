@@ -58,12 +58,14 @@ burst_result::burst_result(
   // reuse batch weights
   if (prev_result.p_) {
     const result_window& prev = *prev_result.p_;
-    const std::pair<int, int> intersection = prev.get_intersection(input);
-    const std::vector<batch_result>& prev_results = prev.get_batches();
-    for (int i = 0, j = intersection.first;
-         i < max_reuse && j < intersection.second;
-         ++i, ++j) {
-      burst_weights[i] = prev_results[j].burst_weight;
+    if (prev.get_start_pos() <= input.get_start_pos()) {
+      const std::pair<int, int> intersection = prev.get_intersection(input);
+      const std::vector<batch_result>& prev_results = prev.get_batches();
+      for (int i = 0, j = intersection.first;
+           i < max_reuse && j < intersection.second;
+           ++i, ++j) {
+        burst_weights[i] = prev_results[j].burst_weight;
+      }
     }
   }
 
