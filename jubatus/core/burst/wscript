@@ -14,6 +14,7 @@ def build(bld):
       'burst_result.hpp',
       'engine.hpp',
       'input_window.hpp',
+      'result_storage.hpp',
       'result_window.hpp',
       'window_fwd.hpp',
       ]
