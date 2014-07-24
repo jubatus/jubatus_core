@@ -4,12 +4,14 @@ def configure(ctx): pass
 
 def build(bld):
   sources = [
+      'aggregator.cpp',
       'burst.cpp',
       'engine.cpp',
       'burst_result.cpp',
       'result_storage.cpp',
       ]
   headers = [
+      'aggregator.hpp',
       'burst.hpp',
       'burst_result.hpp',
       'engine.hpp',
