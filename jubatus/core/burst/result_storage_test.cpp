@@ -27,13 +27,9 @@ namespace core {
 namespace burst {
 
 inline burst_result make_result(double start_pos, double batch_length, int n) {
-  if (n > 0) {
-    input_window input(start_pos, batch_length*n, n);
-    std::vector<double> weights(n, -1);
-    return burst_result(result_window(input, weights));
-  } else {
-    return burst_result(result_window(start_pos, batch_length));
-  }
+  input_window input(start_pos, batch_length, n);
+  std::vector<double> weights(n, -1);
+  return burst_result(result_window(input, weights));
 }
 
 TEST(result_storage, general) {

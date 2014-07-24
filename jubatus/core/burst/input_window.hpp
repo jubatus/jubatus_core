@@ -109,17 +109,10 @@ class input_window : private basic_window<batch_input> {
   typedef basic_window<batch_input> base_;
 
  public:
-  explicit input_window(double start_pos = 0, double batch_length = 1)
-      : base_(start_pos, batch_length, 0) {
-  }
-
-  input_window(double start_pos, double interval, int32_t batch_size)
-      : base_(start_pos,
-              batch_size > 0 ? interval / batch_size : -1,  // error when -1
-              batch_size) {
-    JUBATUS_ASSERT_LT(0, batches_.size(), "exception should be thrown");
-    JUBATUS_ASSERT_EQ(0, batches_[0].d, "should be zero-initialized");
-    JUBATUS_ASSERT_EQ(0, batches_[0].r, "should be zero-initialized");
+  explicit input_window(double start_pos = 0,
+                        double batch_interval = 1,
+                        int32_t batch_size = 0)
+      : base_(start_pos, batch_interval, batch_size) {
   }
 
   bool add_document(uint32_t d, uint32_t r, double pos) {

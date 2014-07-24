@@ -51,7 +51,7 @@ TEST(burst_result, simple) {
   const double batch_length = 1;
   const int n = 5;
 
-  input_window input(start_pos, batch_length*n, n);
+  input_window input(start_pos, batch_length, n);
 
   for (int i = 0; i < n; ++i) {
     double pos = start_pos + (i + 0.5) * batch_length;
@@ -90,7 +90,7 @@ TEST(burst_result, reuse) {
   const double batch_length = 1;
   const int n = 5;
 
-  input_window input(start_pos, batch_length*n, n);
+  input_window input(start_pos, batch_length, n);
 
   for (int i = 0; i < n; ++i) {
     double pos = start_pos + (i + 0.5) * batch_length;
@@ -101,7 +101,7 @@ TEST(burst_result, reuse) {
     }
   }
 
-  input_window prev_input(start_pos - batch_length*3, batch_length*5, 5);
+  input_window prev_input(start_pos - batch_length*3, batch_length, 5);
   burst_result prev_result =
       make_result_with_default_params(prev_input, burst_result(), 0);
 

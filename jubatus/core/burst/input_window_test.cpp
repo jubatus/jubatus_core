@@ -27,14 +27,12 @@ TEST(construct, input_window) {
                common::invalid_parameter);
   ASSERT_THROW({input_window w(0, -1, 10);},
                common::invalid_parameter);
-  ASSERT_THROW({input_window w(0, 10,  0);},
-               common::invalid_parameter);
   ASSERT_THROW({input_window w(0, 10, -1);},
                common::invalid_parameter);
   ASSERT_THROW({input_window w(0, -1, -1);},
                common::invalid_parameter);
 
-  input_window w(1, 10, 5);
+  input_window w(1, 2, 5);
   ASSERT_DOUBLE_EQ(1, w.get_start_pos());
   ASSERT_DOUBLE_EQ(11, w.get_end_pos());
   ASSERT_DOUBLE_EQ(10, w.get_all_length());
@@ -60,7 +58,7 @@ TEST(default_constructed, input_window) {
 }
 
 TEST(add_document, input_window) {
-  input_window w(1, 10, 5);
+  input_window w(1, 2, 5);
 
   ASSERT_FALSE(w.add_document(2, 1, 0));  // fails if out-of-range
   ASSERT_EQ(0, w.get_batches()[0].d);

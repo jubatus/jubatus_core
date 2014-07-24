@@ -82,11 +82,7 @@ class result_window_test
     n = GetParam().n;
     batch_length = GetParam().batch_length;
 
-    if (n > 0) {
-      input = input_window(start_pos, n*batch_length, n);
-    } else {
-      input = input_window(start_pos, batch_length);
-    }
+    input = input_window(start_pos, batch_length, n);
     weights.resize(n);
 
     // TODO(gintenlabo): fill input and weights randomly
