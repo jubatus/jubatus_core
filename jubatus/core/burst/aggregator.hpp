@@ -38,7 +38,11 @@ class aggregator {
   // calculate windows which has no intersection to current window
   //   and flush them into result_storage
   // returns: count of windows stored
-  int flush_result_to(result_storage& stored);
+  int flush_results(double scaling_param,
+                    double gamma,
+                    double costcut_threshold,
+                    int max_reuse_batches,
+                    result_storage& stored);
 
  private:
   class impl_;
