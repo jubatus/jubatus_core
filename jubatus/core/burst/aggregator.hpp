@@ -28,7 +28,7 @@ namespace burst {
 
 class aggregator {
  public:
-  aggregator(int window_batch_size, double batch_interval);
+  aggregator(int window_batch_size, double batch_interval, int max_stored);
   ~aggregator();
 
   // store data into internal windows

@@ -30,8 +30,10 @@ namespace burst {
 
 class aggregator::impl_ {
  public:
-  impl_(int window_batch_size, double batch_interval)
-      : window_batch_size_(window_batch_size), batch_interval_(batch_interval) {
+  impl_(int window_batch_size, double batch_interval, int max_stored)
+      : window_batch_size_(window_batch_size),
+        batch_interval_(batch_interval),
+        max_stored_(max_stored) {
   }
 
   bool add_document(int d, int r, double pos) {
@@ -70,26 +72,28 @@ class aggregator::impl_ {
       return 0;
     }
 
+    typedef std::deque<input_window>::iterator iterator_t;
+
     burst_result prev = stored.get_latest_result();
-    for (int i = 0; i < n; ++i) {
-      burst_result r(aggregated_[i],
-                     scaling_param, gamma, costcut_threshold,
+    for (iterator_t iter = aggregated_.begin(), end = aggregated_.end();
+         iter != end; ++iter) {
+      burst_result r(*iter, scaling_param, gamma, costcut_threshold,
                      prev, max_reuse_batches);
       stored.store(r);
       prev.swap(r);  // more efficient than prev = r; use move when C++11/14
     }
 
     // clear aggregated
-    std::vector<input_window>().swap(aggregated_);
+    std::deque<input_window>().swap(aggregated_);
 
     return n;
   }
 
  private:
-  std::deque<input_window> aggregating_;
-  std::vector<input_window> aggregated_;
+  std::deque<input_window> aggregating_, aggregated_;
   int window_batch_size_;
   double batch_interval_;
+  int max_stored_;
 
   input_window make_new_window_(double pos, const input_window& prev) const {
     double prev_start_pos = prev.get_start_pos();
@@ -121,15 +125,21 @@ class aggregator::impl_ {
         break;
       }
       JUBATUS_ASSERT_GT(aggregating_.size(), 1, "");
+
       aggregated_.push_back(input_window());
       aggregated_.back().swap(aggregating_.back());  // move semantics
       aggregating_.pop_back();
+
+      while (aggregated_.size() > static_cast<size_t>(max_stored_)) {
+        aggregated_.pop_front();
+      }
     }
   }
 };
 
-aggregator::aggregator(int window_batch_size, double batch_interval)
-    : p_(new impl_(window_batch_size, batch_interval)) {
+aggregator::aggregator(
+    int window_batch_size, double batch_interval, int max_stored)
+    : p_(new impl_(window_batch_size, batch_interval, max_stored)) {
 }
 
 aggregator::~aggregator() {

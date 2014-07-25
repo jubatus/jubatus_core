@@ -37,7 +37,7 @@ TEST(aggregator, regular_input) {
   const double batch_interval = 6.283;
   const double window_interval = batch_size * batch_interval;
 
-  aggregator tested(batch_size, batch_interval);
+  aggregator tested(batch_size, batch_interval, 2);
   result_storage results(2);
 
   for (int i = 0; i < n; ++i) {
@@ -88,7 +88,7 @@ TEST(aggregator, sparse_input) {
   const double batch_interval = 2.718;
   const double window_interval = batch_size * batch_interval;
 
-  aggregator tested(batch_size, batch_interval);
+  aggregator tested(batch_size, batch_interval, 2);
   result_storage results(2);
 
   double pos = (batch_size/2 + 0.5) * batch_interval, prev_pos = -1;
@@ -119,7 +119,7 @@ TEST(aggregator, lazy_flushing) {
   const double batch_interval = 1.618;
   const double window_interval = batch_size * batch_interval;
 
-  aggregator tested(batch_size, batch_interval);
+  aggregator tested(batch_size, batch_interval, n);
   result_storage results(n);
 
   const double pos0 = (batch_size/2 + 0.5) * batch_interval;
@@ -144,6 +144,48 @@ TEST(aggregator, lazy_flushing) {
       ASSERT_EQ(1, batch.d);
       ASSERT_EQ(0, batch.r);
       ASSERT_EQ(0, batch.burst_weight);
+
+      pos += window_interval * 1.732;
+    }
+  }
+}
+
+TEST(aggregator, lazy_flushing_overflow) {
+  const int n = 10;
+  const int k = 5;
+  const int batch_size = 10;
+  const double batch_interval = 1.618;
+  const double window_interval = batch_size * batch_interval;
+
+  aggregator tested(batch_size, batch_interval, k);
+  result_storage results(k);
+
+  const double pos0 = (batch_size/2 + 0.5) * batch_interval;
+  {
+    double pos = pos0;
+    for (int i = 0; i < n; ++i) {
+      bool added = tested.add_document(1, 0, pos);
+      ASSERT_TRUE(added);
+
+      pos += window_interval * 1.732;
+    }
+  }
+
+  int m = flush_results_with_default_params(tested, results);
+  ASSERT_EQ(k, m);
+
+  {
+    double pos = pos0;
+    for (int i = 0; i < n-1; ++i) {
+      burst_result result = results.get_result_at(pos);
+      if (i < n-k-1) {
+        ASSERT_FALSE(result.is_valid());
+      } else {
+        batch_result batch = result.get_batch_at(pos);
+        ASSERT_EQ(1, batch.d);
+        ASSERT_EQ(0, batch.r);
+        ASSERT_EQ(0, batch.burst_weight);
+      }
 
       pos += window_interval * 1.732;
     }
