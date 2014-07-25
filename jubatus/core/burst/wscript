@@ -18,6 +18,7 @@ def build(bld):
       'input_window.hpp',
       'result_storage.hpp',
       'result_window.hpp',
+      'window_intersection.hpp',
       'window_fwd.hpp',
       ]
   use = ['jubatus_util']
@@ -32,6 +33,7 @@ def build(bld):
       'input_window_test.cpp',
       'result_storage_test.cpp',
       'result_window_test.cpp',
+      'window_intersection_test.cpp',
       ]
 
   for test in tests:
