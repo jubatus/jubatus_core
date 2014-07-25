@@ -84,14 +84,22 @@ class basic_window {
     return batch_length_ * get_batch_size();
   }
 
-  const std::vector<batch_type>& get_batches() const {
-    return batches_;
-  }
   int32_t get_batch_size() const {
     return batches_.size();
   }
   double get_batch_length() const {
     return batch_length_;
+  }
+
+  const std::vector<batch_type>& get_batches() const {
+    return batches_;
+  }
+
+  batch_type& get_batch_by_index(size_t i) {
+    return batches_[i];
+  }
+  const batch_type& get_batch_by_index(size_t i) const {
+    return batches_[i];
   }
 
   void swap(basic_window& x) {
@@ -143,9 +151,10 @@ class input_window : private basic_window<batch_input> {
   using base_::contains;
   using base_::get_all_length;
 
-  using base_::get_batches;
   using base_::get_batch_size;
   using base_::get_batch_length;
+  using base_::get_batches;
+  using base_::get_batch_by_index;
 
   void swap(input_window& x) {
     base_::swap(static_cast<base_&>(x));
