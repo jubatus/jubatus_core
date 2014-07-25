@@ -22,8 +22,7 @@
 #include "input_window.hpp"
 #include "result_window.hpp"
 #include "engine.hpp"
-
-using jubatus::util::lang::shared_ptr;
+#include "window_intersection.hpp"
 
 namespace jubatus {
 namespace core {
@@ -59,7 +58,7 @@ burst_result::burst_result(
   if (prev_result.p_) {
     const result_window& prev = *prev_result.p_;
     if (prev.get_start_pos() <= input.get_start_pos()) {
-      const std::pair<int, int> intersection = prev.get_intersection(input);
+      const std::pair<int, int> intersection = get_intersection(prev, input);
       const std::vector<batch_result>& prev_results = prev.get_batches();
       for (int i = 0, j = intersection.first;
            i < max_reuse && j < intersection.second;
