@@ -32,6 +32,11 @@ namespace jubatus {
 namespace core {
 namespace burst {
 
+inline bool window_position_near(
+    double pos0, double pos1, double batch_length) {
+  return std::abs(pos1 - pos0) / batch_length < 0.01;
+}
+
 class intersection_helper {
  public:
   explicit intersection_helper(double start_pos = 0,
@@ -79,8 +84,8 @@ class intersection_helper {
     return std::numeric_limits<int>::min();
   }
 
-  bool position_near(double pos1, double pos0) const {
-    return std::abs(pos1 - pos0) / batch_length_ < 0.01;
+  bool position_near(double pos0, double pos1) const {
+    return window_position_near(pos0, pos1, batch_length_);
   }
 
   bool has_batch_length_equals_to(double length1) const {

@@ -58,10 +58,20 @@ class burst_result {
   double get_start_pos() const;
   double get_end_pos() const;
   bool contains(double pos) const;
-  double get_all_length() const;
 
   int get_batch_size() const;
   double get_batch_length() const;
+  double get_all_length() const;
+
+  // comparing start_pos
+  // floating number error is considered
+  bool is_older_than(const burst_result& x) const;
+  bool is_newer_than(const burst_result& x) const;
+  bool has_same_start_pos(const burst_result& x) const;
+
+  // compares batch_length; floating number error is allowed
+  bool has_same_batch_length(const burst_result& x) const;
+
   const std::vector<batch_result>& get_batches() const;
 
   const batch_result& get_batch_at(double pos) const;

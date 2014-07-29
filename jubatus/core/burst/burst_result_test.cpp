@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 
 #include "input_window.hpp"
+#include "result_window.hpp"
 
 namespace jubatus {
 namespace core {
@@ -115,6 +116,86 @@ TEST(burst_result, reuse) {
   EXPECT_EQ(0, results[2].burst_weight);
   EXPECT_EQ(0, results[3].burst_weight);
   EXPECT_LT(6, results[4].burst_weight);
+}
+
+TEST(burst_result, is_older_than) {
+  burst_result r0, r1(result_window(1, 1)), r2(result_window(2, 1));
+  burst_result r1_(result_window(1.0001, 1));
+
+  // expected behavior
+  EXPECT_TRUE(r1.is_older_than(r2));
+  EXPECT_FALSE(r2.is_older_than(r1));
+  EXPECT_FALSE(r1.is_older_than(r1_));
+  EXPECT_FALSE(r1_.is_older_than(r1));
+
+  // always false when rhs and/or lhs is default constructed
+  EXPECT_FALSE(r0.is_older_than(r0));
+  EXPECT_FALSE(r0.is_older_than(r1));
+  EXPECT_FALSE(r2.is_older_than(r0));
+
+  // irreflexive
+  EXPECT_FALSE(r1.is_older_than(r1));
+  EXPECT_FALSE(r2.is_older_than(r2));
+}
+
+TEST(burst_result, is_newer_than) {
+  burst_result r0, r1(result_window(1, 1)), r2(result_window(2, 1));
+  burst_result r1_(result_window(1.0001, 1));
+
+  // expected behavior
+  EXPECT_TRUE(r2.is_newer_than(r1));
+  EXPECT_FALSE(r1.is_newer_than(r2));
+  EXPECT_FALSE(r1.is_newer_than(r1_));
+  EXPECT_FALSE(r1_.is_newer_than(r1));
+
+  // always false when rhs and/or lhs is default constructed
+  EXPECT_FALSE(r0.is_newer_than(r0));
+  EXPECT_FALSE(r0.is_newer_than(r1));
+  EXPECT_FALSE(r2.is_newer_than(r0));
+
+  // irreflexive
+  EXPECT_FALSE(r1.is_newer_than(r1));
+  EXPECT_FALSE(r2.is_newer_than(r2));
+}
+
+TEST(burst_result, has_same_start_pos) {
+  burst_result r0, r1(result_window(1, 1)), r2(result_window(2, 1));
+  burst_result r1_(result_window(1.0001, 2));
+
+  // expected behavior
+  EXPECT_FALSE(r2.has_same_start_pos(r1));
+  EXPECT_FALSE(r1.has_same_start_pos(r2));
+  EXPECT_TRUE(r1.has_same_start_pos(r1_));
+  EXPECT_TRUE(r1_.has_same_start_pos(r1));
+
+  // always false when rhs and/or lhs is default constructed
+  EXPECT_FALSE(r0.has_same_start_pos(r0));
+  EXPECT_FALSE(r0.has_same_start_pos(r1));
+  EXPECT_FALSE(r2.has_same_start_pos(r0));
+
+  // reflexive
+  EXPECT_TRUE(r1.has_same_start_pos(r1));
+  EXPECT_TRUE(r2.has_same_start_pos(r2));
+}
+
+TEST(burst_result, has_same_batch_length) {
+  burst_result r0, r1(result_window(1, 1)), r2(result_window(1, 2));
+  burst_result r1_(result_window(2, 1.0001));
+
+  // expected behavior
+  EXPECT_FALSE(r2.has_same_batch_length(r1));
+  EXPECT_FALSE(r1.has_same_batch_length(r2));
+  EXPECT_TRUE(r1.has_same_batch_length(r1_));
+  EXPECT_TRUE(r1_.has_same_batch_length(r1));
+
+  // always false when rhs and/or lhs is default constructed
+  EXPECT_FALSE(r0.has_same_batch_length(r0));
+  EXPECT_FALSE(r0.has_same_batch_length(r1));
+  EXPECT_FALSE(r2.has_same_batch_length(r0));
+
+  // reflexive
+  EXPECT_TRUE(r1.has_same_batch_length(r1));
+  EXPECT_TRUE(r2.has_same_batch_length(r2));
 }
 
 }  // namespace burst
