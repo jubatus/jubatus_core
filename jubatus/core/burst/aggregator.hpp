@@ -35,9 +35,9 @@ class aggregator {
   // returns: false if pos is too late to store
   bool add_document(int d, int r, double pos);
 
-  // calculate windows which has no intersection to current window
-  //   and flush them into result_storage
-  // returns: count of windows stored
+  // calculate windows and store into result_storage
+  //   then erase stored input which has no intersection to latest window
+  // returns: count of windows erased
   int flush_results(double scaling_param,
                     double gamma,
                     double costcut_threshold,

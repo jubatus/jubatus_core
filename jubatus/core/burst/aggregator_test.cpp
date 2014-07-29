@@ -37,7 +37,7 @@ TEST(aggregator, regular_input) {
   const double batch_interval = 6.283;
   const double window_interval = batch_size * batch_interval;
 
-  aggregator tested(batch_size, batch_interval, 2);
+  aggregator tested(batch_size, batch_interval, 3);
   result_storage results(2);
 
   for (int i = 0; i < n; ++i) {
@@ -66,12 +66,12 @@ TEST(aggregator, regular_input) {
         burst_result latest = results.get_latest_result();
         ASSERT_TRUE(j == 0 || j == batch_size/2);
         ASSERT_NEAR(start_pos + (j - batch_size/2) * batch_interval,
-                    latest.get_end_pos(),
+                    latest.get_start_pos(),
                     batch_interval / 100);
         const std::vector<batch_result>& batches = latest.get_batches();
         for (size_t k = 0; k < batches.size(); ++k) {
-          double pos = latest.get_start_pos() + (k+0.5) * batch_interval;
-          if (pos > 0) {
+          double pos_k = latest.get_start_pos() + (k+0.5) * batch_interval;
+          if (0 < pos_k && pos_k < pos-batch_interval) {
             ASSERT_EQ(2, batches[k].d);
             ASSERT_EQ(0, batches[k].r);
             ASSERT_EQ(0, batches[k].burst_weight);
@@ -88,7 +88,7 @@ TEST(aggregator, sparse_input) {
   const double batch_interval = 2.718;
   const double window_interval = batch_size * batch_interval;
 
-  aggregator tested(batch_size, batch_interval, 2);
+  aggregator tested(batch_size, batch_interval, 3);
   result_storage results(2);
 
   double pos = (batch_size/2 + 0.5) * batch_interval, prev_pos = -1;
@@ -99,14 +99,12 @@ TEST(aggregator, sparse_input) {
     int m = flush_results_with_default_params(tested, results);
     if (prev_pos >= 0) {
       ASSERT_EQ(1, m);
-      burst_result latest = results.get_latest_result();
-      batch_result batch = latest.get_batch_at(prev_pos);
-      ASSERT_EQ(1, batch.d);
-      ASSERT_EQ(0, batch.r);
-      ASSERT_EQ(0, batch.burst_weight);
-    } else {
-      ASSERT_EQ(0, m);
     }
+    burst_result latest = results.get_latest_result();
+    batch_result batch = latest.get_batch_at(pos);
+    ASSERT_EQ(1, batch.d);
+    ASSERT_EQ(0, batch.r);
+    ASSERT_EQ(0, batch.burst_weight);
 
     prev_pos = pos;
     pos += window_interval * 1.414;
@@ -138,7 +136,7 @@ TEST(aggregator, lazy_flushing) {
 
   {
     double pos = pos0;
-    for (int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n; ++i) {
       burst_result result = results.get_result_at(pos);
       batch_result batch = result.get_batch_at(pos);
       ASSERT_EQ(1, batch.d);
@@ -157,7 +155,7 @@ TEST(aggregator, lazy_flushing_overflow) {
   const double batch_interval = 1.618;
   const double window_interval = batch_size * batch_interval;
 
-  aggregator tested(batch_size, batch_interval, k);
+  aggregator tested(batch_size, batch_interval, k+1);
   result_storage results(k);
 
   const double pos0 = (batch_size/2 + 0.5) * batch_interval;
@@ -176,9 +174,9 @@ TEST(aggregator, lazy_flushing_overflow) {
 
   {
     double pos = pos0;
-    for (int i = 0; i < n-1; ++i) {
+    for (int i = 0; i < n; ++i) {
       burst_result result = results.get_result_at(pos);
-      if (i < n-k-1) {
+      if (i < n-k) {
         ASSERT_FALSE(result.is_valid());
       } else {
         batch_result batch = result.get_batch_at(pos);

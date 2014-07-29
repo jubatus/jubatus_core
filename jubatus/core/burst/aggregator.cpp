@@ -39,18 +39,20 @@ class aggregator::impl_ {
   bool add_document(int d, int r, double pos) {
     typedef std::deque<input_window>::iterator iterator_t;
 
-    if (aggregating_.empty()) {
-      aggregating_.push_front(
+    if (inputs_.empty()) {
+      inputs_.push_front(
           make_new_window_(pos, input_window(0, batch_interval_, 0)));
-    } else if (aggregating_[0].get_end_pos() <= pos) {
-      input_window new_window = make_new_window_(pos, aggregating_[0]);
-      aggregating_.push_front(input_window());
-      aggregating_.front().swap(new_window);  // move semantics
-      move_aggregated_inputs_();
+    } else if (inputs_.front().get_end_pos() <= pos) {
+      input_window new_window = make_new_window_(pos, inputs_[0]);
+      inputs_.push_front(input_window());
+      inputs_.front().swap(new_window);  // move semantics
+      while (inputs_.size() > static_cast<size_t>(max_stored_)) {
+        inputs_.pop_back();
+      }
     }
 
     bool added = false;
-    for (iterator_t iter = aggregating_.begin(), end = aggregating_.end();
+    for (iterator_t iter = inputs_.begin(), end = inputs_.end();
          iter != end; ++iter) {
       if (iter->add_document(d, r, pos)) {
         added = true;
@@ -66,16 +68,16 @@ class aggregator::impl_ {
                     double costcut_threshold,
                     int max_reuse_batches,
                     result_storage& stored) {
-    const int n = aggregated_.size();
-
-    if (n == 0) {
+    if (inputs_.empty()) {
       return 0;
     }
 
-    typedef std::deque<input_window>::iterator iterator_t;
+    burst_result prev = stored.get_result_at(
+        inputs_.back().get_start_pos() - batch_interval_/2);
 
-    burst_result prev = stored.get_latest_result();
-    for (iterator_t iter = aggregated_.begin(), end = aggregated_.end();
+    typedef std::deque<input_window>::reverse_iterator iterator_t;
+
+    for (iterator_t iter = inputs_.rbegin(), end = inputs_.rend();
          iter != end; ++iter) {
       burst_result r(*iter, scaling_param, gamma, costcut_threshold,
                      prev, max_reuse_batches);
@@ -83,14 +85,26 @@ class aggregator::impl_ {
       prev.swap(r);  // more efficient than prev = r; use move when C++11/14
     }
 
-    // clear aggregated
-    std::deque<input_window>().swap(aggregated_);
+    // erase inputs which will no longer be modified by add_document
+    int n = 0;
+    for (;;) {
+      JUBATUS_ASSERT_GT(inputs_.size(), 0, "");
 
+      std::pair<int, int> intersection =
+          get_intersection(inputs_.back(), inputs_.front());
+      if (intersection.first != intersection.second) {
+        break;  // break if intersection exists
+      }
+
+      inputs_.pop_back();
+      ++n;
+    }
+    // return erased count
     return n;
   }
 
  private:
-  std::deque<input_window> aggregating_, aggregated_;
+  std::deque<input_window> inputs_;
   int window_batch_size_;
   double batch_interval_;
   int max_stored_;
@@ -115,25 +129,6 @@ class aggregator::impl_ {
     }
 
     return new_window;  // NRVO
-  }
-
-  void move_aggregated_inputs_() {
-    for (;;) {
-      std::pair<int, int> intersection =
-          get_intersection(aggregating_.back(), aggregating_.front());
-      if (intersection.first != intersection.second) {
-        break;
-      }
-      JUBATUS_ASSERT_GT(aggregating_.size(), 1, "");
-
-      aggregated_.push_back(input_window());
-      aggregated_.back().swap(aggregating_.back());  // move semantics
-      aggregating_.pop_back();
-
-      while (aggregated_.size() > static_cast<size_t>(max_stored_)) {
-        aggregated_.pop_front();
-      }
-    }
   }
 };
 
