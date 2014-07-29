@@ -32,6 +32,7 @@ class burst : public driver_base {
   typedef jubatus::core::burst::burst model_t;
   typedef model_t::result_t result_t;
   typedef model_t::result_map result_map;
+  typedef jubatus::core::burst::keyword_params keyword_params;
   typedef model_t::keyword_list keyword_list;
 
   explicit burst(jubatus::util::lang::shared_ptr<model_t> model) {
@@ -46,17 +47,19 @@ class burst : public driver_base {
     return burst_.get();
   }
 
-  bool add_keyword(
-      const std::string& keyword, double scaling_param, double gamma);
+  bool add_keyword(const std::string& keyword,
+                   const keyword_params& params,
+                   bool processed_in_this_server);
   bool remove_keyword(const std::string& keyword);
   bool remove_all_keywords();
   keyword_list get_all_keywords() const;
 
   bool add_document(const std::string& str, double pos);
-  result_t get_result(const std::string& keyword);
-  result_t get_result_at(const std::string& keyword, double pos);
-  result_map get_all_bursted_results();
-  result_map get_all_bursted_results_at(double pos);
+  void calculate_results();
+  result_t get_result(const std::string& keyword) const;
+  result_t get_result_at(const std::string& keyword, double pos) const;
+  result_map get_all_bursted_results() const;
+  result_map get_all_bursted_results_at(double pos) const;
 
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);

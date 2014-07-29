@@ -37,6 +37,11 @@ struct burst_options {
   double costcut_threshold;
 };
 
+struct keyword_params {
+  double scaling_param;
+  double gamma;
+};
+
 struct keyword_with_params {
   std::string keyword;
   double scaling_param;
@@ -52,18 +57,21 @@ class burst {
   explicit burst(const burst_options& options);
   ~burst();
 
-  bool add_keyword(
-      const std::string& keyword, double scaling_param, double gamma);
+  bool add_keyword(const std::string& keyword,
+                   const keyword_params& params,
+                   bool processed_in_this_server);
   bool remove_keyword(const std::string& keyword);
   bool remove_all_keywords();
   keyword_list get_all_keywords() const;
 
   bool add_document(const std::string& str, double pos);
 
-  result_t get_result(const std::string& keyword);
-  result_t get_result_at(const std::string& keyword, double pos);
-  result_map get_all_bursted_results();
-  result_map get_all_bursted_results_at(double pos);
+  void calculate_results();
+
+  result_t get_result(const std::string& keyword) const;
+  result_t get_result_at(const std::string& keyword, double pos) const;
+  result_map get_all_bursted_results() const;
+  result_map get_all_bursted_results_at(double pos) const;
 
   class diff_t {
     friend class burst;
