@@ -48,7 +48,7 @@ class result_storage::impl_ {
         } else if (iter->has_same_start_pos(result)) {
           JUBATUS_ASSERT_EQ(
               iter->get_batch_size(), result.get_batch_size(), "");
-          JUBATUS_ASSERT(iter->has_same_batch_length(result));
+          JUBATUS_ASSERT(iter->has_same_batch_interval(result));
           *iter = result;  // update with new result
           break;
         }

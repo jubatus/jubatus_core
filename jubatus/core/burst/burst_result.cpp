@@ -99,11 +99,11 @@ bool burst_result::contains(double pos) const {
 int burst_result::get_batch_size() const {
   return p_ ? p_->get_batch_size() : 0;
 }
-double burst_result::get_batch_length() const {
-  return p_ ? p_->get_batch_length() : 0;
+double burst_result::get_batch_interval() const {
+  return p_ ? p_->get_batch_interval() : 0;
 }
-double burst_result::get_all_length() const {
-  return p_ ? p_->get_all_length() : 0;
+double burst_result::get_all_interval() const {
+  return p_ ? p_->get_all_interval() : 0;
 }
 
 bool burst_result::is_older_than(const burst_result& x) const {
@@ -112,7 +112,7 @@ bool burst_result::is_older_than(const burst_result& x) const {
   }
   double pos1 = p_->get_start_pos(), pos2 = x.p_->get_start_pos();
   if (pos1 < pos2) {
-    return !window_position_near(pos1, pos2, p_->get_batch_length());
+    return !window_position_near(pos1, pos2, p_->get_batch_interval());
   } else {
     return false;
   }
@@ -123,7 +123,7 @@ bool burst_result::is_newer_than(const burst_result& x) const {
   }
   double pos1 = p_->get_start_pos(), pos2 = x.p_->get_start_pos();
   if (pos1 > pos2) {
-    return !window_position_near(pos1, pos2, p_->get_batch_length());
+    return !window_position_near(pos1, pos2, p_->get_batch_interval());
   } else {
     return false;
   }
@@ -133,15 +133,15 @@ bool burst_result::has_same_start_pos(const burst_result& x) const {
     return false;
   }
   double pos0 = p_->get_start_pos(), pos1 = x.p_->get_start_pos();
-  return window_position_near(pos0, pos1, p_->get_batch_length());
+  return window_position_near(pos0, pos1, p_->get_batch_interval());
 }
 
-bool burst_result::has_same_batch_length(const burst_result& x) const {
+bool burst_result::has_same_batch_interval(const burst_result& x) const {
   if (!p_ || !x.p_) {
     return false;
   }
-  double length1 = x.p_->get_batch_length();
-  return intersection_helper(*p_).has_batch_length_equals_to(length1);
+  double interval_x = x.p_->get_batch_interval();
+  return intersection_helper(*p_).has_batch_interval_equals_to(interval_x);
 }
 
 const std::vector<batch_result> empty_batch_results;

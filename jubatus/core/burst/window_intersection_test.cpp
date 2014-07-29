@@ -37,22 +37,22 @@ namespace burst {
                 << "; actual: " << actual;
   }
 }
-::testing::AssertionResult check_batch_length(
-    double len, const intersection_helper& w) {
-  if (w.has_batch_length_equals_to(len)) {
-    return ::testing::AssertionSuccess() << "expected: " << len;
+::testing::AssertionResult check_batch_interval(
+    double interval, const intersection_helper& w) {
+  if (w.has_batch_interval_equals_to(interval)) {
+    return ::testing::AssertionSuccess() << "expected: " << interval;
   } else {
-    return ::testing::AssertionFailure() << "expected: " << len;
+    return ::testing::AssertionFailure() << "expected: " << interval;
   }
 }
 
 struct window_intersection_test_params {
   double start_pos;
-  double batch_length;
+  double batch_interval;
   int n;
 
-  window_intersection_test_params(double start_pos_, double len_, int n_)
-      : start_pos(start_pos_), batch_length(len_), n(n_) {
+  window_intersection_test_params(double start_pos_, double interval_, int n_)
+      : start_pos(start_pos_), batch_interval(interval_), n(n_) {
   }
 };
 
@@ -64,8 +64,8 @@ class window_intersection_test
   void SetUp() {
     start_pos = GetParam().start_pos;
     n = GetParam().n;
-    batch_length = GetParam().batch_length;
-    w0 = sample_window(start_pos, batch_length, n);
+    batch_interval = GetParam().batch_interval;
+    w0 = sample_window(start_pos, batch_interval, n);
     tested = intersection_helper(w0);
   }
 
@@ -73,11 +73,11 @@ class window_intersection_test
   intersection_helper tested;
   double start_pos;
   int n;
-  double batch_length;
+  double batch_interval;
 };
 
 TEST_P(window_intersection_test, get_index_for_boundary) {
-  double eps = batch_length * 0.01 / 2;
+  double eps = batch_interval * 0.01 / 2;
 
   #define CHECK_INDEX_FOR_BOUNDARY(expected, pos)                         \
     do {                                                                  \
@@ -93,23 +93,23 @@ TEST_P(window_intersection_test, get_index_for_boundary) {
   // CHECK_INDEX_FOR_BOUNDARY
 
     for (int i = -5; i <= n+5; ++i) {
-      double pos = start_pos + i * batch_length;
+      double pos = start_pos + i * batch_interval;
       CHECK_INDEX_FOR_BOUNDARY(i, pos);
-      CHECK_INDEX_FOR_BOUNDARY(tested.no_index(), pos + batch_length / 2);
+      CHECK_INDEX_FOR_BOUNDARY(tested.no_index(), pos + batch_interval / 2);
     }
 
   #undef CHECK_INDEX_FOR_BOUNDARY
 }
 
-TEST_P(window_intersection_test, has_batch_length_equals_to) {
-  double eps = batch_length * 0.01 / 2;
+TEST_P(window_intersection_test, has_batch_interval_equals_to) {
+  double eps = batch_interval * 0.01 / 2;
   double eps_n = eps / (n > 0 ? n : 1);
 
-  ASSERT_TRUE(check_batch_length(batch_length, tested));
-  ASSERT_TRUE(check_batch_length(batch_length - eps_n, tested));
-  ASSERT_TRUE(check_batch_length(batch_length + eps_n, tested));
-  ASSERT_FALSE(check_batch_length(batch_length - 10*eps_n, tested));
-  ASSERT_FALSE(check_batch_length(batch_length + 10*eps_n, tested));
+  ASSERT_TRUE(check_batch_interval(batch_interval, tested));
+  ASSERT_TRUE(check_batch_interval(batch_interval - eps_n, tested));
+  ASSERT_TRUE(check_batch_interval(batch_interval + eps_n, tested));
+  ASSERT_FALSE(check_batch_interval(batch_interval - 10*eps_n, tested));
+  ASSERT_FALSE(check_batch_interval(batch_interval + 10*eps_n, tested));
 }
 
 TEST_P(window_intersection_test, intersect_to_empty_window) {
@@ -119,49 +119,49 @@ TEST_P(window_intersection_test, intersect_to_empty_window) {
 }
 
 TEST_P(window_intersection_test, intersect_to_totally_left1) {
-  sample_window w(start_pos - batch_length*2, batch_length, 1);
+  sample_window w(start_pos - batch_interval*2, batch_interval, 1);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(0, intersection.first);
   ASSERT_EQ(0, intersection.second);
 }
 
 TEST_P(window_intersection_test, intersect_to_totally_left2) {
-  sample_window w(start_pos - batch_length*1.5, batch_length, 1);
+  sample_window w(start_pos - batch_interval*1.5, batch_interval, 1);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(tested.no_index(), intersection.first);
   ASSERT_EQ(tested.no_index(), intersection.second);
 }
 
 TEST_P(window_intersection_test, intersect_to_partially_left0) {
-  sample_window w(start_pos - batch_length*2, batch_length, 2);
+  sample_window w(start_pos - batch_interval*2, batch_interval, 2);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(0, intersection.first);
   ASSERT_EQ(0, intersection.second);
 }
 
 TEST_P(window_intersection_test, intersect_to_partially_left1) {
-  sample_window w(start_pos - batch_length*1, batch_length, 4);
+  sample_window w(start_pos - batch_interval*1, batch_interval, 4);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(0, intersection.first);
   ASSERT_EQ(std::min(n, 3), intersection.second);
 }
 
 TEST_P(window_intersection_test, intersect_to_partially_left2) {
-  sample_window w(start_pos - batch_length*0.5, batch_length, 4);
+  sample_window w(start_pos - batch_interval*0.5, batch_interval, 4);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(tested.no_index(), intersection.first);
   ASSERT_EQ(tested.no_index(), intersection.second);
 }
 
 TEST_P(window_intersection_test, intersect_to_overlap0) {
-  sample_window w(start_pos, batch_length, n);
+  sample_window w(start_pos, batch_interval, n);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(0, intersection.first);
   ASSERT_EQ(n, intersection.second);
 }
 
 TEST_P(window_intersection_test, intersect_to_overlap1) {
-  sample_window w(start_pos-batch_length, batch_length, n+2);
+  sample_window w(start_pos-batch_interval, batch_interval, n+2);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(0, intersection.first);
   ASSERT_EQ(n, intersection.second);
@@ -171,7 +171,7 @@ TEST_P(window_intersection_test, intersect_to_overlap2) {
   int i = std::min(2, n);
   int j = std::max(i, n-1);
   ASSERT_LE(i, j);
-  sample_window w(start_pos+batch_length*i, batch_length, j-i);
+  sample_window w(start_pos+batch_interval*i, batch_interval, j-i);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(i, intersection.first);
   ASSERT_EQ(j, intersection.second);
@@ -181,7 +181,7 @@ TEST_P(window_intersection_test, intersect_to_overlap3) {
   int i = std::min(2, n);
   int j = std::max(i, n-1);
   ASSERT_LE(i, j);
-  sample_window w(start_pos+batch_length*(i-0.5), batch_length, j-i);
+  sample_window w(start_pos+batch_interval*(i-0.5), batch_interval, j-i);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(tested.no_index(), intersection.first);
   ASSERT_EQ(tested.no_index(), intersection.second);
@@ -189,7 +189,7 @@ TEST_P(window_intersection_test, intersect_to_overlap3) {
 
 TEST_P(window_intersection_test, intersect_to_partially_right0) {
   double end_pos = w0.get_end_pos();
-  sample_window w(end_pos, batch_length, 2);
+  sample_window w(end_pos, batch_interval, 2);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(n, intersection.first);
   ASSERT_EQ(n, intersection.second);
@@ -197,7 +197,7 @@ TEST_P(window_intersection_test, intersect_to_partially_right0) {
 
 TEST_P(window_intersection_test, intersect_to_partially_right1) {
   double end_pos = w0.get_end_pos();
-  sample_window w(end_pos - batch_length*1, batch_length, 4);
+  sample_window w(end_pos - batch_interval*1, batch_interval, 4);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(std::max(0, n-1), intersection.first);
   ASSERT_EQ(n, intersection.second);
@@ -205,7 +205,7 @@ TEST_P(window_intersection_test, intersect_to_partially_right1) {
 
 TEST_P(window_intersection_test, intersect_to_partially_right2) {
   double end_pos = w0.get_end_pos();
-  sample_window w(end_pos - batch_length*0.5, batch_length, 4);
+  sample_window w(end_pos - batch_interval*0.5, batch_interval, 4);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(tested.no_index(), intersection.first);
   ASSERT_EQ(tested.no_index(), intersection.second);
@@ -213,7 +213,7 @@ TEST_P(window_intersection_test, intersect_to_partially_right2) {
 
 TEST_P(window_intersection_test, intersect_to_totally_right1) {
   double end_pos = w0.get_end_pos();
-  sample_window w(end_pos + batch_length*2, batch_length, 1);
+  sample_window w(end_pos + batch_interval*2, batch_interval, 1);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(n, intersection.first);
   ASSERT_EQ(n, intersection.second);
@@ -221,7 +221,7 @@ TEST_P(window_intersection_test, intersect_to_totally_right1) {
 
 TEST_P(window_intersection_test, intersect_to_totally_right2) {
   double end_pos = w0.get_end_pos();
-  sample_window w(end_pos + batch_length*1.5, batch_length, 1);
+  sample_window w(end_pos + batch_interval*1.5, batch_interval, 1);
   std::pair<int, int> intersection = get_intersection(w0, w);
   ASSERT_EQ(tested.no_index(), intersection.first);
   ASSERT_EQ(tested.no_index(), intersection.second);

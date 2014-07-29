@@ -60,8 +60,8 @@ class burst_result {
   bool contains(double pos) const;
 
   int get_batch_size() const;
-  double get_batch_length() const;
-  double get_all_length() const;
+  double get_batch_interval() const;
+  double get_all_interval() const;
 
   // comparing start_pos
   // floating number error is considered
@@ -69,8 +69,8 @@ class burst_result {
   bool is_newer_than(const burst_result& x) const;
   bool has_same_start_pos(const burst_result& x) const;
 
-  // compares batch_length; floating number error is allowed
-  bool has_same_batch_length(const burst_result& x) const;
+  // compares batch_interval; floating number error is allowed
+  bool has_same_batch_interval(const burst_result& x) const;
 
   const std::vector<batch_result>& get_batches() const;
 

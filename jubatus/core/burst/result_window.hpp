@@ -29,14 +29,14 @@ class result_window : private basic_window<batch_result> {
   typedef basic_window<batch_result> base_;
 
  public:
-  explicit result_window(double start_pos = 0, double batch_length = 1)
-      : base_(start_pos, batch_length, 0) {
+  explicit result_window(double start_pos = 0, double batch_interval = 1)
+      : base_(start_pos, batch_interval, 0) {
   }
 
   result_window(const input_window& input,
                 const std::vector<double>& burst_weights)
       : base_(input.get_start_pos(),
-              input.get_batch_length(),
+              input.get_batch_interval(),
               input.get_batch_size()) {
     size_t n = input.get_batch_size();
 
@@ -56,11 +56,11 @@ class result_window : private basic_window<batch_result> {
   using base_::get_start_pos;
   using base_::get_end_pos;
   using base_::contains;
-  using base_::get_all_length;
+  using base_::get_all_interval;
 
   using base_::get_batches;
   using base_::get_batch_size;
-  using base_::get_batch_length;
+  using base_::get_batch_interval;
 };
 
 }  // namespace burst

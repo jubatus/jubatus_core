@@ -33,24 +33,24 @@ namespace core {
 namespace burst {
 
 inline bool window_position_near(
-    double pos0, double pos1, double batch_length) {
-  return std::abs(pos1 - pos0) / batch_length < 0.01;
+    double pos0, double pos1, double batch_interval) {
+  return std::abs(pos1 - pos0) / batch_interval < 0.01;
 }
 
 class intersection_helper {
  public:
   explicit intersection_helper(double start_pos = 0,
-                               double batch_length = 1,
+                               double batch_interval = 1,
                                int batch_size = 0)
       : start_pos_(start_pos),
-        batch_length_(batch_length),
+        batch_interval_(batch_interval),
         batch_size_(batch_size) {
   }
 
   template<class Window>
   explicit intersection_helper(const Window& w)
       : start_pos_(w.get_start_pos()),
-        batch_length_(w.get_batch_length()),
+        batch_interval_(w.get_batch_interval()),
         batch_size_(w.get_batch_size()) {
   }
 
@@ -61,7 +61,7 @@ class intersection_helper {
 
     if (begin == no_index() ||
         end == no_index() ||
-        !has_batch_length_equals_to(w.get_batch_length())) {
+        !has_batch_interval_equals_to(w.get_batch_interval())) {
       // nonsense data is given (should throw an exception?)
       return std::make_pair(no_index(), no_index());
     }
@@ -71,8 +71,8 @@ class intersection_helper {
   }
 
   int get_index_for_boundary(double boundary_pos) const {
-    int candidate = get_index_(boundary_pos + batch_length_/2);
-    double candidate_pos = start_pos_ + candidate * batch_length_;
+    int candidate = get_index_(boundary_pos + batch_interval_/2);
+    double candidate_pos = start_pos_ + candidate * batch_interval_;
     if (!position_near(boundary_pos, candidate_pos)) {
       return no_index();
     }
@@ -85,12 +85,13 @@ class intersection_helper {
   }
 
   bool position_near(double pos0, double pos1) const {
-    return window_position_near(pos0, pos1, batch_length_);
+    return window_position_near(pos0, pos1, batch_interval_);
   }
 
-  bool has_batch_length_equals_to(double length1) const {
+  bool has_batch_interval_equals_to(double interval1) const {
+    // comparing end_pos
     size_t n = (std::max)(batch_size_, 1);
-    return position_near(n * length1, n * batch_length_);  // comparing end_pos
+    return position_near(n * interval1, n * batch_interval_);
   }
 
   int adjust_index(int index) const {
@@ -104,12 +105,12 @@ class intersection_helper {
   }
 
   int get_index_(double pos) const {
-    return static_cast<int>(std::floor((pos - start_pos_) / batch_length_));
+    return static_cast<int>(std::floor((pos - start_pos_) / batch_interval_));
   }
 
  private:
   double start_pos_;
-  double batch_length_;
+  double batch_interval_;
   int batch_size_;
 };
 

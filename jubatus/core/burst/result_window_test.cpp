@@ -30,19 +30,19 @@ TEST(default_constructed, result_window) {
 
   ASSERT_DOUBLE_EQ(0, w.get_start_pos());
   ASSERT_DOUBLE_EQ(0, w.get_end_pos());
-  ASSERT_DOUBLE_EQ(0, w.get_all_length());
+  ASSERT_DOUBLE_EQ(0, w.get_all_interval());
   ASSERT_EQ(0, w.get_batch_size());
-  ASSERT_LT(0, w.get_batch_length());
+  ASSERT_LT(0, w.get_batch_interval());
   ASSERT_EQ(0u, w.get_batches().size());
 }
 
 struct result_window_test_params {
   double start_pos;
-  double batch_length;
+  double batch_interval;
   int n;
 
-  result_window_test_params(double start_pos_, double len_, int n_)
-      : start_pos(start_pos_), batch_length(len_), n(n_) {
+  result_window_test_params(double start_pos_, double interval_, int n_)
+      : start_pos(start_pos_), batch_interval(interval_), n(n_) {
   }
 };
 
@@ -52,9 +52,9 @@ class result_window_test
   void SetUp() {
     start_pos = GetParam().start_pos;
     n = GetParam().n;
-    batch_length = GetParam().batch_length;
+    batch_interval = GetParam().batch_interval;
 
-    input = input_window(start_pos, batch_length, n);
+    input = input_window(start_pos, batch_interval, n);
     weights.resize(n);
 
     // TODO(gintenlabo): fill input and weights randomly
@@ -67,15 +67,15 @@ class result_window_test
   result_window tested;
   double start_pos;
   int n;
-  double batch_length;
+  double batch_interval;
 };
 
 TEST_P(result_window_test, basics) {
   ASSERT_DOUBLE_EQ(start_pos, tested.get_start_pos());
-  ASSERT_DOUBLE_EQ(start_pos + n*batch_length, tested.get_end_pos());
-  ASSERT_DOUBLE_EQ(n*batch_length, tested.get_all_length());
+  ASSERT_DOUBLE_EQ(start_pos + n*batch_interval, tested.get_end_pos());
+  ASSERT_DOUBLE_EQ(n*batch_interval, tested.get_all_interval());
   ASSERT_EQ(n, tested.get_batch_size());
-  ASSERT_EQ(batch_length, tested.get_batch_length());
+  ASSERT_EQ(batch_interval, tested.get_batch_interval());
 
   std::vector<batch_input> const& inputs = input.get_batches();
   std::vector<batch_result> const& results = tested.get_batches();

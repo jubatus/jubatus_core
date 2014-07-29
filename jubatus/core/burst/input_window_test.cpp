@@ -35,9 +35,9 @@ TEST(construct, input_window) {
   input_window w(1, 2, 5);
   ASSERT_DOUBLE_EQ(1, w.get_start_pos());
   ASSERT_DOUBLE_EQ(11, w.get_end_pos());
-  ASSERT_DOUBLE_EQ(10, w.get_all_length());
+  ASSERT_DOUBLE_EQ(10, w.get_all_interval());
   ASSERT_EQ(5, w.get_batch_size());
-  ASSERT_DOUBLE_EQ(2, w.get_batch_length());
+  ASSERT_DOUBLE_EQ(2, w.get_batch_interval());
 
   ASSERT_TRUE(w.contains(1));
   ASSERT_TRUE(w.contains(5));
@@ -50,9 +50,9 @@ TEST(default_constructed, input_window) {
 
   ASSERT_DOUBLE_EQ(0, w.get_start_pos());
   ASSERT_DOUBLE_EQ(0, w.get_end_pos());
-  ASSERT_DOUBLE_EQ(0, w.get_all_length());
+  ASSERT_DOUBLE_EQ(0, w.get_all_interval());
   ASSERT_EQ(0, w.get_batch_size());
-  ASSERT_LT(0, w.get_batch_length());
+  ASSERT_LT(0, w.get_batch_interval());
 
   ASSERT_FALSE(w.add_document(1, 1, 1));  // fails anywhere
 }

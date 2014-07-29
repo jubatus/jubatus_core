@@ -41,7 +41,7 @@ TEST(burst_result, default_ctor) {
 
   EXPECT_EQ(burst_result::invalid_pos, r.get_start_pos());
   EXPECT_EQ(burst_result::invalid_pos, r.get_end_pos());
-  EXPECT_EQ(0, r.get_all_length());
+  EXPECT_EQ(0, r.get_all_interval());
   EXPECT_EQ(0, r.get_batch_size());
   EXPECT_EQ(0u, r.get_batches().size());
   EXPECT_FALSE(r.is_bursted_at_latest_batch());
@@ -49,13 +49,13 @@ TEST(burst_result, default_ctor) {
 
 TEST(burst_result, simple) {
   const double start_pos = 1;
-  const double batch_length = 1;
+  const double batch_interval = 1;
   const int n = 5;
 
-  input_window input(start_pos, batch_length, n);
+  input_window input(start_pos, batch_interval, n);
 
   for (int i = 0; i < n; ++i) {
-    double pos = start_pos + (i + 0.5) * batch_length;
+    double pos = start_pos + (i + 0.5) * batch_interval;
     if (i == 0 || i == 4) {
       input.add_document(10, 10, pos);
     } else {
@@ -76,7 +76,7 @@ TEST(burst_result, simple) {
 
   // check is_bursted_at
   for (int i = 0; i < n; ++i) {
-    double pos = start_pos + (i + 0.5) * batch_length;
+    double pos = start_pos + (i + 0.5) * batch_interval;
     if (i == 0 || i == 4) {
       EXPECT_TRUE(r.is_bursted_at(pos));
     } else {
@@ -88,13 +88,13 @@ TEST(burst_result, simple) {
 
 TEST(burst_result, reuse) {
   const double start_pos = 1;
-  const double batch_length = 1;
+  const double batch_interval = 1;
   const int n = 5;
 
-  input_window input(start_pos, batch_length, n);
+  input_window input(start_pos, batch_interval, n);
 
   for (int i = 0; i < n; ++i) {
-    double pos = start_pos + (i + 0.5) * batch_length;
+    double pos = start_pos + (i + 0.5) * batch_interval;
     if (i == 0 || i == 4) {
       input.add_document(10, 10, pos);
     } else {
@@ -102,7 +102,7 @@ TEST(burst_result, reuse) {
     }
   }
 
-  input_window prev_input(start_pos - batch_length*3, batch_length, 5);
+  input_window prev_input(start_pos - batch_interval*3, batch_interval, 5);
   burst_result prev_result =
       make_result_with_default_params(prev_input, burst_result(), 0);
 
@@ -178,24 +178,24 @@ TEST(burst_result, has_same_start_pos) {
   EXPECT_TRUE(r2.has_same_start_pos(r2));
 }
 
-TEST(burst_result, has_same_batch_length) {
+TEST(burst_result, has_same_batch_interval) {
   burst_result r0, r1(result_window(1, 1)), r2(result_window(1, 2));
   burst_result r1_(result_window(2, 1.0001));
 
   // expected behavior
-  EXPECT_FALSE(r2.has_same_batch_length(r1));
-  EXPECT_FALSE(r1.has_same_batch_length(r2));
-  EXPECT_TRUE(r1.has_same_batch_length(r1_));
-  EXPECT_TRUE(r1_.has_same_batch_length(r1));
+  EXPECT_FALSE(r2.has_same_batch_interval(r1));
+  EXPECT_FALSE(r1.has_same_batch_interval(r2));
+  EXPECT_TRUE(r1.has_same_batch_interval(r1_));
+  EXPECT_TRUE(r1_.has_same_batch_interval(r1));
 
   // always false when rhs and/or lhs is default constructed
-  EXPECT_FALSE(r0.has_same_batch_length(r0));
-  EXPECT_FALSE(r0.has_same_batch_length(r1));
-  EXPECT_FALSE(r2.has_same_batch_length(r0));
+  EXPECT_FALSE(r0.has_same_batch_interval(r0));
+  EXPECT_FALSE(r0.has_same_batch_interval(r1));
+  EXPECT_FALSE(r2.has_same_batch_interval(r0));
 
   // reflexive
-  EXPECT_TRUE(r1.has_same_batch_length(r1));
-  EXPECT_TRUE(r2.has_same_batch_length(r2));
+  EXPECT_TRUE(r1.has_same_batch_interval(r1));
+  EXPECT_TRUE(r2.has_same_batch_interval(r2));
 }
 
 }  // namespace burst

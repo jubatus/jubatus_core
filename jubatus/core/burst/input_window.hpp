@@ -36,19 +36,19 @@ class basic_window {
  public:
   typedef Batch batch_type;
 
-  explicit basic_window(double batch_length = 1)
-      : batches_(), start_pos_(0), batch_length_(batch_length) {
-    if (batch_length <= 0) {
+  explicit basic_window(double batch_interval = 1)
+      : batches_(), start_pos_(0), batch_interval_(batch_interval) {
+    if (batch_interval <= 0) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
-          "window: batch_length should be > 0"));
+          "window: batch_interval should be > 0"));
     }
   }
 
-  basic_window(double start_pos, double batch_length, int32_t batch_size)
-      : batches_(), start_pos_(start_pos), batch_length_(batch_length) {
-    if (batch_length <= 0) {
+  basic_window(double start_pos, double batch_interval, int32_t batch_size)
+      : batches_(), start_pos_(start_pos), batch_interval_(batch_interval) {
+    if (batch_interval <= 0) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
-          "window: batch_length should be > 0"));
+          "window: batch_interval should be > 0"));
     }
     if (batch_size < 0) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
@@ -75,20 +75,20 @@ class basic_window {
     return start_pos_;
   }
   double get_end_pos() const {
-    return start_pos_ + get_all_length();
+    return start_pos_ + get_all_interval();
   }
   bool contains(double pos) const {
     return get_start_pos() <= pos && pos < get_end_pos();
   }
-  double get_all_length() const {
-    return batch_length_ * get_batch_size();
+  double get_all_interval() const {
+    return batch_interval_ * get_batch_size();
   }
 
   int32_t get_batch_size() const {
     return batches_.size();
   }
-  double get_batch_length() const {
-    return batch_length_;
+  double get_batch_interval() const {
+    return batch_interval_;
   }
 
   const std::vector<batch_type>& get_batches() const {
@@ -106,7 +106,7 @@ class basic_window {
     using std::swap;
     swap(batches_, x.batches_);
     swap(start_pos_, x.start_pos_);
-    swap(batch_length_, x.batch_length_);
+    swap(batch_interval_, x.batch_interval_);
   }
   friend void swap(basic_window& x, basic_window& y) {
     x.swap(y);
@@ -115,12 +115,12 @@ class basic_window {
  protected:
   std::vector<batch_type> batches_;
   double start_pos_;
-  double batch_length_;
+  double batch_interval_;
 
   // get index for pos; no out of range, return as if extended
   int get_index_(double pos) const {
     return static_cast<int>(
-        std::floor((pos - start_pos_) / get_batch_length()));
+        std::floor((pos - start_pos_) / get_batch_interval()));
   }
 };
 
@@ -149,10 +149,10 @@ class input_window : private basic_window<batch_input> {
   using base_::get_start_pos;
   using base_::get_end_pos;
   using base_::contains;
-  using base_::get_all_length;
+  using base_::get_all_interval;
 
   using base_::get_batch_size;
-  using base_::get_batch_length;
+  using base_::get_batch_interval;
   using base_::get_batches;
   using base_::get_batch_by_index;
 
