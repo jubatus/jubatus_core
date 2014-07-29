@@ -57,6 +57,33 @@ TEST(result_storage, general) {
       storage.get_result_at(batch_length/2).get_start_pos());
 }
 
+TEST(result_storage, unsequenced) {
+  const int n = 5;
+  const double batch_length = 1;
+
+  result_storage storage(n);
+
+  storage.store(make_result(0, batch_length, 10));
+  storage.store(make_result(1, batch_length, 10));
+  storage.store(make_result(2, batch_length, 10));
+  storage.store(make_result(3, batch_length, 10));
+  storage.store(make_result(2, batch_length, 10));
+  storage.store(make_result(3, batch_length, 10));
+  storage.store(make_result(4, batch_length, 10));
+  storage.store(make_result(3, batch_length, 10));
+  storage.store(make_result(2, batch_length, 10));
+  storage.store(make_result(1, batch_length, 10));
+
+  // first stored result should not be erased
+  ASSERT_DOUBLE_EQ(0, storage.get_result_at(0.5).get_start_pos());
+
+  // sequenced
+  ASSERT_DOUBLE_EQ(1, storage.get_result_at(1.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(2, storage.get_result_at(2.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(3, storage.get_result_at(3.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(4, storage.get_result_at(4.5).get_start_pos());
+}
+
 }  // namespace burst
 }  // namespace core
 }  // namespace jubatus

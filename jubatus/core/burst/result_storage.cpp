@@ -36,7 +36,25 @@ class result_storage::impl_ {
   }
 
   void store(const result_t& result) {
-    results_.push_front(result);
+    if (results_.empty()) {
+      results_.push_front(result);
+    } else {
+      typedef results_t::iterator iterator_t;
+      for (iterator_t iter = results_.begin(), end = results_.end();
+          iter != end; ++iter) {
+        if (iter->is_older_than(result)) {
+          results_.insert(iter, result);
+          break;
+        } else if (iter->has_same_start_pos(result)) {
+          JUBATUS_ASSERT_EQ(
+              iter->get_batch_size(), result.get_batch_size(), "");
+          JUBATUS_ASSERT(iter->has_same_batch_length(result));
+          *iter = result;  // update with new result
+          break;
+        }
+      }
+    }
+
     while (results_.size() > results_max_) {
       results_.pop_back();
     }
