@@ -82,7 +82,7 @@ class burst_result {
 
   void mix(const burst_result& w);
 
-  void msgpack_pack(framework::packer& packer);
+  void msgpack_pack(framework::packer& packer) const;
   void msgpack_unpack(msgpack::object o);
 
  private:
