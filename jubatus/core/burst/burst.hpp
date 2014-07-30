@@ -76,7 +76,7 @@ class burst {
   class diff_t {
     friend class burst;
     class impl_;
-    jubatus::util::lang::shared_ptr<impl_> p_;
+    jubatus::util::lang::shared_ptr<const impl_> p_;
    public:
     diff_t() {}
     void mix(const diff_t& mixed);

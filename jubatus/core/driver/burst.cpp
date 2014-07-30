@@ -68,6 +68,16 @@ burst::result_map burst::get_all_bursted_results_at(double pos) const {
   return burst_->get_all_bursted_results_at(pos);
 }
 
+void burst::pack(framework::packer& pk) const {
+  burst_->pack(pk);
+}
+void burst::unpack(msgpack::object o) {
+  burst_->unpack(o);
+}
+void burst::clear() {
+  burst_->clear();
+}
+
 }  // namespace driver
 }  // namespace core
 }  // namespace jubatus

@@ -32,6 +32,36 @@ namespace jubatus {
 namespace core {
 namespace burst {
 
+class burst::diff_t::impl_ {
+ public:
+  impl_() {
+  }
+
+  impl_(const impl_& x, const impl_& y) {
+    // do mix (unimplemented)
+    throw JUBATUS_EXCEPTION(common::unsupported_method(
+        "sorry, unimplemented: mixing burst"));
+  }
+
+  explicit impl_(msgpack::object o) {
+    // unpack (unimplemented)
+    throw JUBATUS_EXCEPTION(common::unsupported_method(
+        "sorry, unimplemented: mixing burst"));
+  }
+
+  void msgpack_pack(framework::packer& /*packer*/) const {
+    throw JUBATUS_EXCEPTION(common::unsupported_method(
+        "sorry, unimplemented: mixing burst"));
+  }
+  void msgpack_unpack(msgpack::object /*o*/) {
+    throw JUBATUS_EXCEPTION(common::unsupported_method(
+        "sorry, unimplemented: mixing burst"));
+  }
+
+ private:
+  // unimplemented
+};
+
 class burst::impl_ : jubatus::util::lang::noncopyable {
   class storage_ {
    public:
@@ -202,9 +232,29 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
     return results;
   }
 
+  void get_diff(diff_t& /*ret*/) const {
+    throw JUBATUS_EXCEPTION(common::unsupported_method(
+        "sorry, unimplemented: mixing burst"));
+  }
+  bool put_diff(const diff_t&) {
+    throw JUBATUS_EXCEPTION(common::unsupported_method(
+        "sorry, unimplemented: mixing burst"));
+  }
+
   void clear() {
     aggregators_t().swap(aggregators_);
     storages_t().swap(storages_);
+  }
+  storage::version get_version() const {
+    return storage::version();
+  }
+  void pack(framework::packer& /*packer*/) const {
+    throw JUBATUS_EXCEPTION(common::unsupported_method(
+        "sorry, unimplemented: packing burst"));
+  }
+  void unpack(msgpack::object /*o*/) {
+    throw JUBATUS_EXCEPTION(common::unsupported_method(
+        "sorry, unimplemented: unpacking burst"));
   }
 
  private:
@@ -276,6 +326,51 @@ burst::result_map burst::get_all_bursted_results() const {
 burst::result_map burst::get_all_bursted_results_at(double pos) const {
   JUBATUS_ASSERT(p_);
   return p_->get_all_bursted_results_at(pos);
+}
+
+void burst::diff_t::mix(const diff_t& mixed) {
+  if (!p_) {
+    p_ = mixed.p_;
+  } else if (!mixed.p_) {
+    // do nothing
+  } else {
+    p_.reset(new impl_(*p_, *mixed.p_));
+  }
+}
+void burst::diff_t::msgpack_pack(framework::packer& packer) const {
+  if (!p_) {
+    packer.pack_array(0);
+  } else {
+    p_->msgpack_pack(packer);
+  }
+}
+void burst::diff_t::msgpack_unpack(msgpack::object o) {
+  p_.reset(new impl_(o));
+}
+void burst::get_diff(diff_t& ret) const {
+  JUBATUS_ASSERT(p_);
+  p_->get_diff(ret);
+}
+bool burst::put_diff(const diff_t& diff) {
+  JUBATUS_ASSERT(p_);
+  return p_->put_diff(diff);
+}
+
+void burst::clear() {
+  JUBATUS_ASSERT(p_);
+  p_->clear();
+}
+storage::version burst::get_version() const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_version();
+}
+void burst::pack(framework::packer& packer) const {
+  JUBATUS_ASSERT(p_);
+  p_->pack(packer);
+}
+void burst::unpack(msgpack::object o) {
+  JUBATUS_ASSERT(p_);
+  p_->unpack(o);
 }
 
 }  // namespace burst
