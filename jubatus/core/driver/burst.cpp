@@ -33,6 +33,41 @@ void burst::init_(jubatus::util::lang::shared_ptr<model_t>& model) {
   register_mixable(&mixable_burst_);
 }
 
+bool burst::add_keyword(const std::string& keyword,
+                        const keyword_params& params,
+                        bool processed_in_this_server) {
+  return burst_->add_keyword(keyword, params, processed_in_this_server);
+}
+bool burst::remove_keyword(const std::string& keyword) {
+  return burst_->remove_keyword(keyword);
+}
+bool burst::remove_all_keywords() {
+  return burst_->remove_all_keywords();
+}
+burst::keyword_list burst::get_all_keywords() const {
+  return burst_->get_all_keywords();
+}
+
+bool burst::add_document(const std::string& str, double pos) {
+  return burst_->add_document(str, pos);
+}
+void burst::calculate_results() {
+  burst_->calculate_results();
+}
+burst::result_t burst::get_result(const std::string& keyword) const {
+  return burst_->get_result(keyword);
+}
+burst::result_t burst::get_result_at(
+    const std::string& keyword, double pos) const {
+  return burst_->get_result_at(keyword, pos);
+}
+burst::result_map burst::get_all_bursted_results() const {
+  return burst_->get_all_bursted_results();
+}
+burst::result_map burst::get_all_bursted_results_at(double pos) const {
+  return burst_->get_all_bursted_results_at(pos);
+}
+
 }  // namespace driver
 }  // namespace core
 }  // namespace jubatus
