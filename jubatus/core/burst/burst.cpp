@@ -160,6 +160,48 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
     }
   }
 
+  result_t get_result(const string& keyword) const {
+    const result_storage* s = get_storage_(keyword);
+    if (s == NULL) {
+      return result_t();
+    }
+    return s->get_latest_result();
+  }
+
+  result_t get_result_at(const string& keyword, double pos) const {
+    const result_storage* s = get_storage_(keyword);
+    if (s == NULL) {
+      return result_t();
+    }
+    return s->get_result_at(pos);
+  }
+
+  result_map get_all_bursted_results() const {
+    result_map results;
+    for (storages_t::const_iterator iter = storages_.begin();
+         iter != storages_.end(); ++iter) {
+      const result_storage& s = *iter->second.get_storage();
+      result_t result = s.get_latest_result();
+      if (result.is_bursted_at_latest_batch()) {
+        results.insert(std::make_pair(iter->first, result));
+      }
+    }
+    return results;
+  }
+
+  result_map get_all_bursted_results_at(double pos) const {
+    result_map results;
+    for (storages_t::const_iterator iter = storages_.begin();
+         iter != storages_.end(); ++iter) {
+      const result_storage& s = *iter->second.get_storage();
+      result_t result = s.get_result_at(pos);
+      if (result.is_bursted_at(pos)) {
+        results.insert(std::make_pair(iter->first, result));
+      }
+    }
+    return results;
+  }
+
   void clear() {
     aggregators_t().swap(aggregators_);
     storages_t().swap(storages_);
@@ -169,6 +211,14 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
   burst_options options_;
   aggregators_t aggregators_;
   storages_t storages_;
+
+  const result_storage* get_storage_(const string& keyword) const {
+    storages_t::const_iterator iter = storages_.find(keyword);
+    if (iter == storages_.end()) {
+      return NULL;
+    }
+    return iter->second.get_storage().get();
+  }
 };
 
 burst::burst(const burst_options& options)
@@ -208,6 +258,24 @@ bool burst::add_document(const string& str, double pos) {
 void burst::calculate_results() {
   JUBATUS_ASSERT(p_);
   p_->calculate_results();
+}
+
+burst::result_t burst::get_result(const std::string& keyword) const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_result(keyword);
+}
+burst::result_t burst::get_result_at(
+    const std::string& keyword, double pos) const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_result_at(keyword, pos);
+}
+burst::result_map burst::get_all_bursted_results() const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_all_bursted_results();
+}
+burst::result_map burst::get_all_bursted_results_at(double pos) const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_all_bursted_results_at(pos);
 }
 
 }  // namespace burst
