@@ -29,6 +29,7 @@ def build(bld):
 
   tests = [
       'aggregator_test.cpp',
+      'burst_test.cpp',
       'burst_result_test.cpp',
       'engine_test.cpp',
       'input_window_test.cpp',
