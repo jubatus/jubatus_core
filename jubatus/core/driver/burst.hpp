@@ -69,7 +69,7 @@ class burst : public driver_base {
   jubatus::util::lang::shared_ptr<model_t> burst_;
   core::burst::mixable_burst mixable_burst_;
 
-  void init_(jubatus::util::lang::shared_ptr<model_t> model);
+  void init_(jubatus::util::lang::shared_ptr<model_t>& model);
 };
 
 }  // namespace driver

@@ -25,7 +25,7 @@ namespace jubatus {
 namespace core {
 namespace driver {
 
-void burst::init_(jubatus::util::lang::shared_ptr<model_t> model) {
+void burst::init_(jubatus::util::lang::shared_ptr<model_t>& model) {
   burst_.swap(model);
   mixable_burst_.set_model(burst_);
   holder_ = mixable_holder();  // just to be safe
