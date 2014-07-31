@@ -22,6 +22,7 @@
 #include "jubatus/util/lang/scoped_ptr.h"
 
 #include "burst_result.hpp"
+#include "../framework/mixable_helper.hpp"
 
 namespace jubatus {
 namespace core {
@@ -42,6 +43,9 @@ class result_storage {
   typedef std::vector<result_t> diff_t;
   diff_t get_diff() const;
   void put_diff(const diff_t& diff);
+
+  void pack(framework::packer& packer) const;
+  void unpack(msgpack::object o);
 
  private:
   class impl_;

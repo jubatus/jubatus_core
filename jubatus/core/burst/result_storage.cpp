@@ -76,6 +76,8 @@ class result_storage::impl_ {
     }
     return result_t();
   }
+
+  MSGPACK_DEFINE(results_, results_max_);
 };
 
 result_storage::result_storage(int stored_results_max)
@@ -98,6 +100,16 @@ burst_result result_storage::get_latest_result() const {
 burst_result result_storage::get_result_at(double pos) const {
   JUBATUS_ASSERT(p_);
   return p_->get_result_at(pos);
+}
+
+void result_storage::pack(framework::packer& packer) const {
+  JUBATUS_ASSERT(p_);
+  packer.pack(*p_);
+}
+
+void result_storage::unpack(msgpack::object o) {
+  JUBATUS_ASSERT(p_);
+  o.convert(p_.get());
 }
 
 }  // namespace burst

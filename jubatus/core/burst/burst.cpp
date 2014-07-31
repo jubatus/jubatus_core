@@ -95,16 +95,20 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
           params_(s.get_params()) {
     }
 
-    bool add_document(int d, int r, double pos) {
+    bool add_document(int d, int r, double pos) const {
       return a_->add_document(d, r, pos);
     }
 
-    void calculate_result(const burst_options& options) {
+    void calculate_result(const burst_options& options) const {
       a_->flush_results(params_.scaling_param,
                         params_.gamma,
                         options.costcut_threshold,
                         options.max_reuse_batch_num,
                         *s_);
+    }
+
+    const shared_ptr<aggregator>& get_aggregator() const {
+      return a_;
     }
 
    private:
@@ -248,13 +252,40 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
   storage::version get_version() const {
     return storage::version();
   }
-  void pack(framework::packer& /*packer*/) const {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(
-        "sorry, unimplemented: packing burst"));
+
+  void pack(framework::packer& packer) const {
+    packer.pack_array(3);
+
+    packer.pack(options_);
+
+    packer.pack_map(storages_.size());
+    for (storages_t::const_iterator iter = storages_.begin();
+         iter != storages_.end(); ++iter) {
+      packer.pack(iter->first);
+      packer.pack_array(2);
+      packer.pack(iter->second.get_params());
+      iter->second.get_storage()->pack(packer);
+    }
+
+    packer.pack_map(aggregators_.size());
+    for (aggregators_t::const_iterator iter = aggregators_.begin();
+         iter != aggregators_.end(); ++iter) {
+      packer.pack(iter->first);
+      iter->second.get_aggregator()->pack(packer);
+    }
   }
-  void unpack(msgpack::object /*o*/) {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(
-        "sorry, unimplemented: unpacking burst"));
+
+  void unpack(msgpack::object o) {
+    burst_options unpacked_options = options_;
+    aggregators_t unpacked_aggregators;
+    storages_t unpacked_storages;
+
+    unpack_impl_(o, unpacked_options, unpacked_aggregators, unpacked_storages);
+
+    // assign
+    options_ = unpacked_options;
+    storages_.swap(unpacked_storages);
+    aggregators_.swap(unpacked_aggregators);
   }
 
  private:
@@ -268,6 +299,58 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       return NULL;
     }
     return iter->second.get_storage().get();
+  }
+
+  static void unpack_impl_(msgpack::object o,
+                           burst_options& unpacked_options,
+                           aggregators_t& unpacked_aggregators,
+                           storages_t& unpacked_storages) {
+    if (o.type != msgpack::type::ARRAY || o.via.array.size != 3) {
+      throw msgpack::type_error();
+    }
+
+    o.via.array.ptr[0].convert(&unpacked_options);
+
+    {
+      const msgpack::object& m = o.via.array.ptr[1];
+      if (m.type != msgpack::type::MAP) {
+        throw msgpack::type_error();
+      }
+      size_t n = m.via.map.size;
+      for (size_t i = 0; i < n; ++i) {
+        string keyword;
+        m.via.map.ptr[i].key.convert(&keyword);
+
+        std::pair<keyword_params, msgpack::object> val;
+        m.via.map.ptr[i].val.convert(&val);
+        storage_ s(unpacked_options, val.first);
+        s.get_storage()->unpack(val.second);
+
+        unpacked_storages.insert(std::make_pair(keyword, s));
+      }
+    }
+
+    {
+      const msgpack::object& m = o.via.array.ptr[2];
+      if (m.type != msgpack::type::MAP) {
+        throw msgpack::type_error();
+      }
+      size_t n = m.via.map.size;
+      for (size_t i = 0; i < n; ++i) {
+        string keyword;
+        m.via.map.ptr[i].key.convert(&keyword);
+
+        storages_t::const_iterator iter = unpacked_storages.find(keyword);
+        if (iter == unpacked_storages.end()) {
+          throw msgpack::type_error();
+        }
+
+        aggregate_helper_ a(unpacked_options, iter->second);
+        a.get_aggregator()->unpack(m.via.map.ptr[i].val);
+
+        unpacked_aggregators.insert(std::make_pair(keyword, a));
+      }
+    }
   }
 };
 

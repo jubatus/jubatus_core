@@ -162,6 +162,8 @@ class input_window : private basic_window<batch_input> {
   friend void swap(input_window& x, input_window& y) {
     x.swap(y);
   }
+
+  MSGPACK_DEFINE(batches_, start_pos_, batch_interval_);
 };
 
 }  // namespace burst

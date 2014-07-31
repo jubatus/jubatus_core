@@ -103,6 +103,8 @@ class aggregator::impl_ {
     return n;
   }
 
+  MSGPACK_DEFINE(inputs_, window_batch_size_, batch_interval_, max_stored_);
+
  private:
   std::deque<input_window> inputs_;
   int window_batch_size_;
@@ -153,6 +155,16 @@ int aggregator::flush_results(double scaling_param,
   JUBATUS_ASSERT(p_);
   return p_->flush_results(scaling_param, gamma, costcut_threshold,
                            max_reuse_batches, stored);
+}
+
+void aggregator::pack(framework::packer& packer) const {
+  JUBATUS_ASSERT(p_);
+  packer.pack(*p_);
+}
+
+void aggregator::unpack(msgpack::object o) {
+  JUBATUS_ASSERT(p_);
+  o.convert(p_.get());
 }
 
 }  // namespace burst

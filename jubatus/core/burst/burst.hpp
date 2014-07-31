@@ -35,11 +35,20 @@ struct burst_options {
   int result_window_rotate_size;
   int max_reuse_batch_num;
   double costcut_threshold;
+
+  MSGPACK_DEFINE(
+      window_batch_size,
+      batch_interval,
+      result_window_rotate_size,
+      max_reuse_batch_num,
+      costcut_threshold);
 };
 
 struct keyword_params {
   double scaling_param;
   double gamma;
+
+  MSGPACK_DEFINE(scaling_param, gamma);
 };
 
 struct keyword_with_params {

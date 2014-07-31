@@ -21,6 +21,7 @@
 #include "jubatus/util/lang/scoped_ptr.h"
 
 #include "result_storage.hpp"
+#include "../framework/mixable_helper.hpp"
 
 namespace jubatus {
 namespace core {
@@ -43,6 +44,9 @@ class aggregator {
                     double costcut_threshold,
                     int max_reuse_batches,
                     result_storage& stored);
+
+  void pack(framework::packer& packer) const;
+  void unpack(msgpack::object o);
 
  private:
   class impl_;

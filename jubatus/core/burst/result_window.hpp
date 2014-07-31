@@ -61,6 +61,8 @@ class result_window : private basic_window<batch_result> {
   using base_::get_batches;
   using base_::get_batch_size;
   using base_::get_batch_interval;
+
+  MSGPACK_DEFINE(batches_, start_pos_, batch_interval_);
 };
 
 }  // namespace burst
