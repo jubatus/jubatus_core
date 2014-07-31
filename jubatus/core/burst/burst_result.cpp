@@ -24,6 +24,8 @@
 #include "engine.hpp"
 #include "window_intersection.hpp"
 
+using jubatus::util::lang::shared_ptr;
+
 namespace jubatus {
 namespace core {
 namespace burst {
@@ -100,7 +102,7 @@ int burst_result::get_batch_size() const {
   return p_ ? p_->get_batch_size() : 0;
 }
 double burst_result::get_batch_interval() const {
-  return p_ ? p_->get_batch_interval() : 0;
+  return p_ ? p_->get_batch_interval() : 1;
 }
 double burst_result::get_all_interval() const {
   return p_ ? p_->get_all_interval() : 0;
@@ -164,6 +166,21 @@ bool burst_result::is_bursted_at_latest_batch() const {
   }
   const std::vector<batch_result>& batches = p_->get_batches();
   return !batches.empty() && batches.back().is_bursted();
+}
+
+void burst_result::msgpack_pack(framework::packer& packer) const {
+  if (!p_) {
+    result_window r(invalid_pos);
+    packer.pack(r);
+  } else {
+    packer.pack(*p_);
+  }
+}
+
+void burst_result::msgpack_unpack(msgpack::object o) {
+  shared_ptr<result_window> unpacked(new result_window());
+  unpacked->msgpack_unpack(o);
+  p_ = unpacked;
 }
 
 }  // namespace burst

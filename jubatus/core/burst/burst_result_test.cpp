@@ -22,6 +22,10 @@
 
 #include "input_window.hpp"
 #include "result_window.hpp"
+#include "../framework/stream_writer.hpp"
+#include "jubatus/util/math/random.h"
+
+using jubatus::util::math::random::mtrand;
 
 namespace jubatus {
 namespace core {
@@ -33,6 +37,23 @@ inline burst_result make_result_with_default_params(
     int max_reuse) {
   return burst_result(input, 2, 1, DBL_MAX, prev_result, max_reuse);
 }
+
+inline burst_result make_burst_result_randomly(
+    double start_pos, double batch_interval, int batch_size,
+    int data_count, double relevant_rate, mtrand& rand) {
+  input_window input(start_pos, batch_interval, batch_size);
+  double end_pos = input.get_end_pos();
+
+  for (int i = 0; i < data_count; ++i) {
+    int d = 1;
+    int r = rand.next_double() < relevant_rate ? 1 : 0;
+    double pos = rand.next_double(start_pos, end_pos);
+
+    input.add_document(d, r, pos);
+  }
+  return make_result_with_default_params(input, burst_result(), 0);
+}
+
 
 TEST(burst_result, default_ctor) {
   burst_result r;
@@ -196,6 +217,58 @@ TEST(burst_result, has_same_batch_interval) {
   // reflexive
   EXPECT_TRUE(r1.has_same_batch_interval(r1));
   EXPECT_TRUE(r2.has_same_batch_interval(r2));
+}
+
+inline ::testing::AssertionResult burst_result_equals_to(
+    const burst_result& x, const burst_result& y) {
+  if (!x.has_same_start_pos(y)) {
+    return ::testing::AssertionFailure() << "start_pos mismatched: "
+        << x.get_start_pos() << " vs " << y.get_start_pos();
+  }
+  if (!x.has_same_batch_interval(y)) {
+    return ::testing::AssertionFailure() << "batch_interval mismatched: "
+        << x.get_batch_interval() << " vs " << y.get_batch_interval();
+  }
+
+  const std::vector<batch_result>& batches1 = x.get_batches();
+  const std::vector<batch_result>& batches2 = y.get_batches();
+  if (batches1.size() != batches2.size()) {
+    return ::testing::AssertionFailure() << "batch_size mismatched: "
+        << x.get_batch_size() << " vs " << y.get_batch_size();
+  }
+  for (size_t i = 0; i < batches1.size(); ++i) {
+    const batch_result& b1 = batches1[i];
+    const batch_result& b2 = batches2[i];
+    if (b1.d != b2.d || b1.r != b2.r ||
+        std::abs(b1.burst_weight - b2.burst_weight)
+            > std::abs(b1.burst_weight) * 0.001) {
+      return ::testing::AssertionFailure() << i << "th batch mismatched: "
+          << "(" << b1.d << "," << b1.r << "," << b1.burst_weight << ") vs "
+          << "(" << b2.d << "," << b2.r << "," << b2.burst_weight << ")";
+    }
+  }
+  return ::testing::AssertionSuccess();
+}
+
+TEST(burst_result, pack_and_unpack) {
+  mtrand rand(testing::UnitTest::GetInstance()->random_seed());
+
+  burst_result a = make_burst_result_randomly(3, 1, 10, 100, 1.0/10, rand);
+
+  msgpack::sbuffer buf;
+  framework::stream_writer<msgpack::sbuffer> st(buf);
+  framework::jubatus_packer jp(st);
+  framework::packer packer(jp);
+  packer.pack(a);
+
+  burst_result b;
+  {
+    msgpack::unpacked unpacked;
+    msgpack::unpack(&unpacked, buf.data(), buf.size());
+    unpacked.get().convert(&b);
+  }
+
+  ASSERT_TRUE(burst_result_equals_to(a, b));
 }
 
 }  // namespace burst
