@@ -21,6 +21,7 @@
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/lang/scoped_ptr.h"
+#include "jubatus/util/text/json.h"
 
 #include "../framework/mixable_helper.hpp"
 #include "burst_result.hpp"
@@ -42,6 +43,15 @@ struct burst_options {
       result_window_rotate_size,
       max_reuse_batch_num,
       costcut_threshold);
+
+  template<class Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(window_batch_size)
+       & JUBA_MEMBER(batch_interval)
+       & JUBA_MEMBER(result_window_rotate_size)
+       & JUBA_MEMBER(max_reuse_batch_num)
+       & JUBA_MEMBER(costcut_threshold);
+  }
 };
 
 struct keyword_params {
