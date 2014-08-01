@@ -17,6 +17,7 @@ def build(bld):
       ]
 
   headers = [
+      'assoc_vector.hpp',
       'assert.hpp',
       'big_endian.hpp',
       'byte_buffer.hpp',
@@ -41,6 +42,7 @@ def build(bld):
   bld.core_use.extend(use)
 
   test_src = [
+    'assoc_vector_test.cpp',
     'exception_test.cpp',
     'big_endian_test.cpp',
     'byte_buffer_test.cpp',
