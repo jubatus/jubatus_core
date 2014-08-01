@@ -250,7 +250,8 @@ void inverted_index_storage::calc_scores(
   if (query_norm == 0.f) {
     return;
   }
-  std::vector<float> i_scores(column2id_.size(), 0.0);
+
+  std::vector<float> i_scores(column2id_.get_max_id() + 1, 0.0);
   for (size_t i = 0; i < query.size(); ++i) {
     const string& fid = query[i].first;
     float val = query[i].second;
