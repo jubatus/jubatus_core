@@ -16,12 +16,14 @@
 
 #include "burst.hpp"
 
+#include <cfloat>
 #include <utility>
 #include <string>
 #include "jubatus/util/lang/noncopyable.h"
 #include "jubatus/util/data/unordered_map.h"
 
 #include "../common/assert.hpp"
+#include "../common/exception.hpp"
 #include "aggregator.hpp"
 
 using std::string;
@@ -123,6 +125,25 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
  public:
   explicit impl_(const burst_options& options)
       : options_(options) {
+    if (options_.window_batch_size <= 0) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+          "window_batch_size should > 0"));
+    }
+    if (options_.batch_interval <= 0) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+          "batch_interval should > 0"));
+    }
+    if (options_.result_window_rotate_size <= 0) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+          "result_window_rotate_size should > 0"));
+    }
+    if (options_.max_reuse_batch_num < 0) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+          "max_reuse_batch_num should >= 0"));
+    }
+    if (options_.costcut_threshold <= 0) {
+      options_.costcut_threshold = DBL_MAX;
+    }
   }
 
   bool add_keyword(const string& keyword,
