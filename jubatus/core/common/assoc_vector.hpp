@@ -109,7 +109,26 @@ class assoc_vector {
     }
   }
 
-  MSGPACK_DEFINE(data_);
+  template <typename Packer>
+  void msgpack_pack(Packer& pk) const {
+    pk.pack_map(data_.size());
+    for (std::size_t i = 0; i < data_.size(); ++i) {
+      pk.pack(data_[i].first);
+      pk.pack(data_[i].second);
+    }
+  }
+
+  void msgpack_unpack(msgpack::object o) {
+    if (o.type != msgpack::type::MAP) {
+      throw msgpack::type_error();
+    }
+    std::vector<std::pair<K, V> > data(o.via.map.size);
+    for (std::size_t i = 0; i < data.size(); ++i) {
+      o.via.map.ptr[i].key.convert(&data[i].first);
+      o.via.map.ptr[i].val.convert(&data[i].second);
+    }
+    data.swap(data_);
+  }
 
  private:
   std::vector<std::pair<K, V> > data_;
