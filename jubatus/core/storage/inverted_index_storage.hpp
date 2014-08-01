@@ -84,7 +84,7 @@ class inverted_index_storage {
   void add_inp_scores(
       const std::string& row,
       float val,
-      jubatus::util::data::unordered_map<uint64_t, float>& scores) const;
+      std::vector<float>& scores) const;
 
   tbl_t inv_;
   tbl_t inv_diff_;
