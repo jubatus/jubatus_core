@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_DRIVER_BURST_HPP_
 
 #include <string>
+#include <map>
 
 #include "../burst/burst.hpp"
 #include "../framework/mixable.hpp"
@@ -60,6 +61,8 @@ class burst : public driver_base {
   result_t get_result_at(const std::string& keyword, double pos) const;
   result_map get_all_bursted_results() const;
   result_map get_all_bursted_results_at(double pos) const;
+
+  void get_status(std::map<std::string, std::string>& status) const;
 
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
