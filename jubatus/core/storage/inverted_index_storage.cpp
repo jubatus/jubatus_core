@@ -17,10 +17,13 @@
 #include "inverted_index_storage.hpp"
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "../storage/fixed_size_heap.hpp"
 
 using std::istringstream;
 using std::make_pair;
@@ -258,7 +261,8 @@ void inverted_index_storage::calc_scores(
     add_inp_scores(fid, val, i_scores);
   }
 
-  vector<pair<float, uint64_t> > sorted_scores;
+  storage::fixed_size_heap<pair<float, uint64_t>,
+                           std::greater<pair<float, uint64_t> > > heap(ret_num);
   for (size_t i = 0; i < i_scores.size(); ++i) {
     float score = i_scores[i];
     if (score == 0.f)
@@ -267,9 +271,11 @@ void inverted_index_storage::calc_scores(
     if (norm == 0.f)
       continue;
     float normed_score = score / norm / query_norm;
-    sorted_scores.push_back(make_pair(normed_score, i));
+    heap.push(make_pair(normed_score, i));
   }
-  sort(sorted_scores.rbegin(), sorted_scores.rend());
+  vector<pair<float, uint64_t> > sorted_scores;
+  heap.get_sorted(sorted_scores);
+
   for (size_t i = 0; i < sorted_scores.size() && i < ret_num; ++i) {
     scores.push_back(
         make_pair(column2id_.get_key(sorted_scores[i].second),
