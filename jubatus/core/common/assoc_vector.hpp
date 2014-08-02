@@ -68,13 +68,8 @@ class assoc_vector {
   }
 
   iterator find(const K& key) {
-    std::pair<K, V> p = std::make_pair(key, V());
-    iterator it = std::lower_bound(begin(), end(), p);
-    if (it != end() && it->first == key) {
-      return it;
-    } else {
-      return end();
-    }
+    const_iterator it = const_cast<const assoc_vector&>(*this).find(key);
+    return begin() + (it - begin());
   }
 
   size_t count(const K& key) const {
