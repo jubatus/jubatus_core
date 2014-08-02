@@ -58,8 +58,10 @@ class assoc_vector {
   }
 
   const_iterator find(const K& key) const {
-    std::pair<K, V> p = std::make_pair(key, V());
-    const_iterator it = std::lower_bound(begin(), end(), p);
+    const_iterator it = std::lower_bound(begin(),
+                                         end(),
+                                         key,
+                                         less_pair_and_key());
     if (it != end() && it->first == key) {
       return it;
     } else {
@@ -94,12 +96,11 @@ class assoc_vector {
   }
 
   V& operator[](const K& key) {
-    std::pair<K, V> p = std::make_pair(key, V());
-    iterator it = std::lower_bound(data_.begin(), data_.end(), p);
+    iterator it = std::lower_bound(begin(), end(), key, less_pair_and_key());
     if (it != data_.end() && it->first == key) {
       return it->second;
     } else {
-      it = data_.insert(it, p);
+      it = data_.insert(it, std::make_pair(key, V()));
       return it->second;
     }
   }
@@ -126,6 +127,13 @@ class assoc_vector {
   }
 
  private:
+  struct less_pair_and_key {
+    template <class Pair, class Key>
+    bool operator()(Pair const& p, Key const& k) const {
+      return p.first < k;
+    }
+  };
+
   std::vector<std::pair<K, V> > data_;
 };
 

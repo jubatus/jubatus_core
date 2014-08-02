@@ -38,6 +38,15 @@ TEST(assoc_vector, trivial) {
   ASSERT_EQ(0u, m.count(4));
 }
 
+TEST(assoc_vector, replace) {
+  assoc_vector<int, int> m;
+  m[1] = -1;
+  m[1] = 3;
+  ASSERT_EQ(1u, m.size());
+  ASSERT_EQ(1u, m.count(1));
+  EXPECT_EQ(3, m[1]);
+}
+
 TEST(assoc_vector, pack) {
   // Pack format of assoc_vector must to be same as std::map
 
