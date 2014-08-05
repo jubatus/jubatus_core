@@ -85,6 +85,60 @@ TEST(result_storage, unsequenced) {
   ASSERT_DOUBLE_EQ(4, storage.get_result_at(4.5).get_start_pos());
 }
 
+TEST(result_storage, get_diff_and_put_diff) {
+  const int n = 5;
+  const double batch_interval = 1;
+
+  result_storage storage(n);
+
+  storage.store(make_result(0, batch_interval, 10));
+  storage.store(make_result(1, batch_interval, 10));
+  storage.store(make_result(2, batch_interval, 10));
+
+  ASSERT_DOUBLE_EQ(0, storage.get_result_at(0.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(1, storage.get_result_at(1.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(2, storage.get_result_at(2.5).get_start_pos());
+
+  result_storage::diff_t diff = storage.get_diff();
+  ASSERT_EQ(3u, diff.size());
+  ASSERT_DOUBLE_EQ(2, diff[0].get_start_pos());
+  ASSERT_DOUBLE_EQ(1, diff[1].get_start_pos());
+  ASSERT_DOUBLE_EQ(0, diff[2].get_start_pos());
+
+  storage.put_diff(diff);
+  // results are not changed
+  ASSERT_DOUBLE_EQ(0, storage.get_result_at(0.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(1, storage.get_result_at(1.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(2, storage.get_result_at(2.5).get_start_pos());
+
+  // put diff clears diff
+  diff = storage.get_diff();
+  ASSERT_EQ(0u, diff.size());
+  // put-diff empty diff
+  storage.put_diff(diff);
+  // results are not changed
+  ASSERT_DOUBLE_EQ(0, storage.get_result_at(0.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(1, storage.get_result_at(1.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(2, storage.get_result_at(2.5).get_start_pos());
+
+  // add result after put-diff
+  storage.store(make_result(3, batch_interval, 10));
+
+  diff = storage.get_diff();
+  ASSERT_EQ(1u, diff.size());
+  ASSERT_DOUBLE_EQ(3, diff[0].get_start_pos());
+
+  // modify diff
+  diff.push_back(make_result(4, batch_interval, 10));
+
+  storage.put_diff(diff);
+  ASSERT_DOUBLE_EQ(0, storage.get_result_at(0.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(1, storage.get_result_at(1.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(2, storage.get_result_at(2.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(3, storage.get_result_at(3.5).get_start_pos());
+  ASSERT_DOUBLE_EQ(4, storage.get_result_at(4.5).get_start_pos());
+}
+
 }  // namespace burst
 }  // namespace core
 }  // namespace jubatus

@@ -17,6 +17,7 @@
 #include "result_storage.hpp"
 
 #include <stddef.h>
+#include <cfloat>
 #include <deque>
 
 #include "../common/assert.hpp"
@@ -29,17 +30,19 @@ class result_storage::impl_ {
   typedef std::deque<result_t> results_t;
   results_t results_;
   size_t results_max_;
+  double oldest_start_pos_not_mixed_;
 
  public:
   explicit impl_(int stored_results_max)
-      : results_max_(stored_results_max) {
+      : results_max_(stored_results_max), oldest_start_pos_not_mixed_(DBL_MAX) {
   }
 
-  void store(const result_t& result) {
+  void store(const result_t& result, bool merge = false) {
+    double result_start_pos = result.get_start_pos();
+
     if (results_.empty()) {
       results_.push_front(result);
     } else {
-      double result_start_pos = result.get_start_pos();
       typedef results_t::iterator iterator_t;
       for (iterator_t iter = results_.begin(), end = results_.end();
           iter != end; ++iter) {
@@ -50,10 +53,19 @@ class result_storage::impl_ {
           JUBATUS_ASSERT_EQ(
               iter->get_batch_size(), result.get_batch_size(), "");
           JUBATUS_ASSERT(iter->has_same_batch_interval(result));
-          *iter = result;  // update with new result
+          if (merge) {
+            bool mixed = iter->mix(result);
+            JUBATUS_ASSERT(mixed);
+          } else {
+            *iter = result;  // update with new result
+          }
           break;
         }
       }
+    }
+
+    if (result_start_pos < oldest_start_pos_not_mixed_) {
+      oldest_start_pos_not_mixed_ = result_start_pos;
     }
 
     while (results_.size() > results_max_) {
@@ -78,7 +90,33 @@ class result_storage::impl_ {
     return result_t();
   }
 
-  MSGPACK_DEFINE(results_, results_max_);
+  diff_t get_diff() const {
+    diff_t diff;
+
+    typedef results_t::const_iterator iterator_t;
+    for (iterator_t iter = results_.begin(), end = results_.end();
+        iter != end; ++iter) {
+      if (iter->has_start_pos_older_than(oldest_start_pos_not_mixed_)) {
+        break;
+      }
+      diff.push_back(*iter);
+    }
+
+    return diff;
+  }
+
+  void put_diff(const diff_t& diff) {
+    // merge diff
+    for (diff_t::const_iterator iter = diff.begin();
+         iter != diff.end(); ++iter) {
+      store(*iter, true);
+    }
+
+    // clear diff
+    oldest_start_pos_not_mixed_ = DBL_MAX;
+  }
+
+  MSGPACK_DEFINE(results_, results_max_, oldest_start_pos_not_mixed_);
 };
 
 result_storage::result_storage(int stored_results_max)
@@ -101,6 +139,16 @@ burst_result result_storage::get_latest_result() const {
 burst_result result_storage::get_result_at(double pos) const {
   JUBATUS_ASSERT(p_);
   return p_->get_result_at(pos);
+}
+
+result_storage::diff_t result_storage::get_diff() const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_diff();
+}
+
+void result_storage::put_diff(const result_storage::diff_t& diff) {
+  JUBATUS_ASSERT(p_);
+  p_->put_diff(diff);
 }
 
 void result_storage::pack(framework::packer& packer) const {
