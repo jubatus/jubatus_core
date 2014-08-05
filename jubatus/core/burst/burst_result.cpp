@@ -30,6 +30,19 @@ namespace jubatus {
 namespace core {
 namespace burst {
 
+namespace {
+
+int accumulate_d_vec(const burst_result& r) {
+  const std::vector<batch_result>& batches = r.get_batches();
+  int result = 0;
+  for (size_t i = 0; i < batches.size(); ++i) {
+    result += batches[i].d;
+  }
+  return result;
+}
+
+}  // namespace
+
 burst_result::burst_result() {
 }
 
@@ -166,6 +179,22 @@ bool burst_result::is_bursted_at_latest_batch() const {
   }
   const std::vector<batch_result>& batches = p_->get_batches();
   return !batches.empty() && batches.back().is_bursted();
+}
+
+bool burst_result::mix(const burst_result& w) {
+  if (!has_same_start_pos_to(w.get_start_pos()) ||
+      !has_same_batch_interval(w) ||
+      get_batch_size() != w.get_batch_size()) {
+    return false;
+  }
+
+  if (p_ != w.p_) {
+    if (accumulate_d_vec(*this) < accumulate_d_vec(w)) {
+      p_ = w.p_;
+    }
+  }
+
+  return true;
 }
 
 void burst_result::msgpack_pack(framework::packer& packer) const {

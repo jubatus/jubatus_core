@@ -80,7 +80,7 @@ class burst_result {
   }
   bool is_bursted_at_latest_batch() const;
 
-  void mix(const burst_result& w);
+  bool mix(const burst_result& w);
 
   void msgpack_pack(framework::packer& packer) const;
   void msgpack_unpack(msgpack::object o);

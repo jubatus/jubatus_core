@@ -268,6 +268,64 @@ TEST(burst_result, pack_and_unpack) {
   ASSERT_TRUE(burst_result_equals_to(a, b));
 }
 
+TEST(burst_result, mix) {
+  mtrand rand(testing::UnitTest::GetInstance()->random_seed());
+
+  const burst_result
+      a = make_burst_result_randomly(3, 1, 10, 100, 1.0/10, rand),
+      b = make_burst_result_randomly(3, 1, 10, 200, 1.0/50, rand),
+      c = make_burst_result_randomly(5, 1, 10, 100, 1.0/10, rand);
+
+  ASSERT_FALSE(burst_result_equals_to(a, b));
+
+  {
+    // mix a into a
+    burst_result a_ = a;
+    bool mixed = a_.mix(a);
+    ASSERT_TRUE(mixed);
+    ASSERT_TRUE(burst_result_equals_to(a, a_));
+    ASSERT_FALSE(burst_result_equals_to(b, a_));
+  }
+
+  {
+    // mix a into b
+    burst_result b_ = b;
+    bool mixed = b_.mix(a);
+    ASSERT_TRUE(mixed);
+    ASSERT_FALSE(burst_result_equals_to(a, b_));
+    ASSERT_TRUE(burst_result_equals_to(b, b_));
+  }
+
+  {
+    // mix b into a
+    burst_result a_ = a;
+    bool mixed = a_.mix(b);
+    ASSERT_TRUE(mixed);
+    ASSERT_FALSE(burst_result_equals_to(a, a_));
+    ASSERT_TRUE(burst_result_equals_to(b, a_));
+  }
+
+  // mix fail
+  {
+    burst_result r;
+    bool mixed = r.mix(a);
+    ASSERT_FALSE(mixed);
+    ASSERT_FALSE(r.is_valid());
+  }
+  {
+    burst_result a_ = a;
+    bool mixed = a_.mix(burst_result());
+    ASSERT_FALSE(mixed);
+    ASSERT_TRUE(burst_result_equals_to(a, a_));
+  }
+  {
+    burst_result c_ = c;
+    bool mixed = c_.mix(a);
+    ASSERT_FALSE(mixed);
+    ASSERT_TRUE(burst_result_equals_to(c, c_));
+  }
+}
+
 }  // namespace burst
 }  // namespace core
 }  // namespace jubatus
