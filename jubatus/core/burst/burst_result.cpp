@@ -108,34 +108,34 @@ double burst_result::get_all_interval() const {
   return p_ ? p_->get_all_interval() : 0;
 }
 
-bool burst_result::is_older_than(const burst_result& x) const {
-  if (!p_ || !x.p_) {
+bool burst_result::has_start_pos_older_than(double pos) const {
+  if (!p_) {
     return false;
   }
-  double pos1 = p_->get_start_pos(), pos2 = x.p_->get_start_pos();
-  if (pos1 < pos2) {
-    return !window_position_near(pos1, pos2, p_->get_batch_interval());
+  double pos0 = p_->get_start_pos();
+  if (pos0 < pos) {
+    return !window_position_near(pos0, pos, p_->get_batch_interval());
   } else {
     return false;
   }
 }
-bool burst_result::is_newer_than(const burst_result& x) const {
-  if (!p_ || !x.p_) {
+bool burst_result::has_start_pos_newer_than(double pos) const {
+  if (!p_) {
     return false;
   }
-  double pos1 = p_->get_start_pos(), pos2 = x.p_->get_start_pos();
-  if (pos1 > pos2) {
-    return !window_position_near(pos1, pos2, p_->get_batch_interval());
+  double pos0 = p_->get_start_pos();
+  if (pos0 > pos) {
+    return !window_position_near(pos0, pos, p_->get_batch_interval());
   } else {
     return false;
   }
 }
-bool burst_result::has_same_start_pos(const burst_result& x) const {
-  if (!p_ || !x.p_) {
+bool burst_result::has_same_start_pos_to(double pos) const {
+  if (!p_) {
     return false;
   }
-  double pos0 = p_->get_start_pos(), pos1 = x.p_->get_start_pos();
-  return window_position_near(pos0, pos1, p_->get_batch_interval());
+  double pos0 = p_->get_start_pos();
+  return window_position_near(pos0, pos, p_->get_batch_interval());
 }
 
 bool burst_result::has_same_batch_interval(const burst_result& x) const {

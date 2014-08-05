@@ -39,13 +39,14 @@ class result_storage::impl_ {
     if (results_.empty()) {
       results_.push_front(result);
     } else {
+      double result_start_pos = result.get_start_pos();
       typedef results_t::iterator iterator_t;
       for (iterator_t iter = results_.begin(), end = results_.end();
           iter != end; ++iter) {
-        if (iter->is_older_than(result)) {
+        if (iter->has_start_pos_older_than(result_start_pos)) {
           results_.insert(iter, result);
           break;
-        } else if (iter->has_same_start_pos(result)) {
+        } else if (iter->has_same_start_pos_to(result_start_pos)) {
           JUBATUS_ASSERT_EQ(
               iter->get_batch_size(), result.get_batch_size(), "");
           JUBATUS_ASSERT(iter->has_same_batch_interval(result));

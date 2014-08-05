@@ -65,9 +65,9 @@ class burst_result {
 
   // comparing start_pos
   // floating number error is considered
-  bool is_older_than(const burst_result& x) const;
-  bool is_newer_than(const burst_result& x) const;
-  bool has_same_start_pos(const burst_result& x) const;
+  bool has_start_pos_older_than(double start_pos) const;
+  bool has_start_pos_newer_than(double start_pos) const;
+  bool has_same_start_pos_to(double start_pos) const;
 
   // compares batch_interval; floating number error is allowed
   bool has_same_batch_interval(const burst_result& x) const;

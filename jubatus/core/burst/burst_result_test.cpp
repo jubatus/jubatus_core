@@ -139,64 +139,61 @@ TEST(burst_result, reuse) {
   EXPECT_LT(6, results[4].burst_weight);
 }
 
-TEST(burst_result, is_older_than) {
+TEST(burst_result, has_start_pos_older_than) {
   burst_result r0, r1(result_window(1, 1)), r2(result_window(2, 1));
   burst_result r1_(result_window(1.0001, 1));
 
   // expected behavior
-  EXPECT_TRUE(r1.is_older_than(r2));
-  EXPECT_FALSE(r2.is_older_than(r1));
-  EXPECT_FALSE(r1.is_older_than(r1_));
-  EXPECT_FALSE(r1_.is_older_than(r1));
+  EXPECT_TRUE(r1.has_start_pos_older_than(2));
+  EXPECT_FALSE(r2.has_start_pos_older_than(1));
+  EXPECT_FALSE(r1.has_start_pos_older_than(1.0001));
+  EXPECT_FALSE(r1_.has_start_pos_older_than(1.0001));
 
-  // always false when rhs and/or lhs is default constructed
-  EXPECT_FALSE(r0.is_older_than(r0));
-  EXPECT_FALSE(r0.is_older_than(r1));
-  EXPECT_FALSE(r2.is_older_than(r0));
+  // always false when *this is default constructed
+  EXPECT_FALSE(r0.has_start_pos_older_than(r0.get_start_pos()));
+  EXPECT_FALSE(r0.has_start_pos_older_than(1));
 
   // irreflexive
-  EXPECT_FALSE(r1.is_older_than(r1));
-  EXPECT_FALSE(r2.is_older_than(r2));
+  EXPECT_FALSE(r1.has_start_pos_older_than(r1.get_start_pos()));
+  EXPECT_FALSE(r2.has_start_pos_older_than(r2.get_start_pos()));
 }
 
-TEST(burst_result, is_newer_than) {
+TEST(burst_result, has_start_pos_newer_than) {
   burst_result r0, r1(result_window(1, 1)), r2(result_window(2, 1));
   burst_result r1_(result_window(1.0001, 1));
 
   // expected behavior
-  EXPECT_TRUE(r2.is_newer_than(r1));
-  EXPECT_FALSE(r1.is_newer_than(r2));
-  EXPECT_FALSE(r1.is_newer_than(r1_));
-  EXPECT_FALSE(r1_.is_newer_than(r1));
+  EXPECT_TRUE(r2.has_start_pos_newer_than(1));
+  EXPECT_FALSE(r1.has_start_pos_newer_than(2));
+  EXPECT_FALSE(r1.has_start_pos_newer_than(1.0001));
+  EXPECT_FALSE(r1_.has_start_pos_newer_than(1));
 
-  // always false when rhs and/or lhs is default constructed
-  EXPECT_FALSE(r0.is_newer_than(r0));
-  EXPECT_FALSE(r0.is_newer_than(r1));
-  EXPECT_FALSE(r2.is_newer_than(r0));
+  // always false when *this is default constructed
+  EXPECT_FALSE(r0.has_start_pos_newer_than(r0.get_start_pos()));
+  EXPECT_FALSE(r0.has_start_pos_newer_than(1));
 
   // irreflexive
-  EXPECT_FALSE(r1.is_newer_than(r1));
-  EXPECT_FALSE(r2.is_newer_than(r2));
+  EXPECT_FALSE(r1.has_start_pos_newer_than(r1.get_start_pos()));
+  EXPECT_FALSE(r2.has_start_pos_newer_than(r2.get_start_pos()));
 }
 
-TEST(burst_result, has_same_start_pos) {
+TEST(burst_result, has_same_start_pos_to) {
   burst_result r0, r1(result_window(1, 1)), r2(result_window(2, 1));
   burst_result r1_(result_window(1.0001, 2));
 
   // expected behavior
-  EXPECT_FALSE(r2.has_same_start_pos(r1));
-  EXPECT_FALSE(r1.has_same_start_pos(r2));
-  EXPECT_TRUE(r1.has_same_start_pos(r1_));
-  EXPECT_TRUE(r1_.has_same_start_pos(r1));
+  EXPECT_FALSE(r2.has_same_start_pos_to(1));
+  EXPECT_FALSE(r1.has_same_start_pos_to(2));
+  EXPECT_TRUE(r1.has_same_start_pos_to(1.0001));
+  EXPECT_TRUE(r1_.has_same_start_pos_to(1));
 
   // always false when rhs and/or lhs is default constructed
-  EXPECT_FALSE(r0.has_same_start_pos(r0));
-  EXPECT_FALSE(r0.has_same_start_pos(r1));
-  EXPECT_FALSE(r2.has_same_start_pos(r0));
+  EXPECT_FALSE(r0.has_same_start_pos_to(r0.get_start_pos()));
+  EXPECT_FALSE(r0.has_same_start_pos_to(1));
 
   // reflexive
-  EXPECT_TRUE(r1.has_same_start_pos(r1));
-  EXPECT_TRUE(r2.has_same_start_pos(r2));
+  EXPECT_TRUE(r1.has_same_start_pos_to(r1.get_start_pos()));
+  EXPECT_TRUE(r2.has_same_start_pos_to(r2.get_start_pos()));
 }
 
 TEST(burst_result, has_same_batch_interval) {
@@ -221,7 +218,7 @@ TEST(burst_result, has_same_batch_interval) {
 
 inline ::testing::AssertionResult burst_result_equals_to(
     const burst_result& x, const burst_result& y) {
-  if (!x.has_same_start_pos(y)) {
+  if (!x.has_same_start_pos_to(y.get_start_pos())) {
     return ::testing::AssertionFailure() << "start_pos mismatched: "
         << x.get_start_pos() << " vs " << y.get_start_pos();
   }
