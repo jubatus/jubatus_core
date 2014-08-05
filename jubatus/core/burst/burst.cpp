@@ -19,11 +19,13 @@
 #include <cfloat>
 #include <utility>
 #include <string>
+#include <vector>
 #include "jubatus/util/lang/noncopyable.h"
 #include "jubatus/util/data/unordered_map.h"
 
 #include "../common/assert.hpp"
 #include "../common/exception.hpp"
+#include "../common/unordered_map.hpp"
 #include "aggregator.hpp"
 
 using std::string;
@@ -34,9 +36,17 @@ namespace jubatus {
 namespace core {
 namespace burst {
 
-class burst::diff_t::impl_ {
- public:
-  impl_() {
+struct burst::diff_t::impl_ {
+  struct entry_t {
+    keyword_params params;
+    std::vector<burst_result> results;
+
+    MSGPACK_DEFINE(params, results);
+  };
+  typedef unordered_map<string, entry_t> data_t;
+  data_t data;
+
+  impl_() : data() {
   }
 
   impl_(const impl_& x, const impl_& y) {
@@ -45,23 +55,11 @@ class burst::diff_t::impl_ {
         "sorry, unimplemented: mixing burst"));
   }
 
-  explicit impl_(msgpack::object o) {
-    // unpack (unimplemented)
-    throw JUBATUS_EXCEPTION(common::unsupported_method(
-        "sorry, unimplemented: mixing burst"));
+  explicit impl_(msgpack::object o) : data() {
+    o.convert(this);
   }
 
-  void msgpack_pack(framework::packer& /*packer*/) const {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(
-        "sorry, unimplemented: mixing burst"));
-  }
-  void msgpack_unpack(msgpack::object /*o*/) {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(
-        "sorry, unimplemented: mixing burst"));
-  }
-
- private:
-  // unimplemented
+  MSGPACK_DEFINE(data);
 };
 
 class burst::impl_ : jubatus::util::lang::noncopyable {
