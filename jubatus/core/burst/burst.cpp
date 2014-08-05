@@ -49,10 +49,19 @@ struct burst::diff_t::impl_ {
   impl_() : data() {
   }
 
-  impl_(const impl_& x, const impl_& y) {
-    // do mix (unimplemented)
-    throw JUBATUS_EXCEPTION(common::unsupported_method(
-        "sorry, unimplemented: mixing burst"));
+  impl_(const impl_& x, const impl_& y) : data(x.data) {
+    for (data_t::const_iterator iter = y.data.begin();
+         iter != y.data.end(); ++iter) {
+      data_t::iterator found = data.find(iter->first);
+      if (found == data.end()) {
+        data.insert(*iter);
+      } else {
+        std::vector<burst_result>& results1 = found->second.results;
+        const std::vector<burst_result>& results2 = iter->second.results;
+        // simply merged; mixing is performed in put_diff
+        results1.insert(results1.end(), results2.begin(), results2.end());
+      }
+    }
   }
 
   explicit impl_(msgpack::object o) : data() {
@@ -69,6 +78,10 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
         const burst_options& options, const keyword_params& params)
         : s_(new result_storage(options.result_window_rotate_size)),
           params_(params) {
+    }
+
+    void put_diff(const diff_t::impl_::entry_t& diff) const {
+      s_->put_diff(diff.results);
     }
 
     const shared_ptr<result_storage>& get_storage() const {
@@ -105,6 +118,13 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
                         options.costcut_threshold,
                         options.max_reuse_batch_num,
                         *s_);
+    }
+
+    diff_t::impl_::entry_t get_diff() const {
+      diff_t::impl_::entry_t entry;
+      entry.params = params_;
+      entry.results = s_->get_diff();
+      return entry;
     }
 
     const shared_ptr<aggregator>& get_aggregator() const {
@@ -255,13 +275,39 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
     return results;
   }
 
-  void get_diff(diff_t& /*ret*/) const {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(
-        "sorry, unimplemented: mixing burst"));
+  void get_diff(diff_t& ret) const {
+    shared_ptr<diff_t::impl_> diff(new diff_t::impl_());
+    diff_t::impl_::data_t& data = diff->data;
+
+    for (aggregators_t::const_iterator iter = aggregators_.begin();
+         iter != aggregators_.end(); ++iter) {
+      const string& keyword = iter->first;
+      diff_t::impl_::entry_t entry = iter->second.get_diff();
+      data.insert(std::make_pair(keyword, entry));
+    }
+
+    ret.p_ = diff;
   }
-  bool put_diff(const diff_t&) {
-    throw JUBATUS_EXCEPTION(common::unsupported_method(
-        "sorry, unimplemented: mixing burst"));
+  bool put_diff(const diff_t& diff) {
+    const diff_t::impl_::data_t& data = diff.p_->data;
+
+    for (diff_t::impl_::data_t::const_iterator iter = data.begin();
+         iter != data.end(); ++iter) {
+      const std::string& keyword = iter->first;
+      storages_t::iterator found = storages_.find(keyword);
+
+      if (found == storages_.end()) {
+        const keyword_params params = iter->second.params;
+        std::pair<storages_t::iterator, bool> r =
+            storages_.insert(
+                std::make_pair(keyword, storage_(options_, params)));
+        found = r.first;
+      }
+
+      found->second.put_diff(iter->second);
+    }
+
+    return true;
   }
 
   void clear() {
