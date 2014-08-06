@@ -47,6 +47,26 @@ TEST(assoc_vector, replace) {
   EXPECT_EQ(3, m[1]);
 }
 
+TEST(assoc_vector, random) {
+  std::map<int, int> map;
+  assoc_vector<int, int> vec;
+
+  srand(0);
+  for (int i = 0; i < 1000; ++i) {
+    int k = rand() % 1000 * (rand() % 2 == 0 ? 1 : -1);
+    int v = rand() % 1000 * (rand() % 2 == 0 ? 1 : -1);
+    map[k] = v;
+    vec[k] = v;
+  }
+
+  EXPECT_EQ(map.size(), vec.size());
+  for (std::map<int, int>::const_iterator it = map.begin();
+       it != map.end(); ++it) {
+    ASSERT_EQ(1u, vec.count(it->first));
+    EXPECT_EQ(it->second, vec[it->first]);
+  }
+}
+
 TEST(assoc_vector, pack) {
   // Pack format of assoc_vector must to be same as std::map
 
