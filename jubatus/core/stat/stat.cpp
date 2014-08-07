@@ -151,7 +151,7 @@ double stat::moment(const std::string& key, int n, double c) const {
   jubatus::util::data::unordered_map<std::string, stat_val>::const_iterator p =
       stats_.find(key);
   if (p == stats_.end()) {
-    throw JUBATUS_EXCEPTION(stat_error("min: key " + key + " not found"));
+    throw JUBATUS_EXCEPTION(stat_error("moment: key " + key + " not found"));
   }
   const stat_val& st = p->second;
 
