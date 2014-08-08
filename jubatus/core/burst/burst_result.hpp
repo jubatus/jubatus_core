@@ -75,9 +75,7 @@ class burst_result {
   const std::vector<batch_result>& get_batches() const;
 
   const batch_result& get_batch_at(double pos) const;
-  bool is_bursted_at(double pos) const {
-    return get_batch_at(pos).is_bursted();
-  }
+  bool is_bursted_at(double pos) const;
   bool is_bursted_at_latest_batch() const;
 
   bool mix(const burst_result& w);

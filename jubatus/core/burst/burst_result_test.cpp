@@ -96,7 +96,7 @@ TEST(burst_result, simple) {
   EXPECT_LT(6, results[4].burst_weight);
 
   // check is_bursted_at
-  for (int i = 0; i < n; ++i) {
+  for (int i = -1; i < n+1; ++i) {
     double pos = start_pos + (i + 0.5) * batch_interval;
     if (i == 0 || i == 4) {
       EXPECT_TRUE(r.is_bursted_at(pos));

@@ -173,6 +173,14 @@ const batch_result& burst_result::get_batch_at(double pos) const {
   return p_->get_batches()[i];
 }
 
+bool burst_result::is_bursted_at(double pos) const {
+  int i = p_ ? p_->get_index(pos) : -1;
+  if (i < 0) {
+    return false;
+  }
+  return p_->get_batches()[i].is_bursted();
+}
+
 bool burst_result::is_bursted_at_latest_batch() const {
   if (!p_) {
     return false;
