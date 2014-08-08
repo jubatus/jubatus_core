@@ -17,6 +17,7 @@
 #include "burst.hpp"
 
 #include <string>
+#include <vector>
 #include <map>
 
 #include "../framework/mixable.hpp"
@@ -71,6 +72,10 @@ burst::result_map burst::get_all_bursted_results_at(double pos) const {
 
 void burst::get_status(std::map<std::string, std::string>& status) const {
   // TODO(gintenlabo) implement
+}
+
+void burst::set_processed_keywords(const std::vector<std::string>& keywords) {
+  return burst_->set_processed_keywords(keywords);
 }
 
 void burst::pack(framework::packer& pk) const {

@@ -108,6 +108,8 @@ class burst {
     ret.mix(lhs);
   }
 
+  void set_processed_keywords(const std::vector<std::string>& keywords);
+
   void clear();
   storage::version get_version() const;
   void pack(framework::packer& packer) const;

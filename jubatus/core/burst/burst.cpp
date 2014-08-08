@@ -36,6 +36,8 @@ namespace jubatus {
 namespace core {
 namespace burst {
 
+int survival_mix_count_from_set_unprocessed = 5;
+
 struct burst::diff_t::impl_ {
   struct entry_t {
     keyword_params params;
@@ -105,7 +107,8 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
                             options.batch_interval,
                             options.result_window_rotate_size)),
           s_(s.get_storage()),
-          params_(s.get_params()) {
+          params_(s.get_params()),
+          removal_count_(-1) {
     }
 
     bool add_document(int d, int r, double pos) const {
@@ -131,10 +134,31 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       return a_;
     }
 
+    void set_unprocessed() {
+      if (removal_count_ < 0) {
+        removal_count_ = survival_mix_count_from_set_unprocessed;
+      }
+    }
+
+    void set_processed() {
+      removal_count_ = -1;
+    }
+
+    void tick_removal_count() {
+      if (removal_count_ > 0) {
+        --removal_count_;
+      }
+    }
+
+    bool is_to_be_removed() const {
+      return removal_count_ == 0;
+    }
+
    private:
     shared_ptr<aggregator> a_;
     shared_ptr<result_storage> s_;
     keyword_params params_;
+    int removal_count_;
   };
 
   typedef unordered_map<string, storage_> storages_t;
@@ -307,7 +331,45 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       found->second.put_diff(iter->second);
     }
 
+    std::vector<std::string> to_be_removed;
+
+    for (aggregators_t::iterator iter = aggregators_.begin();
+         iter != aggregators_.end(); ++iter) {
+      iter->second.tick_removal_count();
+      if (iter->second.is_to_be_removed()) {
+        to_be_removed.push_back(iter->first);
+      }
+    }
+
+    for (size_t i = 0; i < to_be_removed.size(); ++i) {
+      aggregators_.erase(to_be_removed[i]);
+    }
+
     return true;
+  }
+
+  void set_processed_keywords(const std::vector<string>& keywords) {
+    for (aggregators_t::iterator iter = aggregators_.begin();
+         iter != aggregators_.end(); ++iter) {
+      iter->second.set_unprocessed();
+    }
+
+    for (size_t i = 0; i < keywords.size(); ++i) {
+      aggregators_t::iterator found = aggregators_.find(keywords[i]);
+      if (found != aggregators_.end()) {
+        found->second.set_processed();
+      } else {
+        storages_t::iterator s = storages_.find(keywords[i]);
+        if (s == storages_.end()) {
+          throw JUBATUS_EXCEPTION(
+              common::exception::runtime_error(
+                  "something went wrong in burst"));
+        }
+        aggregators_.insert(
+            std::make_pair(keywords[i],
+                           aggregate_helper_(options_, s->second)));
+      }
+    }
   }
 
   void clear() {
@@ -474,6 +536,11 @@ burst::result_map burst::get_all_bursted_results() const {
 burst::result_map burst::get_all_bursted_results_at(double pos) const {
   JUBATUS_ASSERT(p_);
   return p_->get_all_bursted_results_at(pos);
+}
+
+void burst::set_processed_keywords(const std::vector<string>& keywords) {
+  JUBATUS_ASSERT(p_);
+  return p_->set_processed_keywords(keywords);
 }
 
 void burst::diff_t::mix(const diff_t& mixed) {
