@@ -27,6 +27,27 @@ namespace jubatus {
 namespace core {
 namespace driver {
 
+namespace {
+
+std::string keywords_to_string(const burst::keyword_list& keywords) {
+  size_t n = keywords.size();
+
+  if (n == 0) {
+    return "";
+  }
+
+  std::string result = keywords[0].keyword;
+
+  for (size_t i = 1; i < n; ++i) {
+    result += ',';
+    result += keywords[i].keyword;
+  }
+
+  return result;
+}
+
+}  // namespace
+
 void burst::init_(jubatus::util::lang::shared_ptr<model_t>& model) {
   burst_.swap(model);
   mixable_burst_.set_model(burst_);
@@ -71,7 +92,10 @@ burst::result_map burst::get_all_bursted_results_at(double pos) const {
 }
 
 void burst::get_status(std::map<std::string, std::string>& status) const {
-  // TODO(gintenlabo) implement
+  status["all_keywords"] =
+      keywords_to_string(burst_->get_all_keywords());
+  status["processed_keywords"] =
+      keywords_to_string(burst_->get_processed_keywords());
 }
 
 bool burst::has_been_mixed() const {
