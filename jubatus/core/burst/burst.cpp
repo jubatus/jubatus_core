@@ -138,6 +138,10 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       return s_;
     }
 
+    const keyword_params& get_params() const {
+      return params_;
+    }
+
     void set_unprocessed() {
       if (removal_count_ < 0) {
         removal_count_ = survival_mix_count_from_set_unprocessed;
@@ -224,12 +228,13 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
     return true;
   }
 
-  keyword_list get_all_keywords() const {
+  template<class Map>
+  static keyword_list get_keyword_list(const Map& m) {
     keyword_list result;
-    result.reserve(storages_.size());
+    result.reserve(m.size());
 
-    for (storages_t::const_iterator iter = storages_.begin();
-         iter != storages_.end(); ++iter) {
+    for (typename Map::const_iterator iter = m.begin();
+         iter != m.end(); ++iter) {
       const string& keyword = iter->first;
       const keyword_params& params = iter->second.get_params();
 
@@ -241,6 +246,13 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
     }
 
     return result;
+  }
+
+  keyword_list get_all_keywords() const {
+    return get_keyword_list(storages_);
+  }
+  keyword_list get_processed_keywords() const {
+    return get_keyword_list(aggregators_);
   }
 
   bool add_document(const string& str, double pos) {
@@ -518,6 +530,11 @@ bool burst::remove_all_keywords() {
 burst::keyword_list burst::get_all_keywords() const {
   JUBATUS_ASSERT(p_);
   return p_->get_all_keywords();
+}
+
+burst::keyword_list burst::get_processed_keywords() const {
+  JUBATUS_ASSERT(p_);
+  return p_->get_processed_keywords();
 }
 
 bool burst::add_document(const string& str, double pos) {

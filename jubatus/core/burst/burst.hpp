@@ -82,6 +82,7 @@ class burst {
   bool remove_keyword(const std::string& keyword);
   bool remove_all_keywords();
   keyword_list get_all_keywords() const;
+  keyword_list get_processed_keywords() const;
 
   bool add_document(const std::string& str, double pos);
 
