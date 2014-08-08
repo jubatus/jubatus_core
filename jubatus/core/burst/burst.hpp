@@ -89,6 +89,8 @@ class burst {
 
   result_t get_result(const std::string& keyword) const;
   result_t get_result_at(const std::string& keyword, double pos) const;
+
+  // return results processed in this server; the other results are merged
   result_map get_all_bursted_results() const;
   result_map get_all_bursted_results_at(double pos) const;
 

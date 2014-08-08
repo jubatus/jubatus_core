@@ -134,6 +134,10 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       return a_;
     }
 
+    const shared_ptr<result_storage>& get_storage() const {
+      return s_;
+    }
+
     void set_unprocessed() {
       if (removal_count_ < 0) {
         removal_count_ = survival_mix_count_from_set_unprocessed;
@@ -276,8 +280,8 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
 
   result_map get_all_bursted_results() const {
     result_map results;
-    for (storages_t::const_iterator iter = storages_.begin();
-         iter != storages_.end(); ++iter) {
+    for (aggregators_t::const_iterator iter = aggregators_.begin();
+         iter != aggregators_.end(); ++iter) {
       const result_storage& s = *iter->second.get_storage();
       result_t result = s.get_latest_result();
       if (result.is_bursted_at_latest_batch()) {
@@ -289,8 +293,8 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
 
   result_map get_all_bursted_results_at(double pos) const {
     result_map results;
-    for (storages_t::const_iterator iter = storages_.begin();
-         iter != storages_.end(); ++iter) {
+    for (aggregators_t::const_iterator iter = aggregators_.begin();
+         iter != aggregators_.end(); ++iter) {
       const result_storage& s = *iter->second.get_storage();
       result_t result = s.get_result_at(pos);
       if (result.is_bursted_at(pos)) {
