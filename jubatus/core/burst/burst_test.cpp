@@ -175,6 +175,8 @@ TEST(burst, simple) {
   }
 
   {
+    ASSERT_FALSE(tested.has_been_mixed());
+
     burst::diff_t diff;
     tested.get_diff(diff);
     tested.put_diff(diff);
@@ -187,6 +189,7 @@ TEST(burst, simple) {
       }
     };
     test_burst_and_its_copy(tested, &test::invoke);
+    ASSERT_TRUE(tested.has_been_mixed());
   }
 }
 

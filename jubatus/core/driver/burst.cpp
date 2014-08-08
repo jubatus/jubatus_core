@@ -74,6 +74,9 @@ void burst::get_status(std::map<std::string, std::string>& status) const {
   // TODO(gintenlabo) implement
 }
 
+bool burst::has_been_mixed() const {
+  return burst_->has_been_mixed();
+}
 void burst::set_processed_keywords(const std::vector<std::string>& keywords) {
   return burst_->set_processed_keywords(keywords);
 }

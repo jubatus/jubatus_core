@@ -107,6 +107,8 @@ class burst {
   static void mix(const diff_t& lhs, diff_t& ret) {
     ret.mix(lhs);
   }
+  // return true iff put_diff has been called
+  bool has_been_mixed() const;
 
   void set_processed_keywords(const std::vector<std::string>& keywords);
 

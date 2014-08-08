@@ -65,6 +65,7 @@ class burst : public driver_base {
 
   void get_status(std::map<std::string, std::string>& status) const;
 
+  bool has_been_mixed() const;
   void set_processed_keywords(const std::vector<std::string>& keywords);
 
   void pack(framework::packer& pk) const;

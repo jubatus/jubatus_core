@@ -166,7 +166,8 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
 
  public:
   explicit impl_(const burst_options& options)
-      : options_(options) {
+      : options_(options),
+        has_been_mixed_(false) {
     if (options_.window_batch_size <= 0) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
           "window_batch_size should > 0"));
@@ -345,7 +346,11 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       aggregators_.erase(to_be_removed[i]);
     }
 
+    has_been_mixed_ = true;
     return true;
+  }
+  bool has_been_mixed() const {
+    return has_been_mixed_;
   }
 
   void set_processed_keywords(const std::vector<string>& keywords) {
@@ -419,6 +424,7 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
   burst_options options_;
   aggregators_t aggregators_;
   storages_t storages_;
+  bool has_been_mixed_;
 
   const result_storage* get_storage_(const string& keyword) const {
     storages_t::const_iterator iter = storages_.find(keyword);
@@ -569,6 +575,10 @@ void burst::get_diff(diff_t& ret) const {
 bool burst::put_diff(const diff_t& diff) {
   JUBATUS_ASSERT(p_);
   return p_->put_diff(diff);
+}
+bool burst::has_been_mixed() const {
+  JUBATUS_ASSERT(p_);
+  return p_->has_been_mixed();
 }
 
 void burst::clear() {
