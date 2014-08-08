@@ -173,6 +173,21 @@ TEST(burst, simple) {
     };
     test_burst_and_its_copy(tested, &test::invoke);
   }
+
+  {
+    burst::diff_t diff;
+    tested.get_diff(diff);
+    tested.put_diff(diff);
+
+    struct test {
+      static void invoke(burst& tested) {
+        burst::result_map r = tested.get_all_bursted_results();
+        ASSERT_EQ(1u, r.size());
+        ASSERT_EQ(1u, r.count("haskell"));
+      }
+    };
+    test_burst_and_its_copy(tested, &test::invoke);
+  }
 }
 
 }  // namespace burst
