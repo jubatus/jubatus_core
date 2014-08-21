@@ -55,6 +55,10 @@ anomaly::anomaly(
 anomaly::~anomaly() {
 }
 
+bool anomaly::is_updatable() const {
+  return anomaly_->is_updatable();
+}
+
 void anomaly::clear_row(const std::string& id) {
   anomaly_->clear_row(id);
 }
