@@ -65,6 +65,9 @@ class clustering_test
     pair<string, string> param = GetParam();
     clustering_config conf;
     conf.compressor_method = param.first;
+    conf.bucket_size = 50;
+    conf.bicriteria_base_size = 5;
+    conf.compressed_bucket_size = 10;
     clustering_ = create_driver();
   }
   void TearDown() {
@@ -82,7 +85,7 @@ datum single_datum(string key, double v) {
 }
 
 TEST_P(clustering_test, get_revision) {
-  for (int i = 0; i < 1000; ++i) {
+  for (int i = 0; i < 2000; ++i) {
     vector<datum> datums;
     datums.push_back(single_datum("a", 1));
     clustering_->push(datums);
@@ -131,7 +134,7 @@ TEST_P(clustering_test, get_k_center) {
   vector<datum> one;
   vector<datum> two;
 
-  for (int j = 0; j < 100 ; ++j) {
+  for (int j = 0; j < 200 ; ++j) {
     datum a, b;
     a.num_values_.push_back(make_pair("a", -10 + r.next_gaussian() * 20));
     a.num_values_.push_back(make_pair("b", -200 + r.next_gaussian() * 400));
@@ -197,7 +200,7 @@ TEST_P(clustering_test, get_nearest_members) {
 
   set<check_points, check_point_compare> points;
 
-  for (int i = 0; i < 1000 ; ++i) {
+  for (int i = 0; i < 200 ; ++i) {
     datum x, y;
     float a = 10 + r.next_gaussian() * 20;
     float b = 1000 + r.next_gaussian() * 400;
