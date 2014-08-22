@@ -85,7 +85,7 @@ void normal_herd::update(
         pos_label,
         storage::val2_t(
             pos_val.v1
-            + std::max(0.f, 1.f - margin) * val_covariance_pos
+                + (1.f - margin) * val_covariance_pos
                     / (variance + 1.f / C),
             1.f
                 / ((1.f / pos_val.v2) + (2 * C + C * C * variance)
@@ -96,7 +96,7 @@ void normal_herd::update(
           neg_label,
           storage::val2_t(
               neg_val.v1
-              - std::max(0.f, 1.f - margin) * val_covariance_neg
+                  - (1.f - margin) * val_covariance_neg
                       / (variance + 1.f / C),
               1.f
                   / ((1.f / neg_val.v2) + (2 * C + C * C * variance)
