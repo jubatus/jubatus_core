@@ -1,3 +1,14 @@
+Release 0.0.3 - 2014/08/25
+--------------------------
+
+* Improvements
+    * Improved speed of clustering test (#48)
+    * anomaly: Exposed is_updatable interface in driver (#41)
+
+* Bug fixes
+    * classifier: Fix NHERD equations (#47)
+    * stat: Fix wrong error message (#42)
+
 Release 0.0.2 - 2014/07/22
 --------------------------
 
