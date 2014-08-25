@@ -45,6 +45,8 @@ class anomaly : public driver_base {
     return anomaly_.get();
   }
 
+  bool is_updatable() const;
+
   void clear_row(const std::string& id);
   std::pair<std::string, float> add(
       const std::string& id,

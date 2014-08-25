@@ -7,7 +7,6 @@ def configure(conf):
 
 def build(bld):
   source = [
-      'crc32.cpp',
       'exception.cpp',
       'key_manager.cpp',
       'vector_util.cpp',
@@ -20,7 +19,6 @@ def build(bld):
       'assert.hpp',
       'big_endian.hpp',
       'byte_buffer.hpp',
-      'crc32.hpp',
       'exception.hpp',
       'exception_info.hpp',
       'hash.hpp',
@@ -44,7 +42,6 @@ def build(bld):
     'exception_test.cpp',
     'big_endian_test.cpp',
     'byte_buffer_test.cpp',
-    'crc32_test.cpp',
     'key_manager_test.cpp',
     'vector_util_test.cpp',
     'jsonconfig_test.cpp',
