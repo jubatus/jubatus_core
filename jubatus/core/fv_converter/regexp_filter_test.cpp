@@ -110,6 +110,35 @@ TEST(regexp_filter, long_substitute) {
   }
 }
 
+TEST(regexp_filter, group) {
+  regexp_filter f("(apple|banana|orange)", "\\1 juice \\1");
+
+  std::string out;
+  f.filter("apple", out);
+  EXPECT_EQ("apple juice apple", out);
+}
+
+TEST(regexp_filter, group_10) {
+  regexp_filter f("(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)", "\\10");
+
+  std::string out;
+  f.filter("abcdefghij", out);
+  EXPECT_EQ("a0", out);
+}
+
+TEST(regexp_filter, invalid_group_number) {
+  EXPECT_THROW(regexp_filter f("(a)", "\\2"), converter_exception);
+  EXPECT_THROW(regexp_filter f("(a)", "\\2x"), converter_exception);
+}
+
+TEST(regexp_filter, invalid_escape) {
+  EXPECT_THROW(regexp_filter f("(a)", "\\xx"), converter_exception);
+}
+
+TEST(regexp_filter, last_backslash) {
+  EXPECT_THROW(regexp_filter f("(a)", "\\"), converter_exception);
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus
