@@ -35,6 +35,11 @@ class regexp_filter : public string_filter {
  private:
   regexp_filter();
 
+  void replace(
+      const std::string& input,
+      const OnigRegion* region,
+      std::ostream& out) const;
+
   regex_t* reg_;
   std::string replace_;
 };
