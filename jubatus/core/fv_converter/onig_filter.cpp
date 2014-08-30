@@ -34,11 +34,68 @@ regexp_filter::regexp_filter(const std::string& regexp,
     throw JUBATUS_EXCEPTION(converter_exception(
         "invalid regular expression: " + regexp));
   }
+
+  int num_captures = onig_number_of_captures(reg_);
+  for (std::size_t i = 0; i < replace.size(); ++i) {
+    char c = replace[i];
+    if (c == '\\') {
+      if (i == replace.size() - 1) {
+        throw JUBATUS_EXCEPTION(converter_exception(
+            "invalid replacement expression. 0-9 or \\ are required after \\"));
+      }
+      ++i;
+      c = replace[i];
+      if (c == '\\') {
+      } else if ('0' <= c && c <= '9') {
+        int group = c - '0';
+        if (group > num_captures) {
+          throw JUBATUS_EXCEPTION(converter_exception(
+              "invalid number of capture group"));         
+        }
+      } else {
+        throw JUBATUS_EXCEPTION(converter_exception(
+            "invalid replacement expression. 0-9 or \\ are required after \\"));
+      }
+    }
+  }
 }
 
 regexp_filter::~regexp_filter() {
   if (reg_) {
     onig_free(reg_);
+  }
+}
+
+void regexp_filter::replace(
+    const std::string& input,
+    const OnigRegion* region,
+    std::ostream& out) const {
+  for (std::size_t i = 0; i < replace_.size(); ++i) {
+    char c = replace_[i];
+    if (c == '\\') {
+      ++i;
+      if (i > replace_.size() - 1) {
+        // This exception must not be called, because replace string is checked
+        // in the constructor
+        throw JUBATUS_EXCEPTION(converter_exception(
+            "invalid replacement expression. 0-9 or \\ are required after \\"));
+      }
+      c = replace_[i];
+      if (c == '\\') {
+        out << '\\';
+      } else if ('0' <= c && c <= '9') {
+        int group = c - '0';
+        std::size_t len = region->end[group] - region->beg[group];
+        out << input.substr(region->beg[group], len);
+      } else {
+        // This exception must not be called, because replace string is checked
+        // in the constructor
+        throw JUBATUS_EXCEPTION(converter_exception(
+            "invalid replacement expression. 0-9 or \\ are required after \\"));
+      }
+    } else {
+      out << c;
+    }
   }
 }
 
@@ -49,13 +106,16 @@ void regexp_filter::filter(
   const UChar* head = reinterpret_cast<const UChar*>(input.c_str());
   const UChar* cur = head, *end = head + input.size();
 
+  OnigRegion* region = onig_region_new();
+
   // We need to check when cur == end as "$" matches to the eos.
   while (cur <= end) {
-    int r = onig_match(reg_, head, end, cur, NULL, ONIG_OPTION_NONE);
+    int r = onig_match(reg_, head, end, cur, region, ONIG_OPTION_NONE);
     if (r >= 0) {
-      ss << replace_;
+      replace(input, region, ss);
       cur += r;
     }
+    onig_region_clear(region);
     // If the pattern didn't match or mached an empty string, proceed the
     // pointer forcely.
     if (r <= 0) {
@@ -64,6 +124,7 @@ void regexp_filter::filter(
       ++cur;
     }
   }
+  onig_region_free(region, 1);
 
   output = ss.str();
 }
