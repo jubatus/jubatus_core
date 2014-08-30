@@ -30,6 +30,11 @@ regexp_filter::regexp_filter(
     throw JUBATUS_EXCEPTION(
         converter_exception("invalid regular expression: " + regexp));
   }
+  std::string error;
+  if (!re_.CheckRewriteString(replace, &error)) {
+    throw JUBATUS_EXCEPTION(
+        converter_exception(error + " : " + replace));
+  }
 }
 
 void regexp_filter::filter(
