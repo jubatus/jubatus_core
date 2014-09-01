@@ -50,7 +50,7 @@ regexp_filter::regexp_filter(const std::string& regexp,
         int group = c - '0';
         if (group > num_captures) {
           throw JUBATUS_EXCEPTION(converter_exception(
-              "invalid number of capture group"));         
+              "invalid number of capture group"));
         }
       } else {
         throw JUBATUS_EXCEPTION(converter_exception(
