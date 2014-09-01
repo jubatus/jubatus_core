@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_BURST_WINDOW_FWD_HPP_
 
 #include <stdint.h>
+#include <msgpack.hpp>
 
 namespace jubatus {
 namespace core {
