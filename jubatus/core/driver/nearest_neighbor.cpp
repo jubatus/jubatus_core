@@ -20,23 +20,27 @@
 #include <utility>
 #include <vector>
 #include "../table/column/row_deleter.hpp"
-
-using jubatus::util::lang::shared_ptr;
+#include "../fv_converter/weight_manager.hpp"
+#include "../fv_converter/mixable_weight_manager.hpp"
 
 namespace jubatus {
 namespace core {
 namespace driver {
 
+using jubatus::util::lang::shared_ptr;
+using fv_converter::mixable_weight_manager;
+using fv_converter::weight_manager;
+
 nearest_neighbor::nearest_neighbor(
     shared_ptr<core::nearest_neighbor::nearest_neighbor_base> nn,
     shared_ptr<fv_converter::datum_to_fv_converter> converter)
     : converter_(converter),
-      nn_(nn) {
+      nn_(nn),
+      wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
   register_mixable(nn_->get_mixable());
-  // We cannot register mixables of fv converter, because mixable_weight_manager
-  // does not support mixing with push_mixer.
-  // TODO(beam2d): Support mixing weight manager with push_mixer and register
-  // mixables of fv converter here.
+  register_mixable(&wm_);
+
+  converter_->set_weight_manager(wm_.get_model());
 }
 
 nearest_neighbor::nearest_neighbor(
