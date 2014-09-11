@@ -145,10 +145,7 @@ class datum_to_fv_converter_impl {
 
  public:
   datum_to_fv_converter_impl()
-      : mixable_weights_(new mixable_weight_manager) {
-    set_weight_manager(jubatus::util::lang::shared_ptr<weight_manager>(
-        new weight_manager));
-  }
+      : mixable_weights_(new mixable_weight_manager) {}
 
   void clear_rules() {
     string_filter_rules_.clear();
@@ -297,7 +294,11 @@ class datum_to_fv_converter_impl {
   }
 
   void clear_weights() {
-    mixable_weights_->get_model()->clear();
+    jubatus::util::lang::shared_ptr<weight_manager> weights =
+        mixable_weights_->get_model();
+    if (weights) {
+      weights->clear();
+    }
   }
 
  private:
