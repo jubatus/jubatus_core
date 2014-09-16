@@ -114,12 +114,23 @@ void nearest_neighbor::clear() {
 }
 
 void nearest_neighbor::pack(framework::packer& pk) const {
+  pk.pack_array(2);
   nn_->pack(pk);
+  wm_.get_model()->pack(pk);
 }
 
 void nearest_neighbor::unpack(msgpack::object o) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  // clear
   nn_->clear();
-  nn_->unpack(o);
+  converter_->clear_weights();
+
+  // load
+  nn_->unpack(o.via.array.ptr[0]);
+  wm_.get_model()->unpack(o.via.array.ptr[1]);
 }
 
 }  // namespace driver
