@@ -89,26 +89,51 @@ shared_ptr<classifier_base> classifier_factory::create_classifier(
     }
     res.reset(new passive_aggressive(storage));
   } else if (name == "PA1" || name == "passive_aggressive_1") {
+    if (param.type() == jubatus::util::text::json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
     unlearning_classifier_config conf
         = config_cast_check<unlearning_classifier_config>(param);
     unlearner = create_unlearner(conf);
     res.reset(new passive_aggressive_1(conf, storage));
   } else if (name == "PA2" || name == "passive_aggressive_2") {
+    if (param.type() == jubatus::util::text::json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
     unlearning_classifier_config conf
         = config_cast_check<unlearning_classifier_config>(param);
     unlearner = create_unlearner(conf);
     res.reset(new passive_aggressive_2(conf, storage));
   } else if (name == "CW" || name == "confidence_weighted") {
+    if (param.type() == jubatus::util::text::json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
     unlearning_classifier_config conf
         = config_cast_check<unlearning_classifier_config>(param);
     unlearner = create_unlearner(conf);
     res.reset(new confidence_weighted(conf, storage));
   } else if (name == "AROW" || name == "arow") {
+    if (param.type() == jubatus::util::text::json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
     unlearning_classifier_config conf
         = config_cast_check<unlearning_classifier_config>(param);
     unlearner = create_unlearner(conf);
     res.reset(new arow(conf, storage));
   } else if (name == "NHERD" || name == "normal_herd") {
+    if (param.type() == jubatus::util::text::json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
     unlearning_classifier_config conf
         = config_cast_check<unlearning_classifier_config>(param);
     unlearner = create_unlearner(conf);
