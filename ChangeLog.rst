@@ -1,3 +1,11 @@
+Release 0.0.4 - 2014/09/29
+--------------------------
+
+* Improvements
+    * Support string replacement with capture group in oniguruma-based regexp string_filter (#53)
+    * Improve varidation of replacement string in re2-based regexp string_filter (#54)
+    * classifier: Improve error message when invalid configuration is given (#52)
+
 Release 0.0.3 - 2014/08/25
 --------------------------
 
