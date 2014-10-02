@@ -72,6 +72,7 @@ class clustering {
 
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
+  void clear();
 
   // for test only
   void do_clustering();
