@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_FV_CONVERTER_NUM_FILTER_IMPL_HPP_
 
 #include "num_filter.hpp"
+#include "../common/exception.hpp"
 
 namespace jubatus {
 namespace core {
@@ -60,6 +61,25 @@ class linear_normalization_filter : public num_filter {
   double max_;
   double min_;
   bool truncate_;
+};
+
+class gaussian_normalization_filter : public num_filter {
+ public:
+  gaussian_normalization_filter(double avg,
+                                double var)
+    : avg_(avg), var_(var) {
+    if (var_ < 0) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("Variance must be non-negative"));
+    }
+  }
+
+  double filter(double value) const {
+    return (value - avg_) / var_;
+  }
+ private:
+  double avg_;
+  double var_;
 };
 
 }  // namespace fv_converter

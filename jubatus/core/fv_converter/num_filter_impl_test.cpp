@@ -59,6 +59,20 @@ TEST(linear_normalization, non_truncate) {
   }
 }
 
+TEST(gaussian_normalization, negative_variance) {
+  EXPECT_THROW(gaussian_normalization_filter a(1, -1),
+               common::invalid_parameter);
+}
+
+TEST(gaussian_normalization, trivial) {
+  gaussian_normalization_filter gaussian_normalizer(100, 100);
+  EXPECT_DOUBLE_EQ(0, gaussian_normalizer.filter(100));
+  EXPECT_DOUBLE_EQ(-0.5, gaussian_normalizer.filter(50));
+  EXPECT_DOUBLE_EQ(-1, gaussian_normalizer.filter(-0));
+  EXPECT_DOUBLE_EQ(0.5, gaussian_normalizer.filter(150));
+  EXPECT_DOUBLE_EQ(1, gaussian_normalizer.filter(200));
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus

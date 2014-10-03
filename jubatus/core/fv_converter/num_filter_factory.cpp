@@ -47,6 +47,15 @@ shared_ptr<linear_normalization_filter> create_linear_normalization_filter(
   return shared_ptr<linear_normalization_filter>(
       new linear_normalization_filter(float_max, float_min, truncate_flag));
 }
+shared_ptr<gaussian_normalization_filter> create_gaussian_normalization_filter(
+    const std::map<std::string, std::string>& params) {
+  const std::string& avg = get_or_die(params, "average");
+  const std::string& var = get_or_die(params, "variance");
+  const double float_avg = jubatus::util::lang::lexical_cast<double>(avg);
+  const double float_var = jubatus::util::lang::lexical_cast<double>(var);
+  return shared_ptr<gaussian_normalization_filter>(
+      new gaussian_normalization_filter(float_avg, float_var));
+}
 }  // namespace
 
 shared_ptr<num_filter> num_filter_factory::create(
@@ -57,13 +66,14 @@ shared_ptr<num_filter> num_filter_factory::create(
     return create_add_filter(params);
   } else if (name == "linear_normalization") {
     return create_linear_normalization_filter(params);
+  } else if (name == "gaussian_normalization") {
+    return create_gaussian_normalization_filter(params);
   } else if (ext_ && (p = ext_(name, params))) {
     return shared_ptr<num_filter>(p);
   } else {
     throw JUBATUS_EXCEPTION(
         converter_exception("unknonw num filter name: " + name));
   }
-
 }
 
 }  // namespace fv_converter
