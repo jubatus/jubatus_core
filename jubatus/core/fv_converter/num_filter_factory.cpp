@@ -29,7 +29,6 @@ namespace core {
 namespace fv_converter {
 
 namespace {
-
 shared_ptr<add_filter> create_add_filter(
     const std::map<std::string, std::string>& params) {
   const std::string& value = get_or_die(params, "value");
@@ -37,6 +36,17 @@ shared_ptr<add_filter> create_add_filter(
   return shared_ptr<add_filter>(new add_filter(float_val));
 }
 
+shared_ptr<linear_normalization_filter> create_linear_normalization_filter(
+    const std::map<std::string, std::string>& params) {
+  const std::string& max = get_or_die(params, "max");
+  const std::string& min = get_or_die(params, "min");
+  const std::string& truncate = get_with_default(params, "truncate", "True");
+  const double float_max = jubatus::util::lang::lexical_cast<double>(max);
+  const double float_min = jubatus::util::lang::lexical_cast<double>(min);
+  const bool truncate_flag = truncate == "True";
+  return shared_ptr<linear_normalization_filter>(
+      new linear_normalization_filter(float_max, float_min, truncate_flag));
+}
 }  // namespace
 
 shared_ptr<num_filter> num_filter_factory::create(
@@ -45,12 +55,15 @@ shared_ptr<num_filter> num_filter_factory::create(
   num_filter* p;
   if (name == "add") {
     return create_add_filter(params);
+  } else if (name == "linear_normalization") {
+    return create_linear_normalization_filter(params);
   } else if (ext_ && (p = ext_(name, params))) {
     return shared_ptr<num_filter>(p);
   } else {
     throw JUBATUS_EXCEPTION(
         converter_exception("unknonw num filter name: " + name));
   }
+
 }
 
 }  // namespace fv_converter

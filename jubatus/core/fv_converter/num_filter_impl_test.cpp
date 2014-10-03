@@ -26,6 +26,39 @@ TEST(add_filter, trivial) {
   EXPECT_EQ(3.0, add.filter(2.0));
 }
 
+TEST(linear_normalization, truncate) {
+  linear_normalization_filter truncate_normalizer(100, -100, true);
+  for (int i = 0; i < 1000; ++i) {
+    // cut to zero
+    EXPECT_DOUBLE_EQ(0, truncate_normalizer.filter(-100 - i * 100));
+  }
+  EXPECT_DOUBLE_EQ(0, truncate_normalizer.filter(-100));
+  EXPECT_DOUBLE_EQ(0.25, truncate_normalizer.filter(-50));
+  EXPECT_DOUBLE_EQ(0.5, truncate_normalizer.filter(0));
+  EXPECT_DOUBLE_EQ(0.75, truncate_normalizer.filter(50));
+  EXPECT_DOUBLE_EQ(1, truncate_normalizer.filter(100));
+  for (int i = 0; i < 1000; ++i) {
+    // cut to one
+    EXPECT_DOUBLE_EQ(1, truncate_normalizer.filter(100 + i * 100));
+  }
+}
+
+TEST(linear_normalization, non_truncate) {
+  linear_normalization_filter truncate_normalizer(100, -100, false);
+  for (int i = 0; i < 1000; ++i) {
+    EXPECT_DOUBLE_EQ(-0.5 * i, truncate_normalizer.filter(-100 + i * -100));
+  }
+  EXPECT_DOUBLE_EQ(0, truncate_normalizer.filter(-100));
+  EXPECT_DOUBLE_EQ(0.25, truncate_normalizer.filter(-50));
+  EXPECT_DOUBLE_EQ(0.5, truncate_normalizer.filter(0));
+  EXPECT_DOUBLE_EQ(0.75, truncate_normalizer.filter(50));
+  EXPECT_DOUBLE_EQ(1, truncate_normalizer.filter(100));
+  EXPECT_DOUBLE_EQ(1.5, truncate_normalizer.filter(200));
+  for (int i = 0; i < 1000; ++i) {
+    EXPECT_DOUBLE_EQ(1.0 + 0.5 * i, truncate_normalizer.filter(100 + i * 100));
+  }
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus

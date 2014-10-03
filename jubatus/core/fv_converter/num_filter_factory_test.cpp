@@ -50,6 +50,22 @@ TEST(num_filter_factory, create_add_filter) {
   EXPECT_EQ(20.0, filter->filter(10.0));
 }
 
+TEST(num_filter_factory, create_linear_normalization_filter) {
+  num_filter_factory f;
+  std::map<std::string, std::string> params;
+  params["max"] = "100";
+  params["min"] = "-100";
+  jubatus::util::lang::shared_ptr<num_filter>
+      filter(f.create("linear_normalization", params));
+
+  EXPECT_EQ(typeid(linear_normalization_filter).name(), typeid(*filter).name());
+  EXPECT_DOUBLE_EQ(0, filter->filter(-100));
+  EXPECT_DOUBLE_EQ(0.25, filter->filter(-50));
+  EXPECT_DOUBLE_EQ(0.5, filter->filter(0));
+  EXPECT_DOUBLE_EQ(0.75, filter->filter(50));
+  EXPECT_DOUBLE_EQ(1, filter->filter(100));
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus

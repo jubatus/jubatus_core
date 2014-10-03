@@ -37,6 +37,31 @@ class add_filter : public num_filter {
   double value_;
 };
 
+class linear_normalization_filter : public num_filter {
+ public:
+  linear_normalization_filter(double max,
+                              double min,
+                              bool truncate)
+    : max_(max), min_(min), truncate_(truncate) {
+  }
+
+  double filter(double value) const {
+    if (truncate_) {
+      if (max_ < value) {
+        return 1.0;
+      } else if (value < min_) {
+        return 0.0;
+      }
+    }
+    return (value - min_) / (max_ - min_);
+  }
+
+ private:
+  double max_;
+  double min_;
+  bool truncate_;
+};
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus
