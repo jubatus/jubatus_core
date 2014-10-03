@@ -46,7 +46,6 @@ class storage : public event_dispatcher<storage_event_type, wplist> {
   void get_diff(diff_t& d) const;
   bool put_diff(const diff_t& d);
   void mix(const diff_t&, diff_t& ret);
-  void clear();
 
   size_t get_revision();
 
@@ -62,6 +61,7 @@ class storage : public event_dispatcher<storage_event_type, wplist> {
 
   virtual void pack(framework::packer& packer) const;
   virtual void unpack(msgpack::object o);
+  virtual void clear();
 
   MSGPACK_DEFINE(revision_, name_, config_, common_);
 

@@ -39,6 +39,7 @@ class compressive_storage : public storage {
 
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
+  void clear();
 
  private:
   void carry_up(size_t r);

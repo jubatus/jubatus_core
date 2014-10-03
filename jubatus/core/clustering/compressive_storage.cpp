@@ -132,6 +132,13 @@ void compressive_storage::unpack(msgpack::object o) {
   mems[3].convert(compressor_.get());
 }
 
+void compressive_storage::clear() {
+  storage::clear();
+  mine_.clear();
+  mine_.push_back(wplist());
+  status_ = 0;
+}
+
 }  // namespace clustering
 }  // namespace core
 }  // namespace jubatus

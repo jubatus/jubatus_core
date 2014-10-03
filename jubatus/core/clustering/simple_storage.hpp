@@ -33,6 +33,7 @@ class simple_storage : public storage {
 
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
+  void clear();
 
  private:
   wplist mine_;

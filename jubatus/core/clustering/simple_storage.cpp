@@ -58,6 +58,11 @@ void simple_storage::unpack(msgpack::object o) {
   mems[1].convert(&mine_);
 }
 
+void simple_storage::clear() {
+  storage::clear();
+  mine_.clear();
+}
+
 }  // namespace clustering
 }  // namespace core
 }  // namespace jubatus
