@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_NUM_FILTER_IMPL_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_NUM_FILTER_IMPL_HPP_
 
+#include <cmath>
 #include "num_filter.hpp"
 #include "../common/exception.hpp"
 
@@ -80,6 +81,26 @@ class gaussian_normalization_filter : public num_filter {
  private:
   double avg_;
   double var_;
+};
+
+class sigmoid_normalization_filter : public num_filter {
+ public:
+  sigmoid_normalization_filter(double gain,
+                               double bias)
+    : bias_(bias), gain_(gain) {
+    if (gain_ == 0.0) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("gain must not be zero"));
+    }
+  }
+
+  double filter(double value) const {
+    return 1.0 / (1 + std::exp(-gain_ * (value - bias_)));
+  }
+
+ private:
+  double bias_;
+  double gain_;
 };
 
 }  // namespace fv_converter

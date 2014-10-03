@@ -47,6 +47,7 @@ shared_ptr<linear_normalization_filter> create_linear_normalization_filter(
   return shared_ptr<linear_normalization_filter>(
       new linear_normalization_filter(float_max, float_min, truncate_flag));
 }
+
 shared_ptr<gaussian_normalization_filter> create_gaussian_normalization_filter(
     const std::map<std::string, std::string>& params) {
   const std::string& avg = get_or_die(params, "average");
@@ -55,6 +56,16 @@ shared_ptr<gaussian_normalization_filter> create_gaussian_normalization_filter(
   const double float_var = jubatus::util::lang::lexical_cast<double>(var);
   return shared_ptr<gaussian_normalization_filter>(
       new gaussian_normalization_filter(float_avg, float_var));
+}
+
+shared_ptr<sigmoid_normalization_filter> create_sigmoid_normalization_filter(
+    const std::map<std::string, std::string>& params) {
+  const std::string& gain = get_with_default(params, "gain", "1");
+  const std::string& bias = get_with_default(params, "bias", "0");
+  const double float_gain = jubatus::util::lang::lexical_cast<double>(gain);
+  const double float_bias = jubatus::util::lang::lexical_cast<double>(bias);
+  return shared_ptr<sigmoid_normalization_filter>(
+      new sigmoid_normalization_filter(float_gain, float_bias));
 }
 }  // namespace
 
@@ -68,6 +79,8 @@ shared_ptr<num_filter> num_filter_factory::create(
     return create_linear_normalization_filter(params);
   } else if (name == "gaussian_normalization") {
     return create_gaussian_normalization_filter(params);
+  } else if (name == "sigmoid_normalization") {
+    return create_sigmoid_normalization_filter(params);
   } else if (ext_ && (p = ext_(name, params))) {
     return shared_ptr<num_filter>(p);
   } else {

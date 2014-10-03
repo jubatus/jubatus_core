@@ -73,6 +73,20 @@ TEST(gaussian_normalization, trivial) {
   EXPECT_DOUBLE_EQ(1, gaussian_normalizer.filter(200));
 }
 
+TEST(sigmoid_normalization, trivial) {
+  sigmoid_normalization_filter sigmoid_normalizer(1, 0);
+  EXPECT_DOUBLE_EQ(0.5, sigmoid_normalizer.filter(0));
+  EXPECT_DOUBLE_EQ(1, sigmoid_normalizer.filter(99999999999999));
+  EXPECT_DOUBLE_EQ(0, sigmoid_normalizer.filter(-9999999999999999));
+}
+
+TEST(sigmoid_normalization, biased) {
+  sigmoid_normalization_filter sigmoid_normalizer(1, 10);
+  EXPECT_DOUBLE_EQ(0.5, sigmoid_normalizer.filter(10));
+  EXPECT_DOUBLE_EQ(1, sigmoid_normalizer.filter(99999999999999));
+  EXPECT_DOUBLE_EQ(0, sigmoid_normalizer.filter(-9999999999999999));
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus

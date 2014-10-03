@@ -94,6 +94,21 @@ TEST(num_filter_factory, exception_with_minus_variance) {
                common::invalid_parameter);
 }
 
+TEST(num_filter_factory, create_sigmoid_normalization_filter) {
+  num_filter_factory f;
+  std::map<std::string, std::string> params;
+  params["gain"] = "1";
+  params["bias"] = "0";
+  jubatus::util::lang::shared_ptr<num_filter>
+      filter(f.create("sigmoid_normalization", params));
+
+  EXPECT_EQ(typeid(sigmoid_normalization_filter).name(),
+            typeid(*filter).name());
+  EXPECT_DOUBLE_EQ(0.5, filter->filter(0));
+  EXPECT_DOUBLE_EQ(1, filter->filter(999999999999999999));
+  EXPECT_DOUBLE_EQ(0, filter->filter(-999999999999999999));
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus
