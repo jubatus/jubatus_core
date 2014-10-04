@@ -38,14 +38,14 @@ shared_ptr<add_filter> create_add_filter(
 
 shared_ptr<linear_normalization_filter> create_linear_normalization_filter(
     const std::map<std::string, std::string>& params) {
-  const std::string& max = get_or_die(params, "max");
   const std::string& min = get_or_die(params, "min");
-  const std::string& truncate = get_with_default(params, "truncate", "True");
-  const double float_max = jubatus::util::lang::lexical_cast<double>(max);
+  const std::string& max = get_or_die(params, "max");
+  const std::string truncate = get_with_default(params, "truncate", "True");
   const double float_min = jubatus::util::lang::lexical_cast<double>(min);
+  const double float_max = jubatus::util::lang::lexical_cast<double>(max);
   const bool truncate_flag = truncate == "True";
   return shared_ptr<linear_normalization_filter>(
-      new linear_normalization_filter(float_max, float_min, truncate_flag));
+      new linear_normalization_filter(float_min, float_max, truncate_flag));
 }
 
 shared_ptr<gaussian_normalization_filter> create_gaussian_normalization_filter(
@@ -60,8 +60,8 @@ shared_ptr<gaussian_normalization_filter> create_gaussian_normalization_filter(
 
 shared_ptr<sigmoid_normalization_filter> create_sigmoid_normalization_filter(
     const std::map<std::string, std::string>& params) {
-  const std::string& gain = get_with_default(params, "gain", "1");
-  const std::string& bias = get_with_default(params, "bias", "0");
+  const std::string gain = get_with_default(params, "gain", "1");
+  const std::string bias = get_with_default(params, "bias", "0");
   const double float_gain = jubatus::util::lang::lexical_cast<double>(gain);
   const double float_bias = jubatus::util::lang::lexical_cast<double>(bias);
   return shared_ptr<sigmoid_normalization_filter>(

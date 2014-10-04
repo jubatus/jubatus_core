@@ -27,7 +27,7 @@ TEST(add_filter, trivial) {
 }
 
 TEST(linear_normalization, truncate) {
-  linear_normalization_filter truncate_normalizer(100, -100, true);
+  linear_normalization_filter truncate_normalizer(-100, 100, true);
   for (int i = 0; i < 1000; ++i) {
     // cut to zero
     EXPECT_DOUBLE_EQ(0, truncate_normalizer.filter(-100 - i * 100));
@@ -44,7 +44,7 @@ TEST(linear_normalization, truncate) {
 }
 
 TEST(linear_normalization, non_truncate) {
-  linear_normalization_filter truncate_normalizer(100, -100, false);
+  linear_normalization_filter truncate_normalizer(-100, 100, false);
   for (int i = 0; i < 1000; ++i) {
     EXPECT_DOUBLE_EQ(-0.5 * i, truncate_normalizer.filter(-100 + i * -100));
   }
