@@ -27,7 +27,8 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-gmm_clustering_method::gmm_clustering_method(size_t k) : k_(k) {
+gmm_clustering_method::gmm_clustering_method(size_t k)
+    : k_(k), kcenters_(), mapper_(), gmm_() {
 }
 
 gmm_clustering_method::~gmm_clustering_method() {
