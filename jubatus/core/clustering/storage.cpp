@@ -85,6 +85,15 @@ void storage::mix(const diff_t& lhs, diff_t& ret) {
   std::copy(lb, le, std::back_inserter(ret));
 };
 
+void storage::pack(framework::packer& packer) const {
+  pack_impl_(packer);
+}
+
+void storage::unpack(msgpack::object o) {
+  unpack_impl_(o);
+  dispatch(REVISION_CHANGE, get_all());
+}
+
 void storage::clear() {
   // TODO(gintenlabo): consider revisions
   common_.clear();
@@ -100,10 +109,10 @@ void storage::increment_revision() {
   dispatch(REVISION_CHANGE, get_all());
 }
 
-void storage::pack(framework::packer& packer) const {
+void storage::pack_impl_(framework::packer& packer) const {
   packer.pack(*this);
 }
-void storage::unpack(msgpack::object o) {
+void storage::unpack_impl_(msgpack::object o) {
   o.convert(this);
 }
 

@@ -59,14 +59,16 @@ class storage : public event_dispatcher<storage_event_type, wplist> {
     return core::storage::version();
   }
 
-  virtual void pack(framework::packer& packer) const;
-  virtual void unpack(msgpack::object o);
+  void pack(framework::packer& packer) const;
+  void unpack(msgpack::object o);
   virtual void clear();
 
   MSGPACK_DEFINE(revision_, name_, config_, common_);
 
  protected:
   void increment_revision();
+  virtual void pack_impl_(framework::packer& packer) const;
+  virtual void unpack_impl_(msgpack::object o);
 
   size_t revision_;
   std::string name_;

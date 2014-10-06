@@ -37,8 +37,6 @@ class compressive_storage : public storage {
   void set_compressor(
       jubatus::util::lang::shared_ptr<compressor::compressor> compressor);
 
-  void pack(framework::packer& packer) const;
-  void unpack(msgpack::object o);
   void clear();
 
  private:
@@ -46,6 +44,9 @@ class compressive_storage : public storage {
   bool is_next_bucket_full(size_t bucket_number);
   bool reach_forgetting_threshold(size_t bucket_number);
   void forget_weight(wplist& points);
+
+  void pack_impl_(framework::packer& packer) const;
+  void unpack_impl_(msgpack::object o);
 
   std::vector<wplist> mine_;
   uint64_t status_;
