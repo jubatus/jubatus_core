@@ -96,8 +96,8 @@ void storage::unpack(msgpack::object o) {
 
 void storage::clear() {
   // TODO(gintenlabo): consider revisions
-  common_.clear();
-  dispatch(REVISION_CHANGE, wplist());
+  clear_impl_();
+  dispatch(REVISION_CHANGE, get_all());
 }
 
 size_t storage::get_revision() {
@@ -115,6 +115,10 @@ void storage::pack_impl_(framework::packer& packer) const {
 void storage::unpack_impl_(msgpack::object o) {
   o.convert(this);
 }
+void storage::clear_impl_() {
+  common_.clear();
+}
+
 
 }  // namespace clustering
 }  // namespace core

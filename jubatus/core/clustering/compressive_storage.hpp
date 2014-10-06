@@ -37,8 +37,6 @@ class compressive_storage : public storage {
   void set_compressor(
       jubatus::util::lang::shared_ptr<compressor::compressor> compressor);
 
-  void clear();
-
  private:
   void carry_up(size_t r);
   bool is_next_bucket_full(size_t bucket_number);
@@ -47,6 +45,7 @@ class compressive_storage : public storage {
 
   void pack_impl_(framework::packer& packer) const;
   void unpack_impl_(msgpack::object o);
+  void clear_impl_();
 
   std::vector<wplist> mine_;
   uint64_t status_;

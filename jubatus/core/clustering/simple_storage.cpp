@@ -58,8 +58,8 @@ void simple_storage::unpack_impl_(msgpack::object o) {
   mems[1].convert(&mine_);
 }
 
-void simple_storage::clear() {
-  storage::clear();
+void simple_storage::clear_impl_() {
+  storage::clear_impl_();
   mine_.clear();
 }
 

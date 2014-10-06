@@ -132,8 +132,8 @@ void compressive_storage::unpack_impl_(msgpack::object o) {
   mems[3].convert(compressor_.get());
 }
 
-void compressive_storage::clear() {
-  storage::clear();
+void compressive_storage::clear_impl_() {
+  storage::clear_impl_();
   mine_.clear();
   mine_.push_back(wplist());
   status_ = 0;

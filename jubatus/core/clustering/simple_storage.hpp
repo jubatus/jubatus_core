@@ -31,11 +31,10 @@ class simple_storage : public storage {
   void add(const weighted_point& point);
   wplist get_mine() const;
 
-  void clear();
-
  private:
   void pack_impl_(framework::packer& packer) const;
   void unpack_impl_(msgpack::object o);
+  void clear_impl_();
 
   wplist mine_;
 };
