@@ -25,7 +25,8 @@
 #include <numeric>
 #include <utility>
 #include <vector>
-#include <iostream>
+
+#include "../common/exception.hpp"
 
 namespace jubatus {
 namespace core {
@@ -179,28 +180,28 @@ void burst_detect(const std::vector<uint32_t> & d_vector,
                   double gamma,
                   double burst_cut_threshold) {
   const int window_size = d_vector.size();
-  try {
-    if (gamma <= 0) {
-      throw "gamma must be > 0.";
+  if (gamma <= 0) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("gamma must be > 0."));
+  }
+  if (scaling_param <= 1) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("scaling_param must be > 1."));
+  }
+  if (burst_cut_threshold <= 0) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("burst_cut_threshold must be > 0."));
+  }
+  if (d_vector.size() != r_vector.size()) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("d_vector.size() != r_vector.size()"));
+  }
+  for (int batch_id = 0; batch_id < window_size; batch_id++) {
+    if (d_vector[batch_id] < r_vector[batch_id]) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter(
+            "d_vector[batch_id] < r_vector[batch_id]"));
     }
-    if (scaling_param <= 1) {
-      throw "scaling_param must be > 1.";
-    }
-    if (burst_cut_threshold <= 0) {
-      throw "burst_cut_threshold must be > 0.";
-    }
-    if (d_vector.size() != r_vector.size()) {
-      throw "Error: d_vector.size() != r_vector.size()";
-    }
-    for (int batch_id = 0; batch_id < window_size; batch_id++) {
-      if (d_vector[batch_id] < r_vector[batch_id]) {
-        throw "Error: d_vector[batch_id] < r_vector[batch_id]";
-      }
-    }
-  } catch (char const* e) {
-    batch_weights.assign(window_size, kDefaultBatchWeight);
-    std::cout << "Exception : " << e << std::endl;
-    return;
   }
   const std::vector<double> p_vector
     = get_p_vector(d_vector, r_vector, scaling_param);
