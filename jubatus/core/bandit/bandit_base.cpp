@@ -20,11 +20,14 @@
 #include <vector>
 #include <algorithm>
 
+using jubatus::util::lang::shared_ptr;
+
 namespace jubatus {
 namespace core {
 namespace bandit {
 
-bandit_base::bandit_base() {
+bandit_base::bandit_base(const shared_ptr<storage>& s)
+    : s_(s) {
 }
 
 bandit_base::~bandit_base() {
@@ -40,7 +43,7 @@ bool bandit_base::register_arm(const std::string& arm_id) {
 }
 
 bool bandit_base::delete_arm(const std::string& arm_id) {
-  s_.delete_arm(arm_id);
+  s_->delete_arm(arm_id);
   std::vector<std::string>::iterator iter =
       std::remove(arms_.begin(), arms_.end(), arm_id);
   if (iter == arms_.end()) {
@@ -53,7 +56,7 @@ bool bandit_base::delete_arm(const std::string& arm_id) {
 void bandit_base::register_reward(const std::string& player_id,
                                   const std::string& arm_id,
                                   double reward) {
-  s_.register_reward(player_id, arm_id, reward);
+  s_->register_reward(player_id, arm_id, reward);
 }
 
 registered_rewards bandit_base::get_registered_rewards(
@@ -64,18 +67,18 @@ registered_rewards bandit_base::get_registered_rewards(
        iter != arms_.end(); ++iter) {
     const std::string& arm_id = *iter;
     result.insert(
-        std::make_pair(arm_id, s_.get_registered_reward(player_id, arm_id)));
+        std::make_pair(arm_id, s_->get_registered_reward(player_id, arm_id)));
   }
 
   return result;
 }
 
 bool bandit_base::reset(const std::string& player_id) {
-  return s_.reset(player_id);
+  return s_->reset(player_id);
 }
 
 void bandit_base::clear() {
-  s_.clear();
+  s_->clear();
   arms_.clear();
 }
 

@@ -20,7 +20,8 @@
 #include <string>
 
 #include "registered_reward.hpp"
-#include "jubatus/util/data/unordered_map.h"
+#include "../common/unordered_map.hpp"
+#include "../common/version.hpp"
 
 namespace jubatus {
 namespace core {
@@ -49,6 +50,10 @@ class storage {
   void delete_arm(const std::string& arm_id);
   bool reset(const std::string& player_id);
   void clear();
+
+  core::storage::version get_version() const {
+    return core::storage::version();
+  }
 
  private:
   table_t mixed_, unmixed_;

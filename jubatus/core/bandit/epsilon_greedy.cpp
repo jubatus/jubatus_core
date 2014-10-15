@@ -24,8 +24,10 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-epsilon_greedy::epsilon_greedy(double eps)
-    : eps_(eps) {
+epsilon_greedy::epsilon_greedy(
+    const jubatus::util::lang::shared_ptr<storage>& s,
+    double eps)
+    : bandit_base(s), eps_(eps) {
   if (eps < 0 || 1 < eps) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0 <= epsilon <= 1"));

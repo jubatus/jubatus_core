@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include "jubatus/util/lang/shared_ptr.h"
 
 #include "registered_reward.hpp"
 #include "storage.hpp"
@@ -29,7 +30,7 @@ namespace bandit {
 
 class bandit_base {
  public:
-  bandit_base();
+  explicit bandit_base(const jubatus::util::lang::shared_ptr<storage>& s);
   virtual ~bandit_base();
 
   bool register_arm(const std::string& arm_id);
@@ -52,12 +53,12 @@ class bandit_base {
     return arms_;
   }
   const storage& get_storage() const {
-    return s_;
+    return *s_;
   }
 
  private:
   std::vector<std::string> arms_;
-  storage s_;
+  jubatus::util::lang::shared_ptr<storage> s_;
 };
 
 }  // namespace bandit

@@ -16,6 +16,7 @@ def build(bld):
       'nearest_neighbor.cpp',
       'clustering.cpp',
       'burst.cpp',
+      'bandit.cpp',
       ]
   headers = [
       'driver.hpp',
@@ -28,6 +29,7 @@ def build(bld):
       'nearest_neighbor.hpp',
       'clustering.hpp',
       'burst.hpp',
+      'bandit.hpp',
       ]
   use = ['jubatus_util', 'MSGPACK']
 

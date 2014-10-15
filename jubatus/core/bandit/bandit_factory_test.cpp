@@ -28,10 +28,11 @@ namespace core {
 namespace bandit {
 
 TEST(bandit_factory, epsilon_greedy) {
+  shared_ptr<storage> s(new storage());
   json::json js(new json::json_object);
   js["epsilon"] = json::to_json(0.5);
   common::jsonconfig::config conf(js);
-  shared_ptr<bandit_base> p = bandit_factory::create("epsilon_greedy", conf);
+  shared_ptr<bandit_base> p = bandit_factory::create("epsilon_greedy", conf, s);
   EXPECT_EQ("epsilon_greedy", p->name());
 }
 

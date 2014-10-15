@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_BANDIT_REGISTERED_REWARD_HPP_
 
 #include <string>
+#include <msgpack.hpp>
 
 #include "jubatus/util/data/unordered_map.h"
 
@@ -28,6 +29,8 @@ namespace bandit {
 struct registered_reward {
   int trial_count;
   double total_reward;
+
+  MSGPACK_DEFINE(trial_count, total_reward);
 };
 
 typedef jubatus::util::data::unordered_map<std::string, registered_reward>

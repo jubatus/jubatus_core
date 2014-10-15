@@ -39,7 +39,8 @@ struct epsilon_greedy_config {
 
 shared_ptr<bandit_base> bandit_factory::create(
     const std::string& name,
-    const common::jsonconfig::config& param) {
+    const common::jsonconfig::config& param,
+    const shared_ptr<storage>& s) {
   if (name == "epsilon_greedy") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
@@ -48,7 +49,7 @@ shared_ptr<bandit_base> bandit_factory::create(
     }
     epsilon_greedy_config conf =
         config_cast_check<epsilon_greedy_config>(param);
-    return shared_ptr<bandit_base>(new epsilon_greedy(conf.epsilon));
+    return shared_ptr<bandit_base>(new epsilon_greedy(s, conf.epsilon));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("bandit(" + name + ")"));

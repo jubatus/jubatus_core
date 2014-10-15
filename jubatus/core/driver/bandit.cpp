@@ -14,30 +14,41 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_BANDIT_BANDIT_FACTORY_HPP_
-#define JUBATUS_CORE_BANDIT_BANDIT_FACTORY_HPP_
+#include "bandit.hpp"
 
+#include <map>
 #include <string>
-#include "jubatus/util/lang/shared_ptr.h"
-#include "jubatus/util/text/json.h"
+#include <utility>
+#include <vector>
 
-#include "bandit_base.hpp"
-#include "../common/jsonconfig.hpp"
+#include "../bandit/bandit_factory.hpp"
+
+using jubatus::util::lang::shared_ptr;
+using jubatus::core::bandit::bandit_factory;
 
 namespace jubatus {
 namespace core {
-namespace bandit {
+namespace driver {
 
-class bandit_factory {
- public:
-  static jubatus::util::lang::shared_ptr<bandit_base> create(
-      const std::string& name,
-      const common::jsonconfig::config& param,
-      const jubatus::util::lang::shared_ptr<storage>& s);
-};
+bandit::bandit(const std::string& method_name,
+               const common::jsonconfig::config& param) {
+  shared_ptr<bandit_storage> s(new bandit_storage());
+  bandit_ = bandit_factory::create(method_name, param, s);
+  mixable_storage_.set_model(s);
 
-}  // namespace bandit
+  register_mixable(&mixable_storage_);
+}
+
+void bandit::clear() {
+  bandit_->clear();
+}
+void bandit::pack(framework::packer& pk) const {
+  // unimplemented
+}
+void bandit::unpack(msgpack::object o) {
+  // unimplemented
+}
+
+}  // namespace driver
 }  // namespace core
 }  // namespace jubatus
-
-#endif  // JUBATUS_CORE_BANDIT_BANDIT_FACTORY_HPP_
