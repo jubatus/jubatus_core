@@ -23,6 +23,7 @@
 
 #include "registered_reward.hpp"
 #include "storage.hpp"
+#include "../framework/packer.hpp"
 
 namespace jubatus {
 namespace core {
@@ -55,6 +56,9 @@ class bandit_base {
   const storage& get_storage() const {
     return *s_;
   }
+
+  void pack(framework::packer& pk) const;
+  void unpack(msgpack::object o);
 
  private:
   std::vector<std::string> arms_;

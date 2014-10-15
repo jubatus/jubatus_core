@@ -82,6 +82,25 @@ void bandit_base::clear() {
   arms_.clear();
 }
 
+void bandit_base::pack(framework::packer& pk) const {
+  pk.pack_array(2);
+  pk.pack(arms_);
+  pk.pack(*s_);
+}
+
+void bandit_base::unpack(msgpack::object o) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  // clear before unpacking
+  clear();
+
+  // unpack
+  o.via.array.ptr[0].convert(&arms_);
+  o.via.array.ptr[1].convert(s_.get());
+}
+
 }  // namespace bandit
 }  // namespace core
 }  // namespace jubatus

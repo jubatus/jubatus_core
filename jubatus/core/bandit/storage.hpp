@@ -55,6 +55,8 @@ class storage {
     return core::storage::version();
   }
 
+  MSGPACK_DEFINE(mixed_, unmixed_);
+
  private:
   table_t mixed_, unmixed_;
 };

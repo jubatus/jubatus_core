@@ -43,10 +43,10 @@ void bandit::clear() {
   bandit_->clear();
 }
 void bandit::pack(framework::packer& pk) const {
-  // unimplemented
+  bandit_->pack(pk);
 }
 void bandit::unpack(msgpack::object o) {
-  // unimplemented
+  bandit_->unpack(o);
 }
 
 }  // namespace driver
