@@ -57,6 +57,7 @@ def build(bld):
     'nearest_neighbor_test',
     'clustering_test',
     'burst_test',
+    'bandit_test',
     ]
 
   for t in tests:
