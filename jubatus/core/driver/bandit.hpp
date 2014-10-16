@@ -39,6 +39,20 @@ class bandit : public driver_base {
   bandit(const std::string& method_name,
          const common::jsonconfig::config& param);
 
+  bool register_arm(const std::string& arm_id);
+  bool delete_arm(const std::string& arm_id);
+
+  std::string select_arm(const std::string& player_id);
+
+  void register_reward(const std::string& player_id,
+                       const std::string& arm_id,
+                       double reward);
+
+  core::bandit::registered_rewards get_registered_rewards(
+      const std::string& player_id) const;
+
+  bool reset(const std::string& player_id);
+
   void clear();
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);

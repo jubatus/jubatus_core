@@ -39,6 +39,32 @@ bandit::bandit(const std::string& method_name,
   register_mixable(&mixable_storage_);
 }
 
+bool bandit::register_arm(const std::string& arm_id) {
+  return bandit_->register_arm(arm_id);
+}
+bool bandit::delete_arm(const std::string& arm_id) {
+  return bandit_->delete_arm(arm_id);
+}
+
+std::string bandit::select_arm(const std::string& player_id) {
+  return bandit_->select_arm(player_id);
+}
+
+void bandit::register_reward(const std::string& player_id,
+                             const std::string& arm_id,
+                             double reward) {
+  bandit_->register_reward(player_id, arm_id, reward);
+}
+
+core::bandit::registered_rewards bandit::get_registered_rewards(
+      const std::string& player_id) const {
+  return bandit_->get_registered_rewards(player_id);
+}
+
+bool bandit::reset(const std::string& player_id) {
+  return bandit_->reset(player_id);
+}
+
 void bandit::clear() {
   bandit_->clear();
 }
