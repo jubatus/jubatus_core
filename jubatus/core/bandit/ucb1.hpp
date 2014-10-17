@@ -14,36 +14,30 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "bandit_factory.hpp"
+#ifndef JUBATUS_CORE_BANDIT_UCB1_HPP_
+#define JUBATUS_CORE_BANDIT_UCB1_HPP_
 
 #include <string>
 
-#include <gtest/gtest.h>
-
-using jubatus::util::lang::shared_ptr;
-namespace json = jubatus::util::text::json;
+#include "bandit_base.hpp"
 
 namespace jubatus {
 namespace core {
 namespace bandit {
 
-TEST(bandit_factory, epsilon_greedy) {
-  shared_ptr<storage> s(new storage());
-  json::json js(new json::json_object);
-  js["epsilon"] = json::to_json(0.5);
-  common::jsonconfig::config conf(js);
-  shared_ptr<bandit_base> p = bandit_factory::create("epsilon_greedy", conf, s);
-  EXPECT_EQ("epsilon_greedy", p->name());
-}
+class ucb1 : public bandit_base {
+ public:
+  explicit ucb1(const jubatus::util::lang::shared_ptr<storage>& s);
 
-TEST(bandit_factory, ucb1) {
-  shared_ptr<storage> s(new storage());
-  json::json js(new json::json_object);
-  common::jsonconfig::config conf(js);
-  shared_ptr<bandit_base> p = bandit_factory::create("ucb1", conf, s);
-  EXPECT_EQ("ucb1", p->name());
-}
+  std::string select_arm(const std::string& player_id);
+
+  std::string name() const {
+    return "ucb1";
+  }
+};
 
 }  // namespace bandit
 }  // namespace core
 }  // namespace jubatus
+
+#endif  // JUBATUS_CORE_BANDIT_UCB1_HPP_

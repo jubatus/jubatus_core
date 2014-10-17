@@ -19,6 +19,7 @@
 #include <string>
 
 #include "epsilon_greedy.hpp"
+#include "ucb1.hpp"
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::core::common::jsonconfig::config_cast_check;
@@ -50,6 +51,8 @@ shared_ptr<bandit_base> bandit_factory::create(
     epsilon_greedy_config conf =
         config_cast_check<epsilon_greedy_config>(param);
     return shared_ptr<bandit_base>(new epsilon_greedy(s, conf.epsilon));
+  } else if (name == "ucb1") {
+    return shared_ptr<bandit_base>(new ucb1(s));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("bandit(" + name + ")"));
