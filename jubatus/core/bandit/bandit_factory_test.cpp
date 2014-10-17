@@ -44,6 +44,15 @@ TEST(bandit_factory, ucb1) {
   EXPECT_EQ("ucb1", p->name());
 }
 
+TEST(bandit_factory, softmax) {
+  shared_ptr<storage> s(new storage());
+  json::json js(new json::json_object);
+  js["tau"] = json::to_json(0.5);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p = bandit_factory::create("softmax", conf, s);
+  EXPECT_EQ("softmax", p->name());
+}
+
 }  // namespace bandit
 }  // namespace core
 }  // namespace jubatus
