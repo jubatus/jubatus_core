@@ -62,7 +62,9 @@ def configure(conf):
 
   conf.check_cxx(lib = 'msgpack')
 
-  if not Options.options.debug:
+  if Options.options.debug:
+    conf.define('_GLIBCXX_DEBUG', 1)
+  else:
     conf.define('NDEBUG', 1)
     conf.define('JUBATUS_DISABLE_ASSERTIONS', 1)
 
