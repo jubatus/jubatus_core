@@ -1,3 +1,12 @@
+Release 0.0.5 - 2014/10/20
+--------------------------
+
+* New machine learning service
+    * Distributed Burst Detection
+
+* Improvements
+    * Removed an unnecessary typedef (#37)
+
 Release 0.0.4 - 2014/09/29
 --------------------------
 

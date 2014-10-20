@@ -98,7 +98,6 @@ class bit_vector_unmatch_exception
 
 template <typename bit_base>
 struct bit_vector_base {
-  typedef bit_vector_base<bit_base> bit_vector_t;
   static const size_t BASE_BITS = sizeof(bit_base) * 8;
   static const size_t BLOCKSIZE = sizeof(bit_base);
 
@@ -133,7 +132,7 @@ struct bit_vector_base {
     }
   }
 
-  bool operator==(const bit_vector_t& rhs) const {
+  bool operator==(const bit_vector_base& rhs) const {
     if (bit_num_ != rhs.bit_num_) {
       return false;
     }
@@ -148,7 +147,7 @@ struct bit_vector_base {
     }
     return memcmp(bits_, rhs.bits_, used_bytes()) == 0;
   }
-  bool operator!=(const bit_vector_t& rhs) const {
+  bool operator!=(const bit_vector_base& rhs) const {
     return !this->operator==(rhs);
   }
 
@@ -236,10 +235,10 @@ struct bit_vector_base {
       clear_bit(i);
     }
   }
-  uint64_t calc_hamming_similarity(const bit_vector_t& bv) const {
+  uint64_t calc_hamming_similarity(const bit_vector_base& bv) const {
     return bit_num() - calc_hamming_distance(bv);
   }
-  uint64_t calc_hamming_distance(const bit_vector_t& bv) const {
+  uint64_t calc_hamming_distance(const bit_vector_base& bv) const {
     if (bit_num() != bv.bit_num()) {
       throw bit_vector_unmatch_exception(
           "calc_hamming_similarity(): bit_vector length unmatch! " +
@@ -319,7 +318,7 @@ struct bit_vector_base {
       }
     }
   }
-  friend std::ostream& operator<<(std::ostream& os, const bit_vector_t& bv) {
+  friend std::ostream& operator<<(std::ostream& os, const bit_vector_base& bv) {
     bv.debug_print(os);
     return os;
   }
@@ -397,7 +396,7 @@ struct bit_vector_base {
   }
 
   // deep copy
-  void duplicate(const bit_vector_t& orig) {
+  void duplicate(const bit_vector_base& orig) {
     if (bit_num_ != orig.bit_num_) {
       throw bit_vector_unmatch_exception(
           "failed copy bit vector from " +
