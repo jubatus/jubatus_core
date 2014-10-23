@@ -25,6 +25,7 @@
 #include <vector>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
+#include "../common/assoc_vector.hpp"
 #include "../common/version.hpp"
 #include "bit_vector.hpp"
 
@@ -32,7 +33,7 @@ namespace jubatus {
 namespace core {
 namespace storage {
 
-typedef jubatus::util::data::unordered_map<uint64_t, float> row_t;
+typedef jubatus::core::common::assoc_vector<uint64_t, float> row_t;
 typedef jubatus::util::data::unordered_map<std::string, row_t> tbl_t;
 
 typedef jubatus::util::data::unordered_map<std::string, bit_vector> bit_table_t;
