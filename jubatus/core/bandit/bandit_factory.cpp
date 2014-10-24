@@ -50,8 +50,7 @@ struct softmax_config {
 
 shared_ptr<bandit_base> bandit_factory::create(
     const std::string& name,
-    const common::jsonconfig::config& param,
-    const shared_ptr<storage>& s) {
+    const common::jsonconfig::config& param) {
   if (name == "epsilon_greedy") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
@@ -60,9 +59,9 @@ shared_ptr<bandit_base> bandit_factory::create(
     }
     epsilon_greedy_config conf =
         config_cast_check<epsilon_greedy_config>(param);
-    return shared_ptr<bandit_base>(new epsilon_greedy(s, conf.epsilon));
+    return shared_ptr<bandit_base>(new epsilon_greedy(conf.epsilon));
   } else if (name == "ucb1") {
-    return shared_ptr<bandit_base>(new ucb1(s));
+    return shared_ptr<bandit_base>(new ucb1());
   } else if (name == "softmax") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
@@ -70,7 +69,7 @@ shared_ptr<bandit_base> bandit_factory::create(
               "parameter block is not specified in config"));
     }
     softmax_config conf = config_cast_check<softmax_config>(param);
-    return shared_ptr<bandit_base>(new softmax(s, conf.tau));
+    return shared_ptr<bandit_base>(new softmax(conf.tau));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("bandit(" + name + ")"));

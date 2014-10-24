@@ -5,26 +5,25 @@ def configure(ctx): pass
 def build(bld):
   source = [
       'epsilon_greedy.cpp',
-      'bandit_base.cpp',
       'bandit_factory.cpp',
       'select_by_weights.cpp',
       'softmax.cpp',
-      'storage.cpp',
+      'summation_storage.cpp',
       'ucb1.cpp',
       ]
   headers = [
+      'arm_info.hpp',
       'epsilon_greedy.hpp',
       'bandit_base.hpp',
       'bandit_factory.hpp',
-      'registered_reward.hpp',
       'select_by_weights.hpp',
       'softmax.hpp',
-      'storage.hpp',
+      'summation_storage.hpp',
       'ucb1.hpp',
       ]
   tests = [
       'bandit_factory_test.cpp',
-      'storage_test.cpp',
+      'summation_storage_test.cpp',
       ]
   use = ['jubatus_util']
 

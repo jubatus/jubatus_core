@@ -34,7 +34,6 @@ namespace driver {
 class bandit : public driver_base {
  public:
   typedef core::bandit::bandit_base bandit_base;
-  typedef core::bandit::storage bandit_storage;
 
   bandit(const std::string& method_name,
          const common::jsonconfig::config& param);
@@ -44,11 +43,11 @@ class bandit : public driver_base {
 
   std::string select_arm(const std::string& player_id);
 
-  void register_reward(const std::string& player_id,
+  bool register_reward(const std::string& player_id,
                        const std::string& arm_id,
                        double reward);
 
-  core::bandit::registered_rewards get_registered_rewards(
+  core::bandit::arm_info_map get_arm_info(
       const std::string& player_id) const;
 
   bool reset(const std::string& player_id);
@@ -59,8 +58,8 @@ class bandit : public driver_base {
 
  private:
   jubatus::util::lang::shared_ptr<bandit_base> bandit_;
-  framework::linear_mixable_helper<bandit_storage,
-      bandit_storage::table_t> mixable_storage_;
+  framework::linear_mixable_helper<bandit_base,
+      bandit_base::diff_t> mixable_storage_;
 };
 
 }  // namespace driver

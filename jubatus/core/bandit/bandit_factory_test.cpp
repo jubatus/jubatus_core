@@ -28,28 +28,25 @@ namespace core {
 namespace bandit {
 
 TEST(bandit_factory, epsilon_greedy) {
-  shared_ptr<storage> s(new storage());
   json::json js(new json::json_object);
   js["epsilon"] = json::to_json(0.5);
   common::jsonconfig::config conf(js);
-  shared_ptr<bandit_base> p = bandit_factory::create("epsilon_greedy", conf, s);
+  shared_ptr<bandit_base> p = bandit_factory::create("epsilon_greedy", conf);
   EXPECT_EQ("epsilon_greedy", p->name());
 }
 
 TEST(bandit_factory, ucb1) {
-  shared_ptr<storage> s(new storage());
   json::json js(new json::json_object);
   common::jsonconfig::config conf(js);
-  shared_ptr<bandit_base> p = bandit_factory::create("ucb1", conf, s);
+  shared_ptr<bandit_base> p = bandit_factory::create("ucb1", conf);
   EXPECT_EQ("ucb1", p->name());
 }
 
 TEST(bandit_factory, softmax) {
-  shared_ptr<storage> s(new storage());
   json::json js(new json::json_object);
   js["tau"] = json::to_json(0.5);
   common::jsonconfig::config conf(js);
-  shared_ptr<bandit_base> p = bandit_factory::create("softmax", conf, s);
+  shared_ptr<bandit_base> p = bandit_factory::create("softmax", conf);
   EXPECT_EQ("softmax", p->name());
 }
 

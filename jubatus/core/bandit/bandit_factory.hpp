@@ -32,8 +32,7 @@ class bandit_factory {
  public:
   static jubatus::util::lang::shared_ptr<bandit_base> create(
       const std::string& name,
-      const common::jsonconfig::config& param,
-      const jubatus::util::lang::shared_ptr<storage>& s);
+      const common::jsonconfig::config& param);
 };
 
 }  // namespace bandit

@@ -18,12 +18,10 @@
 #define JUBATUS_CORE_BANDIT_BANDIT_BASE_HPP_
 
 #include <string>
-#include <vector>
-#include "jubatus/util/lang/shared_ptr.h"
 
-#include "registered_reward.hpp"
-#include "storage.hpp"
+#include "arm_info.hpp"
 #include "../framework/packer.hpp"
+#include "../common/version.hpp"
 
 namespace jubatus {
 namespace core {
@@ -31,38 +29,39 @@ namespace bandit {
 
 class bandit_base {
  public:
-  explicit bandit_base(const jubatus::util::lang::shared_ptr<storage>& s);
-  virtual ~bandit_base();
+  bandit_base() {
+  }
+  virtual ~bandit_base() {
+  }
 
-  bool register_arm(const std::string& arm_id);
-  bool delete_arm(const std::string& arm_id);
+  virtual bool register_arm(const std::string& arm_id) = 0;
+  virtual bool delete_arm(const std::string& arm_id) = 0;
 
   virtual std::string select_arm(const std::string& player_id) = 0;
 
-  void register_reward(const std::string& player_id,
-                       const std::string& arm_id,
-                       double reward);
+  virtual bool register_reward(const std::string& player_id,
+                               const std::string& arm_id,
+                               double reward) = 0;
 
-  registered_rewards get_registered_rewards(const std::string& player_id) const;
+  virtual arm_info_map get_arm_info(const std::string& player_id) const = 0;
 
-  bool reset(const std::string& player_id);
-  void clear();
+  virtual bool reset(const std::string& player_id) = 0;
+  virtual void clear() = 0;
 
   virtual std::string name() const = 0;
 
-  const std::vector<std::string>& get_arms() const {
-    return arms_;
-  }
-  const storage& get_storage() const {
-    return *s_;
-  }
+  virtual void pack(framework::packer& pk) const = 0;
+  virtual void unpack(msgpack::object o) = 0;
 
-  void pack(framework::packer& pk) const;
-  void unpack(msgpack::object o);
+  typedef jubatus::util::data::unordered_map<std::string, arm_info_map> diff_t;
 
- private:
-  std::vector<std::string> arms_;
-  jubatus::util::lang::shared_ptr<storage> s_;
+  virtual void get_diff(diff_t& diff) const = 0;
+  virtual bool put_diff(const diff_t& diff) = 0;
+  virtual void mix(const diff_t& lhs, diff_t& rhs) const = 0;
+
+  core::storage::version get_version() const {
+    return core::storage::version();
+  }
 };
 
 }  // namespace bandit

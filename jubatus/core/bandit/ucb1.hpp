@@ -20,6 +20,7 @@
 #include <string>
 
 #include "bandit_base.hpp"
+#include "summation_storage.hpp"
 
 namespace jubatus {
 namespace core {
@@ -27,13 +28,35 @@ namespace bandit {
 
 class ucb1 : public bandit_base {
  public:
-  explicit ucb1(const jubatus::util::lang::shared_ptr<storage>& s);
+  ucb1();
 
   std::string select_arm(const std::string& player_id);
+
+  bool register_arm(const std::string& arm_id);
+  bool delete_arm(const std::string& arm_id);
+
+  bool register_reward(const std::string& player_id,
+                       const std::string& arm_id,
+                       double reward);
+
+  arm_info_map get_arm_info(const std::string& player_id) const;
+
+  bool reset(const std::string& player_id);
+  void clear();
 
   std::string name() const {
     return "ucb1";
   }
+
+  void pack(framework::packer& pk) const;
+  void unpack(msgpack::object o);
+
+  void get_diff(diff_t& diff) const;
+  bool put_diff(const diff_t& diff);
+  void mix(const diff_t& lhs, diff_t& rhs) const;
+
+ private:
+  summation_storage s_;
 };
 
 }  // namespace bandit

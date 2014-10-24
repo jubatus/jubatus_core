@@ -14,7 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "storage.hpp"
+#include "summation_storage.hpp"
 
 #include <string>
 
@@ -24,48 +24,48 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-TEST(storage, common) {
-  storage s;
+TEST(summation_storage, common) {
+  summation_storage s;
   const std::string player_id = "player1";
   const std::string arm_id = "arm1";
 
   {
-    registered_reward r = s.get_registered_reward(player_id, arm_id);
-    EXPECT_EQ(0, r.trial_count);
-    EXPECT_EQ(0.0, r.total_reward);
+    arm_info a = s.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(0, a.trial_count);
+    EXPECT_EQ(0.0, a.weight);
     EXPECT_EQ(0.0, s.get_expectation(player_id, arm_id));
   }
 
   s.register_reward(player_id, arm_id, 1.0);
 
   {
-    registered_reward r = s.get_registered_reward(player_id, arm_id);
-    EXPECT_EQ(1, r.trial_count);
-    EXPECT_EQ(1.0, r.total_reward);
+    arm_info a = s.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(1.0, s.get_expectation(player_id, arm_id));
   }
 
   s.register_reward(player_id, arm_id, 0.0);
 
   {
-    registered_reward r = s.get_registered_reward(player_id, arm_id);
-    EXPECT_EQ(2, r.trial_count);
-    EXPECT_EQ(1.0, r.total_reward);
+    arm_info a = s.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(2, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(0.5, s.get_expectation(player_id, arm_id));
   }
 
   s.clear();
 
   {
-    registered_reward r = s.get_registered_reward(player_id, arm_id);
-    EXPECT_EQ(0, r.trial_count);
-    EXPECT_EQ(0.0, r.total_reward);
+    arm_info a = s.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(0, a.trial_count);
+    EXPECT_EQ(0.0, a.weight);
     EXPECT_EQ(0.0, s.get_expectation(player_id, arm_id));
   }
 }
 
 TEST(storage, mix) {
-  storage s1, s2;
+  summation_storage s1, s2;
 
   s1.register_reward("player1", "hoge", 1.0);
   s1.register_reward("player1", "fuga", 0.0);
@@ -74,77 +74,77 @@ TEST(storage, mix) {
   s2.register_reward("player1", "piyo", 1.0);
   s2.register_reward("player2", "hoge", 0.5);
 
-  storage::table_t diff1, diff2;
+  summation_storage::table_t diff1, diff2;
   s1.get_diff(diff1);
   s2.get_diff(diff2);
-  storage::mix(diff2, diff1);
+  summation_storage::mix(diff2, diff1);
   s1.put_diff(diff1);
   s2.put_diff(diff1);
 
   {
-    registered_reward r = s1.get_registered_reward("player1", "hoge");
-    EXPECT_EQ(2, r.trial_count);
-    EXPECT_EQ(1.0, r.total_reward);
+    arm_info a = s1.get_arm_info("player1", "hoge");
+    EXPECT_EQ(2, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(0.5, s1.get_expectation("player1", "hoge"));
   }
   {
-    registered_reward r = s2.get_registered_reward("player1", "hoge");
-    EXPECT_EQ(2, r.trial_count);
-    EXPECT_EQ(1.0, r.total_reward);
+    arm_info a = s2.get_arm_info("player1", "hoge");
+    EXPECT_EQ(2, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(0.5, s2.get_expectation("player1", "hoge"));
   }
 
   {
-    registered_reward r = s1.get_registered_reward("player1", "fuga");
-    EXPECT_EQ(1, r.trial_count);
-    EXPECT_EQ(0.0, r.total_reward);
+    arm_info a = s1.get_arm_info("player1", "fuga");
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(0.0, a.weight);
     EXPECT_EQ(0.0, s1.get_expectation("player1", "fuga"));
   }
   {
-    registered_reward r = s2.get_registered_reward("player1", "fuga");
-    EXPECT_EQ(1, r.trial_count);
-    EXPECT_EQ(0.0, r.total_reward);
+    arm_info a = s2.get_arm_info("player1", "fuga");
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(0.0, a.weight);
     EXPECT_EQ(0.0, s2.get_expectation("player1", "fuga"));
   }
 
   {
-    registered_reward r = s1.get_registered_reward("player1", "piyo");
-    EXPECT_EQ(1, r.trial_count);
-    EXPECT_EQ(1.0, r.total_reward);
+    arm_info a = s1.get_arm_info("player1", "piyo");
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(1.0, s1.get_expectation("player1", "piyo"));
   }
   {
-    registered_reward r = s2.get_registered_reward("player1", "piyo");
-    EXPECT_EQ(1, r.trial_count);
-    EXPECT_EQ(1.0, r.total_reward);
+    arm_info a = s2.get_arm_info("player1", "piyo");
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(1.0, s2.get_expectation("player1", "piyo"));
   }
 
   {
-    registered_reward r = s1.get_registered_reward("player2", "hoge");
-    EXPECT_EQ(2, r.trial_count);
-    EXPECT_EQ(0.5, r.total_reward);
+    arm_info a = s1.get_arm_info("player2", "hoge");
+    EXPECT_EQ(2, a.trial_count);
+    EXPECT_EQ(0.5, a.weight);
     EXPECT_EQ(0.25, s1.get_expectation("player2", "hoge"));
   }
   {
-    registered_reward r = s2.get_registered_reward("player2", "hoge");
-    EXPECT_EQ(2, r.trial_count);
-    EXPECT_EQ(0.5, r.total_reward);
+    arm_info a = s2.get_arm_info("player2", "hoge");
+    EXPECT_EQ(2, a.trial_count);
+    EXPECT_EQ(0.5, a.weight);
     EXPECT_EQ(0.25, s2.get_expectation("player2", "hoge"));
   }
 
   s1.register_reward("player1", "hoge", 1.0);
 
   {
-    registered_reward r = s1.get_registered_reward("player1", "hoge");
-    EXPECT_EQ(3, r.trial_count);
-    EXPECT_EQ(2.0, r.total_reward);
+    arm_info a = s1.get_arm_info("player1", "hoge");
+    EXPECT_EQ(3, a.trial_count);
+    EXPECT_EQ(2.0, a.weight);
     EXPECT_DOUBLE_EQ(2.0/3.0, s1.get_expectation("player1", "hoge"));
   }
   {
-    registered_reward r = s2.get_registered_reward("player1", "hoge");
-    EXPECT_EQ(2, r.trial_count);
-    EXPECT_EQ(1.0, r.total_reward);
+    arm_info a = s2.get_arm_info("player1", "hoge");
+    EXPECT_EQ(2, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(0.5, s2.get_expectation("player1", "hoge"));
   }
 }

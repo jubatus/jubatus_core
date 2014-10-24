@@ -32,9 +32,8 @@ namespace driver {
 
 bandit::bandit(const std::string& method_name,
                const common::jsonconfig::config& param) {
-  shared_ptr<bandit_storage> s(new bandit_storage());
-  bandit_ = bandit_factory::create(method_name, param, s);
-  mixable_storage_.set_model(s);
+  bandit_ = bandit_factory::create(method_name, param);
+  mixable_storage_.set_model(bandit_);
 
   register_mixable(&mixable_storage_);
 }
@@ -50,15 +49,15 @@ std::string bandit::select_arm(const std::string& player_id) {
   return bandit_->select_arm(player_id);
 }
 
-void bandit::register_reward(const std::string& player_id,
+bool bandit::register_reward(const std::string& player_id,
                              const std::string& arm_id,
                              double reward) {
-  bandit_->register_reward(player_id, arm_id, reward);
+  return bandit_->register_reward(player_id, arm_id, reward);
 }
 
-core::bandit::registered_rewards bandit::get_registered_rewards(
+core::bandit::arm_info_map bandit::get_arm_info(
       const std::string& player_id) const {
-  return bandit_->get_registered_rewards(player_id);
+  return bandit_->get_arm_info(player_id);
 }
 
 bool bandit::reset(const std::string& player_id) {

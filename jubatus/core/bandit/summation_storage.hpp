@@ -14,50 +14,52 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_BANDIT_STORAGE_HPP_
-#define JUBATUS_CORE_BANDIT_STORAGE_HPP_
+#ifndef JUBATUS_CORE_BANDIT_SUMMATION_STORAGE_HPP_
+#define JUBATUS_CORE_BANDIT_SUMMATION_STORAGE_HPP_
 
 #include <string>
+#include <vector>
 
-#include "registered_reward.hpp"
-#include "../common/unordered_map.hpp"
-#include "../common/version.hpp"
+#include "bandit_base.hpp"
 
 namespace jubatus {
 namespace core {
 namespace bandit {
 
-class storage {
+class summation_storage {
  public:
-  typedef jubatus::util::data::unordered_map<std::string, registered_rewards>
-      table_t;
+  typedef bandit_base::diff_t table_t;
 
-  storage();
+  summation_storage();
 
-  void register_reward(const std::string& player_id,
+  bool register_arm(const std::string& arm_id);
+  bool delete_arm(const std::string& arm_id);
+
+  bool register_reward(const std::string& player_id,
                        const std::string& arm_id,
                        double reward);
 
-  registered_reward get_registered_reward(const std::string& player_id,
-                                          const std::string& arm_id) const;
+  arm_info get_arm_info(const std::string& player_id,
+                        const std::string& arm_id) const;
   double get_expectation(const std::string& player_id,
                          const std::string& arm_id) const;
+
+  const std::vector<std::string>& get_arm_ids() const {
+    return arm_ids_;
+  }
+  arm_info_map get_arm_info_map(const std::string& player_id) const;
 
   void get_diff(table_t& diff) const;
   bool put_diff(const table_t& diff);
   static void mix(const table_t& lhs, table_t& rhs);
 
-  void delete_arm(const std::string& arm_id);
   bool reset(const std::string& player_id);
   void clear();
 
-  core::storage::version get_version() const {
-    return core::storage::version();
-  }
-
-  MSGPACK_DEFINE(mixed_, unmixed_);
+  MSGPACK_DEFINE(arm_ids_, mixed_, unmixed_);
 
  private:
+  std::vector<std::string> arm_ids_;
   table_t mixed_, unmixed_;
 };
 
@@ -65,4 +67,4 @@ class storage {
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_BANDIT_STORAGE_HPP_
+#endif  // JUBATUS_CORE_BANDIT_SUMMATION_STORAGE_HPP_

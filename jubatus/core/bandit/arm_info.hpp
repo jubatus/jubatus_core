@@ -14,30 +14,29 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_BANDIT_REGISTERED_REWARD_HPP_
-#define JUBATUS_CORE_BANDIT_REGISTERED_REWARD_HPP_
+#ifndef JUBATUS_CORE_BANDIT_ARM_INFO_HPP_
+#define JUBATUS_CORE_BANDIT_ARM_INFO_HPP_
 
 #include <string>
 #include <msgpack.hpp>
 
-#include "jubatus/util/data/unordered_map.h"
+#include "../common/unordered_map.hpp"
 
 namespace jubatus {
 namespace core {
 namespace bandit {
 
-struct registered_reward {
+struct arm_info {
   int trial_count;
-  double total_reward;
+  double weight;
 
-  MSGPACK_DEFINE(trial_count, total_reward);
+  MSGPACK_DEFINE(trial_count, weight);
 };
 
-typedef jubatus::util::data::unordered_map<std::string, registered_reward>
-    registered_rewards;
+typedef jubatus::util::data::unordered_map<std::string, arm_info> arm_info_map;
 
 }  // namespace bandit
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_BANDIT_REGISTERED_REWARD_HPP_
+#endif  // JUBATUS_CORE_BANDIT_ARM_INFO_HPP_

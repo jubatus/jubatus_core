@@ -20,6 +20,7 @@
 #include <string>
 
 #include "bandit_base.hpp"
+#include "summation_storage.hpp"
 #include "jubatus/util/math/random.h"
 
 namespace jubatus {
@@ -28,18 +29,37 @@ namespace bandit {
 
 class epsilon_greedy : public bandit_base {
  public:
-  epsilon_greedy(const jubatus::util::lang::shared_ptr<storage>& s,
-                 double eps);
+  explicit epsilon_greedy(double eps);
 
   std::string select_arm(const std::string& player_id);
+
+  bool register_arm(const std::string& arm_id);
+  bool delete_arm(const std::string& arm_id);
+
+  bool register_reward(const std::string& player_id,
+                       const std::string& arm_id,
+                       double reward);
+
+  arm_info_map get_arm_info(const std::string& player_id) const;
+
+  bool reset(const std::string& player_id);
+  void clear();
 
   std::string name() const {
     return "epsilon_greedy";
   }
 
+  void pack(framework::packer& pk) const;
+  void unpack(msgpack::object o);
+
+  void get_diff(diff_t& diff) const;
+  bool put_diff(const diff_t& diff);
+  void mix(const diff_t& lhs, diff_t& rhs) const;
+
  private:
   double eps_;
   jubatus::util::math::random::mtrand rand_;
+  summation_storage s_;
 };
 
 }  // namespace bandit

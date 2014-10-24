@@ -77,13 +77,13 @@ TEST(bandit, epsilon_greedy) {
 
   EXPECT_LT(0.1 * trial, total_reward);
 
-  core::bandit::registered_rewards r = b.get_registered_rewards(player_id);
+  core::bandit::arm_info_map r = b.get_arm_info(player_id);
   int trial_actual = 0;
   double total_reward_actual = 0;
-  for (core::bandit::registered_rewards::const_iterator iter = r.begin();
+  for (core::bandit::arm_info_map::const_iterator iter = r.begin();
        iter != r.end(); ++iter) {
     trial_actual += iter->second.trial_count;
-    total_reward_actual += iter->second.total_reward;
+    total_reward_actual += iter->second.weight;
   }
 
   EXPECT_EQ(trial, trial_actual);
