@@ -67,11 +67,25 @@ TEST(num_filter_factory, create_linear_normalization_filter) {
   EXPECT_DOUBLE_EQ(1, filter->filter(100));
 }
 
+TEST(num_filter_factory, create_illegal_linear_normalization_filter) {
+  num_filter_factory f;
+  std::map<std::string, std::string> params;
+  params["min"] = "100";
+  params["max"] = "100";
+  EXPECT_THROW(f.create("linear_normalization", params),
+               common::invalid_parameter);
+
+  params["min"] = "100";
+  params["max"] = "99.99";
+  EXPECT_THROW(f.create("linear_normalization", params),
+               common::invalid_parameter);
+}
+
 TEST(num_filter_factory, create_gaussian_normalization_filter) {
   num_filter_factory f;
   std::map<std::string, std::string> params;
   params["average"] = "100";
-  params["variance"] = "100";
+  params["standard_deviation"] = "100";
   jubatus::util::lang::shared_ptr<num_filter>
       filter(f.create("gaussian_normalization", params));
 
@@ -84,11 +98,11 @@ TEST(num_filter_factory, create_gaussian_normalization_filter) {
   EXPECT_DOUBLE_EQ(1, filter->filter(200));
 }
 
-TEST(num_filter_factory, exception_with_minus_variance) {
+TEST(num_filter_factory, exception_with_minus_standard_deviation) {
   num_filter_factory f;
   std::map<std::string, std::string> params;
   params["average"] = "100";
-  params["variance"] = "-1";
+  params["standard_deviation"] = "-1";
   EXPECT_THROW(f.create("gaussian_normalization", params),
                common::invalid_parameter);
 }

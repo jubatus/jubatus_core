@@ -59,7 +59,7 @@ TEST(linear_normalization, non_truncate) {
   }
 }
 
-TEST(gaussian_normalization, negative_variance) {
+TEST(gaussian_normalization, negative_standard_deviation) {
   EXPECT_THROW(gaussian_normalization_filter a(1, -1),
                common::invalid_parameter);
 }

@@ -73,20 +73,20 @@ class linear_normalization_filter : public num_filter {
 class gaussian_normalization_filter : public num_filter {
  public:
   gaussian_normalization_filter(double average,
-                                double variance)
-    : average_(average), variance_(variance) {
-    if (variance_ < 0) {
+                                double standard_deviation)
+    : average_(average), standard_deviation_(standard_deviation) {
+    if (standard_deviation_ < 0) {
       throw JUBATUS_EXCEPTION(
           common::invalid_parameter("Variance must be non-negative"));
     }
   }
 
   double filter(double value) const {
-    return (value - average_) / variance_;
+    return (value - average_) / standard_deviation_;
   }
  private:
   double average_;
-  double variance_;
+  double standard_deviation_;
 };
 
 class sigmoid_normalization_filter : public num_filter {

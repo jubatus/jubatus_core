@@ -51,11 +51,11 @@ shared_ptr<linear_normalization_filter> create_linear_normalization_filter(
 shared_ptr<gaussian_normalization_filter> create_gaussian_normalization_filter(
     const std::map<std::string, std::string>& params) {
   const std::string& avg = get_or_die(params, "average");
-  const std::string& var = get_or_die(params, "variance");
+  const std::string& stddev = get_or_die(params, "standard_deviation");
   const double float_avg = jubatus::util::lang::lexical_cast<double>(avg);
-  const double float_var = jubatus::util::lang::lexical_cast<double>(var);
+  const double float_stddev = jubatus::util::lang::lexical_cast<double>(stddev);
   return shared_ptr<gaussian_normalization_filter>(
-      new gaussian_normalization_filter(float_avg, float_var));
+      new gaussian_normalization_filter(float_avg, float_stddev));
 }
 
 shared_ptr<sigmoid_normalization_filter> create_sigmoid_normalization_filter(
