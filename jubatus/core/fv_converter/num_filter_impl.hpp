@@ -20,6 +20,7 @@
 #include <cmath>
 #include "num_filter.hpp"
 #include "../common/exception.hpp"
+#include "../common/assert.hpp"
 
 namespace jubatus {
 namespace core {
@@ -45,6 +46,10 @@ class linear_normalization_filter : public num_filter {
                               double max,
                               bool truncate)
     : min_(min), max_(max), truncate_(truncate) {
+    if (max_ <= min_) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("maximum must be bigger than mininum"));
+    }
   }
 
   double filter(double value) const {
@@ -55,6 +60,7 @@ class linear_normalization_filter : public num_filter {
         return 0.0;
       }
     }
+    JUBATUS_ASSERT_GT(min_, max_, "maximums must be bigger than minimum");
     return (value - min_) / (max_ - min_);
   }
 
