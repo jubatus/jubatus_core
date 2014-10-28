@@ -4,9 +4,9 @@ def configure(ctx): pass
 
 def build(bld):
   source = [
+      'bandit_factory.cpp',
       'epsilon_greedy.cpp',
       'exp3.cpp',
-      'bandit_factory.cpp',
       'select_by_weights.cpp',
       'softmax.cpp',
       'summation_storage.cpp',
@@ -14,10 +14,10 @@ def build(bld):
       ]
   headers = [
       'arm_info.hpp',
-      'epsilon_greedy.hpp',
-      'exp3.hpp',
       'bandit_base.hpp',
       'bandit_factory.hpp',
+      'epsilon_greedy.hpp',
+      'exp3.hpp',
       'select_by_weights.hpp',
       'softmax.hpp',
       'summation_storage.hpp',
