@@ -50,6 +50,14 @@ TEST(bandit_factory, softmax) {
   EXPECT_EQ("softmax", p->name());
 }
 
+TEST(bandit_factory, exp3) {
+  json::json js(new json::json_object);
+  js["gamma"] = json::to_json(0.5);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p = bandit_factory::create("exp3", conf);
+  EXPECT_EQ("exp3", p->name());
+}
+
 }  // namespace bandit
 }  // namespace core
 }  // namespace jubatus

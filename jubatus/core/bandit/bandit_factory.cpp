@@ -21,6 +21,7 @@
 #include "epsilon_greedy.hpp"
 #include "ucb1.hpp"
 #include "softmax.hpp"
+#include "exp3.hpp"
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::core::common::jsonconfig::config_cast_check;
@@ -48,6 +49,15 @@ struct softmax_config {
   }
 };
 
+struct exp3_config {
+  double gamma;
+
+  template<class Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(gamma);
+  }
+};
+
 shared_ptr<bandit_base> bandit_factory::create(
     const std::string& name,
     const common::jsonconfig::config& param) {
@@ -70,6 +80,14 @@ shared_ptr<bandit_base> bandit_factory::create(
     }
     softmax_config conf = config_cast_check<softmax_config>(param);
     return shared_ptr<bandit_base>(new softmax(conf.tau));
+  } else if (name == "exp3") {
+    if (param.type() == json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
+    exp3_config conf = config_cast_check<exp3_config>(param);
+    return shared_ptr<bandit_base>(new exp3(conf.gamma));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("bandit(" + name + ")"));
