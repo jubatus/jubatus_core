@@ -200,6 +200,15 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
   bool add_keyword(const string& keyword,
                    const keyword_params& params,
                    bool processed_in_this_server) {
+    if (params.scaling_param <= 1) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("scaling_param must be > 1."));
+    }
+    if (params.gamma <= 0) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("gamma must be > 0."));
+    }
+
     if (storages_.count(keyword) > 0 || aggregators_.count(keyword) > 0) {
       return false;
     }
