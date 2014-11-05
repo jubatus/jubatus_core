@@ -62,6 +62,7 @@ class nearest_neighbor_recommender : public recommender_base {
   void unpack(msgpack::object o);
 
  private:
+  void unlearn_row(const std::string& id);
   jubatus::util::lang::shared_ptr<table::column_table> get_table();
   jubatus::util::lang::shared_ptr<const table::column_table>
       get_const_table() const;
