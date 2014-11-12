@@ -71,7 +71,7 @@ void gmm::batch(const eigen_wsvec_list_t& data, int d, int k) {
         means_[c] += cp * i->data;
         covs_[c] += i->data * (i->data.transpose()) * cp;
         weights[c] += cp;
-        obj -= std::log(cp);
+        obj -= std::log(std::max(cp, 1.0e-45));
       }
     }
     for (int c = 0; c < k; ++c) {
