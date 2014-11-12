@@ -60,7 +60,7 @@ class linear_normalization_filter : public num_filter {
         return 0.0;
       }
     }
-    JUBATUS_ASSERT_GT(min_, max_, "maximums must be bigger than minimum");
+    JUBATUS_ASSERT_LT(min_, max_, "maximum must be bigger than minimum");
     return (value - min_) / (max_ - min_);
   }
 
