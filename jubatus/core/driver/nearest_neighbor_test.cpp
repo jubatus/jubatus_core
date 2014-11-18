@@ -47,6 +47,7 @@ using jubatus::core::nearest_neighbor::lsh;
 using jubatus::core::nearest_neighbor::minhash;
 using jubatus::core::table::column_table;
 using jubatus::core::fv_converter::datum;
+using jubatus::core::fv_converter::datum_to_fv_converter;
 using jubatus::core::nearest_neighbor::nearest_neighbor_base;
 using jubatus::core::unlearner::unlearner_base;
 using jubatus::core::unlearner::lru_unlearner;
@@ -54,6 +55,11 @@ using jubatus::core::unlearner::random_unlearner;
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+void PrintTo(const shared_ptr<datum_to_fv_converter> fvc, ::std::ostream* os) {
+  *os << "<" << *fvc.get() << ">";
+}
+}
 namespace nearest_neighbor {
 
 void PrintTo(const shared_ptr<nearest_neighbor_base> base, ::std::ostream* os) {
@@ -88,6 +94,13 @@ fv_converter::datum create_datum_1d(float x) {
 fv_converter::datum create_datum_2d(float x, float y) {
   const float vec[] = { x, y };
   return create_datum(vec, vec + 2);
+}
+
+fv_converter::datum create_string_datum(const std::string& value) {
+  fv_converter::datum d;
+  d.string_values_.push_back(std::make_pair("key", value));
+  d.string_values_.push_back(std::make_pair("bias", "bias"));
+  return d;
 }
 
 std::vector<shared_ptr<nearest_neighbor_base> >
@@ -402,6 +415,53 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Combine(
         ::testing::ValuesIn(create_nearest_neighbor_bases()),
         ::testing::ValuesIn(create_unlearners())));
+
+class idf_push_mix_test
+    : public ::testing::TestWithParam<
+          std::tr1::tuple<
+              shared_ptr<nearest_neighbor_base>,
+              shared_ptr<datum_to_fv_converter> > > {
+ protected:
+  void SetUp() {
+      nn_driver_.reset(new nearest_neighbor(
+          std::tr1::get<0>(GetParam()),
+          std::tr1::get<1>(GetParam()))
+      );
+  }
+  void TearDown() {
+    nn_driver_->clear();
+  }
+  shared_ptr<core::driver::nearest_neighbor> nn_driver_;
+};
+
+TEST_P(idf_push_mix_test, convert) {
+  nn_driver_->set_row("sample1", create_string_datum("this is a pen"));
+  nn_driver_->set_row("sample2", create_string_datum("this is a pen too"));
+  nn_driver_->set_row("sample3", create_string_datum("that may be a pen"));
+  nn_driver_->set_row("sample4", create_string_datum("there are pens"));
+  std::vector<std::pair<std::string, float> > neighbors
+      = nn_driver_->neighbor_row_from_datum(
+          create_string_datum("this is another pen"), 1);
+  ASSERT_EQ(1u, neighbors.size());
+  ASSERT_LT(0, neighbors[0].second);
+}
+
+std::vector<shared_ptr<datum_to_fv_converter> >
+create_fv_converters() {
+  std::vector<shared_ptr<datum_to_fv_converter> > fv_converters;
+  fv_converters.push_back(make_fv_converter());
+  fv_converters.push_back(make_idf_fv_converter());
+  return fv_converters;
+}
+
+INSTANTIATE_TEST_CASE_P(
+    nearest_neighbor_idf_push_mix_test_instance,
+    idf_push_mix_test,
+    ::testing::Combine(
+        ::testing::ValuesIn(create_nearest_neighbor_bases()),
+        ::testing::ValuesIn(create_fv_converters())));
+
+
 
 }  // namespace driver
 }  // namespace core

@@ -51,4 +51,31 @@ jubatus::util::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_convert
   return converter;
 }
 
+jubatus::util::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_converter>  // NOLINT
+  make_idf_fv_converter() {
+  jubatus::util::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_converter>  // NOLINT
+    converter(
+        new jubatus::core::fv_converter::datum_to_fv_converter);
+
+  jubatus::core::fv_converter::string_rule str_rule;
+  str_rule.key = "*";
+  str_rule.type = "space";
+  str_rule.sample_weight = "bin";
+  str_rule.global_weight = "idf";
+  jubatus::core::fv_converter::num_rule num_rule;
+  num_rule.key = "*";
+  num_rule.type = "num";
+
+  jubatus::core::fv_converter::converter_config c;
+  c.string_rules = std::vector<jubatus::core::fv_converter::string_rule>();
+  c.string_rules->push_back(str_rule);
+  c.num_rules = std::vector<jubatus::core::fv_converter::num_rule>();
+  c.num_rules->push_back(num_rule);
+
+  jubatus::core::fv_converter::initialize_converter(c, *converter);
+  return converter;
+}
+
+
+
 #endif  // JUBATUS_CORE_DRIVER_TEST_UTIL_HPP_

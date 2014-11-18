@@ -114,8 +114,12 @@ class datum_to_fv_converter {
   void clear_weights();
 
  private:
+  friend ::std::ostream& operator<<(::std::ostream& os,
+                                    const datum_to_fv_converter& fvc);
   jubatus::util::lang::scoped_ptr<datum_to_fv_converter_impl> pimpl_;
 };
+
+void PrintTo(const datum_to_fv_converter& fvc, ::std::ostream* os);
 
 }  // namespace fv_converter
 }  // namespace core

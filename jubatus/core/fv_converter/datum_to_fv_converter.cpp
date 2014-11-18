@@ -64,6 +64,9 @@ class datum_to_fv_converter_impl {
         }
       }
     }
+    void to_stream(::std::ostream& os) const {
+      os << "string_filter";  // TODO(kumagi): output more helpful information
+    }
   };
 
   struct num_filter_rule {
@@ -80,6 +83,9 @@ class datum_to_fv_converter_impl {
           filtered.push_back(std::make_pair(dest, out));
         }
       }
+    }
+    void to_stream(::std::ostream& os) const {
+      os << "num_filter";  // TODO(kumagi): output more helpful information
     }
   };
 
@@ -99,6 +105,10 @@ class datum_to_fv_converter_impl {
           splitter_(splitter),
           weights_(weights) {
     }
+    void to_stream(::std::ostream& os) const {
+      // TODO(kumagi): output more helpful information
+      os << "string_feature<" << name_ << ">";
+    }
   };
 
   struct num_feature_rule {
@@ -114,6 +124,10 @@ class datum_to_fv_converter_impl {
           matcher_(matcher),
           feature_func_(feature_func) {
     }
+    void to_stream(::std::ostream& os) const {
+      // TODO(kumagi): output more helpful information
+      os << "num_feature<" << name_ << ">";
+    }
   };
 
   struct binary_feature_rule {
@@ -128,6 +142,10 @@ class datum_to_fv_converter_impl {
         : name_(name),
           matcher_(matcher),
           feature_func_(feature_func) {
+    }
+    void to_stream(::std::ostream& os) const {
+      // TODO(kumagi): output more helpful information
+      os << "binary feature<" << name_ << ">";
     }
   };
 
@@ -298,6 +316,56 @@ class datum_to_fv_converter_impl {
 
   void clear_weights() {
     mixable_weights_->get_model()->clear();
+  }
+
+  void to_stream(::std::ostream& os) const {
+    /*
+      std::vector<binary_feature_rule> binary_rules_;
+      std::vector<string_filter_rule> string_filter_rules_;
+      std::vector<num_filter_rule> num_filter_rules_;
+      std::vector<string_feature_rule> string_rules_;
+      std::vector<num_feature_rule> num_rules_;
+      jubatus::util::lang::shared_ptr<mixable_weight_manager> mixable_weights_;
+      jubatus::util::data::optional<feature_hasher> hasher_;
+    */
+    os << "{";
+    if (!binary_rules_.empty()) {
+      for (size_t i = 0; i < binary_rules_.size(); ++i) {
+        binary_rules_[i].to_stream(os);
+        os << ", ";
+      }
+    }
+    if (!string_filter_rules_.empty()) {
+      for (size_t i = 0; i < string_filter_rules_.size(); ++i) {
+        string_filter_rules_[i].to_stream(os);
+        os << ", ";
+      }
+    }
+    if (!num_filter_rules_.empty()) {
+      for (size_t i = 0; i < num_filter_rules_.size(); ++i) {
+        num_filter_rules_[i].to_stream(os);
+        os << ", ";
+      }
+    }
+    if (!string_rules_.empty()) {
+      for (size_t i = 0; i < string_rules_.size(); ++i) {
+        string_rules_[i].to_stream(os);
+        os << ", ";
+      }
+    }
+    if (!num_rules_.empty()) {
+      for (size_t i = 0; i < num_rules_.size(); ++i) {
+        num_rules_[i].to_stream(os);
+        os << ", ";
+      }
+    }
+    if (mixable_weights_) {
+      os << " with IDF";
+    }
+    if (hasher_) {
+      os << " with feature_hashing";
+    }
+    os << "}";
   }
 
  private:
@@ -582,6 +650,16 @@ void datum_to_fv_converter::set_weight_manager(
 
 void datum_to_fv_converter::clear_weights() {
   pimpl_->clear_weights();
+}
+
+::std::ostream& operator<<(::std::ostream& os,
+                           const datum_to_fv_converter& fvc) {
+  fvc.pimpl_->to_stream(os);
+  return os;
+}
+
+void PrintTo(const datum_to_fv_converter& fvc, ::std::ostream* os) {
+  *os << fvc;
 }
 
 }  // namespace fv_converter
