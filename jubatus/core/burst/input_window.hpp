@@ -38,7 +38,7 @@ class basic_window {
 
   explicit basic_window(double batch_interval = 1)
       : batches_(), start_pos_(0), batch_interval_(batch_interval) {
-    if (batch_interval <= 0) {
+    if (!(batch_interval > 0)) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
           "window: batch_interval should be > 0"));
     }
@@ -46,11 +46,11 @@ class basic_window {
 
   basic_window(double start_pos, double batch_interval, int32_t batch_size)
       : batches_(), start_pos_(start_pos), batch_interval_(batch_interval) {
-    if (batch_interval <= 0) {
+    if (!(batch_interval > 0)) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
           "window: batch_interval should be > 0"));
     }
-    if (batch_size < 0) {
+    if (!(batch_size >= 0)) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
           "window: batch_size should be >= 0"));
     }
