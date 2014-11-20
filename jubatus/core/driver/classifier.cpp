@@ -43,12 +43,10 @@ classifier::classifier(
     shared_ptr<fv_converter::datum_to_fv_converter> converter)
     : converter_(converter)
     , classifier_(classifier_method)
-    , mixable_classifier_model_(classifier_method->get_storage())
     , wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
-  register_mixable(&mixable_classifier_model_);
+  register_mixable(classifier_->get_mixable());
   register_mixable(&wm_);
 
-  mixable_classifier_model_.set_label_unlearner(classifier_->label_unlearner());
   converter_->set_weight_manager(wm_.get_model());
 }
 

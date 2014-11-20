@@ -39,7 +39,7 @@ namespace core {
 namespace classifier {
 
 classifier_base::classifier_base(storage_ptr storage)
-  : storage_(storage) {
+  : storage_(storage), mixable_storage_(storage_) {
 }
 
 classifier_base::~classifier_base() {
@@ -60,6 +60,7 @@ void classifier_base::set_label_unlearner(
   label_unlearner->set_callback(
       jubatus::util::lang::bind(
           delete_label_wrapper, this, jubatus::util::lang::_1));
+  mixable_storage_.set_label_unlearner(label_unlearner);
   unlearner_ = label_unlearner;
 }
 
@@ -202,6 +203,10 @@ float classifier_base::squared_norm(const common::sfv_t& fv) {
 
 storage_ptr classifier_base::get_storage() {
   return storage_;
+}
+
+framework::mixable* classifier_base::get_mixable() {
+  return &mixable_storage_;
 }
 
 void classifier_base::touch(const std::string& label) {
