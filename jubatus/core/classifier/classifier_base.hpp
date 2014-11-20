@@ -69,6 +69,8 @@ class classifier_base {
 
   storage_ptr get_storage();
 
+  framework::mixable* get_mixable();
+
  protected:
   void update_weight(
       const common::sfv_t& sfv,
@@ -96,6 +98,7 @@ class classifier_base {
 
   storage_ptr storage_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
+  framework::linear_function_mixer mixable_storage_;
 };
 
 }  // namespace classifier
