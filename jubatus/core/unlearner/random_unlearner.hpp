@@ -21,7 +21,7 @@
 #include <vector>
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/data/serialization.h"
-#include "jubatus/util/data/unordered_set.h"
+#include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/math/random.h"
 #include "unlearner_base.hpp"
 
@@ -47,7 +47,7 @@ class random_unlearner : public unlearner_base {
   }
 
   void clear() {
-    id_set_.clear();
+    id_map_.clear();
     ids_.clear();
   }
 
@@ -59,10 +59,24 @@ class random_unlearner : public unlearner_base {
   bool exists_in_memory(const std::string& id) const;
 
  private:
-  jubatus::util::data::unordered_set<std::string> id_set_;
+  /**
+   * Map of ID and its position in ids_.
+   */
+  jubatus::util::data::unordered_map<std::string, size_t> id_map_;
+
+  /**
+   * Unlearner ID set.
+   */
   std::vector<std::string> ids_;
+
+  /**
+   * Maximum size to be hold.
+   */
   size_t max_size_;
 
+  /**
+   * Random number generator.
+   */
   jubatus::util::math::random::mtrand mtr_;
 };
 
