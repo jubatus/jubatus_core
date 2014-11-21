@@ -19,13 +19,13 @@
 
 #include <string>
 
-#include "classifier_base.hpp"
+#include "linear_classifier.hpp"
 
 namespace jubatus {
 namespace core {
 namespace classifier {
 
-class confidence_weighted : public classifier_base {
+class confidence_weighted : public linear_classifier {
  public:
   explicit confidence_weighted(storage_ptr storage);
   confidence_weighted(

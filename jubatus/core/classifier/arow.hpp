@@ -19,13 +19,13 @@
 
 #include <string>
 
-#include "classifier_base.hpp"
+#include "linear_classifier.hpp"
 
 namespace jubatus {
 namespace core {
 namespace classifier {
 
-class arow : public classifier_base {
+class arow : public linear_classifier {
  public:
   explicit arow(storage_ptr storage);
   arow(const classifier_config& config, storage_ptr storage);

@@ -30,13 +30,13 @@ namespace core {
 namespace classifier {
 
 confidence_weighted::confidence_weighted(storage_ptr storage)
-    : classifier_base(storage) {
+    : linear_classifier(storage) {
 }
 
 confidence_weighted::confidence_weighted(
     const classifier_config& config,
     storage_ptr storage)
-    : classifier_base(storage),
+    : linear_classifier(storage),
       config_(config) {
 
   if (!(0.f < config.regularization_weight)) {
