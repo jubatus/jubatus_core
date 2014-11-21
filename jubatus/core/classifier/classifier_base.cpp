@@ -201,8 +201,11 @@ float classifier_base::squared_norm(const common::sfv_t& fv) {
   return ret;
 }
 
-storage_ptr classifier_base::get_storage() {
-  return storage_;
+void classifier_base::pack(framework::packer& pk) const {
+  storage_->pack(pk);
+}
+void classifier_base::unpack(msgpack::object o) {
+  storage_->unpack(o);
 }
 
 framework::mixable* classifier_base::get_mixable() {
@@ -226,7 +229,7 @@ void classifier_base::check_touchable(const std::string& label) {
 
 bool classifier_base::delete_label(const std::string& label) {
   // Remove the label from the model.
-  bool result = get_storage()->delete_label(label);
+  bool result = storage_->delete_label(label);
 
   if (unlearner_ && result) {
     // Notify unlearner that the label was removed.
@@ -240,7 +243,7 @@ bool classifier_base::delete_label(const std::string& label) {
  * Callback function to delete the label via unlearner.
  */
 bool classifier_base::unlearn_label(const std::string& label) {
-  return get_storage()->delete_label(label);
+  return storage_->delete_label(label);
 }
 
 }  // namespace classifier
