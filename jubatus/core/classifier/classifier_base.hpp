@@ -67,7 +67,8 @@ class classifier_base {
   // storages.
   virtual void get_status(std::map<std::string, std::string>& status) const;
 
-  storage_ptr get_storage();
+  void pack(framework::packer& pk) const;
+  void unpack(msgpack::object o);
 
   framework::mixable* get_mixable();
 
@@ -90,7 +91,6 @@ class classifier_base {
       const common::sfv_t& sfv,
       const std::string& label,
       classify_result& scores) const;
-  const storage::storage_base* get_storage() const;
 
   static float squared_norm(const common::sfv_t& sfv);
   void check_touchable(const std::string& label);
