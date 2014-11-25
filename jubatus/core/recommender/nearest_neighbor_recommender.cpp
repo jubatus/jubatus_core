@@ -36,7 +36,7 @@ class nearest_neighbor_recommender::unlearning_callback {
   }
 
   void operator()(const std::string& id) {
-    recommender_->clear_row(id);
+    recommender_->unlearn_row(id);
   }
 
  private:
@@ -86,6 +86,14 @@ void nearest_neighbor_recommender::clear_row(const std::string& id) {
   if (unlearner_) {
     unlearner_->remove(id);
   }
+}
+
+/**
+ * Callback from unlearner
+ */
+void nearest_neighbor_recommender::unlearn_row(const std::string& id) {
+  orig_.remove_row(id);
+  get_table()->delete_row(id);
 }
 
 void nearest_neighbor_recommender::update_row(

@@ -176,23 +176,23 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
   explicit impl_(const burst_options& options)
       : options_(options),
         has_been_mixed_(false) {
-    if (options_.window_batch_size <= 0) {
+    if (!(options_.window_batch_size > 0)) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
           "window_batch_size should > 0"));
     }
-    if (options_.batch_interval <= 0) {
+    if (!(options_.batch_interval > 0)) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
           "batch_interval should > 0"));
     }
-    if (options_.result_window_rotate_size <= 0) {
+    if (!(options_.result_window_rotate_size > 0)) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
           "result_window_rotate_size should > 0"));
     }
-    if (options_.max_reuse_batch_num < 0) {
+    if (!(options_.max_reuse_batch_num >= 0)) {
       throw JUBATUS_EXCEPTION(common::invalid_parameter(
           "max_reuse_batch_num should >= 0"));
     }
-    if (options_.costcut_threshold <= 0) {
+    if (!(options_.costcut_threshold > 0)) {
       options_.costcut_threshold = DBL_MAX;
     }
   }
@@ -200,6 +200,15 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
   bool add_keyword(const string& keyword,
                    const keyword_params& params,
                    bool processed_in_this_server) {
+    if (!(params.scaling_param > 1)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("scaling_param must be > 1."));
+    }
+    if (!(params.gamma > 0)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("gamma must be > 0."));
+    }
+
     if (storages_.count(keyword) > 0 || aggregators_.count(keyword) > 0) {
       return false;
     }

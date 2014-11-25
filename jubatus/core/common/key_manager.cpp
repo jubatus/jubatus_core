@@ -120,6 +120,10 @@ void key_manager::delete_key(const std::string& name) {
   }
 }
 
+uint64_t key_manager::get_max_id() const {
+  return next_id_ - 1;
+}
+
 }  // namespace common
 }  // namespace core
 }  // namespace jubatus

@@ -179,7 +179,7 @@ void clustering::unpack(msgpack::object o) {
 }
 
 void clustering::clear() {
-  // TODO(beam2d): Implement clear().
+  clustering_->clear();
 }
 
 }  // namespace driver

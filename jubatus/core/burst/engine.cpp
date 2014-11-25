@@ -32,8 +32,6 @@ namespace jubatus {
 namespace core {
 namespace burst {
 
-// #define BURST_DEBUG
-
 namespace {
 
 // In enumerate burst detect, automaton has the following 2 states.
@@ -131,21 +129,6 @@ bool check_branch_cuttable(
     int batch_id,
     double burst_cut_threshold) {
   const int window_size = d_vector.size();
-
-#ifdef BURST_DEBUG
-  std::cout
-    << "    --- sigma(1) - sigma(0)="
-    << sigma(p_vector[kBurstState],
-             d_vector[batch_id],
-             r_vector[batch_id])
-    - sigma(p_vector[kBaseState],
-            d_vector[batch_id],
-            r_vector[batch_id])
-    << ", "
-    << "burst_cut_threshold * log(window_size)="
-    <<  burst_cut_threshold * std::log(window_size)
-    << std::endl;
-#endif
 
   if (sigma(p_vector[kBurstState],
             d_vector[batch_id],
@@ -252,28 +235,14 @@ void burst_detect(const std::vector<uint32_t> & d_vector,
   for (int update_batch_id = 0;
       update_batch_id < window_size - reuse_batch_size;
       update_batch_id++) {
-#ifdef BURST_DEBUG
-    std::cout << "- batch_id="
-              << update_batch_id + reuse_batch_size
-              << std::endl;
-#endif
-
     for (int now_state = kBaseState; now_state < kStatesNum; now_state++) {
       std::pair<int, double> prev_optimal_pair;
-
-#ifdef BURST_DEBUG
-      std::cout << "  -- now state=" << now_state << std::endl;
-#endif
 
       if ((0 < update_batch_id + reuse_batch_size) &&
          (d_vector[update_batch_id + reuse_batch_size - 1] == 0)) {
         // exception handling
         // in prev batch,
         // (d, r) = (0, 0)
-#ifdef BURST_DEBUG
-        std::cout << "    --- exception (d = 0)" << std::endl;
-#endif
-
         prev_optimal_pair.first = kBaseState;
         prev_optimal_pair.second =
             prev_optimal_costs[kBaseState] +
@@ -282,12 +251,6 @@ void burst_detect(const std::vector<uint32_t> & d_vector,
           check_branch_cuttable(d_vector, r_vector, p_vector,
                                 update_batch_id + reuse_batch_size - 1,
                                 burst_cut_threshold)) {
-#ifdef BURST_DEBUG
-        std::cout << "    --- cut->batch_id="
-                  << update_batch_id + reuse_batch_size - 1
-                  << std::endl;
-#endif
-
         prev_optimal_pair.first = kBaseState;
         prev_optimal_pair.second =
             prev_optimal_costs[kBaseState] +
@@ -311,15 +274,6 @@ void burst_detect(const std::vector<uint32_t> & d_vector,
       prev_optimal_in_now_states_seq[now_state].push_back(now_state);
     }
 
-#ifdef BURST_DEBUG
-    std::cout << "  -- base state cost="
-              << prev_optimal_in_now_states_costs[kBaseState]
-              << ", "
-              << "burst state cost="
-              << prev_optimal_in_now_states_costs[kBurstState]
-              << std::endl;
-#endif
-
     //
     // ready for precessing the next batch.
     //
@@ -330,32 +284,17 @@ void burst_detect(const std::vector<uint32_t> & d_vector,
     }
   }
 
-#ifdef BURST_DEBUG
-  std::cout << "- last burst_cut check"
-            << std::endl;
-#endif
-
   std::vector<int> optimal_states_seq;
 
   if (d_vector[window_size - 1] == 0) {
     // exception handling
     // in prev batch,
     // (d, r) = (0, 0)
-#ifdef BURST_DEBUG
-        std::cout << "    --- exception (d = 0)" << std::endl;
-#endif
     optimal_states_seq = prev_optimal_in_now_states_seq[kBaseState];
-
   } else if (check_branch_cuttable(d_vector, r_vector, p_vector,
                                   window_size - 1,
                                   burst_cut_threshold)) {
-#ifdef BURST_DEBUG
-    std::cout << "    --- cut->batch_id="
-              << window_size - 1
-              << std::endl;
-#endif
     optimal_states_seq = prev_optimal_in_now_states_seq[kBaseState];
-
   } else {
     optimal_states_seq =
         prev_optimal_in_now_states_costs[kBaseState] <=

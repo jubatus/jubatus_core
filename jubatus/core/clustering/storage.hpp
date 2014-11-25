@@ -46,7 +46,6 @@ class storage : public event_dispatcher<storage_event_type, wplist> {
   void get_diff(diff_t& d) const;
   bool put_diff(const diff_t& d);
   void mix(const diff_t&, diff_t& ret);
-  void clear();
 
   size_t get_revision();
 
@@ -60,13 +59,17 @@ class storage : public event_dispatcher<storage_event_type, wplist> {
     return core::storage::version();
   }
 
-  virtual void pack(framework::packer& packer) const;
-  virtual void unpack(msgpack::object o);
+  void pack(framework::packer& packer) const;
+  void unpack(msgpack::object o);
+  void clear();
 
   MSGPACK_DEFINE(revision_, name_, config_, common_);
 
  protected:
   void increment_revision();
+  virtual void pack_impl_(framework::packer& packer) const;
+  virtual void unpack_impl_(msgpack::object o);
+  virtual void clear_impl_();
 
   size_t revision_;
   std::string name_;
