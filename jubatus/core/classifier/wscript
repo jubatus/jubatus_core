@@ -12,6 +12,7 @@ def build(bld):
       'confidence_weighted.cpp',
       'arow.cpp',
       'normal_herd.cpp',
+      'nearest_neighbor_classifier.cpp',
       'classifier_factory.cpp',
       ]
   headers = [
