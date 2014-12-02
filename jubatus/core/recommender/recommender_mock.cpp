@@ -29,10 +29,11 @@ namespace jubatus {
 namespace core {
 namespace recommender {
 
+typedef mixable_recommender_mock_storage::model_ptr model_ptr;
+
 recommender_mock::recommender_mock()
-    : mixable_storage_(new mixable_recommender_mock_storage) {
-  mixable_storage_->set_model(mixable_recommender_mock_storage::model_ptr(
-      new recommender_mock_storage));
+    : mixable_storage_(new mixable_recommender_mock_storage(
+        model_ptr(new recommender_mock_storage))) {
 }
 
 recommender_mock::~recommender_mock() {

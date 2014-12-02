@@ -129,7 +129,6 @@ class mixable_weight_manager_test : public ::testing::Test {
  public:
   void SetUp() {
     shared_ptr<weight_manager> m(new weight_manager);
-    mw.reset(new mixable_weight_manager);
 
     {
       common::sfv_t fv;
@@ -138,7 +137,7 @@ class mixable_weight_manager_test : public ::testing::Test {
       m->update_weight(fv);
     }
 
-    mw->set_model(m);
+    mw.reset(new mixable_weight_manager(m));
   }
   void TearDown() {
     mw.reset();

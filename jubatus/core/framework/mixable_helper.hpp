@@ -43,9 +43,6 @@ class linear_mixable_helper : public linear_mixable {
   typedef Diff diff_type;
   typedef jubatus::util::lang::shared_ptr<Model> model_ptr;
 
-  linear_mixable_helper() {
-  }
-
   explicit linear_mixable_helper(model_ptr model)
     : model_(model) {
     if (!model) {
