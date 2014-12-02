@@ -50,7 +50,6 @@ class nearest_neighbor_classifier : public classifier_base {
   void classify_with_scores(const common::sfv_t& fv,
                             classify_result& scores) const;
   bool delete_label(const std::string& label);
-  bool unlearn_label(const std::string& label);
   void clear();
 
   std::vector<std::string> get_labels() const;
@@ -71,6 +70,9 @@ class nearest_neighbor_classifier : public classifier_base {
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   size_t k_;
   jubatus::util::math::random::mtrand rand_;
+
+  class unlearning_callback;
+  void unlearn_id(const std::string& id);
 };
 
 }  // namespace classifier

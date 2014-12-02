@@ -53,6 +53,20 @@ std::string get_label_from_id(const std::string& id) {
 }
 }  // namespace
 
+class nearest_neighbor_classifier::unlearning_callback {
+ public:
+  explicit unlearning_callback(nearest_neighbor_classifier* classifier)
+      : classifier_(classifier) {
+  }
+
+  void operator()(const std::string& id) {
+    classifier_->unlearn_id(id);
+  }
+
+ private:
+  nearest_neighbor_classifier* classifier_;
+};
+
 nearest_neighbor_classifier::nearest_neighbor_classifier(
     shared_ptr<nearest_neighbor::nearest_neighbor_base> engine,
     size_t k)
@@ -73,8 +87,8 @@ void nearest_neighbor_classifier::train(
 
 void nearest_neighbor_classifier::set_label_unlearner(
     shared_ptr<unlearner::unlearner_base> label_unlearner) {
-  // unimplemented
-  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+  label_unlearner->set_callback(unlearning_callback(this));
+  unlearner_ = label_unlearner;
 }
 
 void nearest_neighbor_classifier::classify_with_scores(
@@ -97,11 +111,6 @@ void nearest_neighbor_classifier::classify_with_scores(
 }
 
 bool nearest_neighbor_classifier::delete_label(const std::string& label) {
-  // unimplemented
-  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
-}
-
-bool nearest_neighbor_classifier::unlearn_label(const std::string& label) {
   // unimplemented
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
@@ -142,6 +151,10 @@ void nearest_neighbor_classifier::unpack(msgpack::object o) {
 
 framework::mixable* nearest_neighbor_classifier::get_mixable() {
   return nearest_neighbor_engine_->get_mixable();
+}
+
+void nearest_neighbor_classifier::unlearn_id(const std::string& id) {
+  nearest_neighbor_engine_->get_table()->delete_row(id);
 }
 
 }  // namespace classifier
