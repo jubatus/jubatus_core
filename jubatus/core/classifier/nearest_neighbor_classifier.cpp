@@ -22,6 +22,7 @@
 #include <utility>
 
 using jubatus::util::lang::shared_ptr;
+using jubatus::util::data::unordered_set;
 
 namespace jubatus {
 namespace core {
@@ -83,6 +84,7 @@ void nearest_neighbor_classifier::train(
     }
   }
   nearest_neighbor_engine_->set_row(id, fv);
+  set_label(label);
 }
 
 void nearest_neighbor_classifier::set_label_unlearner(
@@ -97,6 +99,10 @@ void nearest_neighbor_classifier::classify_with_scores(
   nearest_neighbor_engine_->neighbor_row(fv, ids, k_);
 
   std::map<std::string, float> m;
+  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
+       iter != labels_.end(); ++iter) {
+    m.insert(std::make_pair(*iter, 0));
+  }
   for (size_t i = 0; i < ids.size(); ++i) {
     std::string label = get_label_from_id(ids[i].first);
     m[label] += std::exp(-ids[i].second);
@@ -117,19 +123,23 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
 
 void nearest_neighbor_classifier::clear() {
   nearest_neighbor_engine_->clear();
+  labels_.clear();
   if (unlearner_) {
     unlearner_->clear();
   }
 }
 
 std::vector<std::string> nearest_neighbor_classifier::get_labels() const {
-  // unimplemented
-  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+  std::vector<std::string> result;
+  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
+       iter != labels_.end(); ++iter) {
+    result.push_back(*iter);
+  }
+  return result;
 }
 
 bool nearest_neighbor_classifier::set_label(const std::string& label) {
-  // unimplemented
-  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+  return labels_.insert(label).second;
 }
 
 std::string nearest_neighbor_classifier::name() const {
@@ -142,11 +152,31 @@ void nearest_neighbor_classifier::get_status(
 }
 
 void nearest_neighbor_classifier::pack(framework::packer& pk) const {
+  pk.pack_array(2);
   nearest_neighbor_engine_->pack(pk);
+
+  pk.pack_array(labels_.size());
+  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
+       iter != labels_.end(); ++iter) {
+    pk.pack(*iter);
+  }
 }
 
 void nearest_neighbor_classifier::unpack(msgpack::object o) {
-  nearest_neighbor_engine_->unpack(o);
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+  nearest_neighbor_engine_->unpack(o.via.array.ptr[0]);
+
+  msgpack::object labels = o.via.array.ptr[1];
+  if (labels.type != msgpack::type::ARRAY) {
+    throw msgpack::type_error();
+  }
+  for (size_t i = 0; i < labels.via.array.size; ++i) {
+    std::string label;
+    labels.via.array.ptr[i].convert(&label);
+    labels_.insert(label);
+  }
 }
 
 framework::mixable* nearest_neighbor_classifier::get_mixable() {
