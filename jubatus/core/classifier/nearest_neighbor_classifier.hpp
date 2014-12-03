@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/math/random.h"
+#include "jubatus/util/data/unordered_set.h"
 
 #include "../common/type.hpp"
 #include "../nearest_neighbor/nearest_neighbor_base.hpp"
@@ -67,8 +68,9 @@ class nearest_neighbor_classifier : public classifier_base {
  private:
   jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
       nearest_neighbor_engine_;
-  jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
+  jubatus::util::data::unordered_set<std::string> labels_;
   size_t k_;
+  jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   jubatus::util::math::random::mtrand rand_;
 
   class unlearning_callback;
