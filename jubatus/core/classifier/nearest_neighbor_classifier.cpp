@@ -16,6 +16,7 @@
 
 #include "nearest_neighbor_classifier.hpp"
 
+#include <cfloat>
 #include <string>
 #include <vector>
 #include <map>
@@ -91,6 +92,22 @@ void nearest_neighbor_classifier::set_label_unlearner(
     shared_ptr<unlearner::unlearner_base> label_unlearner) {
   label_unlearner->set_callback(unlearning_callback(this));
   unlearner_ = label_unlearner;
+}
+
+std::string nearest_neighbor_classifier::classify(
+    const common::sfv_t& fv) const {
+  classify_result result;
+  classify_with_scores(fv, result);
+  float max_score = -FLT_MAX;
+  std::string max_class;
+  for (std::vector<classify_result_elem>::const_iterator it = result.begin();
+      it != result.end(); ++it) {
+    if (it == result.begin() || it->score > max_score) {
+      max_score = it->score;
+      max_class = it->label;
+    }
+  }
+  return max_class;
 }
 
 void nearest_neighbor_classifier::classify_with_scores(
