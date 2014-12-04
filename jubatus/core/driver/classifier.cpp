@@ -43,12 +43,10 @@ classifier::classifier(
     shared_ptr<fv_converter::datum_to_fv_converter> converter)
     : converter_(converter)
     , classifier_(classifier_method)
-    , mixable_classifier_model_(classifier_method->get_storage())
     , wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
-  register_mixable(&mixable_classifier_model_);
+  register_mixable(classifier_->get_mixable());
   register_mixable(&wm_);
 
-  mixable_classifier_model_.set_label_unlearner(classifier_->label_unlearner());
   converter_->set_weight_manager(wm_.get_model());
 }
 
@@ -94,7 +92,7 @@ bool classifier::set_label(const std::string& label) {
 
 void classifier::pack(framework::packer& pk) const {
   pk.pack_array(2);
-  classifier_->get_storage()->pack(pk);
+  classifier_->pack(pk);
   wm_.get_model()->pack(pk);
 }
 
@@ -106,7 +104,7 @@ void classifier::unpack(msgpack::object o) {
   // clear before load
   classifier_->clear();
   converter_->clear_weights();
-  classifier_->get_storage()->unpack(o.via.array.ptr[0]);
+  classifier_->unpack(o.via.array.ptr[0]);
   wm_.get_model()->unpack(o.via.array.ptr[1]);
 }
 
