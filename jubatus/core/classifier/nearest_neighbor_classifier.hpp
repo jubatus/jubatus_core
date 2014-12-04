@@ -48,6 +48,7 @@ class nearest_neighbor_classifier : public classifier_base {
       jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
           label_unlearner);
 
+  std::string classify(const common::sfv_t& fv) const;
   void classify_with_scores(const common::sfv_t& fv,
                             classify_result& scores) const;
   bool delete_label(const std::string& label);

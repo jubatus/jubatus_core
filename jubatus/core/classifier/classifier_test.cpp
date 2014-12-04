@@ -32,6 +32,7 @@
 #include "../common/jsonconfig.hpp"
 #include "../unlearner/lru_unlearner.hpp"
 #include "classifier_test_util.hpp"
+#include "../nearest_neighbor/nearest_neighbor_factory.hpp"
 
 using std::pair;
 using std::string;
@@ -40,6 +41,9 @@ using jubatus::util::text::json::to_json;
 using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
 using jubatus::core::storage::local_storage;
+using jubatus::core::common::jsonconfig::config;
+using jubatus::util::text::json::json;
+using jubatus::util::text::json::json_object;
 
 namespace jubatus {
 namespace core {
@@ -50,6 +54,20 @@ shared_ptr<Classifier> make_classifier() {
   storage_ptr s(new local_storage);
   shared_ptr<Classifier> p(new Classifier(s));
   return p;
+}
+template<>
+shared_ptr<nearest_neighbor_classifier>
+    make_classifier<nearest_neighbor_classifier>() {
+  std::string nn_method = "euclid_lsh";
+  json nn_parameter(new json_object);
+  nn_parameter["hash_num"] = to_json(512);
+
+  shared_ptr<table::column_table> table(new table::column_table);
+  shared_ptr<nearest_neighbor::nearest_neighbor_base>
+      nn_engine(nearest_neighbor::create_nearest_neighbor(
+          nn_method, config(nn_parameter), table, ""));
+  return shared_ptr<nearest_neighbor_classifier>(
+      new nearest_neighbor_classifier(nn_engine, 3));
 }
 
 template<typename T>
@@ -224,7 +242,7 @@ REGISTER_TYPED_TEST_CASE_P(
 
 typedef testing::Types<
   perceptron, passive_aggressive, passive_aggressive_1, passive_aggressive_2,
-  confidence_weighted, arow, normal_herd>
+  confidence_weighted, arow, normal_herd, nearest_neighbor_classifier>
   classifier_types;
 
 INSTANTIATE_TYPED_TEST_CASE_P(cl, classifier_test, classifier_types);
