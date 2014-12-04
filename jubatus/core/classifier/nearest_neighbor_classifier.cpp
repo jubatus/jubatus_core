@@ -117,8 +117,31 @@ void nearest_neighbor_classifier::classify_with_scores(
 }
 
 bool nearest_neighbor_classifier::delete_label(const std::string& label) {
-  // unimplemented
-  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+  if (labels_.erase(label) == 0) {
+    return false;
+  }
+
+  shared_ptr<table::column_table> table =
+      nearest_neighbor_engine_->get_table();
+
+  std::vector<std::string> ids_to_be_deleted;
+  for (size_t i = 0, n = table->size(); i < n; ++i) {
+    std::string id = table->get_key(i);
+    std::string l = get_label_from_id(id);
+    if (l == label) {
+      ids_to_be_deleted.push_back(id);
+    }
+  }
+
+  for (size_t i = 0, n = ids_to_be_deleted.size(); i < n; ++i) {
+    const std::string& id = ids_to_be_deleted[i];
+    table->delete_row(id);
+    if (unlearner_) {
+      unlearner_->remove(id);
+    }
+  }
+
+  return true;
 }
 
 void nearest_neighbor_classifier::clear() {
