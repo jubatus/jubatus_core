@@ -60,7 +60,7 @@ bool random_unlearner::touch(const std::string& id) {
   } else {
     // Need to unlearn the old entry and replace it with new one.
     new_id_pos = mtr_(id_map_.size());
-    std::string old_id = ids_[new_id_pos];
+    const std::string old_id = ids_[new_id_pos];
     unlearn(old_id);
     id_map_.erase(old_id);
     ids_[new_id_pos] = id;
