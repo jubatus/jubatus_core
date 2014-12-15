@@ -99,6 +99,20 @@ TEST_F(gmm_test, nearest_center) {
   EXPECT_TRUE(nc_index_a != nc_index_b);
 }
 
+TEST_F(gmm_test, clear_with_empty_list) {
+  do_batch(100);
+  eigen_svec_t svec_a(2);
+  svec_a.coeffRef(0) = 2.0;
+  svec_a.coeffRef(1) = 2.0;
+  eigen_svec_t nc_a = gmm_->get_nearest_center(svec_a);
+  EXPECT_NEAR(nc_a.coeffRef(0), 2.0, epsilon_);
+  EXPECT_NEAR(nc_a.coeffRef(1), 2.0, epsilon_);
+  do_batch(0); // batch update with empty list
+  eigen_svec_t nc_b = gmm_->get_nearest_center(svec_a);
+  EXPECT_NEAR(nc_b.coeffRef(0), 0.0, epsilon_);
+  EXPECT_NEAR(nc_b.coeffRef(1), 0.0, epsilon_);
+}
+
 }  // namespace clustering
 }  // namespace core
 }  // namespace jubatus
