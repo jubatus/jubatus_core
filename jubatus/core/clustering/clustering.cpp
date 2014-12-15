@@ -186,6 +186,10 @@ void clustering::unpack(msgpack::object o) {
   storage_->get_model()->unpack(o);
 }
 
+void clustering::clear() {
+  storage_->get_model()->clear();
+}
+
 void clustering::do_clustering() {
   clustering_method_->batch_update(storage_->get_model()->get_all());
 }

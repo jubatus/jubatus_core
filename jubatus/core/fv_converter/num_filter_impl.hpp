@@ -17,7 +17,10 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_NUM_FILTER_IMPL_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_NUM_FILTER_IMPL_HPP_
 
+#include <cmath>
 #include "num_filter.hpp"
+#include "../common/exception.hpp"
+#include "../common/assert.hpp"
 
 namespace jubatus {
 namespace core {
@@ -35,6 +38,75 @@ class add_filter : public num_filter {
 
  private:
   double value_;
+};
+
+class linear_normalization_filter : public num_filter {
+ public:
+  linear_normalization_filter(double min,
+                              double max,
+                              bool truncate)
+    : min_(min), max_(max), truncate_(truncate) {
+    if (max_ <= min_) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("maximum must be bigger than mininum"));
+    }
+  }
+
+  double filter(double value) const {
+    if (truncate_) {
+      if (max_ < value) {
+        return 1.0;
+      } else if (value < min_) {
+        return 0.0;
+      }
+    }
+    JUBATUS_ASSERT_LT(min_, max_, "maximum must be bigger than minimum");
+    return (value - min_) / (max_ - min_);
+  }
+
+ private:
+  double min_;
+  double max_;
+  bool truncate_;
+};
+
+class gaussian_normalization_filter : public num_filter {
+ public:
+  gaussian_normalization_filter(double average,
+                                double standard_deviation)
+    : average_(average), standard_deviation_(standard_deviation) {
+    if (standard_deviation_ < 0) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("Variance must be non-negative"));
+    }
+  }
+
+  double filter(double value) const {
+    return (value - average_) / standard_deviation_;
+  }
+ private:
+  double average_;
+  double standard_deviation_;
+};
+
+class sigmoid_normalization_filter : public num_filter {
+ public:
+  sigmoid_normalization_filter(double gain,
+                               double bias)
+    : bias_(bias), gain_(gain) {
+    if (gain_ == 0.0) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("gain must not be zero"));
+    }
+  }
+
+  double filter(double value) const {
+    return 1.0 / (1 + std::exp(-gain_ * (value - bias_)));
+  }
+
+ private:
+  double bias_;
+  double gain_;
 };
 
 }  // namespace fv_converter

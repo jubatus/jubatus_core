@@ -172,6 +172,20 @@ TEST(inverted_index_storage, mix) {
   EXPECT_EQ(1.0, s2.get("c2", "r3"));
 }
 
+TEST(inverted_index_storage, empty) {
+  // v:  (1, 1, 0, 0, 0)
+  common::sfv_t v;
+  v.push_back(make_pair("c1", 1.0));
+  v.push_back(make_pair("c2", 1.0));
+
+  inverted_index_storage s;
+
+  vector<pair<string, float> > scores;
+  s.calc_scores(v, scores, 100);
+
+  EXPECT_EQ(0u, scores.size());
+}
+
 }  // namespace storage
 }  // namespace core
 }  // namespace jubatus

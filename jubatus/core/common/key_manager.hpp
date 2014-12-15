@@ -62,6 +62,8 @@ class key_manager {
   void init_by_id2key(const std::vector<std::string>& id2key);
   void delete_key(const std::string& name);
 
+  uint64_t get_max_id() const;
+
   friend std::ostream& operator<<(std::ostream& os, const key_manager& km) {
     typedef jubatus::util::data::unordered_map<std::string, uint64_t> key2id_t;
     os << "[";

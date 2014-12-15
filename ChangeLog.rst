@@ -1,3 +1,35 @@
+Release 0.0.6 - 2014/11/25
+--------------------------
+
+* Improvements
+    * Add normalization feature (num_filter) to fv_converter (#67, #68)
+    * recommender: Improve performance of inverted_index (#44, #45)
+        * This work was supported by New Energy and Industrial Technology Development Organization (NEDO).
+    * clustering: Support clear RPC method (#69)
+    * burst: Improved parameter validation (#75, #77)
+    * burst: Remove unused debug code (#71, #74)
+    * Enable libstdc++ debug mode when configured using `--enable-debug` (#73)
+
+* Bug fixes
+    * recommender: Fix unlearner leaks rows when using NN-based method (fix #76)
+
+Release 0.0.5 - 2014/10/20
+--------------------------
+
+* New machine learning service
+    * Distributed Burst Detection
+
+* Improvements
+    * Removed an unnecessary typedef (#37)
+
+Release 0.0.4 - 2014/09/29
+--------------------------
+
+* Improvements
+    * Support string replacement with capture group in oniguruma-based regexp string_filter (#53)
+    * Improve varidation of replacement string in re2-based regexp string_filter (#54)
+    * classifier: Improve error message when invalid configuration is given (#52)
+
 Release 0.0.3 - 2014/08/25
 --------------------------
 

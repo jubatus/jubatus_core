@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2013 Preferred Infrastructure and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2014 Preferred Infrastructure and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,33 +14,25 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_CLUSTERING_SIMPLE_STORAGE_HPP_
-#define JUBATUS_CORE_CLUSTERING_SIMPLE_STORAGE_HPP_
+#ifndef JUBATUS_CORE_BURST_ENGINE_HPP_
+#define JUBATUS_CORE_BURST_ENGINE_HPP_
 
-#include <string>
-#include "storage.hpp"
+#include <stdint.h>
+#include <vector>
 
 namespace jubatus {
 namespace core {
-namespace clustering {
+namespace burst {
 
-class simple_storage : public storage {
- public:
-  simple_storage(const std::string& name, const clustering_config& config);
+void burst_detect(const std::vector<uint32_t>& d_vector,
+                  const std::vector<uint32_t>& r_vector,
+                  std::vector<double>& batch_weights,
+                  double scaling_param,
+                  double gamma,
+                  double burst_cut_threshold);
 
-  void add(const weighted_point& point);
-  wplist get_mine() const;
-
- private:
-  void pack_impl_(framework::packer& packer) const;
-  void unpack_impl_(msgpack::object o);
-  void clear_impl_();
-
-  wplist mine_;
-};
-
-}  // namespace clustering
+}  // namespace burst
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_CLUSTERING_SIMPLE_STORAGE_HPP_
+#endif  // JUBATUS_CORE_BURST_ENGINE_HPP_
