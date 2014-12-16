@@ -67,7 +67,7 @@ shared_ptr<nearest_neighbor_classifier>
       nn_engine(nearest_neighbor::create_nearest_neighbor(
           nn_method, config(nn_parameter), table, ""));
   return shared_ptr<nearest_neighbor_classifier>(
-      new nearest_neighbor_classifier(nn_engine, 3));
+      new nearest_neighbor_classifier(nn_engine, 3, 1.0f));
 }
 
 template<typename T>

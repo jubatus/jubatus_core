@@ -58,12 +58,14 @@ struct nearest_neighbor_classifier_config
   std::string method;
   config parameter;
   int nearest_neighbor_num;
+  float local_sensitivity;
 
   template<typename Ar>
   void serialize(Ar& ar) {
     ar & JUBA_MEMBER(method)
         & JUBA_MEMBER(parameter)
-        & JUBA_MEMBER(nearest_neighbor_num);
+        & JUBA_MEMBER(nearest_neighbor_num)
+        & JUBA_MEMBER(local_sensitivity);
     unlearner_config::serialize(ar);
   }
 };
@@ -168,8 +170,9 @@ shared_ptr<classifier_base> classifier_factory::create_classifier(
         nearest_neighbor_engine(nearest_neighbor::create_nearest_neighbor(
             conf.method, conf.parameter, table, ""));
     res.reset(
-        new nearest_neighbor_classifier(
-            nearest_neighbor_engine, conf.nearest_neighbor_num));
+        new nearest_neighbor_classifier(nearest_neighbor_engine,
+                                        conf.nearest_neighbor_num,
+                                        conf.local_sensitivity));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("classifier(" + name + ")"));

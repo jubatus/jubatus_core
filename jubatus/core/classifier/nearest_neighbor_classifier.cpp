@@ -71,8 +71,13 @@ class nearest_neighbor_classifier::unlearning_callback {
 
 nearest_neighbor_classifier::nearest_neighbor_classifier(
     shared_ptr<nearest_neighbor::nearest_neighbor_base> engine,
-    size_t k)
-    : nearest_neighbor_engine_(engine), k_(k) {
+    size_t k,
+    float alpha)
+    : nearest_neighbor_engine_(engine), k_(k), alpha_(alpha) {
+  if (!(alpha >= 0)) {
+    throw JUBATUS_EXCEPTION(common::invalid_parameter(
+        "local_sensitivity should >= 0"));
+  }
 }
 
 void nearest_neighbor_classifier::train(
@@ -122,7 +127,7 @@ void nearest_neighbor_classifier::classify_with_scores(
   }
   for (size_t i = 0; i < ids.size(); ++i) {
     std::string label = get_label_from_id(ids[i].first);
-    m[label] += std::exp(-ids[i].second);
+    m[label] += std::exp(-alpha_ * ids[i].second);
   }
 
   scores.clear();

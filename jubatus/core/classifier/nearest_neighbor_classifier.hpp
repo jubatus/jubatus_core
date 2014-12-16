@@ -40,7 +40,7 @@ class nearest_neighbor_classifier : public classifier_base {
   nearest_neighbor_classifier(
       jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
           nearest_neighbor_engine,
-      size_t k);
+      size_t k, float alpha);
 
   void train(const common::sfv_t& fv, const std::string& label);
 
@@ -71,6 +71,7 @@ class nearest_neighbor_classifier : public classifier_base {
       nearest_neighbor_engine_;
   jubatus::util::data::unordered_set<std::string> labels_;
   size_t k_;
+  float alpha_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   jubatus::util::math::random::mtrand rand_;
 
