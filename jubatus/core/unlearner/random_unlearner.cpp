@@ -39,7 +39,7 @@ random_unlearner::random_unlearner(const config& conf)
     }
     mtr_ = jubatus::util::math::random::mtrand(*conf.seed);
   }
-  id_set_.reserve(max_size_);
+  id_map_.reserve(max_size_);
   ids_.reserve(max_size_);
 }
 
@@ -48,31 +48,49 @@ bool random_unlearner::can_touch(const std::string& id) {
 }
 
 bool random_unlearner::touch(const std::string& id) {
-  if (id_set_.count(id) > 0) {
+  if (id_map_.count(id) > 0) {
     return true;
   }
 
-  if (id_set_.size() < max_size_) {
+  size_t new_id_pos = -1;
+  if (id_map_.size() < max_size_) {
+    // Just add new ID to the ID set.
     ids_.push_back(id);
+    new_id_pos = ids_.size() - 1;
   } else {
-    const size_t replace_at = mtr_(id_set_.size());
-    unlearn(ids_[replace_at]);
-    id_set_.erase(ids_[replace_at]);
-    ids_[replace_at] = id;
+    // Need to unlearn the old entry and replace it with new one.
+    new_id_pos = mtr_(id_map_.size());
+    const std::string old_id = ids_[new_id_pos];
+    unlearn(old_id);
+    id_map_.erase(old_id);
+    ids_[new_id_pos] = id;
   }
-  id_set_.insert(id);
+  id_map_.insert(std::make_pair(id, new_id_pos));
 
   return true;
 }
 
 bool random_unlearner::remove(const std::string& id) {
-  // TODO(kmaehashi) As we don't provide sticky ID feature for
-  // random_unlearner so far, we don't have to implement this for now.
+  if (id_map_.count(id) == 0) {
+    return false;
+  }
+
+  const size_t id_pos = id_map_[id];
+  id_map_.erase(id);
+
+  // Overwrite the ID with the last element to avoid calling erase to vector.
+  const std::string back_id = ids_.back();
+  ids_.pop_back();
+  if (id != back_id) {
+    ids_[id_pos] = back_id;
+    id_map_[back_id] = id_pos;
+  }
+
   return true;
 }
 
 bool random_unlearner::exists_in_memory(const std::string& id) const {
-  return id_set_.count(id) > 0;
+  return id_map_.count(id) > 0;
 }
 
 }  // namespace unlearner

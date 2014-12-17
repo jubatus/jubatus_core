@@ -49,6 +49,41 @@ TEST(random_unlearner, seed_must_be_within_32bit) {
   EXPECT_THROW(random_unlearner unlearner(config), common::config_exception);
 }
 
+TEST(random_unlearner, remove) {
+  random_unlearner::config config;
+  config.max_size = 3;
+  random_unlearner unlearner(config);
+
+  // add 3 IDs
+  unlearner.touch("id1");
+  unlearner.touch("id2");
+  unlearner.touch("id3");
+
+  // remove the middle ID
+  EXPECT_TRUE(unlearner.remove("id2"));
+  EXPECT_TRUE(unlearner.exists_in_memory("id1"));
+  EXPECT_FALSE(unlearner.exists_in_memory("id2"));
+  EXPECT_TRUE(unlearner.exists_in_memory("id3"));
+
+  // add 1 ID
+  EXPECT_TRUE(unlearner.touch("id4"));
+  EXPECT_TRUE(unlearner.exists_in_memory("id1"));
+  EXPECT_FALSE(unlearner.exists_in_memory("id2"));
+  EXPECT_TRUE(unlearner.exists_in_memory("id3"));
+  EXPECT_TRUE(unlearner.exists_in_memory("id4"));
+
+  // remove the last ID
+  EXPECT_TRUE(unlearner.remove("id4"));
+  EXPECT_TRUE(unlearner.exists_in_memory("id1"));
+  EXPECT_FALSE(unlearner.exists_in_memory("id2"));
+  EXPECT_TRUE(unlearner.exists_in_memory("id3"));
+  EXPECT_FALSE(unlearner.exists_in_memory("id4"));
+
+  // remove non-existent ID
+  EXPECT_FALSE(unlearner.remove("foo"));
+  EXPECT_FALSE(unlearner.remove("id4"));
+}
+
 TEST(random_unlearner, trivial) {
   unordered_set<std::string> keys;
   keys.insert("id1");
