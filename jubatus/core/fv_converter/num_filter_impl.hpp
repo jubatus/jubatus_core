@@ -77,7 +77,7 @@ class gaussian_normalization_filter : public num_filter {
     : average_(average), standard_deviation_(standard_deviation) {
     if (standard_deviation_ < 0) {
       throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("Variance must be non-negative"));
+          common::invalid_parameter("standard deviation must be non-negative"));
     }
   }
 
