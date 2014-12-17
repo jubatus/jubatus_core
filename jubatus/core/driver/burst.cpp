@@ -48,9 +48,7 @@ std::string keywords_to_string(const burst::keyword_list& keywords) {
 
 }  // namespace
 
-void burst::init_(jubatus::util::lang::shared_ptr<model_t>& model) {
-  burst_.swap(model);
-  mixable_burst_.set_model(burst_);
+void burst::init_() {
   holder_ = mixable_holder();  // just to be safe
 
   register_mixable(&mixable_burst_);

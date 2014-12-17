@@ -43,9 +43,6 @@ class linear_mixable_helper : public linear_mixable {
   typedef Diff diff_type;
   typedef jubatus::util::lang::shared_ptr<Model> model_ptr;
 
-  linear_mixable_helper() {
-  }
-
   explicit linear_mixable_helper(model_ptr model)
     : model_(model) {
     if (!model) {
@@ -54,6 +51,9 @@ class linear_mixable_helper : public linear_mixable {
   }
 
   void set_model(model_ptr m) {
+    if (!m) {
+      throw JUBATUS_EXCEPTION(common::config_not_set());
+    }
     model_ = m;
   }
 
@@ -84,20 +84,12 @@ class linear_mixable_helper : public linear_mixable {
   }
 
   void get_diff(packer& pk) const {
-    if (!model_) {
-      throw JUBATUS_EXCEPTION(common::config_not_set());
-    }
-
     Diff diff;
     model_->get_diff(diff);
     pk.pack(diff);
   }
 
   bool put_diff(const diff_object& ptr) {
-    if (!model_) {
-      throw JUBATUS_EXCEPTION(common::config_not_set());
-    }
-
     internal_diff_object* diff_obj =
       dynamic_cast<internal_diff_object*>(ptr.get());
     if (!diff_obj) {
