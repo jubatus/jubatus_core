@@ -1,3 +1,14 @@
+Release 0.0.7 - 2014/12/22
+--------------------------
+
+* Improvements
+    * Remove error-prone default constructor (#72, #80)
+    * clustering: Add test for gmm-based clustering algorithm (#66)
+
+* Bug fixes
+    * random_unlearner now take care of entries deleted by user (#60, #79)
+    * Fix error message in gaussian_normalization_filter (#85, #86)
+
 Release 0.0.6 - 2014/11/25
 --------------------------
 
