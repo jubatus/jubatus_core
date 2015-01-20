@@ -36,13 +36,12 @@ namespace core {
 namespace clustering {
 
 void gmm::batch(const eigen_wsvec_list_t& data, int d, int k) {
-  if (data.empty()) {
-    *this = gmm();
-    return;
-  }
-
   typedef eigen_wsvec_list_t::const_iterator data_iter;
   initialize(data, d, k);
+
+  if (data.empty()) {
+    return;
+  }
 
   eigen_svec_list_t old_means;
   eigen_smat_list_t old_covs;
@@ -118,7 +117,11 @@ void gmm::initialize(const eigen_wsvec_list_t& data, int d, int k) {
 
   jubatus::util::math::random::mtrand r(time(NULL));
   for (int c = 0; c < k; ++c) {
-    means_[c] = data[r.next_int(0, data.size()-1)].data;
+    if (data.empty()) {
+      means_[c] = eigen_svec_t(d);
+    } else {
+      means_[c] = data[r.next_int(0, data.size()-1)].data;
+    }
     for (int i = 0; i < d; ++i) {
       covs_[c].insert(i, i) = 1;
     }
