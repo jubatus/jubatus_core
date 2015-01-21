@@ -24,6 +24,7 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/math/random.h"
+#include "../common/exception.hpp"
 
 using jubatus::util::lang::shared_ptr;
 using std::max;
@@ -91,6 +92,11 @@ eigen_svec_t gmm::get_nearest_center(const eigen_svec_t& p) const {
 }
 
 int64_t gmm::get_nearest_center_index(const eigen_svec_t& p) const {
+  if (means_.empty()) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "clustering is not performed yet"));
+  }
+
   double max_prob = 0;
   int64_t max_idx = 0;
   eigen_svec_t cps = cluster_probs(p, means_, covs_, cov_solvers_);
