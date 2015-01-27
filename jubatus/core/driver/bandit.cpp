@@ -31,10 +31,9 @@ namespace core {
 namespace driver {
 
 bandit::bandit(const std::string& method_name,
-               const common::jsonconfig::config& param) {
-  bandit_ = bandit_factory::create(method_name, param);
-  mixable_storage_.set_model(bandit_);
-
+               const common::jsonconfig::config& param)
+    : bandit_(bandit_factory::create(method_name, param)),
+      mixable_storage_(bandit_) {
   register_mixable(&mixable_storage_);
 }
 
