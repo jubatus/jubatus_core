@@ -37,12 +37,12 @@ class burst : public driver_base {
   typedef jubatus::core::burst::keyword_params keyword_params;
   typedef model_t::keyword_list keyword_list;
 
-  explicit burst(jubatus::util::lang::shared_ptr<model_t> model) {
-    init_(model);
+  explicit burst(jubatus::util::lang::shared_ptr<model_t> model)
+    : burst_(model), mixable_burst_(model) {
+    init_();
   }
-  explicit burst(model_t* model) {
-    jubatus::util::lang::shared_ptr<model_t> p(model);
-    init_(p);
+  explicit burst(model_t* model) : burst_(model), mixable_burst_(burst_) {
+    init_();
   }
 
   model_t* get_model() const {
@@ -76,7 +76,7 @@ class burst : public driver_base {
   jubatus::util::lang::shared_ptr<model_t> burst_;
   core::burst::mixable_burst mixable_burst_;
 
-  void init_(jubatus::util::lang::shared_ptr<model_t>& model);
+  void init_();
 };
 
 }  // namespace driver

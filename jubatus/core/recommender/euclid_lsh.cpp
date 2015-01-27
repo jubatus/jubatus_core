@@ -93,18 +93,21 @@ const uint32_t euclid_lsh::DEFAULT_NUM_PROBE = 64;  // should be in config
 const uint32_t euclid_lsh::DEFAULT_SEED = 1091;  // should be in config
 const bool euclid_lsh::DEFAULT_RETAIN_PROJECTION = false;
 
+typedef storage::mixable_lsh_index_storage::model_ptr model_ptr;
+typedef storage::lsh_index_storage lsh_index_storage;
+
 euclid_lsh::euclid_lsh()
-    : mixable_storage_(new storage::mixable_lsh_index_storage),
+    : mixable_storage_(new storage::mixable_lsh_index_storage(
+        model_ptr(new lsh_index_storage(DEFAULT_HASH_NUM,
+                                        DEFAULT_TABLE_NUM,
+                                        DEFAULT_SEED)))),
       bin_width_(DEFAULT_BIN_WIDTH),
       num_probe_(DEFAULT_NUM_PROBE),
       retain_projection_(DEFAULT_RETAIN_PROJECTION) {
-  mixable_storage_->set_model(storage::mixable_lsh_index_storage::model_ptr(
-      new storage::lsh_index_storage(
-          DEFAULT_HASH_NUM, DEFAULT_TABLE_NUM, DEFAULT_SEED)));
 }
 
 euclid_lsh::euclid_lsh(const config& config)
-    : mixable_storage_(new storage::mixable_lsh_index_storage),
+    : mixable_storage_(),
       bin_width_(config.bin_width),
       num_probe_(config.probe_num),
       retain_projection_(config.retain_projection) {
@@ -134,9 +137,12 @@ euclid_lsh::euclid_lsh(const config& config)
         common::invalid_parameter("0 <= seed"));
   }
 
-  mixable_storage_->set_model(storage::mixable_lsh_index_storage::model_ptr(
-      new storage::lsh_index_storage(
-          config.hash_num, config.table_num, config.seed)));
+  typedef storage::mixable_lsh_index_storage mli_storage;
+  typedef mli_storage::model_ptr model_ptr;
+  typedef storage::lsh_index_storage li_storage;
+
+  model_ptr p(new li_storage(config.hash_num, config.table_num, config.seed));
+  mixable_storage_.reset(new mli_storage(p));
 }
 
 euclid_lsh::~euclid_lsh() {
@@ -251,9 +257,9 @@ vector<float> euclid_lsh::get_projection(uint32_t seed) {
 }
 
 void euclid_lsh::initialize_model() {
-  mixable_storage_.reset(new storage::mixable_lsh_index_storage);
-  mixable_storage_->set_model(storage::mixable_lsh_index_storage::model_ptr(
-      new storage::lsh_index_storage));
+  typedef storage::mixable_lsh_index_storage::model_ptr model_ptr;
+  model_ptr p(new storage::lsh_index_storage);
+  mixable_storage_.reset(new storage::mixable_lsh_index_storage(p));
 }
 
 void euclid_lsh::pack(framework::packer& packer) const {

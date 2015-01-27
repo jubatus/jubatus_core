@@ -149,9 +149,10 @@ framework::mixable* lsh::get_mixable() const {
 }
 
 void lsh::initialize_model() {
-  mixable_storage_.reset(new storage::mixable_bit_index_storage);
-  mixable_storage_->set_model(storage::mixable_bit_index_storage::model_ptr(
-      new storage::bit_index_storage));
+  typedef storage::mixable_bit_index_storage::model_ptr model_ptr;
+  typedef storage::mixable_bit_index_storage storage_t;
+  model_ptr p(new storage::bit_index_storage);
+  mixable_storage_.reset(new storage_t(p));
 }
 
 void lsh::pack(framework::packer& packer) const {

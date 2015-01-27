@@ -68,7 +68,7 @@ float calculate_lof(
 lof::lof(
     const lof_storage::config& config,
     jubatus::util::lang::shared_ptr<recommender::recommender_base> nn_engine)
-    : mixable_storage_(new mixable_lof_storage),
+    : mixable_storage_(),
       nn_engine_(nn_engine) {
 
   if (!(2 <= config.nearest_neighbor_num)) {
@@ -83,8 +83,8 @@ lof::lof(
             "nearest_neighbor_num <= reverse_nearest_neighbor_num"));
   }
 
-  mixable_storage_->set_model(mixable_lof_storage::model_ptr(
-      new lof_storage(config, nn_engine)));
+  mixable_lof_storage::model_ptr p(new lof_storage(config, nn_engine));
+  mixable_storage_.reset(new mixable_lof_storage(p));
 }
 
 lof::~lof() {

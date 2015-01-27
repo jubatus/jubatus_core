@@ -185,9 +185,8 @@ framework::mixable* minhash::get_mixable() const {
 }
 
 void minhash::initialize_model() {
-  mixable_storage_.reset(new storage::mixable_bit_index_storage);
-  mixable_storage_->set_model(
-      shared_ptr<storage::bit_index_storage>(new storage::bit_index_storage));
+  shared_ptr<storage::bit_index_storage> p(new storage::bit_index_storage);
+  mixable_storage_.reset(new storage::mixable_bit_index_storage(p));
 }
 
 void minhash::pack(framework::packer& packer) const {

@@ -17,10 +17,13 @@
 #include "inverted_index_storage.hpp"
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "../storage/fixed_size_heap.hpp"
 
 using std::istringstream;
 using std::make_pair;
@@ -250,21 +253,29 @@ void inverted_index_storage::calc_scores(
   if (query_norm == 0.f) {
     return;
   }
-  jubatus::util::data::unordered_map<uint64_t, float> i_scores;
+
+  std::vector<float> i_scores(column2id_.get_max_id() + 1, 0.0);
   for (size_t i = 0; i < query.size(); ++i) {
     const string& fid = query[i].first;
     float val = query[i].second;
     add_inp_scores(fid, val, i_scores);
   }
 
-  vector<pair<float, uint64_t> > sorted_scores;
-  for (jubatus::util::data::unordered_map<uint64_t, float>::
-      const_iterator it = i_scores.begin(); it != i_scores.end(); ++it) {
-    float norm = calc_columnl2norm(it->first);
-    float normed_score = (norm != 0.f) ? it->second / norm / query_norm : 0.f;
-    sorted_scores.push_back(make_pair(normed_score, it->first));
+  storage::fixed_size_heap<pair<float, uint64_t>,
+                           std::greater<pair<float, uint64_t> > > heap(ret_num);
+  for (size_t i = 0; i < i_scores.size(); ++i) {
+    float score = i_scores[i];
+    if (score == 0.f)
+      continue;
+    float norm = calc_columnl2norm(i);
+    if (norm == 0.f)
+      continue;
+    float normed_score = score / norm / query_norm;
+    heap.push(make_pair(normed_score, i));
   }
-  sort(sorted_scores.rbegin(), sorted_scores.rend());
+  vector<pair<float, uint64_t> > sorted_scores;
+  heap.get_sorted(sorted_scores);
+
   for (size_t i = 0; i < sorted_scores.size() && i < ret_num; ++i) {
     scores.push_back(
         make_pair(column2id_.get_key(sorted_scores[i].second),
@@ -296,7 +307,7 @@ float inverted_index_storage::calc_columnl2norm(uint64_t column_id) const {
 void inverted_index_storage::add_inp_scores(
     const std::string& row,
     float val,
-    jubatus::util::data::unordered_map<uint64_t, float>& scores) const {
+    std::vector<float>& scores) const {
   tbl_t::const_iterator it_diff = inv_diff_.find(row);
   if (it_diff != inv_diff_.end()) {
     const row_t& row_v = it_diff->second;

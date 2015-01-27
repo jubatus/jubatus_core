@@ -144,7 +144,7 @@ public:
 };
 
 template <class Func>
-void serialize(reflection &ref, stream<Func> &str)
+void serialize(reflection &ref, stream<Func> & /*str*/)
 {
   ref.add("", jubatus::util::lang::shared_ptr<type_rep>(new stream_type()));
 }

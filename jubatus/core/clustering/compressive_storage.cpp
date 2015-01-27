@@ -112,24 +112,31 @@ void compressive_storage::carry_up(size_t r) {
   }
 }
 
-void compressive_storage::pack(framework::packer& packer) const {
+void compressive_storage::pack_impl_(framework::packer& packer) const {
   packer.pack_array(4);
-  packer.pack(static_cast<const storage&>(*this));
+  storage::pack_impl_(packer);
   packer.pack(mine_);
   packer.pack(status_);
   packer.pack(*compressor_);
 }
 
-void compressive_storage::unpack(msgpack::object o) {
+void compressive_storage::unpack_impl_(msgpack::object o) {
   std::vector<msgpack::object> mems;
   o.convert(&mems);
   if (mems.size() != 4) {
     throw msgpack::type_error();
   }
-  mems[0].convert(static_cast<storage*>(this));
+  storage::unpack_impl_(mems[0]);
   mems[1].convert(&mine_);
   mems[2].convert(&status_);
   mems[3].convert(compressor_.get());
+}
+
+void compressive_storage::clear_impl_() {
+  storage::clear_impl_();
+  mine_.clear();
+  mine_.push_back(wplist());
+  status_ = 0;
 }
 
 }  // namespace clustering

@@ -37,6 +37,10 @@ kmeans_clustering_method::~kmeans_clustering_method() {
 }
 
 void kmeans_clustering_method::batch_update(wplist points) {
+  if (points.empty()) {
+    kcenters_.clear();
+    return;
+  }
   initialize_centers(points);
   do_batch_update(points);
 }

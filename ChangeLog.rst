@@ -1,3 +1,29 @@
+Release 0.0.7 - 2014/12/22
+--------------------------
+
+* Improvements
+    * Remove error-prone default constructor (#72, #80)
+    * clustering: Add test for gmm-based clustering algorithm (#66)
+
+* Bug fixes
+    * random_unlearner now take care of entries deleted by user (#60, #79)
+    * Fix error message in gaussian_normalization_filter (#85, #86)
+
+Release 0.0.6 - 2014/11/25
+--------------------------
+
+* Improvements
+    * Add normalization feature (num_filter) to fv_converter (#67, #68)
+    * recommender: Improve performance of inverted_index (#44, #45)
+        * This work was supported by New Energy and Industrial Technology Development Organization (NEDO).
+    * clustering: Support clear RPC method (#69)
+    * burst: Improved parameter validation (#75, #77)
+    * burst: Remove unused debug code (#71, #74)
+    * Enable libstdc++ debug mode when configured using `--enable-debug` (#73)
+
+* Bug fixes
+    * recommender: Fix unlearner leaks rows when using NN-based method (fix #76)
+
 Release 0.0.5 - 2014/10/20
 --------------------------
 

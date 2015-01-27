@@ -145,9 +145,9 @@ class datum_to_fv_converter_impl {
 
  public:
   datum_to_fv_converter_impl()
-      : mixable_weights_(new mixable_weight_manager) {
-    set_weight_manager(jubatus::util::lang::shared_ptr<weight_manager>(
-        new weight_manager));
+      : mixable_weights_() {
+    jubatus::util::lang::shared_ptr<weight_manager> p(new weight_manager);
+    mixable_weights_.reset(new mixable_weight_manager(p));
   }
 
   void clear_rules() {
