@@ -174,12 +174,6 @@ void light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
   // Primarily add id to lof table with dummy parameters.
   // update_entries() below overwrites this row.
   table->add(id, table::owner(my_id_), -1.f, -1.f);
-
-  for (unordered_set<std::string>::const_iterator it = update_set.begin();
-       it != update_set.end(); ++it) {
-    touch(*it);
-  }
-
   update_set.insert(id);
   update_entries(update_set);
 }
