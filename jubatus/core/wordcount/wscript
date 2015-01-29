@@ -1,0 +1,40 @@
+# -*- coding: utf-8-unix -*-
+
+def options(ctx): pass
+
+def configure(ctx): pass
+
+def build(bld):
+  source = [
+      'space_saving.cpp',
+      'wordcount_factory.cpp',
+      ]
+  headers = [
+      'wordcount_factory.hpp',
+      'space_saving.hpp',
+      'wordcount_base.hpp',
+      ]
+  use = ['jubatus_util']
+
+  bld.core_sources.extend(bld.add_prefix(source))
+  bld.core_headers.extend(bld.add_prefix(headers))
+  bld.core_use.extend(use)
+
+  bld.program(
+     features = 'gtest',
+     source = [
+         'wordcount_test.cpp',
+     ],
+     target = "wordcount_test",
+     includes = '.',
+     use = ['jubatus_util', 'jubatus_core'])
+
+  bld.program(
+     features = 'gtest',
+     source = [
+         'wordcount_factory_test.cpp',
+     ],
+     target = "wordcount_factory_test",
+     includes = '.',
+     use = ['jubatus_util', 'jubatus_core'])
+
