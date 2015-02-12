@@ -65,7 +65,7 @@ void nearest_neighbor::set_row(
     unlearner_->touch(id);
   }
   common::sfv_t v;
-  converter_->convert(datum, v);
+  converter_->convert_and_update_weight(datum, v);
   nn_->set_row(id, v);
 }
 
