@@ -179,15 +179,28 @@ core::clustering::cluster_unit
 }
 
 void clustering::pack(framework::packer& pk) const {
+  pk.pack_array(2);
   clustering_->pack(pk);
+  wm_.get_model()->pack(pk);
 }
 
 void clustering::unpack(msgpack::object o) {
-  clustering_->unpack(o);
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  // clear
+  clustering_->clear();
+  converter_->clear_weights();
+
+  // load
+  clustering_->unpack(o.via.array.ptr[0]);
+  wm_.get_model()->unpack(o.via.array.ptr[1]);
 }
 
 void clustering::clear() {
   clustering_->clear();
+  converter_->clear_weights();
 }
 
 }  // namespace driver
