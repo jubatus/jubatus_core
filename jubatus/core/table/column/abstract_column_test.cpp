@@ -22,6 +22,9 @@
 using jubatus::core::table::detail::abstract_column;
 using jubatus::core::table::column_type;
 using jubatus::core::table::bit_vector;
+using jubatus::core::table::bit_vector_column;
+using jubatus::core::table::column_type;
+
 
 TEST(abstract_column, pack_and_unpack) {
   const size_t n = 10;
@@ -102,4 +105,22 @@ TEST(abstract_column, bit_vector_pack_and_unpack) {
   EXPECT_THROW({
     obj.convert(&dest2);
   }, jubatus::core::table::type_unmatch_exception);
+}
+
+TEST(abstract_column, update_at_correct_index) {
+  const int width = 80;
+  column_type type(column_type::bit_vector_type, width);
+  bit_vector_column bvc(type);
+  bit_vector value1(width);
+
+  value1.set_bit(1);
+  bvc.push_back(value1);
+  bvc.push_back(value1);
+
+  bit_vector value2(width);
+  value2.set_bit(2);
+  bvc.update(0, value2);
+
+  bit_vector may_be_value2(bvc[0]);
+  ASSERT_EQ(value2, may_be_value2);
 }
