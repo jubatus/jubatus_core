@@ -25,6 +25,7 @@ namespace core {
 namespace fv_converter {
 
 class binary_feature;
+class combination_feature;
 class num_filter;
 class num_feature;
 class string_feature;
@@ -35,6 +36,9 @@ class factory_extender {
   virtual ~factory_extender() {}
 
   virtual binary_feature* create_binary_feature(
+      const std::string& name,
+      const param_t&) const = 0;
+  virtual combination_feature* create_combination_feature(
       const std::string& name,
       const param_t&) const = 0;
   virtual num_filter* create_num_filter(

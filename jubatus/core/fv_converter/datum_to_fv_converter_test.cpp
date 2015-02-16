@@ -23,15 +23,18 @@
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/text/json.h"
 #include "binary_feature.hpp"
+#include "combination_feature_impl.hpp"
 #include "character_ngram.hpp"
 #include "converter_config.hpp"
 #include "datum_to_fv_converter.hpp"
 #include "datum.hpp"
+#include "exact_match.hpp"
 #include "exception.hpp"
 #include "match_all.hpp"
 #include "num_feature_impl.hpp"
 #include "num_filter_impl.hpp"
 #include "regexp_filter.hpp"
+#include "prefix_match.hpp"
 #include "space_splitter.hpp"
 #include "weight_manager.hpp"
 #include "without_split.hpp"
@@ -440,6 +443,102 @@ TEST(datum_to_fv_converter, check_datum_key_in_binary) {
   datum.binary_values_.push_back(std::make_pair("bad$key", "0101"));
   std::vector<std::pair<std::string, float> > feature;
   ASSERT_THROW(conv.convert(datum, feature), converter_exception);
+}
+
+TEST(datum_to_fv_converter, combination_feature_num) {
+  datum datum;
+  datum.num_values_.push_back(std::make_pair("/val1", 1.1));
+  datum.num_values_.push_back(std::make_pair("/val2", 1.1));
+
+  datum_to_fv_converter conv;
+  init_weight_manager(conv);
+  typedef shared_ptr<combination_feature> combination_feature_t;
+  typedef shared_ptr<num_feature> num_feature_t;
+  shared_ptr<key_matcher> all_matcher(new match_all());
+
+  conv.register_num_rule(
+      "num",
+      all_matcher,
+      num_feature_t(new num_value_feature()));
+  conv.register_combination_rule(
+      "add",
+      all_matcher,
+      all_matcher,
+      combination_feature_t(new combination_add_feature()));
+  conv.register_combination_rule(
+      "mul",
+      all_matcher,
+      all_matcher,
+      combination_feature_t(new combination_mul_feature()));
+  std::vector<std::pair<std::string, float> > feature;
+  conv.convert(datum, feature);
+
+  std::vector<std::pair<std::string, float> > expected;
+  expected.push_back(std::make_pair("/val1@num", 1.1));
+  expected.push_back(std::make_pair("/val2@num", 1.1));
+  expected.push_back(std::make_pair("/val1@num&/val2@num/add", 2.2));
+  expected.push_back(std::make_pair("/val1@num&/val2@num/mul", 1.21));
+
+  ASSERT_EQ(expected, feature);
+}
+
+TEST(datum_to_fv_converter, combination_feature_string) {
+  datum datum;
+  datum.string_values_.push_back(std::make_pair("/name", "abc xyz"));
+  datum.string_values_.push_back(std::make_pair("/title", "foo bar"));
+
+  datum_to_fv_converter conv;
+  init_weight_manager(conv);
+  {
+    shared_ptr<key_matcher> all_matcher(new match_all());
+    shared_ptr<word_splitter> s(new space_splitter());
+    std::vector<splitter_weight_type> p;
+    p.push_back(splitter_weight_type(FREQ_BINARY, TERM_BINARY));
+    p.push_back(splitter_weight_type(TERM_FREQUENCY, IDF));
+    p.push_back(splitter_weight_type(LOG_TERM_FREQUENCY, IDF));
+    conv.register_string_rule("space", all_matcher, s, p);
+  }
+
+  typedef shared_ptr<combination_feature> combination_feature_t;
+  typedef shared_ptr<string_feature> string_feature_t;
+  shared_ptr<key_matcher> name_matcher(new prefix_match("/name"));
+  shared_ptr<key_matcher> title_matcher(new prefix_match("/title"));
+
+  conv.register_combination_rule(
+      "add",
+      name_matcher,
+      title_matcher,
+      combination_feature_t(new combination_add_feature()));
+  conv.register_combination_rule(
+      "mul",
+      title_matcher,
+      title_matcher,
+      combination_feature_t(new combination_mul_feature()));
+  std::vector<std::pair<std::string, float> > feature;
+  conv.convert(datum, feature);
+
+  std::vector<std::pair<std::string, float> > expected;
+  expected.push_back(std::make_pair("/name$xyz@space#bin/bin", 1.0));
+  expected.push_back(std::make_pair("/name$abc@space#bin/bin", 1.0));
+  expected.push_back(std::make_pair("/title$bar@space#bin/bin", 1.0));
+  expected.push_back(std::make_pair("/title$foo@space#bin/bin", 1.0));
+  expected.push_back(std::make_pair(
+      "/name$xyz@space#bin/bin&/title$bar@space#bin/bin/add",
+      2.0));
+  expected.push_back(std::make_pair(
+      "/name$xyz@space#bin/bin&/title$foo@space#bin/bin/add",
+      2.0));
+  expected.push_back(std::make_pair(
+      "/name$abc@space#bin/bin&/title$bar@space#bin/bin/add",
+      2.0));
+  expected.push_back(std::make_pair(
+      "/name$abc@space#bin/bin&/title$foo@space#bin/bin/add",
+      2.0));
+  expected.push_back(std::make_pair(
+      "/title$bar@space#bin/bin&/title$foo@space#bin/bin/mul",
+      1.0));
+
+  ASSERT_EQ(expected, feature);
 }
 
 }  // namespace fv_converter
