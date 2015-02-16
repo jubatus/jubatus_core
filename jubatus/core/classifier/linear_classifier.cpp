@@ -14,7 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "classifier_base.hpp"
+#include "linear_classifier.hpp"
 
 #include <assert.h>
 #include <float.h>
@@ -38,32 +38,33 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-classifier_base::classifier_base(storage_ptr storage)
-  : storage_(storage) {
+linear_classifier::linear_classifier(storage_ptr storage)
+  : storage_(storage), mixable_storage_(storage_) {
 }
 
-classifier_base::~classifier_base() {
+linear_classifier::~linear_classifier() {
 }
 
 namespace {
 // This function is a workaround for libc++.
 // libc++'s std::function<void (<any types>)> does not accept
 // functions which returns other than void.
-void delete_label_wrapper(classifier_base* cb, const std::string& label) {
+void delete_label_wrapper(linear_classifier* cb, const std::string& label) {
     cb->unlearn_label(label);
 }
 }
 
-void classifier_base::set_label_unlearner(
+void linear_classifier::set_label_unlearner(
     jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
         label_unlearner) {
   label_unlearner->set_callback(
       jubatus::util::lang::bind(
           delete_label_wrapper, this, jubatus::util::lang::_1));
+  mixable_storage_.set_label_unlearner(label_unlearner);
   unlearner_ = label_unlearner;
 }
 
-void classifier_base::classify_with_scores(
+void linear_classifier::classify_with_scores(
     const common::sfv_t& sfv,
     classify_result& scores) const {
   scores.clear();
@@ -76,7 +77,7 @@ void classifier_base::classify_with_scores(
   }
 }
 
-string classifier_base::classify(const common::sfv_t& fv) const {
+string linear_classifier::classify(const common::sfv_t& fv) const {
   classify_result result;
   classify_with_scores(fv, result);
   float max_score = -FLT_MAX;
@@ -91,18 +92,18 @@ string classifier_base::classify(const common::sfv_t& fv) const {
   return max_class;
 }
 
-void classifier_base::clear() {
+void linear_classifier::clear() {
   storage_->clear();
   if (unlearner_) {
     unlearner_->clear();
   }
 }
 
-vector<string> classifier_base::get_labels() const {
+vector<string> linear_classifier::get_labels() const {
   return storage_->get_labels();
 }
 
-bool classifier_base::set_label(const string& label) {
+bool linear_classifier::set_label(const string& label) {
   check_touchable(label);
 
   bool result = storage_->set_label(label);
@@ -113,12 +114,12 @@ bool classifier_base::set_label(const string& label) {
   return result;
 }
 
-void classifier_base::get_status(std::map<string, string>& status) const {
+void linear_classifier::get_status(std::map<string, string>& status) const {
   storage_->get_status(status);
   status["storage"] = storage_->type();
 }
 
-void classifier_base::update_weight(
+void linear_classifier::update_weight(
     const common::sfv_t& sfv,
     float step_width,
     const string& pos_label,
@@ -126,7 +127,7 @@ void classifier_base::update_weight(
   storage_->bulk_update(sfv, step_width, pos_label, neg_label);
 }
 
-string classifier_base::get_largest_incorrect_label(
+string linear_classifier::get_largest_incorrect_label(
     const common::sfv_t& fv,
     const string& label,
     classify_result& scores) const {
@@ -146,7 +147,7 @@ string classifier_base::get_largest_incorrect_label(
   return max_class;
 }
 
-float classifier_base::calc_margin(
+float linear_classifier::calc_margin(
     const common::sfv_t& fv,
     const string& label,
     string& incorrect_label) const {
@@ -165,7 +166,7 @@ float classifier_base::calc_margin(
   return incorrect_score - correct_score;
 }
 
-float classifier_base::calc_margin_and_variance(
+float linear_classifier::calc_margin_and_variance(
     const common::sfv_t& sfv,
     const string& label,
     string& incorrect_label,
@@ -192,7 +193,7 @@ float classifier_base::calc_margin_and_variance(
   return margin;
 }
 
-float classifier_base::squared_norm(const common::sfv_t& fv) {
+float linear_classifier::squared_norm(const common::sfv_t& fv) {
   float ret = 0.f;
   for (size_t i = 0; i < fv.size(); ++i) {
     ret += fv[i].second * fv[i].second;
@@ -200,11 +201,18 @@ float classifier_base::squared_norm(const common::sfv_t& fv) {
   return ret;
 }
 
-storage_ptr classifier_base::get_storage() {
-  return storage_;
+void linear_classifier::pack(framework::packer& pk) const {
+  storage_->pack(pk);
+}
+void linear_classifier::unpack(msgpack::object o) {
+  storage_->unpack(o);
 }
 
-void classifier_base::touch(const std::string& label) {
+framework::mixable* linear_classifier::get_mixable() {
+  return &mixable_storage_;
+}
+
+void linear_classifier::touch(const std::string& label) {
   check_touchable(label);
 
   if (unlearner_) {
@@ -212,16 +220,16 @@ void classifier_base::touch(const std::string& label) {
   }
 }
 
-void classifier_base::check_touchable(const std::string& label) {
+void linear_classifier::check_touchable(const std::string& label) {
   if (unlearner_ && !unlearner_->can_touch(label)) {
     throw JUBATUS_EXCEPTION(common::exception::runtime_error(
         "no more space available to add new label: " + label));
   }
 }
 
-bool classifier_base::delete_label(const std::string& label) {
+bool linear_classifier::delete_label(const std::string& label) {
   // Remove the label from the model.
-  bool result = get_storage()->delete_label(label);
+  bool result = storage_->delete_label(label);
 
   if (unlearner_ && result) {
     // Notify unlearner that the label was removed.
@@ -234,8 +242,8 @@ bool classifier_base::delete_label(const std::string& label) {
 /**
  * Callback function to delete the label via unlearner.
  */
-bool classifier_base::unlearn_label(const std::string& label) {
-  return get_storage()->delete_label(label);
+bool linear_classifier::unlearn_label(const std::string& label) {
+  return storage_->delete_label(label);
 }
 
 }  // namespace classifier

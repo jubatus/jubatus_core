@@ -19,13 +19,13 @@
 
 #include <string>
 
-#include "classifier_base.hpp"
+#include "linear_classifier.hpp"
 
 namespace jubatus {
 namespace core {
 namespace classifier {
 
-class normal_herd : public classifier_base {
+class normal_herd : public linear_classifier {
  public:
   explicit normal_herd(storage_ptr storage);
   normal_herd(

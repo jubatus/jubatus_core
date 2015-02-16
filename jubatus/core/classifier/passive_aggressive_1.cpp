@@ -29,13 +29,13 @@ namespace core {
 namespace classifier {
 
 passive_aggressive_1::passive_aggressive_1(storage_ptr storage)
-    : classifier_base(storage) {
+    : linear_classifier(storage) {
 }
 
 passive_aggressive_1::passive_aggressive_1(
     const classifier_config& config,
     storage_ptr storage)
-    : classifier_base(storage),
+    : linear_classifier(storage),
       config_(config) {
 
   if (!(0.f < config.regularization_weight)) {

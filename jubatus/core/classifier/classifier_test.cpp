@@ -32,6 +32,7 @@
 #include "../common/jsonconfig.hpp"
 #include "../unlearner/lru_unlearner.hpp"
 #include "classifier_test_util.hpp"
+#include "../nearest_neighbor/nearest_neighbor_factory.hpp"
 
 using std::pair;
 using std::string;
@@ -40,10 +41,34 @@ using jubatus::util::text::json::to_json;
 using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
 using jubatus::core::storage::local_storage;
+using jubatus::core::common::jsonconfig::config;
+using jubatus::util::text::json::json;
+using jubatus::util::text::json::json_object;
 
 namespace jubatus {
 namespace core {
 namespace classifier {
+
+template<class Classifier>
+shared_ptr<Classifier> make_classifier() {
+  storage_ptr s(new local_storage);
+  shared_ptr<Classifier> p(new Classifier(s));
+  return p;
+}
+template<>
+shared_ptr<nearest_neighbor_classifier>
+    make_classifier<nearest_neighbor_classifier>() {
+  std::string nn_method = "euclid_lsh";
+  json nn_parameter(new json_object);
+  nn_parameter["hash_num"] = to_json(512);
+
+  shared_ptr<table::column_table> table(new table::column_table);
+  shared_ptr<nearest_neighbor::nearest_neighbor_base>
+      nn_engine(nearest_neighbor::create_nearest_neighbor(
+          nn_method, config(nn_parameter), table, ""));
+  return shared_ptr<nearest_neighbor_classifier>(
+      new nearest_neighbor_classifier(nn_engine, 3, 1.0f));
+}
 
 template<typename T>
 class classifier_test : public testing::Test {
@@ -52,34 +77,32 @@ class classifier_test : public testing::Test {
 TYPED_TEST_CASE_P(classifier_test);
 
 TYPED_TEST_P(classifier_test, trivial) {
-  storage_ptr s(new local_storage);
-  TypeParam p(s);
-  ASSERT_NE(p.name(), "");
+  shared_ptr<TypeParam> p = make_classifier<TypeParam>();
+  ASSERT_NE(p->name(), "");
   common::sfv_t fv;
   fv.push_back(make_pair(string("f1"), 1.0));
-  p.train(fv, string("label1"));
+  p->train(fv, string("label1"));
   fv.push_back(make_pair(string("f2"), 1.0));
-  p.train(fv, string("label2"));
+  p->train(fv, string("label2"));
   classify_result scores;
-  p.classify_with_scores(fv, scores);
+  p->classify_with_scores(fv, scores);
   ASSERT_EQ(2u, scores.size());
 
-  p.clear();
+  p->clear();
 
-  p.classify_with_scores(fv, scores);
+  p->classify_with_scores(fv, scores);
   ASSERT_EQ(0u, scores.size());
 }
 
 TYPED_TEST_P(classifier_test, sfv_err) {
-  storage_ptr s(new local_storage);
-  TypeParam p(s);
+  shared_ptr<TypeParam> p = make_classifier<TypeParam>();
   common::sfv_t fv;
   fv.push_back(make_pair(string("f1"), 0.0));
-  p.train(fv, string("label1"));
+  p->train(fv, string("label1"));
   fv.push_back(make_pair(string("f2"), 1.0));
-  p.train(fv, string("label2"));
+  p->train(fv, string("label2"));
   classify_result scores;
-  p.classify_with_scores(fv, scores);
+  p->classify_with_scores(fv, scores);
   ASSERT_EQ(2u, scores.size());
 }
 
@@ -94,19 +117,18 @@ common::sfv_t convert(vector<double>& v) {
 
 TYPED_TEST_P(classifier_test, random) {
   jubatus::util::math::random::mtrand rand(0);
-  storage_ptr s(new local_storage);
-  TypeParam p(s);
+  shared_ptr<TypeParam> p = make_classifier<TypeParam>();
 
   srand(0);
   for (size_t i = 0; i < 1000; ++i) {
     pair<string, vector<double> > d = gen_random_data(rand);
-    p.train(convert(d.second), d.first);
+    p->train(convert(d.second), d.first);
   }
 
   size_t correct = 0;
   for (size_t i = 0; i < 100; ++i) {
     pair<string, vector<double> > d = gen_random_data(rand);
-    if (d.first == p.classify(convert(d.second))) {
+    if (d.first == p->classify(convert(d.second))) {
       ++correct;
     }
   }
@@ -115,19 +137,18 @@ TYPED_TEST_P(classifier_test, random) {
 
 TYPED_TEST_P(classifier_test, random3) {
   jubatus::util::math::random::mtrand rand(0);
-  storage_ptr s(new local_storage);
-  TypeParam p(s);
+  shared_ptr<TypeParam> p = make_classifier<TypeParam>();
 
   srand(0);
   for (size_t i = 0; i < 1000; ++i) {
     pair<string, vector<double> > d = gen_random_data3(rand);
-    p.train(convert(d.second), d.first);
+    p->train(convert(d.second), d.first);
   }
 
   size_t correct = 0;
   for (size_t i = 0; i < 100; ++i) {
     pair<string, vector<double> > d = gen_random_data3(rand);
-    if (d.first == p.classify(convert(d.second))) {
+    if (d.first == p->classify(convert(d.second))) {
       ++correct;
     }
   }
@@ -135,36 +156,35 @@ TYPED_TEST_P(classifier_test, random3) {
 }
 
 TYPED_TEST_P(classifier_test, delete_label) {
-  storage_ptr s(new local_storage);
-  TypeParam p(s);
+  shared_ptr<TypeParam> p = make_classifier<TypeParam>();
 
   {
     common::sfv_t fv;
     fv.push_back(std::make_pair("f1", 1.f));
-    p.train(fv, "A");
+    p->train(fv, "A");
   }
 
   {
     common::sfv_t fv;
     fv.push_back(std::make_pair("f1", 1.f));
     fv.push_back(std::make_pair("f2", 1.f));
-    p.train(fv, "B");
+    p->train(fv, "B");
   }
 
   {
     common::sfv_t fv;
     fv.push_back(std::make_pair("f3", 1.f));
-    p.train(fv, "C");
+    p->train(fv, "C");
   }
 
   {
     common::sfv_t fv;
     fv.push_back(std::make_pair("f1", 1.f));
     fv.push_back(std::make_pair("f2", 1.f));
-    EXPECT_EQ("B", p.classify(fv));
+    EXPECT_EQ("B", p->classify(fv));
   }
 
-  p.delete_label("B");
+  p->delete_label("B");
 
   for (size_t i = 0; i < 8; ++i) {
     common::sfv_t fv;
@@ -177,38 +197,37 @@ TYPED_TEST_P(classifier_test, delete_label) {
     if (i & 4) {
       fv.push_back(std::make_pair("f3", 1.f));
     }
-    EXPECT_NE("B", p.classify(fv));
+    EXPECT_NE("B", p->classify(fv));
   }
 }
 
 TYPED_TEST_P(classifier_test, unlearning) {
-  storage_ptr s(new local_storage);
-  TypeParam p(s);
+  shared_ptr<TypeParam> p = make_classifier<TypeParam>();
 
   unlearner::lru_unlearner::config config;
   config.max_size = 2;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner(
       new unlearner::lru_unlearner(config));
-  p.set_label_unlearner(unlearner);
+  p->set_label_unlearner(unlearner);
 
   {
     common::sfv_t fv;
     fv.push_back(std::make_pair("f1", 10.f));
-    p.train(fv, "A");
+    p->train(fv, "A");
   }
 
   {
     common::sfv_t fv;
     fv.push_back(std::make_pair("f2", 1.f));
-    p.train(fv, "B");
+    p->train(fv, "B");
   }
 
   {
     common::sfv_t fv;
     fv.push_back(std::make_pair("f1", 1.f));
-    p.train(fv, "C");
+    p->train(fv, "C");
 
-    EXPECT_EQ("C", p.classify(fv));
+    EXPECT_EQ("C", p->classify(fv));
   }
 }
 
@@ -223,7 +242,7 @@ REGISTER_TYPED_TEST_CASE_P(
 
 typedef testing::Types<
   perceptron, passive_aggressive, passive_aggressive_1, passive_aggressive_2,
-  confidence_weighted, arow, normal_herd>
+  confidence_weighted, arow, normal_herd, nearest_neighbor_classifier>
   classifier_types;
 
 INSTANTIATE_TYPED_TEST_CASE_P(cl, classifier_test, classifier_types);

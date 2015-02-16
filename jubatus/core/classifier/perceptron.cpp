@@ -25,7 +25,7 @@ namespace core {
 namespace classifier {
 
 perceptron::perceptron(storage_ptr storage)
-    : classifier_base(storage) {
+    : linear_classifier(storage) {
 }
 
 void perceptron::train(const common::sfv_t& sfv, const std::string& label) {

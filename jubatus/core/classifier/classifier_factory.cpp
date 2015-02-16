@@ -23,6 +23,7 @@
 #include "../common/jsonconfig.hpp"
 #include "../storage/storage_base.hpp"
 #include "../unlearner/unlearner_factory.hpp"
+#include "../nearest_neighbor/nearest_neighbor_factory.hpp"
 
 using jubatus::core::common::jsonconfig::config;
 using jubatus::core::common::jsonconfig::config_cast_check;
@@ -48,6 +49,23 @@ struct unlearning_classifier_config
   template<typename Ar>
   void serialize(Ar& ar) {
     classifier_config::serialize(ar);
+    unlearner_config::serialize(ar);
+  }
+};
+
+struct nearest_neighbor_classifier_config
+    : public unlearner_config {
+  std::string method;
+  config parameter;
+  int nearest_neighbor_num;
+  float local_sensitivity;
+
+  template<typename Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(method)
+        & JUBA_MEMBER(parameter)
+        & JUBA_MEMBER(nearest_neighbor_num)
+        & JUBA_MEMBER(local_sensitivity);
     unlearner_config::serialize(ar);
   }
 };
@@ -138,6 +156,23 @@ shared_ptr<classifier_base> classifier_factory::create_classifier(
         = config_cast_check<unlearning_classifier_config>(param);
     unlearner = create_unlearner(conf);
     res.reset(new normal_herd(conf, storage));
+  } else if (name == "NN" || name == "nearest_neighbor") {
+    if (param.type() == jubatus::util::text::json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
+    nearest_neighbor_classifier_config conf
+        = config_cast_check<nearest_neighbor_classifier_config>(param);
+    unlearner = create_unlearner(conf);
+    shared_ptr<table::column_table> table(new table::column_table);
+    shared_ptr<nearest_neighbor::nearest_neighbor_base>
+        nearest_neighbor_engine(nearest_neighbor::create_nearest_neighbor(
+            conf.method, conf.parameter, table, ""));
+    res.reset(
+        new nearest_neighbor_classifier(nearest_neighbor_engine,
+                                        conf.nearest_neighbor_num,
+                                        conf.local_sensitivity));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("classifier(" + name + ")"));
