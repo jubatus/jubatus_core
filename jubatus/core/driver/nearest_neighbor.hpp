@@ -72,6 +72,8 @@ class nearest_neighbor : public driver_base {
   std::vector<std::pair<std::string, float> >
   similar_row(const core::fv_converter::datum& datum, size_t ret_num);
 
+  std::vector<std::string> get_all_rows();
+
   void clear();
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
