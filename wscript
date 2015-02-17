@@ -5,7 +5,7 @@ from functools import partial
 import os
 import sys
 
-VERSION = '0.0.3'
+VERSION = '0.0.7'
 ABI_VERSION = VERSION
 APPNAME = 'jubatus_core'
 
@@ -62,7 +62,9 @@ def configure(conf):
 
   conf.check_cxx(lib = 'msgpack')
 
-  if not Options.options.debug:
+  if Options.options.debug:
+    conf.define('_GLIBCXX_DEBUG', 1)
+  else:
     conf.define('NDEBUG', 1)
     conf.define('JUBATUS_DISABLE_ASSERTIONS', 1)
 

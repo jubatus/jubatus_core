@@ -283,7 +283,7 @@ public:
 };
 
 template <class Ar>
-inline void serialize(Ar &ar, class_name &)
+inline void serialize(Ar &/*ar*/, class_name &)
 {
 }
 

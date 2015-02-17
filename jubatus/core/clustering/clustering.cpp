@@ -41,7 +41,7 @@ clustering::clustering(
     : config_(cfg),
       name_(name),
       method_(method),
-      storage_(new mixable_storage) {
+      storage_() {
 
   // TODO(@rimms): move to factory
   if (method =="gmm" &&
@@ -113,7 +113,7 @@ void clustering::set_storage(shared_ptr<storage> storage) {
   storage->add_event_listener(UPDATE,
       jubatus::util::lang::bind(&clustering::update_clusters,
           this, jubatus::util::lang::_1, false));
-  storage_->set_model(storage);
+  storage_.reset(new mixable_storage(storage));
 }
 
 jubatus::util::lang::shared_ptr<storage> clustering::get_storage() {
@@ -184,6 +184,10 @@ void clustering::pack(framework::packer& pk) const {
 
 void clustering::unpack(msgpack::object o) {
   storage_->get_model()->unpack(o);
+}
+
+void clustering::clear() {
+  storage_->get_model()->clear();
 }
 
 void clustering::do_clustering() {

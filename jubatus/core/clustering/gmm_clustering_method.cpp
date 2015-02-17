@@ -27,13 +27,18 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-gmm_clustering_method::gmm_clustering_method(size_t k) : k_(k) {
+gmm_clustering_method::gmm_clustering_method(size_t k)
+    : k_(k), kcenters_(), mapper_(), gmm_() {
 }
 
 gmm_clustering_method::~gmm_clustering_method() {
 }
 
 void gmm_clustering_method::batch_update(wplist points) {
+  if (points.empty()) {
+    *this = gmm_clustering_method(k_);
+    return;
+  }
   mapper_.clear();
   eigen_wsvec_list_t data = mapper_.convert(points, true);
   gmm_.batch(data, mapper_.get_dimension(), k_);

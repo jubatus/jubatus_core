@@ -33,10 +33,11 @@ namespace core {
 namespace recommender {
 
 inverted_index::inverted_index()
-    : mixable_storage_(new storage::mixable_inverted_index_storage) {
-  mixable_storage_->set_model(
-      jubatus::util::lang::shared_ptr<storage::inverted_index_storage>(
-          new storage::inverted_index_storage));
+    : mixable_storage_() {
+  typedef storage::inverted_index_storage ii_storage;
+  typedef storage::mixable_inverted_index_storage mii_storage;
+  jubatus::util::lang::shared_ptr<ii_storage> p(new ii_storage);
+  mixable_storage_.reset(new mii_storage(p));
 }
 
 inverted_index::~inverted_index() {

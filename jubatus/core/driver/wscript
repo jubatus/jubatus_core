@@ -14,7 +14,8 @@ def build(bld):
       'anomaly.cpp',
       'graph.cpp',
       'nearest_neighbor.cpp',
-      'clustering.cpp'
+      'clustering.cpp',
+      'burst.cpp',
       ]
   headers = [
       'driver.hpp',
@@ -26,6 +27,7 @@ def build(bld):
       'graph.hpp',
       'nearest_neighbor.hpp',
       'clustering.hpp',
+      'burst.hpp',
       ]
   use = ['jubatus_util', 'MSGPACK']
 
@@ -52,6 +54,7 @@ def build(bld):
     'stat_test',
     'nearest_neighbor_test',
     'clustering_test',
+    'burst_test',
     ]
 
   for t in tests:

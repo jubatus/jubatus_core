@@ -19,6 +19,7 @@
 
 #include <istream>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
@@ -97,6 +98,14 @@ class weight_manager : public framework::model {
 
   void unpack(msgpack::object o) {
     o.convert(this);
+  }
+
+  std::string to_string() const {
+    std::stringstream ss;
+    ss << "version:" << version_
+       << " diff_weights:" << diff_weights_.to_string()
+       << " master_weights:" << master_weights_.to_string();
+    return ss.str();
   }
 
  private:

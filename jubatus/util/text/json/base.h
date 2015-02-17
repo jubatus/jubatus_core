@@ -33,6 +33,7 @@
 #define JUBATUS_UTIL_TEXT_JSON_BASE_H_
 
 #include <stdint.h>
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
@@ -246,7 +247,11 @@ private:
 
 class json_float : public json_number{
 public:
-  json_float(double d) : dat(d) {}
+  json_float(double d) : dat(d) {
+    if (!std::isfinite(d)) {
+      throw json_bad_cast<json_float>("value of json float must be finite");
+    }
+  }
 
   json::json_type_t type() const {
     return json::Float;
@@ -760,14 +765,14 @@ inline void gen_print(std::ostream& os, const T& js, bool pretty, bool escape)
 }
 
 template <class T>
-inline void gen_print(std::ostream& os, const pretty_tag<T>& js, bool pretty, bool escape)
+inline void gen_print(std::ostream& os, const pretty_tag<T>& js, bool /*pretty*/, bool escape)
 {
   gen_print(os, js.dat, true, escape);
 }
 
 
 template <class T>
-inline void gen_print(std::ostream& os, const without_escape_tag<T>& js, bool pretty, bool escape)
+inline void gen_print(std::ostream& os, const without_escape_tag<T>& js, bool pretty, bool /*escape*/)
 {
   gen_print(os, js.dat, pretty, false);
 }

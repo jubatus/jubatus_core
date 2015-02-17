@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_FV_CONVERTER_COUNTER_HPP_
 
 #include <ostream>
+#include <sstream>
 
 #include "jubatus/util/data/unordered_map.h"
 #include "../common/unordered_map.hpp"

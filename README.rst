@@ -56,6 +56,10 @@ Jubatus source tree includes following third-party library.
 
 .. _Eigen: http://eigen.tuxfamily.org
 
+- A fork of pficommon_ (placed under jubatus_core's jubatus/core/util/. New BSD License)
+
+.. _pficommon: https://github.com/pfi/pficommon/
+
 Update history
 --------------
 
