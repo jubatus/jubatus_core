@@ -22,8 +22,9 @@
 
 #include "clustering.hpp"
 
-#include "../../util/lang/shared_ptr.h"
-#include "../../util/math/random.h"
+#include "jubatus/util/lang/shared_ptr.h"
+#include "jubatus/util/math/random.h"
+#include "jubatus/util/lang/cast.h"
 #include "../clustering/clustering_config.hpp"
 #include "../clustering/clustering.hpp"
 #include "../clustering/kmeans_clustering_method.hpp"
@@ -38,7 +39,9 @@ using std::pair;
 using std::set;
 using std::make_pair;
 using jubatus::util::lang::shared_ptr;
+using jubatus::util::lang::lexical_cast;
 using jubatus::core::fv_converter::datum;
+using jubatus::core::fv_converter::datum_to_fv_converter;
 using jubatus::core::clustering::clustering_method;
 using jubatus::core::clustering::clustering_config;
 
@@ -150,6 +153,7 @@ TEST_P(clustering_test, get_k_center) {
   {
     vector<datum> result = clustering_->get_k_center();
     ASSERT_EQ(2, result.size());
+    ASSERT_LT(1, result[0].num_values_.size());
     if (result[0].num_values_[0].first == "a"
         || result[0].num_values_[0].first == "b") {
       // result[0] is {"a":xx, "b":yy} cluster
@@ -341,8 +345,72 @@ vector<pair<string, string> > parameter_list() {
 }
 
 INSTANTIATE_TEST_CASE_P(clustering_test_instance,
-    clustering_test,
-    testing::ValuesIn(parameter_list()));
+                        clustering_test,
+                        testing::ValuesIn(parameter_list()));
+
+
+
+class clustering_with_idf_test
+    : public ::testing::TestWithParam<pair<string, string> > {
+ protected:
+  shared_ptr<driver::clustering> create_driver() const {
+    pair<string, string> param = GetParam();
+    clustering_config conf;
+    conf.compressor_method = param.first;
+    return shared_ptr<driver::clustering>(
+        new driver::clustering(
+            shared_ptr<core::clustering::clustering>(
+                new core::clustering::clustering("dummy",
+                                                 param.second,
+                                                 conf)),
+            make_tf_idf_fv_converter()));
+  }
+  void SetUp() {
+    pair<string, string> param = GetParam();
+    clustering_config conf;
+    conf.compressor_method = param.first;
+    conf.bucket_size = 50;
+    conf.bicriteria_base_size = 5;
+    conf.compressed_bucket_size = 10;
+    clustering_ = create_driver();
+  }
+  void TearDown() {
+    clustering_.reset();
+  }
+  shared_ptr<driver::clustering> clustering_;
+};
+
+fv_converter::datum create_datum_str(const string& key, const string& value) {
+  fv_converter::datum d;
+  d.string_values_.push_back(make_pair(key, value));
+  return d;
+}
+
+TEST_P(clustering_with_idf_test, get_nearest_members) {
+  jubatus::util::math::random::mtrand r(0);
+  vector<datum> one;
+  vector<datum> two;
+
+  for (int i = 0; i < 200 ; ++i) {
+    const string i_str = lexical_cast<string>(i);
+    one.push_back(create_datum_str("a" + i_str, "x y z " + i_str));
+    two.push_back(create_datum_str("a" + i_str, "y z w " + i_str));
+  }
+  clustering_->push(one);
+  clustering_->push(two);
+
+  clustering_->do_clustering();
+
+  {
+    vector<datum> result = clustering_->get_k_center();
+    ASSERT_EQ(2u, result.size());
+  }
+
+}
+
+INSTANTIATE_TEST_CASE_P(clustering_with_idf_test_instance,
+                        clustering_with_idf_test,
+                        testing::ValuesIn(parameter_list()));
 
 }  // namespace driver
 }  // namespace core
