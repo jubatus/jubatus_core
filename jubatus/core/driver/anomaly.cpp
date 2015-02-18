@@ -50,6 +50,8 @@ anomaly::anomaly(
     register_mixable(mixables[i]);
   }
   register_mixable(&wm_);
+
+  converter_->set_weight_manager(wm_.get_model());
 }
 
 anomaly::~anomaly() {

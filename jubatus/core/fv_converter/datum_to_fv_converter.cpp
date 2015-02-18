@@ -145,9 +145,10 @@ class datum_to_fv_converter_impl {
 
  public:
   datum_to_fv_converter_impl()
-      : mixable_weights_() {
-    jubatus::util::lang::shared_ptr<weight_manager> p(new weight_manager);
-    mixable_weights_.reset(new mixable_weight_manager(p));
+    : mixable_weights_(
+        new mixable_weight_manager(
+            jubatus::util::lang::shared_ptr<weight_manager>(
+                new weight_manager))) {
   }
 
   void clear_rules() {
@@ -211,7 +212,7 @@ class datum_to_fv_converter_impl {
     jubatus::util::lang::shared_ptr<weight_manager> weights =
         mixable_weights_->get_model();
     if (weights) {
-      (*weights).get_weight(fv);
+      weights->get_weight(fv);
     }
 
     if (hasher_) {
@@ -227,8 +228,8 @@ class datum_to_fv_converter_impl {
     jubatus::util::lang::shared_ptr<weight_manager> weights =
         mixable_weights_->get_model();
     if (weights) {
-      (*weights).update_weight(fv);
-      (*weights).get_weight(fv);
+      weights->update_weight(fv);
+      weights->get_weight(fv);
     }
 
     if (hasher_) {
@@ -297,7 +298,11 @@ class datum_to_fv_converter_impl {
   }
 
   void clear_weights() {
-    mixable_weights_->get_model()->clear();
+    jubatus::util::lang::shared_ptr<weight_manager> weights =
+        mixable_weights_->get_model();
+    if (weights) {
+      weights->clear();
+    }
   }
 
  private:
