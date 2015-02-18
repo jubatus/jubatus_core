@@ -212,7 +212,7 @@ class datum_to_fv_converter_impl {
     jubatus::util::lang::shared_ptr<weight_manager> weights =
         mixable_weights_->get_model();
     if (weights) {
-      (*weights).get_weight(fv);
+      weights->get_weight(fv);
     }
 
     if (hasher_) {
@@ -228,8 +228,8 @@ class datum_to_fv_converter_impl {
     jubatus::util::lang::shared_ptr<weight_manager> weights =
         mixable_weights_->get_model();
     if (weights) {
-      (*weights).update_weight(fv);
-      (*weights).get_weight(fv);
+      weights->update_weight(fv);
+      weights->get_weight(fv);
     }
 
     if (hasher_) {
