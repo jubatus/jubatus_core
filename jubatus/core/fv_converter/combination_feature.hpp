@@ -27,8 +27,6 @@ namespace fv_converter {
 
 class combination_feature {
  public:
-  combination_feature() {
-  }
   virtual ~combination_feature() {
   }
 
