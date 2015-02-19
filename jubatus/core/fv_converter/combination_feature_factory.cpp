@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include "combination_feature_impl.hpp"
 #include "exception.hpp"
 #include "util.hpp"
 
@@ -25,12 +26,12 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
-combination_feature* combination_feature_factory::create(
+jubatus::util::lang::shared_ptr<combination_feature> combination_feature_factory::create(
     const std::string& name,
     const param_t& params) const {
   combination_feature* p;
   if (ext_ && (p = ext_(name, params))) {
-    return p;
+    return jubatus::util::lang::shared_ptr<combination_feature>(p);
   } else {
     throw JUBATUS_EXCEPTION(
         converter_exception("unknown combination feature name: " + name));

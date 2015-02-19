@@ -19,6 +19,7 @@
 
 #include <string>
 #include "jubatus/util/lang/function.h"
+#include "jubatus/util/lang/shared_ptr.h"
 #include "type.hpp"
 
 namespace jubatus {
@@ -39,8 +40,9 @@ class combination_feature_factory {
     : ext_(ext) {
   }
 
-  combination_feature* create(const std::string& name,
-                              const param_t& params) const;
+  jubatus::util::lang::shared_ptr<combination_feature> create(
+      const std::string& name,
+      const param_t& params) const;
 
  private:
   create_function ext_;
