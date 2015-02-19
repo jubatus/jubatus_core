@@ -23,6 +23,8 @@
 #include <vector>
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
+#include "binary_feature.hpp"
+#include "combination_feature.hpp"
 #include "counter.hpp"
 #include "datum.hpp"
 #include "exception.hpp"
@@ -31,7 +33,6 @@
 #include "mixable_weight_manager.hpp"
 #include "num_feature.hpp"
 #include "num_filter.hpp"
-#include "binary_feature.hpp"
 #include "space_splitter.hpp"
 #include "string_feature.hpp"
 #include "string_filter.hpp"
@@ -131,8 +132,27 @@ class datum_to_fv_converter_impl {
     }
   };
 
+  struct combination_feature_rule {
+    std::string name_;
+    jubatus::util::lang::shared_ptr<key_matcher> matcher_left_;
+    jubatus::util::lang::shared_ptr<key_matcher> matcher_right_;
+    jubatus::util::lang::shared_ptr<combination_feature> feature_func_;
+
+    combination_feature_rule(
+        const std::string& name,
+        jubatus::util::lang::shared_ptr<key_matcher> matcher_left,
+        jubatus::util::lang::shared_ptr<key_matcher> matcher_right,
+        jubatus::util::lang::shared_ptr<combination_feature> feature_func)
+        : name_(name),
+          matcher_left_(matcher_left),
+          matcher_right_(matcher_right),
+          feature_func_(feature_func) {
+    }
+  };
+
   // binarys
   std::vector<binary_feature_rule> binary_rules_;
+  std::vector<combination_feature_rule> combination_rules_;
 
   std::vector<string_filter_rule> string_filter_rules_;
   std::vector<num_filter_rule> num_filter_rules_;
@@ -157,6 +177,7 @@ class datum_to_fv_converter_impl {
     string_rules_.clear();
     num_rules_.clear();
     binary_rules_.clear();
+    combination_rules_.clear();
   }
 
   void register_string_filter(
@@ -198,6 +219,19 @@ class datum_to_fv_converter_impl {
     binary_rules_.push_back(binary_feature_rule(name, matcher, feature_func));
   }
 
+  void register_combination_rule(
+      const std::string& name,
+      jubatus::util::lang::shared_ptr<key_matcher> matcher_left,
+      jubatus::util::lang::shared_ptr<key_matcher> matcher_right,
+      jubatus::util::lang::shared_ptr<combination_feature> feature_func) {
+    combination_rules_.push_back(
+        combination_feature_rule(
+            name,
+            matcher_left,
+            matcher_right,
+            feature_func));
+  }
+
   void add_weight(const std::string& key, float weight) {
     jubatus::util::lang::shared_ptr<weight_manager> weights =
         mixable_weights_->get_model();
@@ -215,6 +249,8 @@ class datum_to_fv_converter_impl {
       weights->get_weight(fv);
     }
 
+    convert_combinations(fv);
+
     if (hasher_) {
       hasher_->hash_feature_keys(fv);
     }
@@ -231,6 +267,8 @@ class datum_to_fv_converter_impl {
       weights->update_weight(fv);
       weights->get_weight(fv);
     }
+
+    convert_combinations(fv);
 
     if (hasher_) {
       hasher_->hash_feature_keys(fv);
@@ -506,6 +544,25 @@ class datum_to_fv_converter_impl {
       }
     }
   }
+
+  void convert_combinations(common::sfv_t& ret_fv) const {
+    const size_t original_size = ret_fv.size();
+    for (size_t i = 0; i < combination_rules_.size(); ++i) {
+      const combination_feature_rule& r = combination_rules_[i];
+      for (size_t j = 0 ; j < original_size - 1; ++j) {
+        for (size_t m = j + 1; m < original_size; ++m) {
+          if (r.matcher_left_->match(ret_fv[j].first)
+              && r.matcher_right_->match(ret_fv[m].first)) {
+            r.feature_func_->add_feature(
+                ret_fv[j].first + "&" + ret_fv[m].first + "/" + r.name_,
+                ret_fv[j].second,
+                ret_fv[m].second,
+                ret_fv);
+          }
+        }
+      }
+    }
+  }
 };
 
 datum_to_fv_converter::datum_to_fv_converter()
@@ -564,6 +621,18 @@ void datum_to_fv_converter::register_binary_rule(
     jubatus::util::lang::shared_ptr<key_matcher> matcher,
     jubatus::util::lang::shared_ptr<binary_feature> feature_func) {
   pimpl_->register_binary_rule(name, matcher, feature_func);
+}
+
+void datum_to_fv_converter::register_combination_rule(
+    const std::string& name,
+    jubatus::util::lang::shared_ptr<key_matcher> matcher_left,
+    jubatus::util::lang::shared_ptr<key_matcher> matcher_right,
+    jubatus::util::lang::shared_ptr<combination_feature> feature_func) {
+  pimpl_->register_combination_rule(
+      name,
+      matcher_left,
+      matcher_right,
+      feature_func);
 }
 
 void datum_to_fv_converter::add_weight(const std::string& key, float weight) {

@@ -22,6 +22,11 @@
 #include "jubatus/util/text/json.h"
 #include "jubatus/util/lang/bind.h"
 #include "jubatus/util/lang/function.h"
+#include "binary_feature.hpp"
+#include "binary_feature_factory.hpp"
+#include "combination_feature.hpp"
+#include "combination_feature_factory.hpp"
+#include "combination_feature_impl.hpp"
 #include "except_match.hpp"
 #include "datum_to_fv_converter.hpp"
 #include "exception.hpp"
@@ -33,8 +38,6 @@
 #include "num_feature_factory.hpp"
 #include "num_filter.hpp"
 #include "num_filter_factory.hpp"
-#include "binary_feature.hpp"
-#include "binary_feature_factory.hpp"
 #include "space_splitter.hpp"
 #include "string_feature_factory.hpp"
 #include "string_filter.hpp"
@@ -51,6 +54,8 @@ typedef jubatus::util::lang::shared_ptr<string_feature> string_feature_ptr;
 typedef jubatus::util::lang::shared_ptr<key_matcher> matcher_ptr;
 typedef jubatus::util::lang::shared_ptr<num_feature> num_feature_ptr;
 typedef jubatus::util::lang::shared_ptr<binary_feature> binary_feature_ptr;
+typedef jubatus::util::lang::shared_ptr<combination_feature>
+    combination_feature_ptr;
 typedef jubatus::util::lang::shared_ptr<string_filter> string_filter_ptr;
 typedef jubatus::util::lang::shared_ptr<num_filter> num_filter_ptr;
 
@@ -293,6 +298,52 @@ void init_binary_rules(
   }
 }
 
+void init_combination_types(
+    const std::map<std::string, param_t>& combination_types,
+    std::map<std::string, combination_feature_ptr>& combination_features,
+    combination_feature_factory::create_function ext) {
+  combination_feature_factory f(ext);
+  for (
+      std::map<std::string, param_t>::const_iterator it =
+          combination_types.begin();
+      it != combination_types.end(); ++it) {
+    const std::string& name = it->first;
+    const std::map<std::string, std::string>& param = it->second;
+
+    std::string method = get_or_die(param, "method");
+    combination_feature_ptr feature(f.create(method, param));
+    combination_features[name] = feature;
+  }
+}
+
+void register_default_combination_types(
+    std::map<std::string, combination_feature_ptr>& combination_features) {
+  combination_features["add"] =
+      combination_feature_ptr(new combination_add_feature());
+  combination_features["mul"] =
+      combination_feature_ptr(new combination_mul_feature());
+}
+
+void init_combination_rules(
+    const std::vector<combination_rule>& combination_rules,
+    const std::map<std::string, combination_feature_ptr>& combination_features,
+    datum_to_fv_converter& conv) {
+  key_matcher_factory f;
+  for (size_t i = 0; i < combination_rules.size(); ++i) {
+    const combination_rule& rule = combination_rules[i];
+    matcher_ptr m_left(f.create_matcher(rule.key_left));
+    matcher_ptr m_right(f.create_matcher(rule.key_right));
+    std::map<std::string, combination_feature_ptr>::const_iterator it =
+      combination_features.find(rule.type);
+    if (it == combination_features.end()) {
+      throw JUBATUS_EXCEPTION(
+          converter_exception("unknown type: " + rule.type));
+    }
+
+    conv.register_combination_rule(rule.type, m_left, m_right, it->second);
+  }
+}
+
 }  // namespace
 
 void initialize_converter(
@@ -357,6 +408,16 @@ void initialize_converter(
     init_binary_types(*config.binary_types, binary_features, f);
   }
 
+  std::map<std::string, combination_feature_ptr> combination_features;
+  register_default_combination_types(combination_features);
+  if (config.combination_types) {
+    combination_feature_factory::create_function f;
+    if (ext) {
+      f = bind(&factory_extender::create_combination_feature, ext, _1, _2);
+    }
+    init_combination_types(*config.combination_types, combination_features, f);
+  }
+
   conv.clear_rules();
   if (config.string_filter_rules) {
     init_string_filter_rules(*config.string_filter_rules, string_filters, conv);
@@ -372,6 +433,11 @@ void initialize_converter(
   }
   if (config.binary_rules) {
     init_binary_rules(*config.binary_rules, binary_features, conv);
+  }
+  if (config.combination_rules) {
+    init_combination_rules(
+        *config.combination_rules,
+        combination_features, conv);
   }
 
   if (config.hash_max_size.bool_test()) {
