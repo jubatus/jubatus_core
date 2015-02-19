@@ -30,14 +30,14 @@ namespace core {
 namespace classifier {
 
 normal_herd::normal_herd(storage_ptr storage)
-    : classifier_base(storage) {
+    : linear_classifier(storage) {
   config_.regularization_weight = 0.1f;
 }
 
 normal_herd::normal_herd(
     const classifier_config& config,
     storage_ptr storage)
-    : classifier_base(storage),
+    : linear_classifier(storage),
       config_(config) {
 
   if (!(0.f < config.regularization_weight)) {

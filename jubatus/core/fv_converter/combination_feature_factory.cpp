@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2011 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2015 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,42 +14,30 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "passive_aggressive.hpp"
+#include "combination_feature_factory.hpp"
 
+#include <map>
 #include <string>
-
-using std::string;
+#include "combination_feature_impl.hpp"
+#include "exception.hpp"
+#include "util.hpp"
 
 namespace jubatus {
 namespace core {
-namespace classifier {
+namespace fv_converter {
 
-passive_aggressive::passive_aggressive(storage_ptr storage)
-    : linear_classifier(storage) {
-}
-
-void passive_aggressive::train(const common::sfv_t& sfv, const string& label) {
-  check_touchable(label);
-
-  string incorrect_label;
-  float margin = calc_margin(sfv, label, incorrect_label);
-  float loss = 1.f + margin;
-  if (loss < 0.f) {
-    return;
+jubatus::util::lang::shared_ptr<combination_feature> combination_feature_factory::create(
+    const std::string& name,
+    const param_t& params) const {
+  combination_feature* p;
+  if (ext_ && (p = ext_(name, params))) {
+    return jubatus::util::lang::shared_ptr<combination_feature>(p);
+  } else {
+    throw JUBATUS_EXCEPTION(
+        converter_exception("unknown combination feature name: " + name));
   }
-  float sfv_norm = squared_norm(sfv);
-  if (sfv_norm == 0.f) {
-    storage_->register_label(label);
-    return;
-  }
-  update_weight(sfv, loss / (2 * sfv_norm), label, incorrect_label);
-  touch(label);
 }
 
-string passive_aggressive::name() const {
-  return string("passive_aggressive");
-}
-
-}  // namespace classifier
+}  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus

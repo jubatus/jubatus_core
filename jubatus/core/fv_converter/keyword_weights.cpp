@@ -16,10 +16,16 @@
 
 #include <cmath>
 #include <string>
+#include <sstream>
 #include <utility>
 #include "../common/type.hpp"
 #include "datum_to_fv_converter.hpp"
 #include "keyword_weights.hpp"
+
+using std::string;
+using std::pair;
+using std::stringstream;
+using jubatus::core::common::sfv_t;
 
 namespace jubatus {
 namespace core {
@@ -28,7 +34,7 @@ namespace fv_converter {
 namespace {
 
 struct is_zero {
-  bool operator()(const std::pair<std::string, float>& p) {
+  bool operator()(const pair<string, float>& p) {
     return p.second == 0;
   }
 };
@@ -41,18 +47,18 @@ keyword_weights::keyword_weights()
       weights_() {
 }
 
-void keyword_weights::update_document_frequency(const common::sfv_t& fv) {
+void keyword_weights::update_document_frequency(const sfv_t& fv) {
   ++document_count_;
-  for (common::sfv_t::const_iterator it = fv.begin(); it != fv.end(); ++it) {
+  for (sfv_t::const_iterator it = fv.begin(); it != fv.end(); ++it) {
     ++document_frequencies_[it->first];
   }
 }
 
-void keyword_weights::add_weight(const std::string& key, float weight) {
+void keyword_weights::add_weight(const string& key, float weight) {
   weights_[key] = weight;
 }
 
-float keyword_weights::get_user_weight(const std::string& key) const {
+float keyword_weights::get_user_weight(const string& key) const {
   weight_t::const_iterator wit = weights_.find(key);
   if (wit != weights_.end()) {
     return wit->second;
@@ -73,6 +79,20 @@ void keyword_weights::clear() {
   document_count_ = 0;
   document_frequencies_.clear();
   weight_t().swap(weights_);
+}
+
+string keyword_weights::to_string() const {
+  stringstream ss;
+  ss << "document_count: " << document_count_
+     << " document_frequencies: " << document_frequencies_
+     << " weights: {";
+  for (weight_t::const_iterator it = weights_.begin();
+       it != weights_.end();
+       ++it) {
+    ss << it->first << " => " << it->second << std::endl;
+  }
+  ss << " }";
+  return ss.str();
 }
 
 }  // namespace fv_converter

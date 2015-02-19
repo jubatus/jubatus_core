@@ -25,6 +25,7 @@
 
 #include "../framework/mixable.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
+#include "../fv_converter/mixable_weight_manager.hpp"
 #include "../nearest_neighbor/nearest_neighbor_base.hpp"
 #include "../table/column/column_table.hpp"
 #include "../unlearner/unlearner_base.hpp"
@@ -72,6 +73,8 @@ class nearest_neighbor : public driver_base {
   std::vector<std::pair<std::string, float> >
   similar_row(const core::fv_converter::datum& datum, size_t ret_num);
 
+  std::vector<std::string> get_all_rows();
+
   void clear();
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
@@ -82,6 +85,7 @@ class nearest_neighbor : public driver_base {
   jubatus::util::lang::shared_ptr<core::nearest_neighbor::nearest_neighbor_base>
       nn_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
+  fv_converter::mixable_weight_manager wm_;
 };
 
 }  // namespace driver

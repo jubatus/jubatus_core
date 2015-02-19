@@ -23,6 +23,8 @@
 
 #include "../common/vector_util.hpp"
 #include "../fv_converter/revert.hpp"
+#include "../fv_converter/weight_manager.hpp"
+#include "../fv_converter/mixable_weight_manager.hpp"
 
 namespace jubatus {
 namespace core {
@@ -32,13 +34,19 @@ using std::vector;
 using std::pair;
 using jubatus::util::lang::shared_ptr;
 using fv_converter::datum;
+using fv_converter::mixable_weight_manager;
+using fv_converter::weight_manager;
 
 clustering::clustering(
     shared_ptr<core::clustering::clustering> clustering_method,
     shared_ptr<fv_converter::datum_to_fv_converter> converter)
     : converter_(converter),
-      clustering_(clustering_method) {
+      clustering_(clustering_method),
+      wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
   register_mixable(clustering_->get_mixable());
+  register_mixable(&wm_);
+
+  converter_->set_weight_manager(wm_.get_model());
 }
 
 clustering::~clustering() {
@@ -171,15 +179,28 @@ core::clustering::cluster_unit
 }
 
 void clustering::pack(framework::packer& pk) const {
+  pk.pack_array(2);
   clustering_->pack(pk);
+  wm_.get_model()->pack(pk);
 }
 
 void clustering::unpack(msgpack::object o) {
-  clustering_->unpack(o);
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  // clear
+  clustering_->clear();
+  converter_->clear_weights();
+
+  // load
+  clustering_->unpack(o.via.array.ptr[0]);
+  wm_.get_model()->unpack(o.via.array.ptr[1]);
 }
 
 void clustering::clear() {
   clustering_->clear();
+  converter_->clear_weights();
 }
 
 }  // namespace driver

@@ -20,23 +20,27 @@
 #include <utility>
 #include <vector>
 #include "../table/column/row_deleter.hpp"
-
-using jubatus::util::lang::shared_ptr;
+#include "../fv_converter/weight_manager.hpp"
+#include "../fv_converter/mixable_weight_manager.hpp"
 
 namespace jubatus {
 namespace core {
 namespace driver {
 
+using jubatus::util::lang::shared_ptr;
+using fv_converter::mixable_weight_manager;
+using fv_converter::weight_manager;
+
 nearest_neighbor::nearest_neighbor(
     shared_ptr<core::nearest_neighbor::nearest_neighbor_base> nn,
     shared_ptr<fv_converter::datum_to_fv_converter> converter)
     : converter_(converter),
-      nn_(nn) {
+      nn_(nn),
+      wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
   register_mixable(nn_->get_mixable());
-  // We cannot register mixables of fv converter, because mixable_weight_manager
-  // does not support mixing with push_mixer.
-  // TODO(beam2d): Support mixing weight manager with push_mixer and register
-  // mixables of fv converter here.
+  register_mixable(&wm_);
+
+  converter_->set_weight_manager(wm_.get_model());
 }
 
 nearest_neighbor::nearest_neighbor(
@@ -45,8 +49,12 @@ nearest_neighbor::nearest_neighbor(
     shared_ptr<unlearner::unlearner_base> unlearner)
     : converter_(converter),
       nn_(nn),
-      unlearner_(unlearner) {
+      unlearner_(unlearner),
+      wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
   register_mixable(nn_->get_mixable());
+  register_mixable(&wm_);
+
+  converter_->set_weight_manager(wm_.get_model());
   unlearner->set_callback(table::row_deleter(nn_->get_table()));
 }
 
@@ -57,7 +65,7 @@ void nearest_neighbor::set_row(
     unlearner_->touch(id);
   }
   common::sfv_t v;
-  converter_->convert(datum, v);
+  converter_->convert_and_update_weight(datum, v);
   nn_->set_row(id, v);
 }
 
@@ -97,6 +105,12 @@ nearest_neighbor::similar_row(
   return ret;
 }
 
+std::vector<std::string> nearest_neighbor::get_all_rows() {
+  std::vector<std::string> ret;
+  nn_->get_all_row_ids(ret);
+  return ret;
+}
+
 void nearest_neighbor::clear() {
   converter_->clear_weights();
   nn_->clear();
@@ -106,12 +120,23 @@ void nearest_neighbor::clear() {
 }
 
 void nearest_neighbor::pack(framework::packer& pk) const {
+  pk.pack_array(2);
   nn_->pack(pk);
+  wm_.get_model()->pack(pk);
 }
 
 void nearest_neighbor::unpack(msgpack::object o) {
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  // clear
   nn_->clear();
-  nn_->unpack(o);
+  converter_->clear_weights();
+
+  // load
+  nn_->unpack(o.via.array.ptr[0]);
+  wm_.get_model()->unpack(o.via.array.ptr[1]);
 }
 
 }  // namespace driver

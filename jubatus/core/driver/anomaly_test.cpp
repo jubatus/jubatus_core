@@ -32,9 +32,12 @@
 
 using std::make_pair;
 using std::vector;
+using std::string;
+using std::pair;
 using jubatus::util::lang::shared_ptr;
 using jubatus::core::fv_converter::datum_to_fv_converter;
 using jubatus::core::anomaly::anomaly_base;
+using jubatus::util::lang::lexical_cast;
 
 namespace jubatus {
 namespace core {
@@ -61,12 +64,12 @@ TEST_P(anomaly_test, small) {
     datum.num_values_.push_back(make_pair("f1", 1.0));
 
     anomaly_->add("1", datum);  // is it good to be inf?
-    std::pair<std::string, float> w = anomaly_->add("2", datum);
+    pair<string, float> w = anomaly_->add("2", datum);
     float v = anomaly_->calc_score(datum);
     ASSERT_DOUBLE_EQ(w.second, v);
   }
   {
-    std::vector<std::string> rows = anomaly_->get_all_rows();
+    vector<string> rows = anomaly_->get_all_rows();
     ASSERT_EQ(2u, rows.size());
   }
 
@@ -186,6 +189,44 @@ TEST_F(light_lof_test, unlearning) {
   EXPECT_EQ(5u, rows.size());
 }
 
+class anomaly_with_weight_manager_test
+  : public ::testing::TestWithParam<shared_ptr<anomaly_base> > {
+ protected:
+  void SetUp() {
+    anomaly_.reset(new driver::anomaly(
+                     GetParam(), make_tf_idf_fv_converter()));
+  }
+
+  void TearDown() {
+    anomaly_.reset();
+  }
+  jubatus::util::lang::shared_ptr<core::driver::anomaly> anomaly_;
+};
+
+fv_converter::datum create_datum_str(const string& key, const string& value) {
+  fv_converter::datum d;
+  d.string_values_.push_back(make_pair(key, value));
+  return d;
+}
+
+TEST_P(anomaly_with_weight_manager_test, small) {
+  std::pair<std::string, float> w = anomaly_->add("a", create_datum_str("f2", "x y z"));
+  fv_converter::datum datum = create_datum_str("f1", "a b c");
+  for (int i = 0; i < 20; i += 2) {
+    anomaly_->add(lexical_cast<string>(i), datum);  // is it good to be inf?
+    std::pair<std::string, float> w =
+        anomaly_->add(lexical_cast<string>(i + 1), datum);
+    float v = anomaly_->calc_score(datum);
+    ASSERT_GT(2.0, v);
+  }
+
+  std::vector<std::string> rows = anomaly_->get_all_rows();
+  ASSERT_EQ(21, rows.size());
+}
+
+INSTANTIATE_TEST_CASE_P(anomaly_with_weight_manager_test_instance,
+    anomaly_with_weight_manager_test,
+    testing::ValuesIn(create_anomaly_base()));
 }  // driver namespace
 }  // core namespace
 }  // jubatus namespace

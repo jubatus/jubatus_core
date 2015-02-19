@@ -19,13 +19,13 @@
 
 #include <string>
 
-#include "classifier_base.hpp"
+#include "linear_classifier.hpp"
 
 namespace jubatus {
 namespace core {
 namespace classifier {
 
-class perceptron : public classifier_base {
+class perceptron : public linear_classifier {
  public:
   explicit perceptron(storage_ptr storage);
   void train(const common::sfv_t& sfv, const std::string& label);

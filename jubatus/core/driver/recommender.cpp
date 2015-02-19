@@ -49,6 +49,8 @@ recommender::recommender(
       wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
   register_mixable(recommender_->get_mixable());
   register_mixable(&wm_);
+
+  converter_->set_weight_manager(wm_.get_model());
 }
 
 recommender::~recommender() {

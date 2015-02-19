@@ -291,6 +291,18 @@ TEST_P(nearest_neighbor_test, save_load) {
   EXPECT_EQ("1", res[0].first);
 }
 
+TEST_P(nearest_neighbor_test, get_all_rows) {
+  nn_driver_->set_row("id1", create_datum_2d(2.f, 0.f));
+  nn_driver_->set_row("id2", create_datum_2d(2.f, 1.f));
+  nn_driver_->set_row("id3", create_datum_2d(0.f, 2.f));
+
+  vector<string> res = nn_driver_->get_all_rows();
+  ASSERT_EQ(3u, res.size());
+  EXPECT_EQ("id1", res[0]);
+  EXPECT_EQ("id2", res[1]);
+  EXPECT_EQ("id3", res[2]);
+}
+
 TEST_P(nearest_neighbor_test, small) {
   nn_driver_->set_row("id1", create_datum_2d(2.f, 0.f));
   nn_driver_->set_row("id2", create_datum_2d(2.f, 1.f));
@@ -402,6 +414,56 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Combine(
         ::testing::ValuesIn(create_nearest_neighbor_bases()),
         ::testing::ValuesIn(create_unlearners())));
+
+class nearest_neighbor_idf_test
+     : public ::testing::TestWithParam<
+        shared_ptr<core::nearest_neighbor::nearest_neighbor_base> > {
+ protected:
+  void SetUp() {
+    nn_driver_.reset(
+        new core::driver::nearest_neighbor(
+            GetParam(), make_tf_idf_fv_converter()));
+  }
+  void TearDown() {
+    nn_driver_->clear();
+    nn_driver_.reset();
+  }
+
+  shared_ptr<nearest_neighbor> nn_driver_;
+};
+
+fv_converter::datum create_datum_str(const string& key, const string& value) {
+  fv_converter::datum d;
+  d.string_values_.push_back(make_pair(key, value));
+  return d;
+}
+
+TEST_P(nearest_neighbor_idf_test, calc_idf) {
+  fv_converter::datum d = create_datum_str("a", "a b c");
+  for (int i = 0; i < 5; ++i) {
+    nn_driver_->set_row("id1", create_datum_str("a", "x y z"));
+    nn_driver_->set_row("id2", create_datum_str("a", "x y y z"));
+    nn_driver_->set_row("id3", create_datum_str("a", "a b c"));
+    nn_driver_->set_row("id4", create_datum_str("a", "a b c"));
+    nn_driver_->set_row("id5", create_datum_str("a", "x d k y"));
+    nn_driver_->set_row("id6", create_datum_str("a", "z c i j"));
+  }
+
+  vector<pair<string, float> > hit =
+      nn_driver_->neighbor_row_from_datum(d, 2);
+  ASSERT_EQ(2, hit.size());
+  if (hit[0].first == "id3") {
+    ASSERT_EQ("id4", hit[1].first);
+  } else if (hit[0].first == "id4") {
+    ASSERT_EQ("id3", hit[1].first);
+  } else {
+    ASSERT_TRUE(false);
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(nearest_neighbor_idf_test_instance,
+    nearest_neighbor_idf_test,
+    testing::ValuesIn(create_nearest_neighbor_bases()));
 
 }  // namespace driver
 }  // namespace core

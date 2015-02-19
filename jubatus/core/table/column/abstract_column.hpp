@@ -332,9 +332,9 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
 
   void update_at_(size_t index, const void* raw_data) {
     if (raw_data) {
-      memcpy(get_data_at_(size() - 1), raw_data, bytes_per_value_());
+      memcpy(get_data_at_(index), raw_data, bytes_per_value_());
     } else {
-      memset(get_data_at_(size() - 1), 0, bytes_per_value_());
+      memset(get_data_at_(index), 0, bytes_per_value_());
     }
   }
 

@@ -52,6 +52,8 @@ class keyword_weights {
 
   MSGPACK_DEFINE(document_count_, document_frequencies_, weights_);
 
+  std::string to_string() const;
+
  private:
   double get_global_weight(const std::string& key) const;
 

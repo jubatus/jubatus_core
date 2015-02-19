@@ -78,6 +78,7 @@ class clustering : public driver_base {
   jubatus::util::lang::shared_ptr<fv_converter::datum_to_fv_converter>
     converter_;
   jubatus::util::lang::shared_ptr<core::clustering::clustering> clustering_;
+  fv_converter::mixable_weight_manager wm_;
 };
 
 }  // namespace driver

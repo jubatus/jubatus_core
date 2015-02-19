@@ -19,17 +19,15 @@
 
 #include <stdint.h>
 
-#include <cmath>
 #include <map>
 #include <string>
 #include <vector>
 
 #include "../common/type.hpp"
-#include "../framework/linear_function_mixer.hpp"
-#include "../storage/storage_base.hpp"
+#include "../framework/packer.hpp"
+#include "../framework/mixable.hpp"
 #include "../unlearner/unlearner_base.hpp"
 #include "classifier_type.hpp"
-
 
 namespace jubatus {
 namespace core {
@@ -37,65 +35,33 @@ namespace classifier {
 
 class classifier_base {
  public:
-  explicit classifier_base(storage_ptr storage);
-  virtual ~classifier_base();
-  virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
-
-  void set_label_unlearner(
-      jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
-          label_unlearner);
-
-  jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
-  label_unlearner() const {
-    return unlearner_;
+  classifier_base() {
+  }
+  virtual ~classifier_base() {
   }
 
-  std::string classify(const common::sfv_t& fv) const;
-  void classify_with_scores(const common::sfv_t& fv,
-                            classify_result& scores) const;
-  bool delete_label(const std::string& label);
-  bool unlearn_label(const std::string& label);
-  void clear();
+  virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
 
-  std::vector<std::string> get_labels() const;
-  bool set_label(const std::string& label);
+  virtual void classify_with_scores(
+      const common::sfv_t& fv, classify_result& scores) const = 0;
+
+  virtual void set_label_unlearner(
+      jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
+          label_unlearner) = 0;
+
+  virtual bool delete_label(const std::string& label) = 0;
+  virtual std::vector<std::string> get_labels() const = 0;
+  virtual bool set_label(const std::string& label) = 0;
 
   virtual std::string name() const = 0;
 
-  // TODO(beam2d): Think the objective of this function and where it should be
-  // defined. Algorithms have |get_status| tentatively to extract status from
-  // storages.
-  virtual void get_status(std::map<std::string, std::string>& status) const;
+  virtual void get_status(std::map<std::string, std::string>& status) const = 0;
 
-  storage_ptr get_storage();
+  virtual void pack(framework::packer& pk) const = 0;
+  virtual void unpack(msgpack::object o) = 0;
+  virtual void clear() = 0;
 
- protected:
-  void update_weight(
-      const common::sfv_t& sfv,
-      float step_weigth,
-      const std::string& pos_label,
-      const std::string& neg_class);
-  float calc_margin(
-      const common::sfv_t& sfv,
-      const std::string& label,
-      std::string& incorrect_label) const;
-  float calc_margin_and_variance(
-      const common::sfv_t& sfv,
-      const std::string& label,
-      std::string& incorrect_label,
-      float& variance) const;
-  std::string get_largest_incorrect_label(
-      const common::sfv_t& sfv,
-      const std::string& label,
-      classify_result& scores) const;
-  const storage::storage_base* get_storage() const;
-
-  static float squared_norm(const common::sfv_t& sfv);
-  void check_touchable(const std::string& label);
-  void touch(const std::string& label);
-
-  storage_ptr storage_;
-  jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
+  virtual framework::mixable* get_mixable() = 0;
 };
 
 }  // namespace classifier

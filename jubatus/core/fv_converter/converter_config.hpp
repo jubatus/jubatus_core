@@ -92,6 +92,25 @@ struct binary_rule {
   }
 };
 
+struct combination_rule {
+  std::string key_left;
+  std::string key_right;
+  jubatus::util::data::optional<std::string> except_left;
+  jubatus::util::data::optional<std::string> except_right;
+  std::string type;
+
+  friend class jubatus::util::data::serialization::access;
+  template<class Archive>
+  void serialize(Archive& ar) {
+    ar
+      & JUBA_MEMBER(key_left)
+      & JUBA_MEMBER(key_right)
+      & JUBA_MEMBER(except_left)
+      & JUBA_MEMBER(except_right)
+      & JUBA_MEMBER(type);
+  }
+};
+
 struct converter_config {
   jubatus::util::data::optional<std::map<std::string, param_t> >
     string_filter_types;
@@ -110,6 +129,12 @@ struct converter_config {
   jubatus::util::data::optional<std::map<std::string, param_t> > binary_types;
   jubatus::util::data::optional<std::vector<binary_rule> > binary_rules;
 
+  jubatus::util::data::optional<std::map<std::string, param_t> >
+      combination_types;
+  jubatus::util::data::optional<std::vector<combination_rule> >
+      combination_rules;
+
+
   jubatus::util::data::optional<int64_t> hash_max_size;
 
   friend class jubatus::util::data::serialization::access;
@@ -126,6 +151,8 @@ struct converter_config {
         & JUBA_MEMBER(num_rules)
         & JUBA_MEMBER(binary_types)
         & JUBA_MEMBER(binary_rules)
+        & JUBA_MEMBER(combination_types)
+        & JUBA_MEMBER(combination_rules)
         & JUBA_MEMBER(hash_max_size);
   }
 };

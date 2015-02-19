@@ -59,6 +59,7 @@ class datum_to_fv_converter_impl;
 class key_matcher;
 class num_feature;
 class binary_feature;
+class combination_feature;
 class string_filter;
 class num_filter;
 class string_feature;
@@ -101,6 +102,12 @@ class datum_to_fv_converter {
       const std::string& name,
       jubatus::util::lang::shared_ptr<key_matcher> matcher,
       jubatus::util::lang::shared_ptr<binary_feature> feature_func);
+
+  void register_combination_rule(
+      const std::string& name,
+      jubatus::util::lang::shared_ptr<key_matcher> matcher_left,
+      jubatus::util::lang::shared_ptr<key_matcher> matcher_right,
+      jubatus::util::lang::shared_ptr<combination_feature> feature_func);
 
   void add_weight(const std::string& key, float weight);
 

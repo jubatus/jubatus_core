@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2011 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2015 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,42 +14,31 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "passive_aggressive.hpp"
+#ifndef JUBATUS_CORE_FV_CONVERTER_COMBINATION_FEATURE_HPP_
+#define JUBATUS_CORE_FV_CONVERTER_COMBINATION_FEATURE_HPP_
 
 #include <string>
-
-using std::string;
+#include <utility>
+#include <vector>
 
 namespace jubatus {
 namespace core {
-namespace classifier {
+namespace fv_converter {
 
-passive_aggressive::passive_aggressive(storage_ptr storage)
-    : linear_classifier(storage) {
-}
-
-void passive_aggressive::train(const common::sfv_t& sfv, const string& label) {
-  check_touchable(label);
-
-  string incorrect_label;
-  float margin = calc_margin(sfv, label, incorrect_label);
-  float loss = 1.f + margin;
-  if (loss < 0.f) {
-    return;
+class combination_feature {
+ public:
+  virtual ~combination_feature() {
   }
-  float sfv_norm = squared_norm(sfv);
-  if (sfv_norm == 0.f) {
-    storage_->register_label(label);
-    return;
-  }
-  update_weight(sfv, loss / (2 * sfv_norm), label, incorrect_label);
-  touch(label);
-}
 
-string passive_aggressive::name() const {
-  return string("passive_aggressive");
-}
+  virtual void add_feature(
+      const std::string& key,
+      double value_left,
+      double value_right,
+      std::vector<std::pair<std::string, float> >& ret_fv) const = 0;
+};
 
-}  // namespace classifier
+}  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus
+
+#endif  // JUBATUS_CORE_FV_CONVERTER_COMBINATION_FEATURE_HPP_

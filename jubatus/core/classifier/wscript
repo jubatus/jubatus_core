@@ -4,7 +4,7 @@ def configure(ctx): pass
 
 def build(bld):
   source = [
-      'classifier_base.cpp',
+      'linear_classifier.cpp',
       'perceptron.cpp',
       'passive_aggressive.cpp',
       'passive_aggressive_1.cpp',
@@ -12,6 +12,7 @@ def build(bld):
       'confidence_weighted.cpp',
       'arow.cpp',
       'normal_herd.cpp',
+      'nearest_neighbor_classifier.cpp',
       'classifier_factory.cpp',
       ]
   headers = [

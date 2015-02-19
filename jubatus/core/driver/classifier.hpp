@@ -62,7 +62,6 @@ class classifier : public driver_base {
   jubatus::util::lang::shared_ptr<fv_converter::datum_to_fv_converter>
       converter_;
   jubatus::util::lang::shared_ptr<classifier_base> classifier_;
-  framework::linear_function_mixer mixable_classifier_model_;
   fv_converter::mixable_weight_manager wm_;
 };
 
