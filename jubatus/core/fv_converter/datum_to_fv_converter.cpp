@@ -541,17 +541,15 @@ class datum_to_fv_converter_impl {
   }
 
   void convert_combinations(common::sfv_t& ret_fv) const {
-    size_t original_size = ret_fv.size();
+    const size_t original_size = ret_fv.size();
     for (size_t i = 0; i < combination_rules_.size(); ++i) {
       const combination_feature_rule& r = combination_rules_[i];
       for (size_t j = 0 ; j < original_size - 1; ++j) {
         for (size_t m = j + 1; m < original_size; ++m) {
           if (r.matcher_left_->match(ret_fv[j].first)
               && r.matcher_right_->match(ret_fv[m].first)) {
-            std::string k =
-                ret_fv[j].first + "&" + ret_fv[m].first + "/" + r.name_;
             r.feature_func_->add_feature(
-                k,
+                ret_fv[j].first + "&" + ret_fv[m].first + "/" + r.name_,
                 ret_fv[j].second,
                 ret_fv[m].second,
                 ret_fv);
