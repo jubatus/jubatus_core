@@ -291,6 +291,18 @@ TEST_P(nearest_neighbor_test, save_load) {
   EXPECT_EQ("1", res[0].first);
 }
 
+TEST_P(nearest_neighbor_test, get_all_rows) {
+  nn_driver_->set_row("id1", create_datum_2d(2.f, 0.f));
+  nn_driver_->set_row("id2", create_datum_2d(2.f, 1.f));
+  nn_driver_->set_row("id3", create_datum_2d(0.f, 2.f));
+
+  vector<string> res = nn_driver_->get_all_rows();
+  ASSERT_EQ(3u, res.size());
+  EXPECT_EQ("id1", res[0]);
+  EXPECT_EQ("id2", res[1]);
+  EXPECT_EQ("id3", res[2]);
+}
+
 TEST_P(nearest_neighbor_test, small) {
   nn_driver_->set_row("id1", create_datum_2d(2.f, 0.f));
   nn_driver_->set_row("id2", create_datum_2d(2.f, 1.f));

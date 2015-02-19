@@ -105,6 +105,12 @@ nearest_neighbor::similar_row(
   return ret;
 }
 
+std::vector<std::string> nearest_neighbor::get_all_rows() {
+  std::vector<std::string> ret;
+  nn_->get_all_row_ids(ret);
+  return ret;
+}
+
 void nearest_neighbor::clear() {
   converter_->clear_weights();
   nn_->clear();
