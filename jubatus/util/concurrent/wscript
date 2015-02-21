@@ -1,3 +1,4 @@
+# -*- python -*-
 def configure(conf):
   pass
 

@@ -1,3 +1,4 @@
+# -*- python -*-
 incdirs = '. encoding digest string code sparse_matrix'
 
 def configure(conf):
