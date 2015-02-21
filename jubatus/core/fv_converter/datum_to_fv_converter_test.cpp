@@ -45,14 +45,6 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
-namespace {
-
-void init_weight_manager(datum_to_fv_converter& conv) {
-  conv.set_weight_manager(shared_ptr<weight_manager>(new weight_manager));
-}
-
-}  // namespace
-
 TEST(datum_to_fv_converter, trivial) {
   datum_to_fv_converter conv;
 }
@@ -63,7 +55,6 @@ TEST(datum_to_fv_converter, num_feature) {
   datum.num_values_.push_back(std::make_pair("/val2", 0.));
 
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
   typedef shared_ptr<num_feature> num_feature_t;
   shared_ptr<key_matcher> a(new match_all());
 
@@ -87,7 +78,6 @@ TEST(datum_to_fv_converter, string_feature) {
   typedef shared_ptr<word_splitter> splitter_t;
 
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
   {
     shared_ptr<word_splitter> s(new space_splitter());
     std::vector<splitter_weight_type> p;
@@ -170,7 +160,6 @@ TEST(datum_to_fv_converter, string_feature) {
 
 TEST(datum_to_fv_converter, weight) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
   {
     shared_ptr<key_matcher> match(new match_all());
     shared_ptr<word_splitter> s(new space_splitter());
@@ -193,7 +182,6 @@ TEST(datum_to_fv_converter, weight) {
 
 TEST(datum_to_fv_converter, register_string_rule) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
   initialize_converter(converter_config(), conv);
 
   std::vector<splitter_weight_type> p;
@@ -220,7 +208,6 @@ TEST(datum_to_fv_converter, register_string_rule) {
 
 TEST(datum_to_fv_converter, register_num_rule) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
 
   datum datum;
   datum.num_values_.push_back(std::make_pair("/age", 20));
@@ -265,7 +252,6 @@ class binary_length_feature : public binary_feature {
 
 TEST(datum_to_fv_converter, register_binary_rule) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
 
   datum datum;
   datum.binary_values_.push_back(std::make_pair("/bin", "0101"));
@@ -296,7 +282,6 @@ TEST(datum_to_fv_converter, register_binary_rule) {
 
 TEST(datum_to_fv_converter, register_string_filter) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
 
   datum datum;
   datum.string_values_.push_back(std::make_pair("/text", "<tag>aaa</tag>"));
@@ -329,7 +314,6 @@ TEST(datum_to_fv_converter, register_string_filter) {
 
 TEST(datum_to_fv_converter, register_num_filter) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
 
   datum datum;
   datum.num_values_.push_back(std::make_pair("/age", 20));
@@ -352,7 +336,6 @@ TEST(datum_to_fv_converter, register_num_filter) {
 
 TEST(datum_to_fv_converter, recursive_filter) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
   datum datum;
   datum.num_values_.push_back(std::make_pair("/age", 20));
 
@@ -380,7 +363,6 @@ TEST(datum_to_fv_converter, recursive_filter) {
 
 TEST(datum_to_fv_converter, hasher) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
   conv.set_hash_max_size(1);
   conv.register_num_rule("str",
       shared_ptr<key_matcher>(new match_all()),
@@ -398,7 +380,6 @@ TEST(datum_to_fv_converter, hasher) {
 
 TEST(datum_to_fv_converter, check_datum_key_in_string) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
 
   {
     shared_ptr<key_matcher> match(new match_all());
@@ -418,7 +399,6 @@ TEST(datum_to_fv_converter, check_datum_key_in_string) {
 
 TEST(datum_to_fv_converter, check_datum_key_in_number) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
 
   shared_ptr<num_feature> f(new num_string_feature());
   shared_ptr<key_matcher> a(new match_all());
@@ -433,7 +413,6 @@ TEST(datum_to_fv_converter, check_datum_key_in_number) {
 
 TEST(datum_to_fv_converter, check_datum_key_in_binary) {
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
 
   shared_ptr<binary_feature> f(new binary_length_feature());
   shared_ptr<key_matcher> a(new match_all());
@@ -451,7 +430,6 @@ TEST(datum_to_fv_converter, combination_feature_num) {
   datum.num_values_.push_back(std::make_pair("val2", 1.1));
 
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
   typedef shared_ptr<combination_feature> combination_feature_t;
   typedef shared_ptr<num_feature> num_feature_t;
   shared_ptr<key_matcher> all_matcher(new match_all());
@@ -488,7 +466,6 @@ TEST(datum_to_fv_converter, combination_feature_string) {
   datum.string_values_.push_back(std::make_pair("title", "foo bar"));
 
   datum_to_fv_converter conv;
-  init_weight_manager(conv);
   {
     shared_ptr<key_matcher> all_matcher(new match_all());
     shared_ptr<word_splitter> s(new space_splitter());
