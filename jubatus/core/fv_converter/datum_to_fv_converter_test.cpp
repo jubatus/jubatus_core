@@ -500,7 +500,6 @@ TEST(datum_to_fv_converter, combination_feature_string) {
   }
 
   typedef shared_ptr<combination_feature> combination_feature_t;
-  typedef shared_ptr<string_feature> string_feature_t;
   shared_ptr<key_matcher> name_matcher(new prefix_match("name"));
   shared_ptr<key_matcher> title_matcher(new prefix_match("title"));
 
