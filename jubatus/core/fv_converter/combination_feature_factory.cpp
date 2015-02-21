@@ -26,7 +26,8 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
-jubatus::util::lang::shared_ptr<combination_feature> combination_feature_factory::create(
+jubatus::util::lang::shared_ptr<combination_feature>
+combination_feature_factory::create(
     const std::string& name,
     const param_t& params) const {
   combination_feature* p;

@@ -148,7 +148,8 @@ TEST_P(nn_recommender_test, update) {
     recommender_->update_row("id7", create_datum_str("a", "j a b"));
   }
 
-  vector<pair<string, float> > ret = recommender_->similar_row_from_datum(d, 10);
+  vector<pair<string, float> > ret =
+      recommender_->similar_row_from_datum(d, 10);
   ASSERT_EQ("id4", ret[0].first);
 }
 
