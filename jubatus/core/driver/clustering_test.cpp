@@ -405,7 +405,6 @@ TEST_P(clustering_with_idf_test, get_nearest_members) {
     vector<datum> result = clustering_->get_k_center();
     ASSERT_EQ(2u, result.size());
   }
-
 }
 
 INSTANTIATE_TEST_CASE_P(clustering_with_idf_test_instance,

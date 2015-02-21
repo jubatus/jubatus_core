@@ -210,7 +210,8 @@ fv_converter::datum create_datum_str(const string& key, const string& value) {
 }
 
 TEST_P(anomaly_with_weight_manager_test, small) {
-  std::pair<std::string, float> w = anomaly_->add("a", create_datum_str("f2", "x y z"));
+  std::pair<std::string, float> w = anomaly_->add(
+      "a", create_datum_str("f2", "x y z"));
   fv_converter::datum datum = create_datum_str("f1", "a b c");
   for (int i = 0; i < 20; i += 2) {
     anomaly_->add(lexical_cast<string>(i), datum);  // is it good to be inf?

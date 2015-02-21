@@ -476,7 +476,8 @@ TEST(datum_to_fv_converter, combination_feature_num) {
   std::vector<std::pair<std::string, float> > expected;
   expected.push_back(std::make_pair("val1@num", 1.0));
   expected.push_back(std::make_pair("val2@num", 1.1));
-  expected.push_back(std::make_pair("val1@num&val2@num/add", 2.1));  expected.push_back(std::make_pair("val1@num&val2@num/mul", 1.1));
+  expected.push_back(std::make_pair("val1@num&val2@num/add", 2.1));
+  expected.push_back(std::make_pair("val1@num&val2@num/mul", 1.1));
 
   ASSERT_EQ(expected, feature);
 }
