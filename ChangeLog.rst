@@ -1,3 +1,23 @@
+Release 0.1.0 - 2015/02/23
+--------------------------
+
+* New machine learning service
+    * Distributed Multi-Armed Bandit (#111)
+
+* Improvements
+    * Add combination feature (#104)
+    * classifier: Add NN-based method (#83)
+    * clustering: Add test for gmm-based clustering algorithm (#66)
+    * nearest_neighbor: implement get_all_rows API (#58, #101)
+    * Update copyright (#103, #105)
+
+* Bug fixes
+    * weight_manager now MIX correctly in recommender, nearest_neighbor, anomaly and clustering (#61, #64)
+    * weight_manager is now saved in nearest_neighbor and clustering (#62, #64)
+    * nearest_neighbor: weight_manager is now updated when calling set_row API (#99, #64)
+    * nearest_neighbor: overwriting rows now correctly updates the specified row (#84)
+    * anomaly: neighbor of updated ID is not touched when using unlearner (#92, #94)
+
 Release 0.0.7 - 2014/12/22
 --------------------------
 
