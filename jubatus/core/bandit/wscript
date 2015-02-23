@@ -1,0 +1,42 @@
+def options(ctx): pass
+
+def configure(ctx): pass
+
+def build(bld):
+  source = [
+      'bandit_factory.cpp',
+      'epsilon_greedy.cpp',
+      'exp3.cpp',
+      'select_by_weights.cpp',
+      'softmax.cpp',
+      'summation_storage.cpp',
+      'ucb1.cpp',
+      ]
+  headers = [
+      'arm_info.hpp',
+      'bandit_base.hpp',
+      'bandit_factory.hpp',
+      'epsilon_greedy.hpp',
+      'exp3.hpp',
+      'select_by_weights.hpp',
+      'softmax.hpp',
+      'summation_storage.hpp',
+      'ucb1.hpp',
+      ]
+  tests = [
+      'bandit_factory_test.cpp',
+      'summation_storage_test.cpp',
+      ]
+  use = ['jubatus_util']
+
+  bld.core_sources.extend(bld.add_prefix(source))
+  bld.core_headers.extend(bld.add_prefix(headers))
+  bld.core_use.extend(use)
+
+  for test in tests:
+    bld.program(
+      features = 'gtest',
+      source = test,
+      target = test[0:test.rfind('.')],
+      includes = '.',
+      use = use + ['jubatus_core'])
