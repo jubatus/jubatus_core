@@ -35,6 +35,8 @@
 #include "../common/unordered_map.hpp"
 #include "../framework/packer.hpp"
 #include "storage_exception.hpp"
+#include "storage_exception.hpp"
+#include "../unlearner/unlearner_base.hpp"
 #include "bit_vector.hpp"
 #include "column_type.hpp"
 #include "abstract_column.hpp"
@@ -249,7 +251,8 @@ class column_table {
     }
   }
 
-  version_t set_row(const msgpack::object& o) {
+  version_t set_row(const msgpack::object& o,
+                    unlearner::unlearner_base* unlearner = NULL) {
     if (o.type != msgpack::type::ARRAY || o.via.array.size != 3) {
       throw msgpack::type_error();
     }
@@ -260,6 +263,9 @@ class column_table {
     jubatus::util::concurrent::scoped_wlock lk(table_lock_);
     const msgpack::object& dat = o.via.array.ptr[2];
     index_table::iterator it = index_.find(key);
+    if (unlearner) {
+      unlearner->touch(key);
+    }
     if (it == index_.end()) {  // did not exist, append
       if (dat.via.array.size != columns_.size()) {
         throw std::bad_cast();

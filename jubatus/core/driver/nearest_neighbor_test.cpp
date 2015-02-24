@@ -363,11 +363,14 @@ class nearest_neighbor_with_unlearning_test
               shared_ptr<nearest_neighbor_base>,
               shared_ptr<unlearner_base> > > {
  protected:
-  void SetUp() {
-    nn_driver_.reset(new nearest_neighbor(
+  shared_ptr<nearest_neighbor> create_driver() {
+    return shared_ptr<nearest_neighbor>(new nearest_neighbor(
         std::tr1::get<0>(GetParam()),
         make_fv_converter(),
         std::tr1::get<1>(GetParam())));
+  }
+  void SetUp() {
+    nn_driver_ = create_driver();
   }
   void TearDown() {
     nn_driver_->clear();
@@ -406,6 +409,51 @@ TEST_P(nearest_neighbor_with_unlearning_test, unlearning) {
   hit_count += is_hit("id2", create_datum_2d(1.f, 1.f), 3);
   hit_count += is_hit("id3", create_datum_2d(1.f, 1.f), 3);
   EXPECT_EQ(2u, hit_count);
+}
+
+TEST_P(nearest_neighbor_with_unlearning_test, mix_and_unlearning) {
+  framework::linear_mixable* nn_mixable =
+    dynamic_cast<framework::linear_mixable*>(nn_driver_->get_mixable());
+  shared_ptr<driver::nearest_neighbor> other = create_driver();
+  framework::linear_mixable* other_mixable =
+    dynamic_cast<framework::linear_mixable*>(other->get_mixable());
+  ASSERT_TRUE(nn_mixable);
+  ASSERT_TRUE(other_mixable);
+
+  nn_driver_->set_row("a", single_str_datum("x", "hoge"));
+  nn_driver_->set_row("b", single_str_datum("y", "fuga"));
+  nn_driver_->set_row("c", single_str_datum("z", "hige"));
+
+  other->set_row("d", single_str_datum("x", "foo"));
+  other->set_row("e", single_str_datum("y", "bar"));
+  other->set_row("f", single_str_datum("z", "baz"));
+
+  msgpack::sbuffer data;
+  {
+    core::framework::stream_writer<msgpack::sbuffer> st(data);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer pk(jp);
+    nn_mixable->get_diff(pk);
+  }
+  {
+    msgpack::sbuffer sbuf;
+    core::framework::stream_writer<msgpack::sbuffer> st(sbuf);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer pk(jp);
+    other_mixable->get_diff(pk);
+
+    msgpack::unpacked msg;
+    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+    framework::diff_object diff = other_mixable->convert_diff_object(msg.get());
+
+    msgpack::unpacked data_msg;
+    msgpack::unpack(&data_msg, data.data(), data.size());
+
+    other_mixable->mix(data_msg.get(), diff);
+    other_mixable->put_diff(diff);
+  }
+  ASSERT_EQ(MAX_SIZE, nn_driver_->get_all_rows().size());
+  ASSERT_EQ(MAX_SIZE, other->get_all_rows().size());
 }
 
 INSTANTIATE_TEST_CASE_P(
