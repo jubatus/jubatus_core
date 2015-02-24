@@ -38,6 +38,8 @@ def build(bld):
       'bit_vector.hpp',
       'sparse_matrix_storage.hpp',
       'recommender_storage_base.hpp',
+      'local_storage.hpp',
+      'local_storage_mixture.hpp',
       ]
   use = ['jubatus_util', 'MSGPACK']
 
