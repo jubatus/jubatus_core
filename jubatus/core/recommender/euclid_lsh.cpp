@@ -57,24 +57,6 @@ float calc_norm(const common::sfv_t& sfv) {
   return std::sqrt(sqnorm);
 }
 
-vector<float> lsh_function(
-    const common::sfv_t& query,
-    size_t dimension,
-    float bin_width) {
-  vector<float> hash(dimension);
-  for (size_t i = 0; i < query.size(); ++i) {
-    const uint32_t seed = common::hash_util::calc_string_hash(query[i].first);
-    mtrand rnd(seed);
-    for (size_t j = 0; j < hash.size(); ++j) {
-      hash[j] += query[i].second * rnd.next_gaussian();
-    }
-  }
-  for (size_t j = 0; j < dimension; ++j) {
-    hash[j] /= bin_width;
-  }
-  return hash;
-}
-
 }  // namespace
 
 euclid_lsh::config::config()
@@ -175,8 +157,7 @@ void euclid_lsh::similar_row(
   storage::lsh_index_storage& lsh_index = *mixable_storage_->get_model();
   ids.clear();
 
-  const vector<float> hash = lsh_function(
-      query, lsh_index.all_lsh_num(), bin_width_);
+  const vector<float> hash = calculate_lsh(query);
   const float norm = calc_norm(query);
   lsh_index.similar_row(hash, norm, num_probe_, ret_num, ids);
 }
@@ -195,7 +176,7 @@ void euclid_lsh::clear() {
 
   // Clear projection cache
   jubatus::util::data::unordered_map<uint32_t, std::vector<float> >()
-    .swap(projection_);
+    .swap(projection_cache_);
 }
 
 void euclid_lsh::clear_row(const string& id) {
@@ -209,8 +190,7 @@ void euclid_lsh::update_row(const string& id, const sfv_diff_t& diff) {
   common::sfv_t row;
   orig_.get_row(id, row);
 
-  const vector<float> hash = lsh_function(
-      row, lsh_index.all_lsh_num(), bin_width_);
+  const vector<float> hash = calculate_lsh(row);
   const float norm = calc_norm(row);
   lsh_index.set_row(id, hash, norm);
 }
@@ -227,7 +207,7 @@ framework::mixable* euclid_lsh::get_mixable() const {
   return mixable_storage_.get();
 }
 
-vector<float> euclid_lsh::calculate_lsh(const common::sfv_t& query) {
+vector<float> euclid_lsh::calculate_lsh(const common::sfv_t& query) const {
   vector<float> hash(mixable_storage_->get_model()->all_lsh_num());
   for (size_t i = 0; i < query.size(); ++i) {
     const uint32_t seed = common::hash_util::calc_string_hash(query[i].first);
@@ -242,16 +222,18 @@ vector<float> euclid_lsh::calculate_lsh(const common::sfv_t& query) {
   return hash;
 }
 
-vector<float> euclid_lsh::get_projection(uint32_t seed) {
+vector<float> euclid_lsh::get_projection(uint32_t seed) const {
   vector<float> tmpl_proj;
-  vector<float>& proj = retain_projection_ ? projection_[seed] : tmpl_proj;
+  vector<float>& proj = retain_projection_ ? projection_cache_[seed] : tmpl_proj;
 
-  if (proj.empty()) {
-    mtrand rnd(seed);
-    proj.resize(mixable_storage_->get_model()->all_lsh_num());
-    for (size_t i = 0; i < proj.size(); ++i) {
-      proj[i] = rnd.next_gaussian();
-    }
+  if (!proj.empty()) {
+    return proj;
+  }
+
+  mtrand rnd(seed);
+  proj.resize(mixable_storage_->get_model()->all_lsh_num());
+  for (size_t i = 0; i < proj.size(); ++i) {
+    proj[i] = rnd.next_gaussian();
   }
   return proj;
 }

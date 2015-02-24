@@ -100,8 +100,8 @@ class euclid_lsh : public recommender_base {
   void unpack(msgpack::object o);
 
  private:
-  std::vector<float> calculate_lsh(const common::sfv_t& query);
-  std::vector<float> get_projection(uint32_t seed);
+  std::vector<float> calculate_lsh(const common::sfv_t& query) const;
+  std::vector<float> get_projection(uint32_t seed) const;
 
   void initialize_model();
 
@@ -110,7 +110,7 @@ class euclid_lsh : public recommender_base {
   float bin_width_;
   uint32_t num_probe_;
 
-  jubatus::util::data::unordered_map<uint32_t, std::vector<float> > projection_;
+  mutable jubatus::util::data::unordered_map<uint32_t, std::vector<float> > projection_cache_;
   bool retain_projection_;
 };
 
