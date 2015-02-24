@@ -1,3 +1,4 @@
+# -*- python -*-
 import Options
 
 subdirs = "common anomaly bandit burst classifier driver framework fv_converter graph recommender regression stat storage nearest_neighbor table clustering unlearner third_party"
