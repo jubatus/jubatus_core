@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/concurrent/mutex.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/text/json.h"
 #include "recommender_base.hpp"
@@ -110,7 +112,9 @@ class euclid_lsh : public recommender_base {
   float bin_width_;
   uint32_t num_probe_;
 
-  mutable jubatus::util::data::unordered_map<uint32_t, std::vector<float> > projection_cache_;
+  mutable jubatus::util::data::unordered_map<uint32_t, std::vector<float> >
+      projection_cache_;
+  mutable jubatus::util::concurrent::mutex cache_lock_;
   bool retain_projection_;
 };
 

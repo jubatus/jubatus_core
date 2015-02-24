@@ -24,6 +24,8 @@
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/lang/cast.h"
 #include "jubatus/util/math/random.h"
+#include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/concurrent/mutex.h"
 #include "../common/hash.hpp"
 #include "../storage/lsh_util.hpp"
 #include "../storage/lsh_vector.hpp"
@@ -34,6 +36,7 @@ using std::pair;
 using std::ostream;
 using std::istream;
 using jubatus::util::math::random::mtrand;
+using jubatus::util::concurrent::scoped_lock;
 
 namespace jubatus {
 namespace core {
@@ -55,6 +58,14 @@ float calc_norm(const common::sfv_t& sfv) {
     sqnorm += sfv[i].second * sfv[i].second;
   }
   return std::sqrt(sqnorm);
+}
+
+void calc_projection(uint32_t seed, size_t size, vector<float>& ret) {
+  mtrand rnd(seed);
+  ret.resize(size);
+  for (size_t i = 0; i < size; ++i) {
+    ret[i] = rnd.next_gaussian();
+  }
 }
 
 }  // namespace
@@ -224,18 +235,19 @@ vector<float> euclid_lsh::calculate_lsh(const common::sfv_t& query) const {
 
 vector<float> euclid_lsh::get_projection(uint32_t seed) const {
   vector<float> tmpl_proj;
-  vector<float>& proj = retain_projection_ ? projection_cache_[seed] : tmpl_proj;
-
-  if (!proj.empty()) {
+  if (retain_projection_) {
+    scoped_lock lk(cache_lock_);  // lock is needed only retain_projection
+    vector<float>& proj = projection_cache_[seed];
+    if (!proj.empty()) {
+      return proj;
+    }
+    calc_projection(seed, mixable_storage_->get_model()->all_lsh_num(), proj);
+    return proj;
+  } else {
+    vector<float> proj;
+    calc_projection(seed, mixable_storage_->get_model()->all_lsh_num(), proj);
     return proj;
   }
-
-  mtrand rnd(seed);
-  proj.resize(mixable_storage_->get_model()->all_lsh_num());
-  for (size_t i = 0; i < proj.size(); ++i) {
-    proj[i] = rnd.next_gaussian();
-  }
-  return proj;
 }
 
 void euclid_lsh::initialize_model() {
