@@ -154,7 +154,7 @@ void init_num_filter_rules(
         filters.find(rule.type);
     if (it == filters.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown type: " + rule.type));
+          converter_exception("unknown num_filter: [" + rule.type + "]"));
     }
 
     matcher_ptr m(create_key_matcher(rule.key, rule.except));
@@ -194,7 +194,7 @@ void init_string_filter_rules(
         filters.find(rule.type);
     if (it == filters.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown type: " + rule.type));
+          converter_exception("unknown string_filter type: [" + rule.type + "]"));
     }
 
     matcher_ptr m(create_key_matcher(rule.key, rule.except));
@@ -213,7 +213,7 @@ void init_string_rules(
         splitters.find(rule.type);
     if (it == splitters.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown type: " + rule.type));
+          converter_exception("unknown string_rule type: [" + rule.type + "]"));
     }
 
     std::vector<splitter_weight_type> ws;
@@ -256,7 +256,7 @@ void init_num_rules(
         num_features.find(rule.type);
     if (it == num_features.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown type: " + rule.type));
+          converter_exception("unknown num_rule type: [" + rule.type + "]"));
     }
 
     conv.register_num_rule(rule.type, m, it->second);
