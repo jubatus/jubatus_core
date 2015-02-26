@@ -205,6 +205,7 @@ bool inverted_index_storage::put_diff(
       } else {
         v[id] = columns[j].second;
         if (unlearner_) {
+          // ignore error returned by touch
           unlearner_->touch(columns[j].first);
         }
       }

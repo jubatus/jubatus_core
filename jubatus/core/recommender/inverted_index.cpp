@@ -110,6 +110,10 @@ void inverted_index::remove_row(const std::string& id) {
 }
 
 void inverted_index::update_row(const std::string& id, const sfv_diff_t& diff) {
+  if (unlearner_ && !unlearner_->can_touch(id)) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "no more space available to add row: " + id));
+  }
   orig_.set_row(id, diff);
   storage::inverted_index_storage& inv = *mixable_storage_->get_model();
   for (size_t i = 0; i < diff.size(); ++i) {
