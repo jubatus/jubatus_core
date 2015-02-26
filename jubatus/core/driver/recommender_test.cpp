@@ -164,11 +164,12 @@ TEST(inverted_index_unlearner, lru_update) {
   unlearner::lru_unlearner::config conf;
   conf.max_size = 3;
   shared_ptr<unlearner::unlearner_base> unl(new unlearner::lru_unlearner(conf));
+  shared_ptr<recommender_base> inv =
+      shared_ptr<recommender_base>(new core::recommender::inverted_index(unl));
   shared_ptr<driver::recommender> recommender =
-      shared_ptr<driver::recommender>(new driver::recommender(
-        shared_ptr<recommender_base>(
-            new core::recommender::inverted_index(unl)),
-        make_tf_idf_fv_converter()));
+      shared_ptr<driver::recommender>(
+          new driver::recommender(inv,
+                                  make_tf_idf_fv_converter()));
   recommender->update_row("id1", create_datum_str("a", "a b c"));
   recommender->update_row("id2", create_datum_str("a", "d e f"));
   recommender->update_row("id3", create_datum_str("a", "e f g"));
@@ -185,11 +186,12 @@ TEST(inverted_index_unlearner, lru_delete) {
   unlearner::lru_unlearner::config conf;
   conf.max_size = 3;
   shared_ptr<unlearner::unlearner_base> unl(new unlearner::lru_unlearner(conf));
+  shared_ptr<recommender_base> inv =
+      shared_ptr<recommender_base>(new core::recommender::inverted_index(unl));
   shared_ptr<driver::recommender> recommender =
-      shared_ptr<driver::recommender>(new driver::recommender(
-        shared_ptr<recommender_base>(
-            new core::recommender::inverted_index(unl)),
-        make_tf_idf_fv_converter()));
+      shared_ptr<driver::recommender>(
+          new driver::recommender(inv,
+                                  make_tf_idf_fv_converter()));
   recommender->update_row("id1", create_datum_str("a", "a b c"));
   recommender->update_row("id2", create_datum_str("a", "d e f"));
   recommender->update_row("id3", create_datum_str("a", "e f g"));
@@ -209,29 +211,35 @@ TEST(inverted_index_unlearner, lru_delete) {
 TEST(inverted_index_unlearner, mix) {
   unlearner::lru_unlearner::config conf;
   conf.max_size = 3;
-  shared_ptr<unlearner::unlearner_base> unl1(new unlearner::lru_unlearner(conf));
+  shared_ptr<unlearner::unlearner_base>
+      unl1(new unlearner::lru_unlearner(conf));
+  shared_ptr<recommender_base> inv1 =
+      shared_ptr<recommender_base>(new core::recommender::inverted_index(unl1));
   shared_ptr<driver::recommender> recommender1 =
-      shared_ptr<driver::recommender>(new driver::recommender(
-        shared_ptr<recommender_base>(
-            new core::recommender::inverted_index(unl1)),
-        make_tf_idf_fv_converter()));
+      shared_ptr<driver::recommender>(
+          new driver::recommender(inv1,
+                                  make_tf_idf_fv_converter()));
   framework::linear_mixable* mixable1 =
       dynamic_cast<framework::linear_mixable*>(recommender1->get_mixable());
+  ASSERT_TRUE(mixable1 != NULL);
   recommender1->update_row("id1", create_datum_str("a", "a b c"));
   recommender1->update_row("id2", create_datum_str("a", "d e f"));
   recommender1->update_row("id3", create_datum_str("a", "e f g"));
 
-  shared_ptr<unlearner::unlearner_base> unl2(new unlearner::lru_unlearner(conf));
+  shared_ptr<unlearner::unlearner_base>
+      unl2(new unlearner::lru_unlearner(conf));
+  shared_ptr<recommender_base> inv2 =
+      shared_ptr<recommender_base>(new core::recommender::inverted_index(unl2));
   shared_ptr<driver::recommender> recommender2 =
-      shared_ptr<driver::recommender>(new driver::recommender(
-        shared_ptr<recommender_base>(
-            new core::recommender::inverted_index(unl2)),
-        make_tf_idf_fv_converter()));
+      shared_ptr<driver::recommender>(
+          new driver::recommender(inv2,
+                                  make_tf_idf_fv_converter()));
+  framework::linear_mixable* mixable2 =
+      dynamic_cast<framework::linear_mixable*>(recommender2->get_mixable());
+  ASSERT_TRUE(mixable2 != NULL);
   recommender2->update_row("id2", create_datum_str("a", "d e f"));
   recommender2->update_row("id3", create_datum_str("a", "e f g"));
   recommender2->update_row("id4", create_datum_str("a", "f g h"));
-  framework::linear_mixable* mixable2 =
-      dynamic_cast<framework::linear_mixable*>(recommender2->get_mixable());
 
   msgpack::sbuffer data1;
   msgpack::unpacked unpacked1;
