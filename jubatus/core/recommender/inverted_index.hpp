@@ -30,12 +30,19 @@ namespace framework {
 template <typename Model, typename Diff>
 class linear_mixable_helper;
 }  // namespace framework
+namespace unlearner {
+
+class unlearner_base;
+
+}  // namespace unlearner
 namespace recommender {
 
 class inverted_index : public recommender_base {
  public:
   inverted_index();
   ~inverted_index();
+  inverted_index(
+      jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner);
 
   void similar_row(
       const common::sfv_t& query,
@@ -47,6 +54,7 @@ class inverted_index : public recommender_base {
       size_t ret_num) const;
   void clear();
   void clear_row(const std::string& id);
+  void remove_row(const std::string& id);
   void update_row(const std::string& id, const sfv_diff_t& diff);
   void get_all_row_ids(std::vector<std::string>& ids) const;
   std::string type() const;
@@ -59,6 +67,8 @@ class inverted_index : public recommender_base {
  private:
   jubatus::util::lang::shared_ptr<storage::mixable_inverted_index_storage>
       mixable_storage_;
+  jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
+      unlearner_;
 };
 
 }  // namespace recommender

@@ -33,6 +33,7 @@
 #include "../classifier/classifier_test_util.hpp"
 #include "../framework/stream_writer.hpp"
 #include "../storage/column_table.hpp"
+#include "../unlearner/lru_unlearner.hpp"
 #include "recommender.hpp"
 
 #include "test_util.hpp"
@@ -158,6 +159,111 @@ TEST_P(nn_recommender_test, update) {
 INSTANTIATE_TEST_CASE_P(nn_recommender_test_instance,
     nn_recommender_test,
     testing::ValuesIn(create_recommender_bases()));
+
+TEST(inverted_index_unlearner, lru_update) {
+  unlearner::lru_unlearner::config conf;
+  conf.max_size = 3;
+  shared_ptr<unlearner::unlearner_base> unl(new unlearner::lru_unlearner(conf));
+  shared_ptr<driver::recommender> recommender =
+      shared_ptr<driver::recommender>(new driver::recommender(
+        shared_ptr<recommender_base>(
+            new core::recommender::inverted_index(unl)),
+        make_tf_idf_fv_converter()));
+  recommender->update_row("id1", create_datum_str("a", "a b c"));
+  recommender->update_row("id2", create_datum_str("a", "d e f"));
+  recommender->update_row("id3", create_datum_str("a", "e f g"));
+  recommender->update_row("id4", create_datum_str("a", "f g h"));
+  recommender->update_row("id5", create_datum_str("a", "h i j"));
+  recommender->update_row("id6", create_datum_str("a", "i j a"));
+  recommender->update_row("id7", create_datum_str("a", "j a b"));
+
+  vector<pair<string, float> > ret = recommender->similar_row_from_id("id6", 4);
+  ASSERT_EQ(3u, ret.size());
+}
+
+TEST(inverted_index_unlearner, lru_delete) {
+  unlearner::lru_unlearner::config conf;
+  conf.max_size = 3;
+  shared_ptr<unlearner::unlearner_base> unl(new unlearner::lru_unlearner(conf));
+  shared_ptr<driver::recommender> recommender =
+      shared_ptr<driver::recommender>(new driver::recommender(
+        shared_ptr<recommender_base>(
+            new core::recommender::inverted_index(unl)),
+        make_tf_idf_fv_converter()));
+  recommender->update_row("id1", create_datum_str("a", "a b c"));
+  recommender->update_row("id2", create_datum_str("a", "d e f"));
+  recommender->update_row("id3", create_datum_str("a", "e f g"));
+  recommender->clear_row("id1");
+  recommender->update_row("id4", create_datum_str("a", "f g h"));
+  recommender->update_row("id5", create_datum_str("a", "h i j"));
+  recommender->update_row("id6", create_datum_str("a", "i j a"));
+  recommender->update_row("id7", create_datum_str("a", "j a b"));
+
+  vector<pair<string, float> > ret = recommender->similar_row_from_id("id6", 4);
+  ASSERT_EQ(3u, ret.size());
+
+  vector<string> all = recommender->get_all_rows();
+  ASSERT_EQ(3u, all.size());
+}
+
+TEST(inverted_index_unlearner, mix) {
+  unlearner::lru_unlearner::config conf;
+  conf.max_size = 3;
+  shared_ptr<unlearner::unlearner_base> unl1(new unlearner::lru_unlearner(conf));
+  shared_ptr<driver::recommender> recommender1 =
+      shared_ptr<driver::recommender>(new driver::recommender(
+        shared_ptr<recommender_base>(
+            new core::recommender::inverted_index(unl1)),
+        make_tf_idf_fv_converter()));
+  framework::linear_mixable* mixable1 =
+      dynamic_cast<framework::linear_mixable*>(recommender1->get_mixable());
+  recommender1->update_row("id1", create_datum_str("a", "a b c"));
+  recommender1->update_row("id2", create_datum_str("a", "d e f"));
+  recommender1->update_row("id3", create_datum_str("a", "e f g"));
+
+  shared_ptr<unlearner::unlearner_base> unl2(new unlearner::lru_unlearner(conf));
+  shared_ptr<driver::recommender> recommender2 =
+      shared_ptr<driver::recommender>(new driver::recommender(
+        shared_ptr<recommender_base>(
+            new core::recommender::inverted_index(unl2)),
+        make_tf_idf_fv_converter()));
+  recommender2->update_row("id2", create_datum_str("a", "d e f"));
+  recommender2->update_row("id3", create_datum_str("a", "e f g"));
+  recommender2->update_row("id4", create_datum_str("a", "f g h"));
+  framework::linear_mixable* mixable2 =
+      dynamic_cast<framework::linear_mixable*>(recommender2->get_mixable());
+
+  msgpack::sbuffer data1;
+  msgpack::unpacked unpacked1;
+  {
+    core::framework::stream_writer<msgpack::sbuffer> st(data1);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer pk(jp);
+    mixable1->get_diff(pk);
+    msgpack::unpack(&unpacked1, data1.data(), data1.size());
+  }
+
+  msgpack::sbuffer data2;
+  msgpack::unpacked unpacked2;
+  {
+    core::framework::stream_writer<msgpack::sbuffer> st(data2);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer pk(jp);
+    mixable2->get_diff(pk);
+    msgpack::unpack(&unpacked2, data2.data(), data2.size());
+  }
+
+
+  framework::diff_object diff = mixable2->convert_diff_object(unpacked2.get());
+  mixable2->mix(unpacked1.get(), diff);
+
+  mixable1->put_diff(diff);
+  mixable2->put_diff(diff);
+
+  ASSERT_EQ(3u, recommender1->get_all_rows().size());
+  ASSERT_EQ(3u, recommender2->get_all_rows().size());
+}
+
 }  // namespace driver
 }  // namespace core
 }  // namespace jubatus

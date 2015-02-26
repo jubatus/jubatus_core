@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "jubatus/util/lang/shared_ptr.h"
 #include "../common/exception.hpp"
 #include "../common/vector_util.hpp"
 #include "../storage/inverted_index_storage.hpp"
@@ -28,9 +29,15 @@
 using std::pair;
 using std::string;
 using std::vector;
+using jubatus::util::lang::shared_ptr;
 
 namespace jubatus {
 namespace core {
+namespace unlearner {
+
+class unlearner_base;
+
+}  // namespace unlearner
 namespace recommender {
 
 inverted_index::inverted_index()
@@ -39,6 +46,18 @@ inverted_index::inverted_index()
   typedef storage::mixable_inverted_index_storage mii_storage;
   jubatus::util::lang::shared_ptr<ii_storage> p(new ii_storage);
   mixable_storage_.reset(new mii_storage(p));
+}
+
+inverted_index::inverted_index(shared_ptr<unlearner::unlearner_base> unlearner)
+    : mixable_storage_(),
+      unlearner_(unlearner) {
+  typedef storage::inverted_index_storage ii_storage;
+  typedef storage::mixable_inverted_index_storage mii_storage;
+  jubatus::util::lang::shared_ptr<ii_storage> p(new ii_storage);
+  mixable_storage_.reset(new mii_storage(p));
+  mixable_storage_->get_model()->set_unlearner(unlearner);
+  unlearner_->set_callback(
+      bind(&inverted_index::remove_row, this, _1));
 }
 
 inverted_index::~inverted_index() {
@@ -68,9 +87,19 @@ void inverted_index::neighbor_row(
 void inverted_index::clear() {
   orig_.clear();
   mixable_storage_->get_model()->clear();
+  if (unlearner_) {
+    unlearner_->clear();
+  }
 }
 
 void inverted_index::clear_row(const std::string& id) {
+  remove_row(id);
+  if (unlearner_) {
+    unlearner_->remove(id);
+  }
+}
+
+void inverted_index::remove_row(const std::string& id) {
   vector<pair<string, float> > columns;
   orig_.get_row(id, columns);
   storage::inverted_index_storage& inv = *mixable_storage_->get_model();
@@ -85,6 +114,9 @@ void inverted_index::update_row(const std::string& id, const sfv_diff_t& diff) {
   storage::inverted_index_storage& inv = *mixable_storage_->get_model();
   for (size_t i = 0; i < diff.size(); ++i) {
     inv.set(diff[i].first, id, diff[i].second);
+  }
+  if (unlearner_) {
+    unlearner_->touch(id);
   }
 }
 

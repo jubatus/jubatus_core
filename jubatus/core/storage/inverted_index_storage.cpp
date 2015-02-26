@@ -199,8 +199,14 @@ bool inverted_index_storage::put_diff(
       size_t id = column2id_.get_id(columns[j].first);
       if (columns[j].second == 0.f) {
         v.erase(id);
+        if (unlearner_) {
+          unlearner_->remove(columns[j].first);
+        }
       } else {
         v[id] = columns[j].second;
+        if (unlearner_) {
+          unlearner_->touch(columns[j].first);
+        }
       }
     }
   }
