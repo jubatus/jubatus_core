@@ -203,10 +203,15 @@ bool inverted_index_storage::put_diff(
           unlearner_->remove(columns[j].first);
         }
       } else {
-        v[id] = columns[j].second;
         if (unlearner_) {
-          // ignore error returned by touch
-          unlearner_->touch(columns[j].first);
+          if (unlearner_->can_touch(columns[j].first)) {
+            unlearner_->touch(columns[j].first);
+            v[id] = columns[j].second;
+          } else {
+            // drop updates which unlearner cannot touch
+          }
+        } else {
+          v[id] = columns[j].second;
         }
       }
     }
