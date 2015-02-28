@@ -42,6 +42,13 @@ TEST(bandit_factory, ucb1) {
   EXPECT_EQ("ucb1", p->name());
 }
 
+TEST(bandit_factory, ts) {
+  json::json js(new json::json_object);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p = bandit_factory::create("ts", conf);
+  EXPECT_EQ("ts", p->name());
+}
+
 TEST(bandit_factory, softmax) {
   json::json js(new json::json_object);
   js["tau"] = json::to_json(0.5);

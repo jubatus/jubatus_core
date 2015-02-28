@@ -39,6 +39,7 @@ namespace jubatus {
 namespace util {
 namespace math {
 const double pi = 4.0 * std::atan(1.0);
+const double napier_e = 2.718281828;
 }
 }
 }
