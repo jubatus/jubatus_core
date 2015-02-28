@@ -11,6 +11,7 @@ def build(bld):
       'softmax.cpp',
       'summation_storage.cpp',
       'ucb1.cpp',
+      'ts.cpp',
       ]
   headers = [
       'arm_info.hpp',
@@ -22,6 +23,7 @@ def build(bld):
       'softmax.hpp',
       'summation_storage.hpp',
       'ucb1.hpp',
+      'ts.hpp',
       ]
   tests = [
       'bandit_factory_test.cpp',

@@ -20,6 +20,7 @@
 #include "../common/jsonconfig.hpp"
 #include "epsilon_greedy.hpp"
 #include "ucb1.hpp"
+#include "ts.hpp"
 #include "softmax.hpp"
 #include "exp3.hpp"
 
@@ -92,6 +93,8 @@ shared_ptr<bandit_base> bandit_factory::create(
     ucb1_config conf =
         config_cast_check<ucb1_config>(param);
     return shared_ptr<bandit_base>(new ucb1(conf.assume_unrewarded));
+  } else if (name == "ts") {
+    return shared_ptr<bandit_base>(new ts());
   } else if (name == "softmax") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
