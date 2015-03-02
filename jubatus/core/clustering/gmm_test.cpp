@@ -29,7 +29,7 @@ class gmm_test : public ::testing::Test {
  protected:
   static const size_t k_ = 2;
   static const size_t d_ = 2;
-  static const double epsilon_ = 0.3;
+  static const double epsilon_;
 
   virtual void SetUp() {
     gmm_.reset(new gmm);
@@ -56,6 +56,8 @@ class gmm_test : public ::testing::Test {
   jubatus::util::math::random::mtrand r_;
   jubatus::util::lang::scoped_ptr<gmm> gmm_;
 };
+
+const double gmm_test::epsilon_ = 0.3;
 
 TEST_F(gmm_test, centers_and_covs) {
   do_batch(500);
