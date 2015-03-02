@@ -96,10 +96,6 @@ light_lof::light_lof(
             "nearest_neighbor_num <= reverse_nearest_neighbor_num"));
   }
 
-  shared_ptr<column_table> table(new column_table);
-  std::vector<table::column_type> schema(
-      2, table::column_type(table::column_type::float_type));
-  table->init(schema);
   mixable_nearest_neighbor_->set_model(nearest_neighbor_engine_->get_table());
   mixable_scores_->set_model(create_lof_table());
 }
