@@ -136,16 +136,16 @@ class column_table {
   bool update(
       const std::string& key,
       const owner& o,
-      size_t colum_id,
+      size_t column_id,
       const T& v) {
     jubatus::util::concurrent::scoped_wlock lk(table_lock_);
     index_table::iterator it = index_.find(key);
-    if (tuples_ < colum_id || it == index_.end()) {
+    if (tuples_ < column_id || it == index_.end()) {
       return false;
     }
     versions_[it->second] = std::make_pair(o, clock_);
-    columns_[colum_id].update(it->second, v);
-    columns_[colum_id].update(it->second, v);
+    columns_[column_id].update(it->second, v);
+    columns_[column_id].update(it->second, v);
     ++clock_;
     return true;
   }
