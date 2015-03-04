@@ -61,6 +61,21 @@ class sparse_matrix_storage : public framework::model {
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
 
+  friend std::ostream& operator<<(std::ostream& o,
+                                  const sparse_matrix_storage& s) {
+    for (tbl_t::const_iterator it = s.tbl_.begin();
+         it != s.tbl_.end();
+         ++it) {
+      o << "(" << it->first << "): ";
+      for (row_t::const_iterator jt = it->second.begin();
+           jt != it->second.end();
+           ++jt) {
+        o << s.column2id_.get_key(jt->first) << "->" << jt->second << ", ";
+      }
+    }
+    return o;
+  }
+
  private:
   tbl_t tbl_;
   common::key_manager column2id_;

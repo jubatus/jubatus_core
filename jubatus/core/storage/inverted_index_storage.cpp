@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "../storage/fixed_size_heap.hpp"
+#include "jubatus/util/data/unordered_map.h"
 
 using std::istringstream;
 using std::make_pair;
@@ -33,6 +34,7 @@ using std::sort;
 using std::sqrt;
 using std::string;
 using std::vector;
+using jubatus::util::data::unordered_map;
 
 namespace jubatus {
 namespace core {
@@ -164,7 +166,20 @@ void inverted_index_storage::get_all_column_ids(
   for (imap_float_t::const_iterator it = column2norm_diff_.begin();
       it != column2norm_diff_.end(); ++it) {
     if (column2norm_.find(it->first) == column2norm_.end()) {
-      ids.push_back(column2id_.get_key(it->first));
+      if (0.f < it->second) {  // recently removed row has zero value
+        ids.push_back(column2id_.get_key(it->first));
+      } else {
+        // remove if diff specify 0.0
+        // column2norm_ may have recently removed data, we must exclude it
+        for (std::vector<std::string>::iterator target = ids.begin();
+             target != ids.end();
+             ++target) {
+          if (*target == column2id_.get_key(it->first)) {
+            ids.erase(target);
+            break;
+          }
+        }
+      }
     }
   }
 }
@@ -190,26 +205,63 @@ bool inverted_index_storage::put_diff(
     const diff_type& mixed_diff) {
   vector<string> ids;
   mixed_diff.inv.get_all_row_ids(ids);
+
+  unordered_map<string, bool> update_list;  // bool:true->update, false->erase
+  if (unlearner_) {
+    for (size_t i = 0; i < ids.size(); ++i) {
+      const string& row = ids[i];
+      vector<pair<string, float> > columns;
+      mixed_diff.inv.get_row(row, columns);
+      for (size_t j = 0; j < columns.size(); ++j) {
+        if (unlearner_->can_touch(columns[j].first)) {
+          unordered_map<string, bool>::iterator it =
+              update_list.find(columns[j].first);
+          if (it == update_list.end()) {
+            update_list.insert(
+                make_pair(columns[j].first, 0 < columns[j].second));
+          } else {
+            // at least one value is not zero, it is update, not erase
+            it->second = it->second || 0 < columns[j].second;
+          }
+        }
+        // drop untouchable value
+      }
+    }
+
+    for (unordered_map<string, bool>::const_iterator it = update_list.begin();
+         it != update_list.end();
+         ++it) {
+      if (it->second) {  // update
+        unlearner_->touch(it->first);
+      } else {  // remove
+        unlearner_->remove(it->first);
+      }
+    }
+    for (unordered_map<string, bool>::iterator it = update_list.begin();
+         it != update_list.end();
+         ++it) {
+      if (!unlearner_->exists_in_memory(it->first)) {
+        it->second = false;  // unlearn
+      }
+    }
+  }
+
   for (size_t i = 0; i < ids.size(); ++i) {
     const string& row = ids[i];
     row_t& v = inv_[row];
     vector<pair<string, float> > columns;
     mixed_diff.inv.get_row(row, columns);
+
     for (size_t j = 0; j < columns.size(); ++j) {
       size_t id = column2id_.get_id(columns[j].first);
       if (columns[j].second == 0.f) {
         v.erase(id);
-        if (unlearner_) {
-          unlearner_->remove(columns[j].first);
-        }
       } else {
         if (unlearner_) {
-          if (unlearner_->can_touch(columns[j].first)) {
-            unlearner_->touch(columns[j].first);
+          if (unlearner_->exists_in_memory(columns[j].first)) {
             v[id] = columns[j].second;
-          } else {
-            // drop updates which unlearner cannot touch
           }
+          // drop data whichi unlearner could not touch
         } else {
           v[id] = columns[j].second;
         }
@@ -218,12 +270,30 @@ bool inverted_index_storage::put_diff(
   }
   inv_diff_.clear();
 
-  for (map_float_t::const_iterator it = mixed_diff.column2norm.begin();
-      it != mixed_diff.column2norm.end(); ++it) {
-    uint64_t column_index = column2id_.get_id(it->first);
-    column2norm_[column_index] += it->second;
-    if (column2norm_[column_index] == 0.f) {
-      column2norm_.erase(column_index);
+  if (unlearner_) {
+    for (map_float_t::const_iterator it = mixed_diff.column2norm.begin();
+         it != mixed_diff.column2norm.end(); ++it) {
+      unordered_map<string, bool>::const_iterator target =
+          update_list.find(it->first);
+      uint64_t column_index = column2id_.get_id(it->first);
+      if (target != update_list.end() && target->second) {
+        // unlearner admit to update
+        column2norm_[column_index] += it->second;
+        if (column2norm_[column_index] == 0.f) {
+          column2norm_.erase(column_index);
+        }
+      } else {
+        column2norm_.erase(column_index);
+      }
+    }
+  } else {
+    for (map_float_t::const_iterator it = mixed_diff.column2norm.begin();
+         it != mixed_diff.column2norm.end(); ++it) {
+      uint64_t column_index = column2id_.get_id(it->first);
+      column2norm_[column_index] += it->second;
+      if (column2norm_[column_index] == 0.f) {
+        column2norm_.erase(column_index);
+      }
     }
   }
   column2norm_diff_.clear();
