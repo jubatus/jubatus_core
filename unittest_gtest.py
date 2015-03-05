@@ -111,6 +111,8 @@ def configure(conf):
 def options(opt):
     opt.add_option('--check', action = 'store_true', default = False,
                    help = 'Execute unit tests')
+    opt.add_option('--checkleak', action = 'store_true', default = False,
+                   help = 'Execute unit tests with valgrind')
     opt.add_option('--checkall', action = 'store_true', default = False,
                    help = 'Execute all unit tests')
     opt.add_option('--checkone', action = 'store', default = False,
@@ -129,7 +131,10 @@ def match_filter(filt, targ):
 @feature('testt', 'gtest')
 @before('process_rule')
 def test_remover(self):
-    if not Options.options.check and not Options.options.checkall and self.target != Options.options.checkone and not match_filter(Options.options.checkfilter, self.target):
+    if (not Options.options.check and
+        not (Options.options.checkall or Options.options.checkleak) and
+        self.target != Options.options.checkone and
+        not match_filter(Options.options.checkfilter, self.target)):
         self.meths[:] = []
 
 @feature('gtest')
@@ -172,7 +177,7 @@ class utest(Task.Task):
         if stat != Task.SKIP_ME:
             return stat
 
-        if Options.options.checkall:
+        if Options.options.checkall or Options.options.checkleak:
             return Task.RUN_ME
         if Options.options.checkone == self.generator.name:
             return Task.RUN_ME
@@ -224,13 +229,19 @@ class utest(Task.Task):
             if filt != "":
                 self.ut_exec += ['--gtest_filter=' + filt]
 
+        if Options.options.checkleak:
+          self.ut_exec.insert(0, 'valgrind')
+          self.ut_exec.insert(1, '--error-exitcode=1')
+          self.ut_exec.insert(2, '--leak-check=full')
+          self.ut_exec.insert(3, '--show-reachable=yes')
+
         cwd = getattr(self.generator, 'ut_cwd', '') or self.inputs[0].parent.abspath()
         proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, env=fu, stderr=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)
         (stdout, stderr) = proc.communicate()
 
         tup = (filename, proc.returncode, stdout, stderr)
         self.generator.utest_result = tup
-        
+
         testlock.acquire()
         try:
             bld = self.generator.bld
