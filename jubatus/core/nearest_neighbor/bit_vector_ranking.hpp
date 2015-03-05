@@ -17,18 +17,26 @@
 #ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_BIT_VECTOR_RANKING_HPP_
 #define JUBATUS_CORE_NEAREST_NEIGHBOR_BIT_VECTOR_RANKING_HPP_
 
+#include <stdint.h>
 #include <utility>
 #include <vector>
-#include "../table/column/bit_vector.hpp"
-#include "../table/column/abstract_column.hpp"
 
 namespace jubatus {
 namespace core {
+namespace storage {
+template <typename bit_base> class bit_vector_base;
+typedef bit_vector_base<uint64_t> bit_vector;
+
+template <typename T>
+class typed_column;
+typedef typed_column<bit_vector> bit_vector_column;
+typedef const bit_vector_column const_bit_vector_column;
+}
 namespace nearest_neighbor {
 
 void ranking_hamming_bit_vectors(
-    const table::bit_vector& query,
-    const table::const_bit_vector_column& bvs,
+    const storage::bit_vector& query,
+    const storage::const_bit_vector_column& bvs,
     std::vector<std::pair<uint64_t, float> >& ret,
     uint64_t ret_num);
 

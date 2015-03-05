@@ -24,6 +24,7 @@
 #include "../common/exception.hpp"
 #include "../common/hash.hpp"
 #include "lsh_util.hpp"
+#include "../storage/bit_index_storage.hpp"
 
 using std::pair;
 using std::string;

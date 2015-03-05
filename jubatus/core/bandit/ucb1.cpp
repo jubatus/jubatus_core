@@ -20,6 +20,8 @@
 #include <vector>
 #include <cfloat>
 #include "../common/exception.hpp"
+#include "../framework/packer.hpp"
+#include "../common/version.hpp"
 
 namespace jubatus {
 namespace core {
@@ -98,6 +100,9 @@ bool ucb1::put_diff(const diff_t& diff) {
 }
 void ucb1::mix(const diff_t& lhs, diff_t& rhs) const {
   s_.mix(lhs, rhs);
+}
+storage::version ucb1::get_version() const {
+  return storage::version();
 }
 
 }  // namespace bandit

@@ -21,7 +21,7 @@
 #include "../common/exception.hpp"
 #include "../common/jsonconfig.hpp"
 #include "../nearest_neighbor/nearest_neighbor_factory.hpp"
-#include "../table/column/column_table.hpp"
+#include "../storage/column_table.hpp"
 #include "../unlearner/unlearner_factory.hpp"
 #include "recommender_factory.hpp"
 #include "recommender.hpp"
@@ -72,7 +72,7 @@ shared_ptr<recommender_base> recommender_factory::create_recommender(
   } else if (name == "nearest_neighbor_recommender") {
     nearest_neighbor_recommender_config conf =
         config_cast_check<nearest_neighbor_recommender_config>(param);
-    shared_ptr<table::column_table> table(new table::column_table);
+    shared_ptr<storage::column_table> table(new storage::column_table);
     shared_ptr<nearest_neighbor::nearest_neighbor_base>
         nearest_neighbor_engine(nearest_neighbor::create_nearest_neighbor(
             conf.method, conf.parameter, table, id));

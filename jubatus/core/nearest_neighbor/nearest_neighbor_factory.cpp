@@ -32,7 +32,7 @@ namespace nearest_neighbor {
 shared_ptr<nearest_neighbor_base> create_nearest_neighbor(
     const std::string& name,
     const common::jsonconfig::config& config,
-    shared_ptr<table::column_table> table,
+    shared_ptr<storage::column_table> table,
     const std::string& id) {
 
   using common::jsonconfig::config_cast_check;

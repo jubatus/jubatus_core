@@ -22,7 +22,6 @@
 #include "jubatus/util/data/unordered_map.h"
 #include "../common/type.hpp"
 #include "counter.hpp"
-#include "datum.hpp"
 
 namespace jubatus {
 namespace core {

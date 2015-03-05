@@ -23,6 +23,7 @@
 #include <vector>
 #include "../common/exception.hpp"
 #include "../common/vector_util.hpp"
+#include "../storage/inverted_index_storage.hpp"
 
 using std::pair;
 using std::string;

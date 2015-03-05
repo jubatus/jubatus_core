@@ -21,13 +21,13 @@
 #include <vector>
 
 #include "column_table.hpp"
-#include "../../common/assert.hpp"
+#include "../common/assert.hpp"
 
 namespace jutil = jubatus::util;
 
 namespace jubatus {
 namespace core {
-namespace table {
+namespace storage {
 
 void column_table::init(const std::vector<column_type>& schema) {
   jutil::concurrent::scoped_wlock lk(table_lock_);
@@ -167,6 +167,6 @@ const_bit_vector_column& column_table::get_bit_vector_column(
 }
 
 
-}  // namespace table
+}  // namespace storage
 }  // namespace core
 }  // namespace jubatus

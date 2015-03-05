@@ -32,8 +32,8 @@ using std::map;
 using std::pair;
 using std::string;
 using std::make_pair;
-using jubatus::core::table::bit_vector;
-using jubatus::core::table::column_table;
+using jubatus::core::storage::bit_vector;
+using jubatus::core::storage::column_table;
 using jubatus::util::data::string::split;
 
 namespace jubatus {
@@ -69,7 +69,7 @@ class bit_vector_nearest_neighbor_mock
  public:
   bit_vector_nearest_neighbor_mock(
       uint64_t bitnum,
-      jubatus::util::lang::shared_ptr<table::column_table> table)
+      jubatus::util::lang::shared_ptr<storage::column_table> table)
       : bit_vector_nearest_neighbor_base(bitnum, table, "test"),
         hash_value_(bitnum) {
   }

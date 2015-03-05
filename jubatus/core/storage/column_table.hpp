@@ -14,8 +14,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_TABLE_COLUMN_COLUMN_TABLE_HPP_
-#define JUBATUS_CORE_TABLE_COLUMN_COLUMN_TABLE_HPP_
+#ifndef JUBATUS_CORE_STORAGE_COLUMN_TABLE_HPP_
+#define JUBATUS_CORE_STORAGE_COLUMN_TABLE_HPP_
 
 #include <stdint.h>
 #include <algorithm>
@@ -23,7 +23,6 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include <iostream>
 #include <msgpack.hpp>
 
 #include "jubatus/util/lang/cast.h"
@@ -31,11 +30,11 @@
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/concurrent/rwmutex.h"
 #include "jubatus/util/lang/shared_ptr.h"
-#include "../../common/assert.hpp"
-#include "../../common/exception.hpp"
-#include "../../common/unordered_map.hpp"
-#include "../../framework/packer.hpp"
-#include "../storage_exception.hpp"
+#include "../common/assert.hpp"
+#include "../common/exception.hpp"
+#include "../common/unordered_map.hpp"
+#include "../framework/packer.hpp"
+#include "storage_exception.hpp"
 #include "bit_vector.hpp"
 #include "column_type.hpp"
 #include "abstract_column.hpp"
@@ -43,7 +42,7 @@
 
 namespace jubatus {
 namespace core {
-namespace table {
+namespace storage {
 
 class invalid_row_set
     : public common::exception::jubaexception<invalid_row_set> {
@@ -202,17 +201,6 @@ class column_table {
   uint64_t size() const {
     jubatus::util::concurrent::scoped_rlock lk(table_lock_);
     return tuples_;
-  }
-
-  void dump() const {
-    jubatus::util::concurrent::scoped_rlock lk(table_lock_);
-    std::cout << "schema is ";
-    for (std::vector<detail::abstract_column>::const_iterator it =
-             columns_.begin();
-         it != columns_.end();
-         ++it) {
-      it->dump();
-    }
   }
 
   std::string dump_json() const {
@@ -421,8 +409,8 @@ class column_table {
   }
 };
 
-}  // namespace table
+}  // namespace storage
 }  // namespcae core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_TABLE_COLUMN_COLUMN_TABLE_HPP_
+#endif  // JUBATUS_CORE_STORAGE_COLUMN_TABLE_HPP_

@@ -20,7 +20,7 @@
 #include <gtest/gtest.h>
 #include "column_type.hpp"
 
-using jubatus::core::table::column_type;
+using jubatus::core::storage::column_type;
 
 class column_type_test
     : public testing::TestWithParam<column_type::type_name> {

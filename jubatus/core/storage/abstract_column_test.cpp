@@ -19,11 +19,11 @@
 #include <gtest/gtest.h>
 #include "abstract_column.hpp"
 
-using jubatus::core::table::detail::abstract_column;
-using jubatus::core::table::column_type;
-using jubatus::core::table::bit_vector;
-using jubatus::core::table::bit_vector_column;
-using jubatus::core::table::column_type;
+using jubatus::core::storage::detail::abstract_column;
+using jubatus::core::storage::column_type;
+using jubatus::core::storage::bit_vector;
+using jubatus::core::storage::bit_vector_column;
+using jubatus::core::storage::column_type;
 
 
 TEST(abstract_column, pack_and_unpack) {
@@ -49,7 +49,7 @@ TEST(abstract_column, pack_and_unpack) {
     obj.convert(&dest1);
   });
 
-  using jubatus::core::table::int32_column;
+  using jubatus::core::storage::int32_column;
   const int32_column& column = dynamic_cast<int32_column&>(*dest1.get());
   EXPECT_EQ(n, column.size());
   for (size_t i = 0; i < n; ++i) {
@@ -62,7 +62,7 @@ TEST(abstract_column, pack_and_unpack) {
       abstract_column(column_type(column_type::int8_type));
   EXPECT_THROW({
     obj.convert(&dest2);
-  }, jubatus::core::table::type_unmatch_exception);
+  }, jubatus::core::storage::type_unmatch_exception);
 }
 
 TEST(abstract_column, bit_vector_pack_and_unpack) {
@@ -89,7 +89,7 @@ TEST(abstract_column, bit_vector_pack_and_unpack) {
     obj.convert(&dest1);
   });
 
-  using jubatus::core::table::bit_vector_column;
+  using jubatus::core::storage::bit_vector_column;
   const bit_vector_column& column =
       dynamic_cast<bit_vector_column&>(*dest1.get());
   EXPECT_EQ(n, column.size());
@@ -104,7 +104,7 @@ TEST(abstract_column, bit_vector_pack_and_unpack) {
       abstract_column(column_type(column_type::int8_type));
   EXPECT_THROW({
     obj.convert(&dest2);
-  }, jubatus::core::table::type_unmatch_exception);
+  }, jubatus::core::storage::type_unmatch_exception);
 }
 
 TEST(abstract_column, update_at_correct_index) {

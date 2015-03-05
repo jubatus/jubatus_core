@@ -18,14 +18,14 @@
 #include <utility>
 #include <vector>
 #include "bit_vector_ranking.hpp"
-
+#include "../storage/abstract_column.hpp"
 #include "../storage/fixed_size_heap.hpp"
 
 using std::make_pair;
 using std::pair;
 using std::vector;
-using jubatus::core::table::bit_vector;
-using jubatus::core::table::const_bit_vector_column;
+using jubatus::core::storage::bit_vector;
+using jubatus::core::storage::const_bit_vector_column;
 
 namespace jubatus {
 namespace core {

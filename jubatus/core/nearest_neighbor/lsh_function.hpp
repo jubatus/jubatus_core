@@ -17,9 +17,10 @@
 #ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_LSH_FUNCTION_HPP_
 #define JUBATUS_CORE_NEAREST_NEIGHBOR_LSH_FUNCTION_HPP_
 
+#include <stdint.h>
 #include <vector>
 #include "../common/type.hpp"
-#include "../table/column/bit_vector.hpp"
+#include "../storage/bit_vector.hpp"
 
 namespace jubatus {
 namespace core {
@@ -28,8 +29,8 @@ namespace nearest_neighbor {
 std::vector<float> random_projection(
     const common::sfv_t& sfv,
     uint32_t hash_num);
-table::bit_vector binarize(const std::vector<float>& proj);
-table::bit_vector cosine_lsh(const common::sfv_t& sfv, uint32_t hash_num);
+storage::bit_vector binarize(const std::vector<float>& proj);
+storage::bit_vector cosine_lsh(const common::sfv_t& sfv, uint32_t hash_num);
 
 }  // namespace nearest_neighbor
 }  // namespace core

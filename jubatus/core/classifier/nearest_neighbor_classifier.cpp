@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include "../storage/column_table.hpp"
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::data::unordered_set;
@@ -143,7 +144,7 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
     return false;
   }
 
-  shared_ptr<table::column_table> table =
+  shared_ptr<storage::column_table> table =
       nearest_neighbor_engine_->get_table();
 
   std::vector<std::string> ids_to_be_deleted;

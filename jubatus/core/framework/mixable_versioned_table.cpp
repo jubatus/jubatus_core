@@ -21,12 +21,12 @@
 #include <vector>
 #include <memory>
 #include <msgpack.hpp>
-#include "../../core/common/exception.hpp"
-#include "../../core/common/byte_buffer.hpp"
-#include "../../core/framework/packer.hpp"
-#include "../../core/framework/stream_writer.hpp"
+#include "../common/exception.hpp"
+#include "../common/byte_buffer.hpp"
+#include "../framework/packer.hpp"
+#include "../framework/stream_writer.hpp"
 
-typedef jubatus::core::table::column_table::version_t version_t;
+typedef jubatus::core::storage::column_table::version_t version_t;
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::core::framework::diff_object;

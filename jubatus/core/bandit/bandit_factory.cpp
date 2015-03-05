@@ -17,7 +17,7 @@
 #include "bandit_factory.hpp"
 
 #include <string>
-
+#include "../common/jsonconfig.hpp"
 #include "epsilon_greedy.hpp"
 #include "ucb1.hpp"
 #include "softmax.hpp"

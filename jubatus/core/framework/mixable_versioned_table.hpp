@@ -20,22 +20,22 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "../../core/common/version.hpp"
-#include "../../core/framework/push_mixable.hpp"
-#include "../../core/framework/linear_mixable.hpp"
-#include "../../core/table/column/column_table.hpp"
-#include "../../core/unlearner/unlearner_base.hpp"
+#include "../common/version.hpp"
+#include "../framework/push_mixable.hpp"
+#include "../framework/linear_mixable.hpp"
+#include "../storage/column_table.hpp"
+#include "../unlearner/unlearner_base.hpp"
 
 namespace jubatus {
 namespace core {
 namespace framework {
 
-typedef std::map<table::owner, uint64_t> version_clock;
+typedef std::map<storage::owner, uint64_t> version_clock;
 
 class mixable_versioned_table : public core::framework::push_mixable,
   public core::framework::linear_mixable {
  public:
-  typedef jubatus::util::lang::shared_ptr<table::column_table> model_ptr;
+  typedef jubatus::util::lang::shared_ptr<storage::column_table> model_ptr;
 
   void set_unlearner(
       jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner) {
@@ -71,7 +71,7 @@ class mixable_versioned_table : public core::framework::push_mixable,
   void pull_impl(const version_clock& vc, framework::packer&) const;
   void push_impl(const msgpack::object&);
 
-  void update_version(const table::column_table::version_t& version);
+  void update_version(const storage::column_table::version_t& version);
 
   model_ptr model_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;

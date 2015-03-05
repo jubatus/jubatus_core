@@ -28,6 +28,9 @@
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class bit_index_storage;
+}  // namespace storage
 namespace recommender {
 
 class minhash : public recommender_base {

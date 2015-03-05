@@ -22,7 +22,6 @@
 #include <utility>
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/lang/shared_ptr.h"
-#include "../table/column/column_table.hpp"
 #include "../common/type.hpp"
 #include "../framework/mixable.hpp"
 #include "../framework/model.hpp"
@@ -33,6 +32,9 @@
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}  // namespace storage
 namespace recommender {
 
 class recommender_base : public framework::model {
@@ -64,12 +66,12 @@ class recommender_base : public framework::model {
     return NULL;
   }
 
-  virtual jubatus::util::lang::shared_ptr<table::column_table> get_table() {
-    return jubatus::util::lang::shared_ptr<table::column_table>();
+  virtual jubatus::util::lang::shared_ptr<storage::column_table> get_table() {
+    return jubatus::util::lang::shared_ptr<storage::column_table>();
   }
-  virtual jubatus::util::lang::shared_ptr<const table::column_table>
+  virtual jubatus::util::lang::shared_ptr<const storage::column_table>
       get_const_table() const {
-    return jubatus::util::lang::shared_ptr<const table::column_table>();
+    return jubatus::util::lang::shared_ptr<const storage::column_table>();
   }
 
   virtual jubatus::util::lang::shared_ptr<unlearner::unlearner_base>

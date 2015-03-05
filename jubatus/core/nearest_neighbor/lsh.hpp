@@ -26,6 +26,9 @@
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}  // namespace storage
 namespace nearest_neighbor {
 
 class lsh : public bit_vector_nearest_neighbor_base {
@@ -42,17 +45,17 @@ class lsh : public bit_vector_nearest_neighbor_base {
     }
   };
   lsh(const config& conf,
-      jubatus::util::lang::shared_ptr<table::column_table> table,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
       const std::string& id);
   lsh(const config& conf,
-      jubatus::util::lang::shared_ptr<table::column_table> table,
-      std::vector<table::column_type>& schema,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
+      std::vector<storage::column_type>& schema,
       const std::string& id);
 
   virtual std::string type() const { return "lsh"; }
 
  private:
-  virtual table::bit_vector hash(const common::sfv_t& sfv) const;
+  virtual storage::bit_vector hash(const common::sfv_t& sfv) const;
 };
 
 }  // namespace nearest_neighbor

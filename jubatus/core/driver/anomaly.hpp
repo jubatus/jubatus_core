@@ -22,14 +22,18 @@
 #include <vector>
 
 #include "jubatus/util/lang/shared_ptr.h"
-#include "../anomaly/anomaly_base.hpp"
-#include "../framework/mixable.hpp"
-#include "../fv_converter/datum_to_fv_converter.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
 #include "driver.hpp"
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+class datum;
+class datum_to_fv_converter;
+}  // namespace fv_converter
+namespace anomaly {
+class anomaly_base;
+}  // namespace anomaly
 namespace driver {
 
 class anomaly : public driver_base {

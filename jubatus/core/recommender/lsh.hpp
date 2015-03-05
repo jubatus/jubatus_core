@@ -22,12 +22,19 @@
 #include <vector>
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/lang/shared_ptr.h"
-
 #include "recommender_base.hpp"
-#include "../storage/bit_index_storage.hpp"
 
 namespace jubatus {
 namespace core {
+namespace framework {
+template <typename Model, typename Diff>
+class linear_mixable_helper;
+}  // namespace framework
+namespace storage {
+class bit_index_storage;
+typedef framework::linear_mixable_helper<bit_index_storage, bit_table_t>
+    mixable_bit_index_storage;
+}  // namespace storage
 namespace recommender {
 
 class lsh : public recommender_base {

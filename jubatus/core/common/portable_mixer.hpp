@@ -17,7 +17,6 @@
 #ifndef JUBATUS_CORE_COMMON_PORTABLE_MIXER_HPP_
 #define JUBATUS_CORE_COMMON_PORTABLE_MIXER_HPP_
 
-#include <iostream>
 #include <string>
 #include <vector>
 #include "jubatus/util/math/random.h"

@@ -19,12 +19,15 @@
 
 #include <string>
 
+#include "jubatus/util/math/random.h"
 #include "bandit_base.hpp"
 #include "summation_storage.hpp"
-#include "jubatus/util/math/random.h"
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class version;
+}  // namespace storage
 namespace bandit {
 
 class softmax : public bandit_base {
@@ -55,6 +58,7 @@ class softmax : public bandit_base {
   void get_diff(diff_t& diff) const;
   bool put_diff(const diff_t& diff);
   void mix(const diff_t& lhs, diff_t& rhs) const;
+  storage::version get_version() const;
 
  private:
   double tau_;

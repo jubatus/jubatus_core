@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_CLUSTERING_GMM_CLUSTERING_METHOD_HPP_
 
 #include <vector>
+#include "../common/type.hpp"
 #include "clustering_method.hpp"
 #include "eigen_feature_mapper.hpp"
 #include "gmm.hpp"

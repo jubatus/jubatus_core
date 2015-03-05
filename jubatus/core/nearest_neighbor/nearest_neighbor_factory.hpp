@@ -21,10 +21,12 @@
 #include <string>
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../common/jsonconfig.hpp"
-#include "../table/column/column_table.hpp"
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}
 namespace nearest_neighbor {
 
 class nearest_neighbor_base;
@@ -32,7 +34,7 @@ class nearest_neighbor_base;
 jubatus::util::lang::shared_ptr<nearest_neighbor_base> create_nearest_neighbor(
     const std::string& name,
     const common::jsonconfig::config& config,
-    jubatus::util::lang::shared_ptr<table::column_table> table,
+    jubatus::util::lang::shared_ptr<storage::column_table> table,
     const std::string& id);
 
 }  // namespace nearest_neighbor

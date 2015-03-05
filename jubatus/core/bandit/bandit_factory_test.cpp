@@ -19,6 +19,8 @@
 #include <string>
 
 #include <gtest/gtest.h>
+#include "../common/jsonconfig.hpp"
+#include "bandit_base.hpp"
 
 using jubatus::util::lang::shared_ptr;
 namespace json = jubatus::util::text::json;
