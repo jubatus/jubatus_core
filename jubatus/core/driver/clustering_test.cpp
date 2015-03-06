@@ -65,7 +65,6 @@ class clustering_test
             make_fv_converter()));
   }
   void SetUp() {
-    feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
     pair<string, string> param = GetParam();
     conf_.k = 2;
     conf_.compressor_method = param.first;
