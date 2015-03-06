@@ -117,6 +117,8 @@ def options(opt):
                    help = 'Execute specified unit test')
     opt.add_option('--checkfilter', action = 'store', default = False,
                    help = 'Execute unit tests sprcified by pattern')
+    opt.add_option('--checkconcurrency', action = 'store_true', default = False,
+                   help = 'Detect concurrency error with drd')
 
 def match_filter(filt, targ):
     if isinstance(filt, str):
@@ -129,7 +131,7 @@ def match_filter(filt, targ):
 @feature('testt', 'gtest')
 @before('process_rule')
 def test_remover(self):
-    if not Options.options.check and not Options.options.checkall and self.target != Options.options.checkone and not match_filter(Options.options.checkfilter, self.target):
+    if not Options.options.check and not Options.options.checkall and not Options.options.checkconcurrency and self.target != Options.options.checkone and not match_filter(Options.options.checkfilter, self.target):
         self.meths[:] = []
 
 @feature('gtest')
@@ -223,6 +225,12 @@ class utest(Task.Task):
             (_, _, filt) = Options.options.checkfilter.partition('.')
             if filt != "":
                 self.ut_exec += ['--gtest_filter=' + filt]
+
+        if Options.options.checkconcurrency:
+            self.ut_exec.insert(0, 'valgrind')
+            self.ut_exec.insert(1, '--tool=drd')
+            self.ut_exec.insert(2, '--error-exitcode=1')
+            self.ut_exec.append('--gtest_filter=*concurrent*')
 
         cwd = getattr(self.generator, 'ut_cwd', '') or self.inputs[0].parent.abspath()
         proc = Utils.subprocess.Popen(self.ut_exec, cwd=cwd, env=fu, stderr=Utils.subprocess.PIPE, stdout=Utils.subprocess.PIPE)

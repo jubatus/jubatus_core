@@ -24,6 +24,8 @@
 #include <vector>
 #include "jubatus/util/math/random.h"
 #include "jubatus/util/data/unordered_set.h"
+#include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/concurrent/mutex.h"
 
 #include "../common/type.hpp"
 #include "../nearest_neighbor/nearest_neighbor_base.hpp"
@@ -72,7 +74,9 @@ class nearest_neighbor_classifier : public classifier_base {
   jubatus::util::data::unordered_set<std::string> labels_;
   size_t k_;
   float alpha_;
+  jubatus::util::concurrent::mutex unlearner_mutex_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
+  jubatus::util::concurrent::mutex rand_mutex_;
   jubatus::util::math::random::mtrand rand_;
 
   class unlearning_callback;

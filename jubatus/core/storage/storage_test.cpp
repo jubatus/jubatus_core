@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>
+#include "jubatus/util/concurrent/mutex.h"
 #include "local_storage.hpp"
 #include "local_storage_mixture.hpp"
 
@@ -66,8 +67,29 @@ class stub_storage : public storage_base {
       }
     }
   }
+  void get_nolock(const string& feature, feature_val1_t& ret) const {
+    map<string, map<string, val3_t> >::const_iterator hit = data_.find(feature);
+    if (hit != data_.end()) {
+      const map<string, val3_t>& f = hit->second;
+      for (map<string, val3_t>::const_iterator it = f.begin(); it != f.end();
+           ++it) {
+        ret.push_back(make_pair(it->first, val1_t(it->second.v1)));
+      }
+    }
+  }
 
   void get2(const string& feature, feature_val2_t& ret) const {
+    map<string, map<string, val3_t> >::const_iterator hit = data_.find(feature);
+    if (hit != data_.end()) {
+      const map<string, val3_t>& f = hit->second;
+      for (map<string, val3_t>::const_iterator it = f.begin(); it != f.end();
+           ++it) {
+        ret.push_back(
+            make_pair(it->first, val2_t(it->second.v1, it->second.v2)));
+      }
+    }
+  }
+  void get2_nolock(const string& feature, feature_val2_t& ret) const {
     map<string, map<string, val3_t> >::const_iterator hit = data_.find(feature);
     if (hit != data_.end()) {
       const map<string, val3_t>& f = hit->second;
@@ -89,8 +111,25 @@ class stub_storage : public storage_base {
       }
     }
   }
+  void get3_nolock(const string& feature, feature_val3_t& ret) const {
+    map<string, map<string, val3_t> >::const_iterator hit = data_.find(feature);
+    if (hit != data_.end()) {
+      const map<string, val3_t>& f = hit->second;
+      for (map<string, val3_t>::const_iterator it = f.begin(); it != f.end();
+           ++it) {
+        ret.push_back(*it);
+      }
+    }
+  }
 
   void set(
+      const std::string& feature,
+      const std::string& klass,
+      const val1_t& w) {
+    data_[feature][klass] = val3_t(w, 0, 0);
+    labels_.insert(klass);
+  }
+  void set_nolock(
       const std::string& feature,
       const std::string& klass,
       const val1_t& w) {
@@ -105,6 +144,13 @@ class stub_storage : public storage_base {
     data_[feature][klass] = val3_t(w.v1, w.v2, 0);
     labels_.insert(klass);
   }
+  void set2_nolock(
+      const std::string& feature,
+      const std::string& klass,
+      const val2_t& w) {
+    data_[feature][klass] = val3_t(w.v1, w.v2, 0);
+    labels_.insert(klass);
+  }
 
   void set3(
       const std::string& feature,
@@ -112,6 +158,17 @@ class stub_storage : public storage_base {
       const val3_t& w) {
     data_[feature][klass] = w;
     labels_.insert(klass);
+  }
+  void set3_nolock(
+      const std::string& feature,
+      const std::string& klass,
+      const val3_t& w) {
+    data_[feature][klass] = w;
+    labels_.insert(klass);
+  }
+
+  util::concurrent::mutex& get_lock() const {
+    return mutex_;
   }
 
   void pack(framework::packer& packer) const {
@@ -131,6 +188,18 @@ class stub_storage : public storage_base {
   }
 
   bool delete_label(const string& name) {
+    if (labels_.find(name) == labels_.end()) {
+      return false;
+    }
+    for (map<string, map<string, val3_t> >::iterator it = data_.begin();
+         it != data_.end(); ++it) {
+      it->second.erase(name);
+    }
+    labels_.erase(name);
+    return true;
+  }
+
+  bool delete_label_nolock(const string& name) {
     if (labels_.find(name) == labels_.end()) {
       return false;
     }
@@ -188,6 +257,7 @@ class stub_storage : public storage_base {
   std::string type() const {
     return "stub_storage";
   }
+  mutable util::concurrent::mutex mutex_;
 };
 
 }  // namespace storage

@@ -21,6 +21,7 @@
 
 #include <gtest/gtest.h>
 
+#include "jubatus/util/concurrent/mutex.h"
 #include "linear_function_mixer.hpp"
 #include "../storage/storage_base.hpp"
 
@@ -36,9 +37,15 @@ class storage_mock_base : public storage::storage_base {
  public:
   void get(const std::string& feature, feature_val1_t& ret) const {
   }
+  void get_nolock(const std::string& feature, feature_val1_t& ret) const {
+  }
   void get2(const std::string& feature, feature_val2_t& ret) const {
   }
+  void get2_nolock(const std::string& feature, feature_val2_t& ret) const {
+  }
   void get3(const std::string& feature, feature_val3_t& ret) const {
+  }
+  void get3_nolock(const std::string& feature, feature_val3_t& ret) const {
   }
 
   void inp(const common::sfv_t& sfv, map_feature_val1_t& ret) const {
@@ -49,12 +56,27 @@ class storage_mock_base : public storage::storage_base {
       const std::string& klass,
       const val1_t& w) {
   }
+  void set_nolock(
+      const std::string& feature,
+      const std::string& klass,
+      const val1_t& w) {
+  }
   void set2(
       const std::string& feature,
       const std::string& klass,
       const val2_t& w) {
   }
+  void set2_nolock(
+      const std::string& feature,
+      const std::string& klass,
+      const val2_t& w) {
+  }
   void set3(
+      const std::string& feature,
+      const std::string& klass,
+      const val3_t& w) {
+  }
+  void set3_nolock(
       const std::string& feature,
       const std::string& klass,
       const val3_t& w) {
@@ -83,6 +105,10 @@ class storage_mock_base : public storage::storage_base {
       const std::string& dec_class) {
   }
 
+  util::concurrent::mutex& get_lock() const {
+    return mutex_;
+  }
+
   virtual void get_diff(diff_t&) const = 0;
 
   vector<string> get_labels() const {
@@ -98,6 +124,9 @@ class storage_mock_base : public storage::storage_base {
   bool delete_label(const std::string& name) {
     return true;
   }
+  bool delete_label_nolock(const std::string& name) {
+    return true;
+  }
 
   virtual void clear() {
   }
@@ -109,6 +138,7 @@ class storage_mock_base : public storage::storage_base {
   std::string type() const {
     return "";
   }
+  mutable util::concurrent::mutex mutex_;
 };
 
 class storage_mock_1 : public storage_mock_base {

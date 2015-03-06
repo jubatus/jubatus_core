@@ -24,6 +24,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include "jubatus/util/concurrent/lock.h"
 #include "jubatus/util/lang/bind.h"
 
 #include "../common/exception.hpp"
@@ -174,11 +175,12 @@ float linear_classifier::calc_margin_and_variance(
   float margin = calc_margin(sfv, label, incorrect_label);
   var = 0.f;
 
+  util::concurrent::scoped_lock lk(storage_->get_lock());
   for (size_t i = 0; i < sfv.size(); ++i) {
     const string& feature = sfv[i].first;
     const float val = sfv[i].second;
     feature_val2_t weight_covars;
-    storage_->get2(feature, weight_covars);
+    storage_->get2_nolock(feature, weight_covars);
     float label_covar = 1.f;
     float incorrect_label_covar = 1.f;
     for (size_t j = 0; j < weight_covars.size(); ++j) {
@@ -243,7 +245,10 @@ bool linear_classifier::delete_label(const std::string& label) {
  * Callback function to delete the label via unlearner.
  */
 bool linear_classifier::unlearn_label(const std::string& label) {
-  return storage_->delete_label(label);
+  // this method must be called via touch() function.
+  // touch() must be done with holding lock
+  // so this function must not get lock
+  return storage_->delete_label_nolock(label);
 }
 
 }  // namespace classifier

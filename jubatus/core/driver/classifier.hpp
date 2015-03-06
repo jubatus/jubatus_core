@@ -50,6 +50,7 @@ class classifier : public driver_base {
   virtual ~classifier();
 
   void train(const std::string&, const fv_converter::datum&);
+
   jubatus::core::classifier::classify_result classify(
       const fv_converter::datum& data) const;
 

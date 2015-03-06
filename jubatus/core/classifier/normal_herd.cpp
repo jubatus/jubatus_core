@@ -20,6 +20,7 @@
 #include <cmath>
 #include <string>
 
+#include "jubatus/util/concurrent/lock.h"
 #include "classifier_util.hpp"
 #include "../common/exception.hpp"
 
@@ -66,11 +67,12 @@ void normal_herd::update(
     float variance,
     const string& pos_label,
     const string& neg_label) {
+  util::concurrent::scoped_lock lk(storage_->get_lock());
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
     float val = it->second;
     storage::feature_val2_t ret;
-    storage_->get2(feature, ret);
+    storage_->get2_nolock(feature, ret);
 
     storage::val2_t pos_val(0.f, 1.f);
     storage::val2_t neg_val(0.f, 1.f);
@@ -80,7 +82,7 @@ void normal_herd::update(
     float val_covariance_neg = val * neg_val.v2;
 
     const float C = config_.regularization_weight;
-    storage_->set2(
+    storage_->set2_nolock(
         feature,
         pos_label,
         storage::val2_t(
@@ -91,7 +93,7 @@ void normal_herd::update(
                 / ((1.f / pos_val.v2) + (2 * C + C * C * variance)
                     * val * val)));
     if (neg_label != "") {
-      storage_->set2(
+      storage_->set2_nolock(
           feature,
           neg_label,
           storage::val2_t(
