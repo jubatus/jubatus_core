@@ -64,7 +64,7 @@ class inverted_index : public recommender_base {
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
 
- private:
+ protected:
   jubatus::util::lang::shared_ptr<storage::mixable_inverted_index_storage>
       mixable_storage_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
