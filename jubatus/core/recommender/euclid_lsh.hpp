@@ -36,7 +36,7 @@ namespace storage {
 class lsh_index_storage;
 struct lsh_entry;
 typedef jubatus::util::data::unordered_map<std::string, lsh_entry>
-  lsh_master_table_t;
+    lsh_master_table_t;
 typedef framework::linear_mixable_helper<lsh_index_storage, lsh_master_table_t>
     mixable_lsh_index_storage;
 }  // namespace storage
