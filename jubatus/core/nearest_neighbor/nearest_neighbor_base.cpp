@@ -20,6 +20,7 @@
 
 #include "exception.hpp"
 #include "nearest_neighbor_base.hpp"
+#include "../storage/column_table.hpp"
 
 using std::pair;
 using std::string;
@@ -31,7 +32,7 @@ namespace core {
 namespace nearest_neighbor {
 
 nearest_neighbor_base::nearest_neighbor_base(
-    shared_ptr<table::column_table> table,
+    shared_ptr<storage::column_table> table,
     const std::string& id)
     : my_id_(id),
       mixable_table_(new framework::mixable_versioned_table) {
@@ -40,7 +41,7 @@ nearest_neighbor_base::nearest_neighbor_base(
 
 void nearest_neighbor_base::get_all_row_ids(vector<string>& ids) const {
   vector<string> ret;
-  shared_ptr<const table::column_table> table = get_const_table();
+  shared_ptr<const storage::column_table> table = get_const_table();
   ret.reserve(table->size());
   for (size_t i = 0; i < table->size(); ++i) {
     ret.push_back(table->get_key(i));

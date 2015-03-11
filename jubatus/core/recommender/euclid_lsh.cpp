@@ -27,6 +27,7 @@
 #include "../common/hash.hpp"
 #include "../storage/lsh_util.hpp"
 #include "../storage/lsh_vector.hpp"
+#include "../storage/lsh_index_storage.hpp"
 
 using std::string;
 using std::vector;

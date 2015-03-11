@@ -56,6 +56,7 @@ class exp3 : public bandit_base {
   void get_diff(diff_t& diff) const;
   bool put_diff(const diff_t& diff);
   void mix(const diff_t& lhs, diff_t& rhs) const;
+  storage::version get_version() const;
 
  private:
   double gamma_;

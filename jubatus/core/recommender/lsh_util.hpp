@@ -24,11 +24,11 @@
 
 namespace jubatus {
 namespace core {
-
 namespace storage {
-class bit_vector;
+template <typename T>
+class bit_vector_base;
+typedef bit_vector_base<uint64_t> bit_vector;
 }  // namespace storage
-
 namespace recommender {
 
 void generate_random_vector(size_t dim, uint32_t seed, std::vector<float>& v);

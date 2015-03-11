@@ -26,8 +26,6 @@
 #include "../framework/model.hpp"
 #include "../common/type.hpp"
 #include "../common/version.hpp"
-#include "counter.hpp"
-#include "datum.hpp"
 #include "keyword_weights.hpp"
 
 namespace jubatus {

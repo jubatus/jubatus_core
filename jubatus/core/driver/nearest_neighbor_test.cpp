@@ -14,6 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include "nearest_neighbor.hpp"
 #include <string>
 #include <utility>
 #include <vector>
@@ -28,7 +29,6 @@
 #include "../nearest_neighbor/nearest_neighbor.hpp"
 #include "../nearest_neighbor/nearest_neighbor_factory.hpp"
 #include "../unlearner/unlearner.hpp"
-#include "nearest_neighbor.hpp"
 #include "test_util.hpp"
 
 using std::vector;
@@ -45,7 +45,7 @@ using jubatus::util::text::json::json_float;
 using jubatus::core::nearest_neighbor::euclid_lsh;
 using jubatus::core::nearest_neighbor::lsh;
 using jubatus::core::nearest_neighbor::minhash;
-using jubatus::core::table::column_table;
+using jubatus::core::storage::column_table;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::nearest_neighbor::nearest_neighbor_base;
 using jubatus::core::unlearner::unlearner_base;
@@ -102,7 +102,7 @@ create_nearest_neighbor_bases() {
     pattern.push_back(make_pair("minhash", i));
   }
   for (size_t i = 0; i < pattern.size(); ++i) {
-    shared_ptr<core::table::column_table> table(new core::table::column_table);
+    shared_ptr<column_table> table(new column_table);
 
     json jsconf(new json_object);
     jsconf["hash_num"] = new json_integer(pattern[i].second);

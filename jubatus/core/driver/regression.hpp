@@ -22,14 +22,19 @@
 #include <utility>
 
 #include "jubatus/util/lang/shared_ptr.h"
-#include "../regression/regression_base.hpp"
-#include "../framework/mixable.hpp"
-#include "../fv_converter/datum_to_fv_converter.hpp"
+#include "../framework/linear_function_mixer.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
 #include "driver.hpp"
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+class datum;
+class datum_to_fv_converter;
+}  // namespace fv_converter
+namespace regression {
+class regression_base;
+}  // namespace regression
 namespace driver {
 
 class regression : public driver_base {

@@ -22,6 +22,8 @@
 #ifdef JUBATUS_USE_EIGEN
 #include "gmm_clustering_method.hpp"
 #endif
+#include "clustering_config.hpp"
+#include "clustering_method.hpp"
 
 using jubatus::util::lang::shared_ptr;
 

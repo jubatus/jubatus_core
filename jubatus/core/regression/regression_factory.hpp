@@ -18,7 +18,6 @@
 #define JUBATUS_CORE_REGRESSION_REGRESSION_FACTORY_HPP_
 
 #include <string>
-#include "jubatus/util/text/json.h"
 #include "jubatus/util/lang/shared_ptr.h"
 
 namespace jubatus {

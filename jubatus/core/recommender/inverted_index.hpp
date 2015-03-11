@@ -26,6 +26,10 @@
 
 namespace jubatus {
 namespace core {
+namespace framework {
+template <typename Model, typename Diff>
+class linear_mixable_helper;
+}  // namespace framework
 namespace recommender {
 
 class inverted_index : public recommender_base {

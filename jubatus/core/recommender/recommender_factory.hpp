@@ -19,15 +19,12 @@
 
 #include <string>
 #include "jubatus/util/lang/shared_ptr.h"
-#include "jubatus/util/text/json.h"
 
 namespace jubatus {
 namespace core {
 namespace common {
 namespace jsonconfig {
-
 class config;
-
 }  // namespace jsonconfig
 }  // namespace common
 

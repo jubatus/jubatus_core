@@ -22,6 +22,8 @@
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../common/exception.hpp"
+#include "../nearest_neighbor/nearest_neighbor_base.hpp"
+#include "../unlearner/unlearner.hpp"
 
 using jubatus::util::lang::shared_ptr;
 
@@ -138,12 +140,12 @@ void nearest_neighbor_recommender::unpack(msgpack::object o) {
   nearest_neighbor_engine_->unpack(o.via.array.ptr[1]);
 }
 
-jubatus::util::lang::shared_ptr<table::column_table>
+jubatus::util::lang::shared_ptr<storage::column_table>
 nearest_neighbor_recommender::get_table() {
   return nearest_neighbor_engine_->get_table();
 }
 
-jubatus::util::lang::shared_ptr<const table::column_table>
+jubatus::util::lang::shared_ptr<const storage::column_table>
 nearest_neighbor_recommender::get_const_table() const {
   return nearest_neighbor_engine_->get_const_table();
 }

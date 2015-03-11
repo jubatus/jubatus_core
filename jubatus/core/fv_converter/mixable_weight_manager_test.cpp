@@ -22,6 +22,7 @@
 #include <gtest/gtest.h>
 #include "jubatus/util/lang/shared_ptr.h"
 #include "mixable_weight_manager.hpp"
+#include "datum.hpp"
 
 using std::make_pair;
 using std::stringstream;

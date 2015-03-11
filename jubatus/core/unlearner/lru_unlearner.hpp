@@ -25,15 +25,13 @@
 #include "jubatus/util/data/unordered_set.h"
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
-#include "../fv_converter/key_matcher.hpp"
 #include "unlearner_base.hpp"
-
-using jubatus::util::lang::shared_ptr;
-using jubatus::util::data::unordered_set;
-using jubatus::core::fv_converter::key_matcher;
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+class key_matcher;
+}
 namespace unlearner {
 
 // Unlearner based on Least Recently Used algorithm.
@@ -75,9 +73,10 @@ class lru_unlearner : public unlearner_base {
 
   lru lru_;
   entry_map entry_map_;
-  unordered_set<std::string> sticky_ids_;
+  jubatus::util::data::unordered_set<std::string> sticky_ids_;
   size_t max_size_;
-  shared_ptr<key_matcher> sticky_matcher_;
+  jubatus::util::lang::shared_ptr<jubatus::core::fv_converter::key_matcher>
+      sticky_matcher_;
 };
 
 }  // namespace unlearner

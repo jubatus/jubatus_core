@@ -20,8 +20,8 @@
 #include "jubatus/util/data/unordered_set.h"
 
 // TODO(kmaehashi) move key_matcher to common
+#include "../fv_converter/key_matcher.hpp"
 #include "../fv_converter/key_matcher_factory.hpp"
-
 #include "../common/exception.hpp"
 
 using jubatus::util::data::unordered_set;

@@ -24,15 +24,22 @@
 #include "jubatus/util/lang/shared_ptr.h"
 
 #include "../framework/mixable.hpp"
-#include "../fv_converter/datum_to_fv_converter.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
-#include "../nearest_neighbor/nearest_neighbor_base.hpp"
-#include "../table/column/column_table.hpp"
 #include "../unlearner/unlearner_base.hpp"
 #include "driver.hpp"
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+class datum;
+class datum_to_fv_converter;
+}  // namespace fv_converter
+namespace storage {
+class column_table;
+}  // namespace storage
+namespace nearest_neighbor {
+class nearest_neighbor_base;
+}  // namespace nearest_neighbor
 namespace driver {
 
 class nearest_neighbor : public driver_base {
@@ -50,14 +57,9 @@ class nearest_neighbor : public driver_base {
         fv_converter::datum_to_fv_converter> converter,
     jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner);
 
-  jubatus::util::lang::shared_ptr<table::column_table> get_table() {
-    return nn_->get_table();
-  }
-
-  jubatus::util::lang::shared_ptr<const table::column_table>
-  get_const_table() const {
-    return nn_->get_const_table();
-  }
+  jubatus::util::lang::shared_ptr<storage::column_table> get_table();
+  jubatus::util::lang::shared_ptr<const storage::column_table>
+  get_const_table() const;
 
   void set_row(const std::string& id, const fv_converter::datum& datum);
 

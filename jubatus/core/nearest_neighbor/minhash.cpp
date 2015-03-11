@@ -14,6 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include "minhash.hpp"
 #include <cfloat>
 #include <cmath>
 #include <map>
@@ -21,16 +22,15 @@
 #include <vector>
 
 #include "../common/hash.hpp"
-#include "minhash.hpp"
 
 using std::string;
 using std::map;
 using std::vector;
 using std::pair;
 using jubatus::util::lang::lexical_cast;
-using jubatus::core::table::column_table;
-using jubatus::core::table::bit_vector;
-using jubatus::core::table::column_type;
+using jubatus::core::storage::column_table;
+using jubatus::core::storage::bit_vector;
+using jubatus::core::storage::column_type;
 
 
 namespace jubatus {
@@ -102,7 +102,7 @@ float calc_hash(uint64_t a, uint64_t b, float val) {
 
 minhash::minhash(
     const config& conf,
-    jubatus::util::lang::shared_ptr<table::column_table> table,
+    jubatus::util::lang::shared_ptr<column_table> table,
     const std::string& id)
     : bit_vector_nearest_neighbor_base(conf.hash_num, table, id) {
 
@@ -114,7 +114,7 @@ minhash::minhash(
 
 minhash::minhash(
     const config& conf,
-    jubatus::util::lang::shared_ptr<table::column_table> table,
+    jubatus::util::lang::shared_ptr<column_table> table,
     vector<column_type>& schema,
     const std::string& id)
     : bit_vector_nearest_neighbor_base(conf.hash_num, table, schema, id) {

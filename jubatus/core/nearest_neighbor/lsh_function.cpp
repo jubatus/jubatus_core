@@ -17,10 +17,12 @@
 #include <vector>
 #include "jubatus/util/math/random.h"
 #include "../common/hash.hpp"
+#include "../common/type.hpp"
+#include "../storage/bit_vector.hpp"
 #include "lsh_function.hpp"
 
 using std::vector;
-using jubatus::core::table::bit_vector;
+using jubatus::core::storage::bit_vector;
 
 namespace jubatus {
 namespace core {

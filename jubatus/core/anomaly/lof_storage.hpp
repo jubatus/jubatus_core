@@ -32,11 +32,12 @@
 #include "../common/type.hpp"
 #include "../common/unordered_map.hpp"
 #include "../framework/mixable_helper.hpp"
-#include "../recommender/recommender_base.hpp"
-#include "../recommender/recommender_factory.hpp"
 
 namespace jubatus {
 namespace core {
+namespace recommender {
+class recommender_base;
+}  // namespace recommender
 namespace anomaly {
 
 struct lof_entry {

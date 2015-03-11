@@ -20,7 +20,8 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/lang/bind.h"
-
+#include "../clustering/clustering.hpp"
+#include "../fv_converter/datum_to_fv_converter.hpp"
 #include "../common/vector_util.hpp"
 #include "../fv_converter/revert.hpp"
 #include "../fv_converter/weight_manager.hpp"

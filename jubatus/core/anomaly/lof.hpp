@@ -20,7 +20,6 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
-#include "jubatus/util/text/json.h"
 #include "../recommender/recommender_base.hpp"
 #include "anomaly_base.hpp"
 #include "lof_storage.hpp"

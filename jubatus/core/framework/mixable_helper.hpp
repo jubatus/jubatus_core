@@ -17,7 +17,6 @@
 #ifndef JUBATUS_CORE_FRAMEWORK_MIXABLE_HELPER_HPP_
 #define JUBATUS_CORE_FRAMEWORK_MIXABLE_HELPER_HPP_
 
-#include <iostream>
 #include <string>
 #include <vector>
 

@@ -17,8 +17,6 @@
 #ifndef JUBATUS_CORE_CLUSTERING_STORAGE_HPP_
 #define JUBATUS_CORE_CLUSTERING_STORAGE_HPP_
 
-#include <fstream>
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>

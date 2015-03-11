@@ -23,7 +23,6 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <iostream>
 #include <algorithm>
 #include "jubatus/util/math/random.h"
 

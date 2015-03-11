@@ -23,6 +23,7 @@
 #include <cmath>
 #include "jubatus/util/lang/cast.h"
 #include "../storage/fixed_size_heap.hpp"
+#include "../storage/column_table.hpp"
 #include "lsh_function.hpp"
 
 using std::map;
@@ -31,12 +32,12 @@ using std::make_pair;
 using std::string;
 using std::vector;
 using jubatus::util::lang::lexical_cast;
-using jubatus::core::table::column_table;
-using jubatus::core::table::column_type;
-using jubatus::core::table::owner;
-using jubatus::core::table::bit_vector;
-using jubatus::core::table::const_bit_vector_column;
-using jubatus::core::table::const_float_column;
+using jubatus::core::storage::column_table;
+using jubatus::core::storage::column_type;
+using jubatus::core::storage::owner;
+using jubatus::core::storage::bit_vector;
+using jubatus::core::storage::const_bit_vector_column;
+using jubatus::core::storage::const_float_column;
 
 namespace jubatus {
 namespace core {

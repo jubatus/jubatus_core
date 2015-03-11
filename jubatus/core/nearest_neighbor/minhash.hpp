@@ -17,15 +17,22 @@
 #ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_MINHASH_HPP_
 #define JUBATUS_CORE_NEAREST_NEIGHBOR_MINHASH_HPP_
 
+#include <stdint.h>
 #include <map>
 #include <string>
 #include <vector>
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "bit_vector_nearest_neighbor_base.hpp"
+#include "../common/type.hpp"
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+template <typename bit_base> class bit_vector_base;
+typedef bit_vector_base<uint64_t> bit_vector;
+}
 namespace nearest_neighbor {
 
 class minhash : public bit_vector_nearest_neighbor_base {
@@ -45,12 +52,12 @@ class minhash : public bit_vector_nearest_neighbor_base {
 
   minhash(
       const config& conf,
-      jubatus::util::lang::shared_ptr<table::column_table> table,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
       const std::string& id);
   minhash(
       const config& conf,
-      jubatus::util::lang::shared_ptr<table::column_table> table,
-      std::vector<table::column_type>& schema,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
+      std::vector<storage::column_type>& schema,
       const std::string& id);
 
   virtual std::string type() const {
@@ -58,7 +65,7 @@ class minhash : public bit_vector_nearest_neighbor_base {
   }
 
  private:
-  virtual table::bit_vector hash(const common::sfv_t& sfv) const;
+  virtual storage::bit_vector hash(const common::sfv_t& sfv) const;
 };
 
 }  // namespace nearest_neighbor

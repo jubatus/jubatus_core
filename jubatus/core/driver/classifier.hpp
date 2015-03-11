@@ -22,14 +22,19 @@
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../classifier/classifier_type.hpp"
-#include "../classifier/classifier_base.hpp"
 #include "../framework/mixable.hpp"
-#include "../fv_converter/datum_to_fv_converter.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
 #include "driver.hpp"
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+class datum;
+class datum_to_fv_converter;
+}  // namespace fv_converter
+namespace classifier {
+class classifier_base;
+}  // namespace classifier
 namespace driver {
 
 class classifier : public driver_base {

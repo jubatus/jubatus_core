@@ -17,7 +17,6 @@
 #ifndef JUBATUS_CORE_STORAGE_STORAGE_BASE_HPP_
 #define JUBATUS_CORE_STORAGE_STORAGE_BASE_HPP_
 
-#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
@@ -25,6 +24,7 @@
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
 #include "storage_type.hpp"
+#include "storage_exception.hpp"
 #include "../common/version.hpp"
 #include "../common/exception.hpp"
 #include "../common/type.hpp"
@@ -90,21 +90,6 @@ class storage_base : public framework::model {
   virtual bool delete_label(const std::string& label) = 0;
 
   virtual std::string type() const = 0;
-};
-
-class storage_exception
-    : public common::exception::jubaexception<storage_exception> {
- public:
-  explicit storage_exception(const std::string& msg)
-      : msg(msg) {
-  }
-  ~storage_exception() throw () {
-  }
-  const char* what() const throw () {
-    return msg.c_str();
-  }
- private:
-  std::string msg;
 };
 
 }  // namespace storage
