@@ -26,9 +26,6 @@
 
 namespace jubatus {
 namespace core {
-namespace storage {
-class version;
-}  // namespace storage
 namespace bandit {
 
 class exp3 : public bandit_base {

@@ -20,7 +20,6 @@
 #include <string>
 
 #include "arm_info.hpp"
-#include "../common/version.hpp"
 
 namespace msgpack {
 template <typename T>

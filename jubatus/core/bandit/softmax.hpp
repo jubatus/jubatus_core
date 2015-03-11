@@ -25,9 +25,6 @@
 
 namespace jubatus {
 namespace core {
-namespace storage {
-class version;
-}  // namespace storage
 namespace bandit {
 
 class softmax : public bandit_base {
