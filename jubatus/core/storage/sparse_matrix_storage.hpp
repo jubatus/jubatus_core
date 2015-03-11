@@ -22,6 +22,7 @@
 #include <vector>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/concurrent/mutex.h"
 #include "../common/key_manager.hpp"
 #include "../common/unordered_map.hpp"
 #include "../framework/model.hpp"
@@ -39,18 +40,29 @@ class sparse_matrix_storage : public framework::model {
   sparse_matrix_storage& operator =(const sparse_matrix_storage&);
 
   void set(const std::string& row, const std::string& column, float val);
+  void set_nolock(const std::string& row, const std::string& column, float val);
   void set_row(
+      const std::string& row,
+      const std::vector<std::pair<std::string, float> >& columns);
+  void set_row_nolock(
       const std::string& row,
       const std::vector<std::pair<std::string, float> >& columns);
 
   float get(const std::string& row, const std::string& column) const;
+  float get_nolock(const std::string& row, const std::string& column) const;
   void get_row(
+      const std::string& row,
+      std::vector<std::pair<std::string, float> >& columns) const;
+  void get_row_nolock(
       const std::string& row,
       std::vector<std::pair<std::string, float> >& columns) const;
 
   float calc_l2norm(const std::string& row) const;
+  float calc_l2norm_nolock(const std::string& row) const;
   void remove(const std::string& row, const std::string& column);
+  void remove_nolock(const std::string& row, const std::string& column);
   void remove_row(const std::string& row);
+  void remove_row_nolock(const std::string& row);
   void get_all_row_ids(std::vector<std::string>& ids) const;
   void clear();
 
@@ -58,10 +70,15 @@ class sparse_matrix_storage : public framework::model {
     return storage::version();
   }
 
+  util::concurrent::mutex& get_mutex() const {
+    return mutex_;
+  }
+
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
 
  private:
+  mutable util::concurrent::mutex mutex_;
   tbl_t tbl_;
   common::key_manager column2id_;
   storage::version version_;

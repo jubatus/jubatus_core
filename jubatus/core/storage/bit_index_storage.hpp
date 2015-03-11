@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/concurrent/mutex.h"
 #include "../common/key_manager.hpp"
 #include "../common/unordered_map.hpp"
 #include "../framework/mixable_helper.hpp"
@@ -38,8 +39,11 @@ class bit_index_storage : public framework::model {
   ~bit_index_storage();
 
   void set_row(const std::string& row, const bit_vector& bv);
+  void set_row_nolock(const std::string& row, const bit_vector& bv);
   void get_row(const std::string& row, bit_vector& bv) const;
+  void get_row_nolock(const std::string& row, bit_vector& bv) const;
   void remove_row(const std::string& row);
+  void remove_row_nolock(const std::string& row);
   void clear();
   void get_all_row_ids(std::vector<std::string>& ids) const;
 
@@ -52,6 +56,10 @@ class bit_index_storage : public framework::model {
     return storage::version();
   }
 
+  util::concurrent::mutex& get_mutex() const {
+    return mutex_;
+  }
+
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
 
@@ -62,6 +70,7 @@ class bit_index_storage : public framework::model {
   MSGPACK_DEFINE(bitvals_, bitvals_diff_);
 
  private:
+  mutable util::concurrent::mutex mutex_;
   bit_table_t bitvals_;
   bit_table_t bitvals_diff_;
 };

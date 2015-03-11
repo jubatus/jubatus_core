@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "jubatus/util/concurrent/lock.h"
 #include "../common/exception.hpp"
 #include "../common/vector_util.hpp"
 #include "../storage/inverted_index_storage.hpp"
@@ -83,8 +84,9 @@ void inverted_index::clear_row(const std::string& id) {
 void inverted_index::update_row(const std::string& id, const sfv_diff_t& diff) {
   orig_.set_row(id, diff);
   storage::inverted_index_storage& inv = *mixable_storage_->get_model();
+  util::concurrent::scoped_lock lk(inv.get_mutex());
   for (size_t i = 0; i < diff.size(); ++i) {
-    inv.set(diff[i].first, id, diff[i].second);
+    inv.set_nolock(diff[i].first, id, diff[i].second);
   }
 }
 

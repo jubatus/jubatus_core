@@ -21,8 +21,12 @@
 
 #include <gtest/gtest.h>
 
+#include "jubatus/util/concurrent/thread.h"
 #include "jubatus/util/lang/cast.h"
 #include "jubatus/util/lang/shared_ptr.h"
+#include "jubatus/util/lang/function.h"
+#include "jubatus/util/lang/bind.h"
+#include "jubatus/util/math/random.h"
 #include "../common/jsonconfig.hpp"
 
 #include "../fv_converter/datum.hpp"
@@ -50,6 +54,11 @@ using jubatus::util::text::json::json_integer;
 using jubatus::util::text::json::json_string;
 using jubatus::util::text::json::json_float;
 using jubatus::util::lang::lexical_cast;
+using jubatus::util::concurrent::thread;
+using jubatus::util::lang::function;
+using jubatus::util::lang::bind;
+using jubatus::util::lang::_1;
+using jubatus::util::lang::_2;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::recommender::recommender_base;
 using jubatus::core::storage::column_table;
@@ -158,6 +167,157 @@ TEST_P(nn_recommender_test, update) {
 INSTANTIATE_TEST_CASE_P(nn_recommender_test_instance,
     nn_recommender_test,
     testing::ValuesIn(create_recommender_bases()));
+
+datum make_datum(const string& key, const string& vec) {
+  datum d;
+  d.string_values_.push_back(make_pair(key, vec));
+  return d;
+}
+
+void make_random_data(
+    jubatus::util::math::random::mtrand& rand,
+    vector<pair<string, datum> >& data,
+    size_t size) {
+  for (size_t i = 0; i < size; ++i) {
+    string payload;
+    for (size_t j = 0; j < 20; ++j) {
+      payload += lexical_cast<string>(rand() % 100) + " ";
+    }
+    data.push_back(make_pair("key", make_datum("str", payload)));
+  }
+}
+
+class concurrent_recommender_test
+    : public ::testing::TestWithParam<
+        shared_ptr<core::recommender::recommender_base> > {
+ protected:
+  void SetUp() {
+    recommender_.reset(new driver::recommender(
+          jubatus::util::lang::shared_ptr<core::recommender::recommender_base>(
+            new core::recommender::inverted_index),
+          make_tf_idf_fv_converter()));
+  }
+
+  void TearDown() {
+    recommender_.reset();
+  }
+
+  jubatus::util::lang::shared_ptr<core::driver::recommender> recommender_;
+};
+
+vector<shared_ptr<recommender_base> >
+create_recommender_bases_subset() {
+  const std::string id("my_id");
+  vector<shared_ptr<recommender_base> > recommenders;
+
+  {
+    common::jsonconfig::config conf;
+    recommenders.push_back(
+        core::recommender::recommender_factory::create_recommender(
+            "inverted_index",
+            conf,
+            ""));
+  }
+
+  vector<pair<string, int> > pattern;
+  pattern.push_back(make_pair("lsh", 2048));
+  pattern.push_back(make_pair("euclid_lsh", 2048));
+  pattern.push_back(make_pair("minhash", 2048));
+
+  for (size_t i = 0; i < pattern.size(); ++i) {
+    shared_ptr<core::table::column_table> table(new core::table::column_table);
+
+    json jsconf(new json_object);
+    json method_param(new json_object);
+    method_param["hash_num"] = new json_integer(pattern[i].second);
+    jsconf["parameter"] = method_param;
+    jsconf["method"] = new json_string(pattern[i].first);
+    common::jsonconfig::config conf(jsconf);
+    recommenders.push_back(
+        core::recommender::recommender_factory::create_recommender(
+            "nearest_neighbor_recommender",
+            conf,
+            id));
+  }
+
+  return recommenders;
+}
+
+void update_row_task(int thread_id,
+                     int num,
+                     shared_ptr<driver::recommender> target) {
+  jubatus::util::math::random::mtrand rand;
+  vector<pair<string, datum> > data;
+  make_random_data(rand, data, num);
+  for (int i = 0; i < num; ++i) {
+    target->update_row(lexical_cast<string>(thread_id) +
+                       "|" +
+                       lexical_cast<string>(num),
+                       data[i].second);
+  }
+}
+
+void clear_row_task(int thread_id,
+                     int num,
+                     shared_ptr<driver::recommender> target) {
+  jubatus::util::math::random::mtrand rand;
+  for (int i = 0; i < num; ++i) {
+    target->clear_row(lexical_cast<string>(thread_id) +
+                       "|" +
+                       lexical_cast<string>(num));
+  }
+}
+
+void similar_row_from_datum_task(int thread_id,
+                                 int num,
+                                 shared_ptr<driver::recommender> target) {
+  jubatus::util::math::random::mtrand rand;
+  vector<pair<string, datum> > data;
+  make_random_data(rand, data, num);
+
+  for (int i = 0; i < num; ++i) {
+    target->similar_row_from_datum(data[i].second, 10);
+  }
+}
+
+TEST_P(concurrent_recommender_test, update_update) {
+  thread t0(bind(update_row_task, 0, 100, recommender_));
+  thread t1(bind(update_row_task, 1, 100, recommender_));
+  t0.start();
+  t1.start();
+  t0.join();
+  t1.join();
+}
+
+TEST_P(concurrent_recommender_test, update_clear) {
+  thread t0(bind(update_row_task, 0, 200, recommender_));
+  thread t1(bind(clear_row_task, 0, 200, recommender_));  // on purpose
+  t0.start();
+  t1.start();
+  t1.sleep(0.001);  // delete start a bit later
+  t0.join();
+  t1.join();
+}
+
+TEST_P(concurrent_recommender_test, update_clear_similar) {
+  thread t0(bind(update_row_task, 0, 200, recommender_));
+  thread t1(bind(clear_row_task, 0, 200, recommender_));  // on purpose
+  thread t2(bind(similar_row_from_datum_task, 1, 200, recommender_));
+  t0.start();
+  t1.start();
+  t2.start();
+  t1.sleep(0.001);
+  t0.join();
+  t1.join();
+  t2.join();
+}
+
+
+INSTANTIATE_TEST_CASE_P(concurrent_recommender_test_instance,
+                        concurrent_recommender_test,
+                        testing::ValuesIn(create_recommender_bases_subset()));
+
+
 }  // namespace driver
 }  // namespace core
 }  // namespace jubatus

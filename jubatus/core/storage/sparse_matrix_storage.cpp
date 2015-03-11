@@ -22,6 +22,7 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/data/unordered_set.h"
+#include "jubatus/util/concurrent/lock.h"
 
 using std::istream;
 using std::ostream;
@@ -51,10 +52,25 @@ void sparse_matrix_storage::set(
     const string& row,
     const string& column,
     float val) {
+  util::concurrent::scoped_lock lk(mutex_);
+  set_nolock(row, column, val);
+}
+
+void sparse_matrix_storage::set_nolock(
+    const string& row,
+    const string& column,
+    float val) {
   tbl_[row][column2id_.get_id(column)] = val;
 }
 
 void sparse_matrix_storage::set_row(
+    const string& row,
+    const vector<pair<string, float> >& columns) {
+  util::concurrent::scoped_lock lk(mutex_);
+  set_row_nolock(row, columns);
+}
+
+void sparse_matrix_storage::set_row_nolock(
     const string& row,
     const vector<pair<string, float> >& columns) {
   row_t& row_v = tbl_[row];
@@ -66,6 +82,13 @@ void sparse_matrix_storage::set_row(
 }
 
 float sparse_matrix_storage::get(
+    const string& row,
+    const string& column) const {
+  util::concurrent::scoped_lock lk(mutex_);
+  return get_nolock(row, column);
+}
+
+float sparse_matrix_storage::get_nolock(
     const string& row,
     const string& column) const {
   tbl_t::const_iterator it = tbl_.find(row);
@@ -88,6 +111,13 @@ float sparse_matrix_storage::get(
 void sparse_matrix_storage::get_row(
     const string& row,
     vector<pair<string, float> >& columns) const {
+  util::concurrent::scoped_lock lk(mutex_);
+  get_row_nolock(row, columns);
+}
+
+void sparse_matrix_storage::get_row_nolock(
+    const string& row,
+    vector<pair<string, float> >& columns) const {
   columns.clear();
   tbl_t::const_iterator it = tbl_.find(row);
   if (it == tbl_.end()) {
@@ -102,6 +132,11 @@ void sparse_matrix_storage::get_row(
 }
 
 float sparse_matrix_storage::calc_l2norm(const string& row) const {
+  util::concurrent::scoped_lock lk(mutex_);
+  return calc_l2norm_nolock(row);
+}
+
+float sparse_matrix_storage::calc_l2norm_nolock(const string& row) const {
   tbl_t::const_iterator it = tbl_.find(row);
   if (it == tbl_.end()) {
     return 0.f;
@@ -116,6 +151,12 @@ float sparse_matrix_storage::calc_l2norm(const string& row) const {
 }
 
 void sparse_matrix_storage::remove(const string& row, const string& column) {
+  util::concurrent::scoped_lock lk(mutex_);
+  remove_nolock(row, column);
+}
+
+void sparse_matrix_storage::remove_nolock(const string& row,
+                                          const string& column) {
   tbl_t::iterator it = tbl_.find(row);
   if (it == tbl_.end()) {
     return;
@@ -135,6 +176,11 @@ void sparse_matrix_storage::remove(const string& row, const string& column) {
 }
 
 void sparse_matrix_storage::remove_row(const string& row) {
+  util::concurrent::scoped_lock lk(mutex_);
+  remove_row_nolock(row);
+}
+
+void sparse_matrix_storage::remove_row_nolock(const string& row) {
   tbl_t::iterator it = tbl_.find(row);
   if (it == tbl_.end()) {
     return;
@@ -149,6 +195,7 @@ void sparse_matrix_storage::remove_row(const string& row) {
 }
 
 void sparse_matrix_storage::get_all_row_ids(vector<string>& ids) const {
+  util::concurrent::scoped_lock lk(mutex_);
   ids.clear();
   for (tbl_t::const_iterator it = tbl_.begin(); it != tbl_.end(); ++it) {
     ids.push_back(it->first);
@@ -156,6 +203,7 @@ void sparse_matrix_storage::get_all_row_ids(vector<string>& ids) const {
 }
 
 void sparse_matrix_storage::clear() {
+  util::concurrent::scoped_lock lk(mutex_);
   tbl_t().swap(tbl_);
   common::key_manager().swap(column2id_);
   // norm_ptr_->clear();
@@ -163,10 +211,12 @@ void sparse_matrix_storage::clear() {
 
 void sparse_matrix_storage::pack(framework::packer& packer)
     const {
+  util::concurrent::scoped_lock lk(mutex_);
   packer.pack(*this);
 }
 
 void sparse_matrix_storage::unpack(msgpack::object o) {
+  util::concurrent::scoped_lock lk(mutex_);
   o.convert(this);
 }
 

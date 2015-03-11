@@ -23,6 +23,7 @@
 #include <utility>
 #include <vector>
 
+#include "jubatus/util/concurrent/lock.h"
 #include "../storage/fixed_size_heap.hpp"
 
 using std::istringstream;
@@ -48,12 +49,19 @@ void inverted_index_storage::set(
     const std::string& row,
     const std::string& column,
     float val) {
+  util::concurrent::scoped_lock lk(mutex_);
+  set_nolock(row, column, val);
+}
+void inverted_index_storage::set_nolock(
+    const std::string& row,
+    const std::string& column,
+    float val) {
   uint64_t column_id = column2id_.get_id_const(column);
 
   if (column_id == common::key_manager::NOTFOUND) {
     column_id = column2id_.get_id(column);
   } else {
-    float cur_val = get(row, column);
+    float cur_val = get_nolock(row, column);
     column2norm_diff_[column_id] -= cur_val * cur_val;
   }
   inv_diff_[row][column_id] = val;
@@ -63,7 +71,15 @@ void inverted_index_storage::set(
   }
 }
 
+
 float inverted_index_storage::get(
+    const string& row,
+    const string& column) const {
+  util::concurrent::scoped_lock lk(mutex_);
+  return get_nolock(row, column);
+}
+
+float inverted_index_storage::get_nolock(
     const string& row,
     const string& column) const {
   uint64_t column_id = column2id_.get_id_const(column);
@@ -114,12 +130,19 @@ float inverted_index_storage::get_from_tbl(
 void inverted_index_storage::remove(
     const std::string& row,
     const std::string& column) {
+  util::concurrent::scoped_lock lk(mutex_);
+  remove_nolock(row, column);
+}
+
+void inverted_index_storage::remove_nolock(
+    const std::string& row,
+    const std::string& column) {
   uint64_t column_id = column2id_.get_id_const(column);
   if (column_id == common::key_manager::NOTFOUND) {
     return;
   }
 
-  set(row, column, 0.f);
+  set_nolock(row, column, 0.f);
 
   // Test if the data exists in the master table.
   bool exist = false;
@@ -147,6 +170,7 @@ void inverted_index_storage::remove(
 }
 
 void inverted_index_storage::clear() {
+  util::concurrent::scoped_lock lk(mutex_);
   tbl_t().swap(inv_);
   tbl_t().swap(inv_diff_);
   imap_float_t().swap(column2norm_);
@@ -156,6 +180,7 @@ void inverted_index_storage::clear() {
 
 void inverted_index_storage::get_all_column_ids(
     std::vector<std::string>& ids) const {
+  util::concurrent::scoped_lock lk(mutex_);
   ids.clear();
   for (imap_float_t::const_iterator it = column2norm_.begin();
       it != column2norm_.end(); ++it) {
@@ -170,6 +195,7 @@ void inverted_index_storage::get_all_column_ids(
 }
 
 void inverted_index_storage::get_diff(diff_type& diff) const {
+  util::concurrent::scoped_lock lk(mutex_);
   for (tbl_t::const_iterator it = inv_diff_.begin(); it != inv_diff_.end();
       ++it) {
     vector<pair<string, float> > columns;
@@ -188,6 +214,7 @@ void inverted_index_storage::get_diff(diff_type& diff) const {
 
 bool inverted_index_storage::put_diff(
     const diff_type& mixed_diff) {
+  util::concurrent::scoped_lock lk(mutex_);
   vector<string> ids;
   mixed_diff.inv.get_all_row_ids(ids);
   for (size_t i = 0; i < ids.size(); ++i) {
@@ -238,10 +265,12 @@ void inverted_index_storage::mix(const diff_type& lhs, diff_type& rhs) const {
 }
 
 void inverted_index_storage::pack(framework::packer& packer) const {
+  util::concurrent::scoped_lock lk(mutex_);
   packer.pack(*this);
 }
 
 void inverted_index_storage::unpack(msgpack::object o) {
+  util::concurrent::scoped_lock lk(mutex_);
   o.convert(this);
 }
 
@@ -254,6 +283,7 @@ void inverted_index_storage::calc_scores(
     return;
   }
 
+  util::concurrent::scoped_lock lk(mutex_);
   std::vector<float> i_scores(column2id_.get_max_id() + 1, 0.0);
   for (size_t i = 0; i < query.size(); ++i) {
     const string& fid = query[i].first;

@@ -22,6 +22,7 @@
 #include <utility>
 #include <vector>
 #include "fixed_size_heap.hpp"
+#include "jubatus/util/concurrent/lock.h"
 
 using std::greater;
 using std::istringstream;
@@ -42,10 +43,19 @@ bit_index_storage::~bit_index_storage() {
 }
 
 void bit_index_storage::set_row(const string& row, const bit_vector& bv) {
+  util::concurrent::scoped_lock lk(mutex_);
+  set_row_nolock(row, bv);
+}
+void bit_index_storage::set_row_nolock(const string& row, const bit_vector& bv) {
   bitvals_diff_[row] = bv;
 }
 
 void bit_index_storage::get_row(const string& row, bit_vector& bv) const {
+  util::concurrent::scoped_lock lk(mutex_);
+  get_row_nolock(row, bv);
+}
+
+void bit_index_storage::get_row_nolock(const string& row, bit_vector& bv) const {
   {
     bit_table_t::const_iterator it = bitvals_diff_.find(row);
     if (it != bitvals_diff_.end()) {
@@ -64,6 +74,11 @@ void bit_index_storage::get_row(const string& row, bit_vector& bv) const {
 }
 
 void bit_index_storage::remove_row(const string& row) {
+  util::concurrent::scoped_lock lk(mutex_);
+  remove_row_nolock(row);
+}
+
+void bit_index_storage::remove_row_nolock(const string& row) {
   if (bitvals_.find(row) == bitvals_.end()) {
     // The row is not in the master table; we can
     // immedeately remove it from the diff table.
@@ -76,11 +91,13 @@ void bit_index_storage::remove_row(const string& row) {
 }
 
 void bit_index_storage::clear() {
+  util::concurrent::scoped_lock lk(mutex_);
   bit_table_t().swap(bitvals_);
   bit_table_t().swap(bitvals_diff_);
 }
 
 void bit_index_storage::get_all_row_ids(std::vector<std::string>& ids) const {
+  util::concurrent::scoped_lock lk(mutex_);
   ids.clear();
   for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
       ++it) {
@@ -95,11 +112,13 @@ void bit_index_storage::get_all_row_ids(std::vector<std::string>& ids) const {
 }
 
 void bit_index_storage::get_diff(bit_table_t& diff) const {
+  util::concurrent::scoped_lock lk(mutex_);
   diff = bitvals_diff_;
 }
 
 bool bit_index_storage::put_diff(
     const bit_table_t& mixed_diff) {
+  util::concurrent::scoped_lock lk(mutex_);
   for (bit_table_t::const_iterator it = mixed_diff.begin();
       it != mixed_diff.end(); ++it) {
     if (it->second.bit_num() == 0) {
@@ -140,17 +159,19 @@ void bit_index_storage::similar_row(
   }
 
   heap_type heap(ret_num);
-
-  for (bit_table_t::const_iterator it = bitvals_diff_.begin();
-      it != bitvals_diff_.end(); ++it) {
-    similar_row_one(bv, *it, heap);
-  }
-  for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
-      ++it) {
-    if (bitvals_diff_.find(it->first) != bitvals_diff_.end()) {
-      continue;
+  {  // lock scope
+    util::concurrent::scoped_lock lk(mutex_);
+    for (bit_table_t::const_iterator it = bitvals_diff_.begin();
+         it != bitvals_diff_.end(); ++it) {
+      similar_row_one(bv, *it, heap);
     }
-    similar_row_one(bv, *it, heap);
+    for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
+         ++it) {
+      if (bitvals_diff_.find(it->first) != bitvals_diff_.end()) {
+        continue;
+      }
+      similar_row_one(bv, *it, heap);
+    }
   }
 
   vector<pair<uint64_t, string> > scores;
@@ -162,10 +183,12 @@ void bit_index_storage::similar_row(
 }
 
 void bit_index_storage::pack(framework::packer& packer) const {
+  util::concurrent::scoped_lock lk(mutex_);
   packer.pack(*this);
 }
 
 void bit_index_storage::unpack(msgpack::object o) {
+  util::concurrent::scoped_lock lk(mutex_);
   o.convert(this);
 }
 

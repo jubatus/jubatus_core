@@ -22,6 +22,7 @@
 #include <vector>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/concurrent/mutex.h"
 #include "storage_type.hpp"
 #include "../common/version.hpp"
 #include "../common/type.hpp"
@@ -47,8 +48,11 @@ class inverted_index_storage {
   ~inverted_index_storage();
 
   void set(const std::string& row, const std::string& column, float val);
+  void set_nolock(const std::string& row, const std::string& column, float val);
   float get(const std::string& row, const std::string& column) const;
+  float get_nolock(const std::string& row, const std::string& column) const;
   void remove(const std::string& row, const std::string& column);
+  void remove_nolock(const std::string& row, const std::string& column);
   void clear();
   void get_all_column_ids(std::vector<std::string>& ids) const;
 
@@ -63,6 +67,9 @@ class inverted_index_storage {
 
   storage::version get_version() const {
     return storage::version();
+  }
+  util::concurrent::mutex& get_mutex() const {
+    return mutex_;
   }
 
   std::string name() const;
@@ -86,6 +93,7 @@ class inverted_index_storage {
       float val,
       std::vector<float>& scores) const;
 
+  mutable util::concurrent::mutex mutex_;
   tbl_t inv_;
   tbl_t inv_diff_;
   imap_float_t column2norm_;
