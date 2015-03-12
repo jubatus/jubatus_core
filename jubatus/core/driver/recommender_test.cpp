@@ -225,7 +225,7 @@ create_recommender_bases_subset() {
   pattern.push_back(make_pair("minhash", 2048));
 
   for (size_t i = 0; i < pattern.size(); ++i) {
-    shared_ptr<core::table::column_table> table(new core::table::column_table);
+    shared_ptr<storage::column_table> table(new storage::column_table);
 
     json jsconf(new json_object);
     json method_param(new json_object);
