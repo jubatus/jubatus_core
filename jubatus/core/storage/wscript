@@ -30,18 +30,29 @@ def build(bld):
       'lsh_vector.cpp',
       'lsh_util.cpp',
       'lsh_index_storage.cpp'
-      ]
+  ]
   headers = [
-      'storage_base.hpp',
-      'storage_type.hpp',
-      'storage_factory.hpp',
+      'abstract_column.hpp',
+      'bit_index_storage.hpp',
       'bit_vector.hpp',
       'column_table.hpp',
-      'sparse_matrix_storage.hpp',
-      'recommender_storage_base.hpp',
+      'column_type.hpp',
+      'fixed_size_heap.hpp',
+      'inverted_index_storage.hpp',
       'local_storage.hpp',
       'local_storage_mixture.hpp',
-      ]
+      'lsh_index_storage.hpp',
+      'lsh_util.hpp',
+      'lsh_vector.hpp',
+      'owner.hpp',
+      'recommender_storage_base.hpp',
+      'row_deleter.hpp',
+      'sparse_matrix_storage.hpp',
+      'storage_base.hpp',
+      'storage_exception.hpp',
+      'storage_factory.hpp',
+      'storage_type.hpp',
+  ]
   use = ['jubatus_util', 'MSGPACK']
 
   bld.core_sources.extend(bld.add_prefix(source))
