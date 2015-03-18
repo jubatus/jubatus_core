@@ -26,7 +26,7 @@
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::data::unordered_set;
-using jubatus::util::concurrent::scoped_lock;;
+using jubatus::util::concurrent::scoped_lock;
 
 namespace jubatus {
 namespace core {

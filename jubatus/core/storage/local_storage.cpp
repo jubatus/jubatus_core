@@ -42,7 +42,8 @@ void local_storage::get(const string& feature, feature_val1_t& ret) const {
   get_nolock(feature, ret);
 }
 
-void local_storage::get_nolock(const string& feature, feature_val1_t& ret) const {
+void local_storage::get_nolock(const string& feature,
+                               feature_val1_t& ret) const {
   ret.clear();
   id_features3_t::const_iterator cit = tbl_.find(feature);
   if (cit == tbl_.end()) {
@@ -59,7 +60,8 @@ void local_storage::get2(const string& feature, feature_val2_t& ret) const {
   get2_nolock(feature, ret);
 }
 
-void local_storage::get2_nolock(const string& feature, feature_val2_t& ret) const {
+void local_storage::get2_nolock(const string& feature,
+                                feature_val2_t& ret) const {
   ret.clear();
   id_features3_t::const_iterator cit = tbl_.find(feature);
   if (cit == tbl_.end()) {
@@ -77,7 +79,8 @@ void local_storage::get3(const string& feature, feature_val3_t& ret) const {
   get3_nolock(feature, ret);
 }
 
-void local_storage::get3_nolock(const string& feature, feature_val3_t& ret) const {
+void local_storage::get3_nolock(const string& feature,
+                                feature_val3_t& ret) const {
   ret.clear();
   id_features3_t::const_iterator cit = tbl_.find(feature);
   if (cit == tbl_.end()) {
