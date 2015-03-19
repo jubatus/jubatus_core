@@ -81,7 +81,7 @@ class key_manager {
 
   jubatus::util::data::unordered_map<std::string, uint64_t> key2id_;
   jubatus::util::data::unordered_map<uint64_t, std::string> id2key_;
-  uint64_t next_id_;
+  size_t next_id_;
 };
 
 inline void swap(key_manager& l, key_manager& r) {  // NOLINT
