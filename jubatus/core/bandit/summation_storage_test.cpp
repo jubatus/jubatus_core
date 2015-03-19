@@ -25,7 +25,7 @@ namespace core {
 namespace bandit {
 
 TEST(summation_storage, common) {
-  summation_storage s;
+  summation_storage s(false);
   const std::string player_id = "player1";
   const std::string arm_id = "arm1";
 
@@ -65,7 +65,7 @@ TEST(summation_storage, common) {
 }
 
 TEST(storage, mix) {
-  summation_storage s1, s2;
+  summation_storage s1(false), s2(false);
 
   s1.register_reward("player1", "hoge", 1.0);
   s1.register_reward("player1", "fuga", 0.0);
@@ -146,6 +146,42 @@ TEST(storage, mix) {
     EXPECT_EQ(2, a.trial_count);
     EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(0.5, s2.get_expectation("player1", "hoge"));
+  }
+}
+
+TEST(summation_storage, notify_selected) {
+  const std::string player_id = "player1";
+  const std::string arm_id = "arm1";
+
+  summation_storage s1(false);
+
+  s1.notify_selected(player_id, arm_id);
+
+  // if assume_unrewarded is false, notify_selected has no effect
+  {
+    arm_info a = s1.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(0, a.trial_count);
+    EXPECT_EQ(0.0, a.weight);
+  }
+
+  summation_storage s2(true);
+
+  s2.notify_selected(player_id, arm_id);
+
+  // if assume_unrewarded is true, notify_selected will increment trial_count
+  {
+    arm_info a = s2.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(0.0, a.weight);
+  }
+
+  s2.register_reward(player_id, arm_id, 1.0);
+
+  // and register_reward will not increment trial_count
+  {
+    arm_info a = s2.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
   }
 }
 

@@ -23,7 +23,8 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-summation_storage::summation_storage() {
+summation_storage::summation_storage(bool assume_unrewarded)
+    : assume_unrewarded_(assume_unrewarded) {
 }
 
 bool summation_storage::register_arm(const std::string& arm_id) {
@@ -58,13 +59,26 @@ bool summation_storage::delete_arm(const std::string& arm_id) {
   return true;
 }
 
+void summation_storage::notify_selected(
+    const std::string& player_id,
+    const std::string& arm_id) {
+  if (!assume_unrewarded_) {
+    return;
+  }
+  arm_info_map& as = unmixed_[player_id];
+  arm_info& a = as[arm_id];
+  a.trial_count += 1;
+}
+
 bool summation_storage::register_reward(
     const std::string& player_id,
     const std::string& arm_id,
     double reward) {
   arm_info_map& as = unmixed_[player_id];
   arm_info& a = as[arm_id];
-  a.trial_count += 1;
+  if (!assume_unrewarded_) {
+    a.trial_count += 1;
+  }
   a.weight += reward;
   return true;
 }

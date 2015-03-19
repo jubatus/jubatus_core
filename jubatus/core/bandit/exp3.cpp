@@ -28,7 +28,7 @@ namespace core {
 namespace bandit {
 
 exp3::exp3(double gamma)
-    : gamma_(gamma) {
+    : gamma_(gamma), s_(false) {
   if (gamma < 0 || 1 < gamma) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0 <= gamma <= 1"));
@@ -66,7 +66,9 @@ std::string exp3::select_arm(const std::string& player_id) {
 
   std::vector<double> weights;
   calc_weights_(player_id, weights);
-  return arms[select_by_weights(weights, rand_)];
+  std::string result = arms[select_by_weights(weights, rand_)];
+  s_.notify_selected(player_id, result);
+  return result;
 }
 
 bool exp3::register_arm(const std::string& arm_id) {

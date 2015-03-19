@@ -30,7 +30,7 @@ namespace core {
 namespace bandit {
 
 softmax::softmax(double tau)
-    : tau_(tau) {
+    : tau_(tau), s_(false) {
   if (tau <= 0) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0 < tau"));
@@ -51,7 +51,9 @@ std::string softmax::select_arm(const std::string& player_id) {
     double expectation = s_.get_expectation(player_id, arms[i]);
     weights.push_back(std::exp(expectation / tau_));
   }
-  return arms[select_by_weights(weights, rand_)];
+  std::string result = arms[select_by_weights(weights, rand_)];
+  s_.notify_selected(player_id, result);
+  return result;
 }
 
 bool softmax::register_arm(const std::string& arm_id) {
