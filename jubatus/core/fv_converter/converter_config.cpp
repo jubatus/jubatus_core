@@ -76,7 +76,7 @@ splitter_weight_type make_weight_type(
     sample_type = LOG_TERM_FREQUENCY;
   } else {
     throw JUBATUS_EXCEPTION(
-        converter_exception("unknown sample_weight: [" + sample + "]"));
+        converter_exception("unknown sample_weight: [" + sample + "] in string_rules"));
   }
 
   term_weight_type global_type;
@@ -88,7 +88,7 @@ splitter_weight_type make_weight_type(
     global_type = WITH_WEIGHT_FILE;
   } else {
     throw JUBATUS_EXCEPTION(
-        converter_exception("unknown global_weight: [" + global + "]"));
+        converter_exception("unknown global_weight: [" + global + "] in string_rules"));
   }
   return splitter_weight_type(sample_type, global_type);
 }
@@ -160,7 +160,7 @@ void init_num_filter_rules(
         filters.find(rule.type);
     if (it == filters.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown num_filter_type: [" + rule.type + "]"));
+          converter_exception("unknown type: [" + rule.type + "] in num_filter_rules"));
     }
 
     matcher_ptr m(create_key_matcher(rule.key, rule.except));
@@ -200,7 +200,7 @@ void init_string_filter_rules(
         filters.find(rule.type);
     if (it == filters.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown string_filter_type: [" + rule.type + "]"));
+          converter_exception("unknown type: [" + rule.type + "] in string_filter_rules"));
     }
 
     matcher_ptr m(create_key_matcher(rule.key, rule.except));
@@ -219,7 +219,7 @@ void init_string_rules(
         splitters.find(rule.type);
     if (it == splitters.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown string_rule_type: [" + rule.type + "]"));
+          converter_exception("unknown type: [" + rule.type + "] in string_rules"));
     }
 
     vector<splitter_weight_type> ws;
@@ -262,7 +262,7 @@ void init_num_rules(
         num_features.find(rule.type);
     if (it == num_features.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown num_rule_type: [" + rule.type + "]"));
+          converter_exception("unknown type: [" + rule.type + "] in num_rules"));
     }
 
     conv.register_num_rule(rule.type, m, it->second);
@@ -297,7 +297,7 @@ void init_binary_rules(
         binary_features.find(rule.type);
     if (it == binary_features.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown binary_rule_type: [" + rule.type + "]"));
+          converter_exception("unknown type: [" + rule.type + "] in binary_rules"));
     }
 
     conv.register_binary_rule(rule.type, m, it->second);
@@ -343,8 +343,8 @@ void init_combination_rules(
       combination_features.find(rule.type);
     if (it == combination_features.end()) {
       throw JUBATUS_EXCEPTION(
-          converter_exception("unknown combination_rule type: [" +
-                              rule.type + "]"));
+          converter_exception("unknown type: [" + rule.type +
+                              "] in combination_rules"));
     }
 
     conv.register_combination_rule(rule.type, m_left, m_right, it->second);
