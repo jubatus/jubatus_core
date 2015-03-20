@@ -29,8 +29,8 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-softmax::softmax(double tau)
-    : tau_(tau), s_(false) {
+softmax::softmax(bool assume_unrewarded, double tau)
+    : tau_(tau), s_(assume_unrewarded) {
   if (tau <= 0) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0 < tau"));

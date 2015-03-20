@@ -29,7 +29,7 @@ namespace bandit {
 
 class epsilon_greedy : public bandit_base {
  public:
-  explicit epsilon_greedy(double eps);
+  epsilon_greedy(bool assume_unrewarded, double eps);
 
   std::string select_arm(const std::string& player_id);
 

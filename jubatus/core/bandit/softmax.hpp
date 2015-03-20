@@ -29,7 +29,7 @@ namespace bandit {
 
 class softmax : public bandit_base {
  public:
-  explicit softmax(double tau);
+  softmax(bool assume_unrewarded, double tau);
 
   std::string select_arm(const std::string& player_id);
 

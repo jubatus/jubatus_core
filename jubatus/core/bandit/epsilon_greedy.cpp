@@ -26,8 +26,8 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-epsilon_greedy::epsilon_greedy(double eps)
-    : eps_(eps), s_(false) {
+epsilon_greedy::epsilon_greedy(bool assume_unrewarded, double eps)
+    : eps_(eps), s_(assume_unrewarded) {
   if (eps < 0 || 1 < eps) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0 <= epsilon <= 1"));
