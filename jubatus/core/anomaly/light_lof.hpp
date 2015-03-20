@@ -22,6 +22,7 @@
 #include <vector>
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/unordered_set.h"
+#include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "anomaly_base.hpp"
 
@@ -50,12 +51,14 @@ class light_lof : public anomaly_base {
 
     int nearest_neighbor_num;
     int reverse_nearest_neighbor_num;
+    jubatus::util::data::optional<bool> ignore_kth_same_point;
 
     template<typename Ar>
     void serialize(Ar& ar) {
       ar
           & JUBA_MEMBER(nearest_neighbor_num)
-          & JUBA_MEMBER(reverse_nearest_neighbor_num);
+          & JUBA_MEMBER(reverse_nearest_neighbor_num)
+          & JUBA_MEMBER(ignore_kth_same_point);
     }
   };
 
@@ -83,7 +86,7 @@ class light_lof : public anomaly_base {
   void clear_row(const std::string& id);
   // update_row is not supported
   void update_row(const std::string& id, const sfv_diff_t& diff);
-  void set_row(const std::string& id, const common::sfv_t& sfv);
+  bool set_row(const std::string& id, const common::sfv_t& sfv);
 
   void get_all_row_ids(std::vector<std::string>& ids) const;
   std::string type() const;

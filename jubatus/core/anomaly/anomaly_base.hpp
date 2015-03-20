@@ -66,9 +66,10 @@ class anomaly_base : public framework::model {
   virtual void update_row(const std::string& id, const sfv_diff_t& diff) = 0;
 
   // Updates the row corresponding to given id.
+  // Returns true when the row was successfully updated.
   //
   // Some implementations including lof do not support this function.
-  virtual void set_row(const std::string& id, const common::sfv_t& sfv) = 0;
+  virtual bool set_row(const std::string& id, const common::sfv_t& sfv) = 0;
 
   virtual void get_all_row_ids(std::vector<std::string>& ids) const = 0;
   virtual std::string type() const = 0;
