@@ -174,7 +174,7 @@ TEST_F(light_lof_test, unlearning) {
   fv_converter::datum datum;
   datum.num_values_.push_back(make_pair("f1", 1.0));
 
-  for (int i = 0; i < 5; ++i) {
+  for (std::size_t i = 0; i < 5; ++i) {
     datum.num_values_[0].second = i;
     anomaly_->overwrite(
         "row" + jubatus::util::lang::lexical_cast<std::string>(i),
@@ -222,7 +222,7 @@ TEST_P(anomaly_with_weight_manager_test, small) {
   }
 
   std::vector<std::string> rows = anomaly_->get_all_rows();
-  ASSERT_EQ(21, rows.size());
+  ASSERT_EQ(21U, rows.size());
 }
 
 INSTANTIATE_TEST_CASE_P(anomaly_with_weight_manager_test_instance,

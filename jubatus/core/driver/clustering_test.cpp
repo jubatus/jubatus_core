@@ -96,7 +96,8 @@ TEST_P(clustering_test, get_revision) {
     datums.push_back(single_datum("a", 1));
     clustering_->push(datums);
   }
-  ASSERT_EQ(num / conf_.bucket_size, clustering_->get_revision());
+  std::size_t expected = num / conf_.bucket_size;
+  ASSERT_EQ(expected, clustering_->get_revision());
 }
 
 TEST_P(clustering_test, push) {
@@ -156,7 +157,7 @@ TEST_P(clustering_test, get_k_center) {
   {
     vector<datum> result = clustering_->get_k_center();
     ASSERT_EQ(conf_.k, result.size());
-    ASSERT_LT(1, result[0].num_values_.size());
+    ASSERT_LT(1U, result[0].num_values_.size());
     if (result[0].num_values_[0].first == "a"
         || result[0].num_values_[0].first == "b") {
       // result[0] is {"a":xx, "b":yy} cluster
