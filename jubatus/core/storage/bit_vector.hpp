@@ -432,32 +432,6 @@ struct bit_vector_base {
 };
 typedef bit_vector_base<uint64_t> bit_vector;
 
-template<typename bit_base>
-class const_bit_vector_base : private bit_vector_base<bit_base> {
-  typedef bit_vector_base<bit_base> base_bit_vector_t;
-
- public:
-  const_bit_vector_base(const void* bits, int bit_num)
-      : base_bit_vector_t(const_cast<void*>(bits), bit_num) {}
-  explicit const_bit_vector_base(const base_bit_vector_t& orig)
-      : base_bit_vector_t(const_cast<base_bit_vector_t&>(orig)) {}
-  using base_bit_vector_t::debug_print;
-  using base_bit_vector_t::calc_hamming_similarity;
-  using base_bit_vector_t::bit_count;
-  using base_bit_vector_t::operator==;  // NOLINT
-  using base_bit_vector_t::get_bit;
-  using base_bit_vector_t::status;
-  using base_bit_vector_t::bit_num;
-  using base_bit_vector_t::used_bytes;
-  friend std::ostream& operator<<(
-      std::ostream& os,
-      const base_bit_vector_t& bv) {
-    bv.debug_print(os);
-    return os;
-  }
-};
-typedef const_bit_vector_base<uint64_t> const_bit_vector;
-
 }  // namespace storage
 }  // namespace core
 }  // namespace jubatus
