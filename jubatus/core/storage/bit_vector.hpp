@@ -267,25 +267,6 @@ struct bit_vector_base {
     }
     return result;
   }
-  static uint64_t pop_count(uint64_t r) {
-    r = (r & 0x5555555555555555ULL) +
-      ((r >> 1) & 0x5555555555555555ULL);
-    r = (r & 0x3333333333333333ULL) +
-      ((r >> 2) & 0x3333333333333333ULL);
-    r = (r + (r >> 4)) & 0x0f0f0f0f0f0f0f0fULL;
-    r = r + (r >>  8);
-    r = r + (r >> 16);
-    r = r + (r >> 32);
-    return static_cast<uint64_t>(r & 0x7f);
-  }
-  static size_t pop_count(uint8_t r) {
-    r = (r & 0x55U) +
-      ((r >> 1) & 0x55U);
-    r = (r & 0x33U) +
-      ((r >> 2) & 0x33U);
-    r = (r + (r >> 4)) & 0x0fU;
-    return static_cast<size_t>(r & 0x7f);
-  }
 
   bit_base* raw_data_unsafe() {
     return bits_;
