@@ -51,17 +51,6 @@ bit_vector make_bv(const string& in_str) {
   return bv;
 }
 
-common::sfv_t make_sfv(const string& in_str) {
-  common::sfv_t sfv;
-  vector<string> cells = split(in_str, ' ');
-  for (size_t i = 0; i < cells.size(); ++i) {
-    vector<string> pair = split(cells[i], ':');
-    sfv.push_back(
-        make_pair(pair[0], jubatus::util::lang::lexical_cast<float>(pair[1])));
-  }
-  return sfv;
-}
-
 }  // namespace
 
 class bit_vector_nearest_neighbor_mock
