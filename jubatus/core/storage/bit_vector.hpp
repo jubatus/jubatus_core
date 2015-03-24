@@ -37,7 +37,7 @@ namespace detail {
 template <typename T, size_t N> struct bitcount_impl;
 template <typename T>
 struct bitcount_impl<T, 1> {
-  static size_t call(T bits) {
+  static int call(T bits) {
     bits = (bits & 0x55) + (bits >> 1 & 0x55);
     bits = (bits & 0x33) + (bits >> 2 & 0x33);
     return (bits & 0x0f) + (bits >> 4 & 0x0f);
@@ -45,7 +45,7 @@ struct bitcount_impl<T, 1> {
 };
 template <typename T>
 struct bitcount_impl<T, 2> {
-  static size_t call(T bits) {
+  static int call(T bits) {
     bits = (bits & 0x5555U) + (bits >> 1 & 0x5555U);
     bits = (bits & 0x3333U) + (bits >> 2 & 0x3333U);
     bits = (bits & 0x0f0fU) + (bits >> 4 & 0x0f0fU);
@@ -54,7 +54,7 @@ struct bitcount_impl<T, 2> {
 };
 template <typename T>
 struct bitcount_impl<T, 4> {
-  static size_t call(T bits) {
+  static int call(T bits) {
     bits = (bits & 0x55555555LU) + (bits >> 1 & 0x55555555LU);
     bits = (bits & 0x33333333LU) + (bits >> 2 & 0x33333333LU);
     bits = (bits & 0x0f0f0f0fLU) + (bits >> 4 & 0x0f0f0f0fLU);
@@ -64,7 +64,7 @@ struct bitcount_impl<T, 4> {
 };
 template <typename T>
 struct bitcount_impl<T, 8> {
-  static size_t call(T bits) {
+  static int call(T bits) {
     bits = (bits & 0x5555555555555555LLU) + (bits >> 1 & 0x5555555555555555LLU);
     bits = (bits & 0x3333333333333333LLU) + (bits >> 2 & 0x3333333333333333LLU);
     bits = (bits & 0x0f0f0f0f0f0f0f0fLLU) + (bits >> 4 & 0x0f0f0f0f0f0f0f0fLLU);
@@ -74,7 +74,7 @@ struct bitcount_impl<T, 8> {
   }
 };
 template <typename T>
-inline size_t bitcount(T bits) {
+inline int bitcount(T bits) {
   return bitcount_impl<T, sizeof(T)>::call(bits);
 }
 
