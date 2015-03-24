@@ -73,10 +73,46 @@ struct bitcount_impl<T, 8> {
     return (bits & 0x00000000ffffffffLLU) + (bits >>32 & 0x00000000ffffffffLLU);
   }
 };
-template <typename T>
-inline int bitcount(T bits) {
-  return bitcount_impl<T, sizeof(T)>::call(bits);
+
+#ifdef __GNUG__
+
+inline int fast_bitcount(unsigned bits) {
+  return __builtin_popcount(bits);
 }
+
+inline int fast_bitcount(unsigned long bits) {
+  return __builtin_popcountl(bits);
+}
+
+inline int fast_bitcount(unsigned long long bits) {
+  return __builtin_popcountll(bits);
+}
+
+#endif
+
+template <class T>
+inline int bitcount_dispatcher(T bits) {
+#ifdef __GNUG__
+  return fast_bitcount(bits);
+#else
+  return bitcounc_impl<T, sizeof(T)>::call(bits);
+#endif
+}
+
+inline int bitcount(unsigned bits) {
+  return bitcount_dispatcher(bits);
+}
+
+inline int bitcount(unsigned long bits) {
+  return bitcount_dispatcher(bits);
+}
+
+inline int bitcount(unsigned long long bits) {
+  return bitcount_dispatcher(bits);
+}
+
+template <class T>
+inline int bitcount(T); // = delete;
 
 }  // namespace detail
 
