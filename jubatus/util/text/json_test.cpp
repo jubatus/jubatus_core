@@ -282,9 +282,7 @@ TEST(json, from_json)
   }
   {
     json j(new json_bool(false));
-    bool const expected = false;
-    bool const actual = json_cast<bool>(j);
-    EXPECT_FALSE(actual);
+    EXPECT_FALSE(json_cast<bool>(j));
   }
 
   {
