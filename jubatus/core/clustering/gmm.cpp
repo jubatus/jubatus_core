@@ -20,6 +20,7 @@
 #include <ctime>
 #include <cfloat>
 #include <cmath>
+#include <limits>
 #include <iostream>
 #include <utility>
 #include <vector>
