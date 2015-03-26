@@ -20,6 +20,7 @@
 #include <cmath>
 #include <string>
 
+#include "jubatus/util/concurrent/lock.h"
 #include "classifier_util.hpp"
 #include "../common/exception.hpp"
 
@@ -68,24 +69,25 @@ void arow::update(
     float beta,
     const std::string& pos_label,
     const std::string& neg_label) {
+  util::concurrent::scoped_lock lk(storage_->get_lock());
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
     float val = it->second;
     storage::feature_val2_t ret;
-    storage_->get2(feature, ret);
+    storage_->get2_nolock(feature, ret);
 
     storage::val2_t pos_val(0.f, 1.f);
     storage::val2_t neg_val(0.f, 1.f);
     ClassifierUtil::get_two(ret, pos_label, neg_label, pos_val, neg_val);
 
-    storage_->set2(
+    storage_->set2_nolock(
         feature,
         pos_label,
         storage::val2_t(
             pos_val.v1 + alpha * pos_val.v2 * val,
             pos_val.v2 - beta * pos_val.v2 * pos_val.v2 * val * val));
     if (neg_label != "") {
-      storage_->set2(
+      storage_->set2_nolock(
           feature,
           neg_label,
           storage::val2_t(

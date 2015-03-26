@@ -21,6 +21,7 @@
 #include <vector>
 #include "../common/type.hpp"
 #include "bit_vector_ranking.hpp"
+#include "jubatus/util/concurrent/rwmutex.h"
 
 using std::string;
 using std::pair;
@@ -69,6 +70,7 @@ void bit_vector_nearest_neighbor_base::neighbor_row(
     const common::sfv_t& query,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
   neighbor_row_from_hash(hash(query), ids, ret_num);
 }
 
@@ -77,6 +79,7 @@ void bit_vector_nearest_neighbor_base::neighbor_row(
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
   const storage::column_table& table = *get_const_table();
+  util::concurrent::scoped_rlock lk(table.get_mutex());
   const pair<bool, uint64_t> maybe_index = table.exact_match(query_id);
   if (!maybe_index.first) {
     ids.clear();
@@ -108,7 +111,8 @@ void bit_vector_nearest_neighbor_base::neighbor_row_from_hash(
   jubatus::util::lang::shared_ptr<const column_table> table = get_const_table();
   ids.clear();
   for (size_t i = 0; i < scores.size(); ++i) {
-    ids.push_back(make_pair(table->get_key(scores[i].first), scores[i].second));
+    ids.push_back(make_pair(table->get_key_nolock(scores[i].first),
+                            scores[i].second));
   }
 }
 

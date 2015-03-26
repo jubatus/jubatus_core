@@ -151,6 +151,10 @@ class column_table {
 
   std::string get_key(uint64_t key_id) const {
     jubatus::util::concurrent::scoped_rlock lk(table_lock_);
+    return get_key_nolock(key_id);
+  }
+
+  std::string get_key_nolock(uint64_t key_id) const {
     if (tuples_ <= key_id) {
       return "";
     }
@@ -355,6 +359,10 @@ class column_table {
     }
     delete_row_(index);
     return true;
+  }
+
+  util::concurrent::rw_mutex& get_mutex() const {
+    return table_lock_;
   }
 
   MSGPACK_DEFINE(keys_, tuples_, versions_, columns_, clock_, index_);

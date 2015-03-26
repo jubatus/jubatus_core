@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/lock.h"
 #include "storage_base.hpp"
 #include "../common/key_manager.hpp"
 #include "../common/version.hpp"
@@ -39,8 +41,11 @@ class local_storage : public storage_base {
   ~local_storage();
 
   void get(const std::string &feature, feature_val1_t& ret) const;
+  void get_nolock(const std::string &feature, feature_val1_t& ret) const;
   void get2(const std::string &feature, feature_val2_t& ret) const;
+  void get2_nolock(const std::string &feature, feature_val2_t& ret) const;
   void get3(const std::string &feature, feature_val3_t& ret) const;
+  void get3_nolock(const std::string &feature, feature_val3_t& ret) const;
 
   // inner product
   void inp(const common::sfv_t& sfv, map_feature_val1_t& ret) const;
@@ -49,11 +54,23 @@ class local_storage : public storage_base {
       const std::string& feature,
       const std::string& klass,
       const val1_t& w);
+  void set_nolock(
+      const std::string& feature,
+      const std::string& klass,
+      const val1_t& w);
   void set2(
       const std::string& feature,
       const std::string& klass,
       const val2_t& w);
+  void set2_nolock(
+      const std::string& feature,
+      const std::string& klass,
+      const val2_t& w);
   void set3(
+      const std::string& feature,
+      const std::string& klass,
+      const val3_t& w);
+  void set3_nolock(
       const std::string& feature,
       const std::string& klass,
       const val3_t& w);
@@ -71,8 +88,11 @@ class local_storage : public storage_base {
       const std::string& inc_class,
       const std::string& dec_class);
 
+  util::concurrent::mutex& get_lock() const;
+
   void register_label(const std::string& label);
   bool delete_label(const std::string& label);
+  bool delete_label_nolock(const std::string& label);
 
   void clear();
   std::vector<std::string> get_labels() const;
@@ -89,11 +109,13 @@ class local_storage : public storage_base {
 
  private:
   // map_features3_t tbl_;
+  mutable util::concurrent::mutex mutex_;
   id_features3_t tbl_;
   common::key_manager class2id_;
 
   // used for dump data
   friend std::ostream& operator<<(std::ostream& os, const local_storage& ls) {
+    util::concurrent::scoped_lock lk(ls.mutex_);
     os << "{" << std::endl;
     for (id_features3_t::const_iterator it = ls.tbl_.begin();
          it != ls.tbl_.end();
