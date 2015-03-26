@@ -53,17 +53,23 @@ jubatus::util::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_convert
   return converter;
 }
 
+std::string generate_random_string(jubatus::util::math::random::mtrand& rand,
+                                   int length) {
+  static const std::string alphabets =
+      "abcdefghijklmnopqrstuvwxyz"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  std::string ret(length, 'a');
+  for (int i = 0; i < length; ++i) {
+    ret[i] = alphabets[rand.next_int(alphabets.length())];
+  }
+  return ret;
+}
+
 jubatus::core::fv_converter::datum generate_random_datum(
     jubatus::util::math::random::mtrand& rand,
     int datum_length) {
   jubatus::core::fv_converter::datum d;
-  std::string value;
-  value.resize(datum_length * 2 + 1);
-  for (int j = 0; j < datum_length; ++j) {
-    value[j * 2]     = (rand() % ('z' - 'a')) + 'a';
-    value[j * 2 + 1] = ' ';
-  }
-  value[datum_length*2] = '\0';
+  std::string value = generate_random_string(rand, datum_length);
   d.string_values_.push_back(std::make_pair("key", value));
   return d;
 }
