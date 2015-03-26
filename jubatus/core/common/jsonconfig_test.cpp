@@ -49,7 +49,7 @@ TEST(jsonconfig, empty) {
 
 TEST(jsonconfig, bool) {
   json j(new json_bool(false));
-  EXPECT_EQ(false, config(j).As<bool>());
+  EXPECT_FALSE(config(j).As<bool>());
 }
 
 TEST(jsonconfig, bool_type_error) {
@@ -478,7 +478,7 @@ TEST(jsonconfig_cast, cast_check_error) {
     FAIL();
   } catch (const cast_check_error& e) {
     const config_error_list& errors = e.errors();
-    EXPECT_EQ(3, errors.size());
+    EXPECT_EQ(3U, errors.size());
 
     type_error* e1 = dynamic_cast<type_error*>(errors[0].get());
     ASSERT_TRUE(e1);

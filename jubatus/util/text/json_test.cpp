@@ -282,9 +282,7 @@ TEST(json, from_json)
   }
   {
     json j(new json_bool(false));
-    bool const expected = false;
-    bool const actual = json_cast<bool>(j);
-    EXPECT_EQ(expected, actual);
+    EXPECT_FALSE(json_cast<bool>(j));
   }
 
   {
@@ -708,7 +706,7 @@ TEST(json, parse)
   {
     istringstream iss("false");
     json j;iss>>j;
-    EXPECT_EQ(false, json_cast<bool>(j));
+    EXPECT_FALSE(json_cast<bool>(j));
   }
   {
     istringstream iss("null");
@@ -863,9 +861,9 @@ TEST(json, clone)
     EXPECT_EQ(json_cast<int>(js2["Image"]["IDs"][2]), 42);
     EXPECT_EQ(json_cast<int>(js3["Image"]["IDs"][2]), 234);
 
-    EXPECT_EQ(js1["Image"]["IDs"].size(), 5);
-    EXPECT_EQ(js2["Image"]["IDs"].size(), 5);
-    EXPECT_EQ(js3["Image"]["IDs"].size(), 4);
+    EXPECT_EQ(js1["Image"]["IDs"].size(), 5U);
+    EXPECT_EQ(js2["Image"]["IDs"].size(), 5U);
+    EXPECT_EQ(js3["Image"]["IDs"].size(), 4U);
 
     json js4 = js1["Image"]["Thumbnail"];
     json js5 = js1["Image"]["Thumbnail"].clone();

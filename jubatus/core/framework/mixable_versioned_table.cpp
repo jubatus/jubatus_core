@@ -39,23 +39,6 @@ namespace core {
 namespace framework {
 namespace {
 
-std::string get_row_key(const std::string& packed) {
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, packed.c_str(), packed.size());
-  JUBATUS_ASSERT_EQ(msgpack::type::ARRAY,
-                    unpacked.get().type,
-                    "packed value must be array here");
-  JUBATUS_ASSERT_GE(1, unpacked.get().via.array.size,
-                    "array's length must be more than 1");
-  JUBATUS_ASSERT_GE(msgpack::type::RAW, unpacked.get().via.array.ptr[0].type,
-                    "first item of array must be string");
-  return unpacked.get().via.array.ptr[0].as<std::string>();
-}
-
-}  // namespace
-
-namespace {
-
 struct internal_diff : framework::diff_object_raw {
   void convert_binary(framework::packer& pk) const {
     msgpack::sbuffer data;
