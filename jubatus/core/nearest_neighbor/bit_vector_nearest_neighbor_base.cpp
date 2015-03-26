@@ -111,7 +111,8 @@ void bit_vector_nearest_neighbor_base::neighbor_row_from_hash(
   jubatus::util::lang::shared_ptr<const column_table> table = get_const_table();
   ids.clear();
   for (size_t i = 0; i < scores.size(); ++i) {
-    ids.push_back(make_pair(table->get_key_nolock(scores[i].first), scores[i].second));
+    ids.push_back(make_pair(table->get_key_nolock(scores[i].first),
+                            scores[i].second));
   }
 }
 
