@@ -23,7 +23,7 @@
 
 #include "jubatus/util/lang/shared_ptr.h"
 
-#include "../table/column/column_table.hpp"
+#include "../storage/column_table.hpp"
 #include "anomaly_base.hpp"
 
 namespace jubatus {

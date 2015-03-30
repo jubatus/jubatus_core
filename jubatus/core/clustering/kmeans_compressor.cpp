@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
+#include <limits>
 #include <utility>
 #include <vector>
 #include <stack>
@@ -214,6 +215,8 @@ void kmeans_compressor::bicriteria_to_coreset(
     squared_min_dist_sum += m.second * m.second * weight;
     weight_sum += weight;
   }
+  squared_min_dist_sum = std::max(squared_min_dist_sum,
+                                  std::numeric_limits<double>::min());
   std::vector<double> weights;
   double sumw = 0;
   for (size_t i = 0; i < src.size(); ++i) {

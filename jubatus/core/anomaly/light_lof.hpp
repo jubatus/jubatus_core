@@ -23,15 +23,22 @@
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/unordered_set.h"
 #include "jubatus/util/lang/shared_ptr.h"
-
-#include "../framework/mixable_versioned_table.hpp"
-#include "../nearest_neighbor/nearest_neighbor_base.hpp"
-#include "../table/column/column_table.hpp"
-#include "../unlearner/unlearner_base.hpp"
 #include "anomaly_base.hpp"
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}  // namespace storage
+namespace unlearner {
+class unlearner_base;
+}  // namespace unlearner
+namespace nearest_neighbor {
+class nearest_neighbor_base;
+}  // namespace nearest_neighbor
+namespace framework {
+class mixable_versioned_table;
+}  // namespace framework
 namespace anomaly {
 
 // LOF implementation using nearest_neighbor as a backend.

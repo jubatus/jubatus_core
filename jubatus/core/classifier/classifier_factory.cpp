@@ -165,7 +165,7 @@ shared_ptr<classifier_base> classifier_factory::create_classifier(
     nearest_neighbor_classifier_config conf
         = config_cast_check<nearest_neighbor_classifier_config>(param);
     unlearner = create_unlearner(conf);
-    shared_ptr<table::column_table> table(new table::column_table);
+    shared_ptr<storage::column_table> table(new storage::column_table);
     shared_ptr<nearest_neighbor::nearest_neighbor_base>
         nearest_neighbor_engine(nearest_neighbor::create_nearest_neighbor(
             conf.method, conf.parameter, table, ""));

@@ -19,9 +19,11 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "../table/column/row_deleter.hpp"
+#include "../storage/row_deleter.hpp"
+#include "../fv_converter/datum_to_fv_converter.hpp"
 #include "../fv_converter/weight_manager.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
+#include "../nearest_neighbor/nearest_neighbor_base.hpp"
 
 namespace jubatus {
 namespace core {
@@ -55,7 +57,16 @@ nearest_neighbor::nearest_neighbor(
   register_mixable(&wm_);
 
   converter_->set_weight_manager(wm_.get_model());
-  unlearner->set_callback(table::row_deleter(nn_->get_table()));
+  unlearner->set_callback(storage::row_deleter(nn_->get_table()));
+}
+
+shared_ptr<storage::column_table> nearest_neighbor::get_table() {
+  return nn_->get_table();
+}
+
+shared_ptr<const storage::column_table>
+nearest_neighbor::get_const_table() const {
+  return nn_->get_const_table();
 }
 
 void nearest_neighbor::set_row(

@@ -21,9 +21,12 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include "../storage/column_table.hpp"
+#include "jubatus/util/concurrent/lock.h"
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::data::unordered_set;
+using jubatus::util::concurrent::scoped_lock;
 
 namespace jubatus {
 namespace core {
@@ -82,8 +85,13 @@ nearest_neighbor_classifier::nearest_neighbor_classifier(
 
 void nearest_neighbor_classifier::train(
     const common::sfv_t& fv, const std::string& label) {
-  std::string id = make_id_from_label(label, rand_);
+  std::string id;
+  {
+    util::concurrent::scoped_lock lk(rand_mutex_);
+    id = make_id_from_label(label, rand_);
+  }
   if (unlearner_) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     if (!unlearner_->touch(id)) {
       throw JUBATUS_EXCEPTION(common::exception::runtime_error(
           "no more space available to add new ID: " + id));
@@ -143,7 +151,7 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
     return false;
   }
 
-  shared_ptr<table::column_table> table =
+  shared_ptr<storage::column_table> table =
       nearest_neighbor_engine_->get_table();
 
   std::vector<std::string> ids_to_be_deleted;

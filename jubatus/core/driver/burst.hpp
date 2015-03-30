@@ -20,7 +20,6 @@
 #include <string>
 #include <vector>
 #include <map>
-
 #include "../burst/burst.hpp"
 #include "../framework/mixable.hpp"
 #include "driver.hpp"

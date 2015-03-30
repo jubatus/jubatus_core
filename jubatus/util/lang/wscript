@@ -1,3 +1,4 @@
+# -*- python -*-
 subdirs = [ 'algorithm' ]
 
 def configure(conf):

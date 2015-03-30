@@ -54,29 +54,31 @@ class clustering_test
  protected:
   shared_ptr<driver::clustering> create_driver() const {
     pair<string, string> param = GetParam();
-    clustering_config conf;
-    conf.compressor_method = param.first;
     return shared_ptr<driver::clustering>(
         new driver::clustering(
             shared_ptr<core::clustering::clustering>(
                 new core::clustering::clustering("dummy",
                                                  param.second,
-                                                 conf)),
+                                                 conf_)),
             make_fv_converter()));
   }
   void SetUp() {
     pair<string, string> param = GetParam();
-    clustering_config conf;
-    conf.compressor_method = param.first;
-    conf.bucket_size = 50;
-    conf.bicriteria_base_size = 5;
-    conf.compressed_bucket_size = 10;
+    conf_.k = 2;
+    conf_.compressor_method = param.first;
+    conf_.bucket_size = 200;
+    conf_.compressed_bucket_size = conf_.bucket_size / 10;
+    conf_.bicriteria_base_size = conf_.bucket_size / 100;
+    conf_.bucket_length = 2;
+    conf_.forgetting_factor = 0.0;
+    conf_.forgetting_threshold = 0.5;
     clustering_ = create_driver();
   }
   void TearDown() {
     clustering_.reset();
   }
   shared_ptr<driver::clustering> clustering_;
+  clustering_config conf_;
 };
 
 namespace {  // testing util
@@ -88,22 +90,24 @@ datum single_datum(string key, double v) {
 }
 
 TEST_P(clustering_test, get_revision) {
-  for (int i = 0; i < 2000; ++i) {
+  const int num = conf_.bucket_size * 10;
+  for (int i = 0; i < num; ++i) {
     vector<datum> datums;
     datums.push_back(single_datum("a", 1));
     clustering_->push(datums);
   }
-  ASSERT_EQ(0, clustering_->get_revision());
+  std::size_t expected = num / conf_.bucket_size;
+  ASSERT_EQ(expected, clustering_->get_revision());
 }
 
 TEST_P(clustering_test, push) {
-  for (int j = 0; j < 21 ; j += 5) {
+  for (int j = 0; j < conf_.bucket_size / 5; ++j) {
     vector<datum> datums;
     for (int i = 0; i < 100; i += 5) {
       datums.push_back(single_datum("a", i * 2));
       datums.push_back(single_datum("b", i * 100));
-      clustering_->push(datums);
     }
+    clustering_->push(datums);
   }
 }
 
@@ -137,7 +141,7 @@ TEST_P(clustering_test, get_k_center) {
   vector<datum> one;
   vector<datum> two;
 
-  for (int j = 0; j < 200 ; ++j) {
+  for (int j = 0; j < conf_.bucket_size / 2; ++j) {
     datum a, b;
     a.num_values_.push_back(make_pair("a", -10 + r.next_gaussian() * 20));
     a.num_values_.push_back(make_pair("b", -200 + r.next_gaussian() * 400));
@@ -152,8 +156,8 @@ TEST_P(clustering_test, get_k_center) {
   clustering_->do_clustering();
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(2, result.size());
-    ASSERT_LT(1, result[0].num_values_.size());
+    ASSERT_EQ(conf_.k, result.size());
+    ASSERT_LT(1U, result[0].num_values_.size());
     if (result[0].num_values_[0].first == "a"
         || result[0].num_values_[0].first == "b") {
       // result[0] is {"a":xx, "b":yy} cluster
@@ -172,6 +176,33 @@ TEST_P(clustering_test, get_k_center) {
     }
   }
 }
+
+TEST_P(clustering_test, integer_center) {
+  jubatus::util::math::random::mtrand r(0);
+  const int quantity = conf_.bucket_size * 5;
+  std::vector<datum> data(quantity);
+
+  for (int i = 0; i < quantity ; ++i) {
+    data[i].num_values_.push_back(make_pair("x", 100 + r.next_int(-10, 10)));
+  }
+
+  clustering_->push(data);
+  const std::vector<fv_converter::datum> centers = clustering_->get_k_center();
+
+  ASSERT_EQ(conf_.k, centers.size());
+  /*  debug out
+  for (size_t i = 0; i < centers.size(); ++i) {
+    std::cout << i << " :[";
+    for (size_t j = 0; j < centers[i].num_values_.size(); ++j) {
+      std::cout
+        << centers[i].num_values_[j].first << " => "
+        << centers[i].num_values_[j].second << ", ";
+    }
+    std::cout << "]" << std::endl;;
+  }
+  //*/
+}
+
 struct check_points {
   float a;
   float b;
@@ -204,7 +235,7 @@ TEST_P(clustering_test, get_nearest_members) {
 
   set<check_points, check_point_compare> points;
 
-  for (int i = 0; i < 200 ; ++i) {
+  for (int i = 0; i < conf_.bucket_size * 2 + 1; ++i) {
     datum x, y;
     float a = 10 + r.next_gaussian() * 20;
     float b = 1000 + r.next_gaussian() * 400;
@@ -224,7 +255,7 @@ TEST_P(clustering_test, get_nearest_members) {
 
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(2u, result.size());
+    ASSERT_EQ(conf_.k, result.size());
   }
 
   set<check_points, check_point_compare>::const_iterator it;
@@ -239,7 +270,7 @@ TEST_P(clustering_test, get_nearest_members) {
     for (size_t i = 0; i < result.size(); ++i) {
       const vector<pair<string, double> >& near_points =
           result[i].second.num_values_;
-      ASSERT_EQ(2u, near_points.size());
+      ASSERT_EQ(2, near_points.size());  // must be 2-dimentional
       ASSERT_EQ("a", near_points[0].first);
       ASSERT_EQ("b", near_points[1].first);
       ASSERT_NE(points.end(),
@@ -256,7 +287,7 @@ TEST_P(clustering_test, get_nearest_center) {
   vector<datum> one;
   vector<datum> two;
 
-  for (int i = 0; i < 1000 ; ++i) {
+  for (int i = 0; i < conf_.bucket_size * 2; ++i) {
     datum x, y;
     x.num_values_.push_back(make_pair("a", 10 + r.next_gaussian() * 20));
     x.num_values_.push_back(make_pair("b", 1000 + r.next_gaussian() * 400));
@@ -272,7 +303,7 @@ TEST_P(clustering_test, get_nearest_center) {
 
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(conf_.k, result.size());
   }
 
   for (int i = 0; i < 100; ++i) {

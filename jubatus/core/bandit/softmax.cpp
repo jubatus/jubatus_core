@@ -21,7 +21,9 @@
 #include <cmath>
 #include <numeric>
 #include "../common/exception.hpp"
+#include "../framework/packer.hpp"
 #include "select_by_weights.hpp"
+#include "../common/version.hpp"
 
 namespace jubatus {
 namespace core {
@@ -91,6 +93,10 @@ bool softmax::put_diff(const diff_t& diff) {
 }
 void softmax::mix(const diff_t& lhs, diff_t& rhs) const {
   s_.mix(lhs, rhs);
+}
+
+storage::version softmax::get_version() const {
+  return storage::version();
 }
 
 }  // namespace bandit

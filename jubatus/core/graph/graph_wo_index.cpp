@@ -41,31 +41,6 @@ namespace graph {
 
 namespace {
 
-// Debug print
-void print_tree(const shortest_path_tree& spt, std::ostream& out) {
-  out << "landmark = " << spt.landmark << std::endl;
-  out << "from root = [";
-  for (spt_edges::const_iterator it = spt.from_root.begin();
-       it != spt.from_root.end(); ++it) {
-    if (it != spt.from_root.begin()) {
-      out << ", ";
-    }
-    out << '(' << it->first << ", (" << it->second.first << ", "
-        << it->second.second << "))";
-  }
-  out << "]\n";
-  out << "to root = [";
-  for (spt_edges::const_iterator it = spt.to_root.begin();
-       it != spt.to_root.end(); ++it) {
-    if (it != spt.to_root.begin()) {
-      out << ", ";
-    }
-    out << '(' << it->first << ", (" << it->second.first << ", "
-        << it->second.second << "))";
-  }
-  out << "]" << endl;
-}
-
 bool is_empty_query(const preset_query& query) {
   return query.node_query.empty() && query.edge_query.empty();
 }

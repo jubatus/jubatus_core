@@ -1,3 +1,4 @@
+# -*- python -*-
 def options(ctx): pass
 
 def configure(ctx): pass
@@ -20,6 +21,16 @@ def build(bld):
       'classifier_factory.hpp',
       'classifier_type.hpp',
       'classifier_config.hpp',
+      'classifier.hpp',
+      'linear_classifier.hpp',
+      'arow.hpp',
+      'confidence_weighted.hpp',
+      'normal_herd.hpp',
+      'passive_aggressive.hpp',
+      'passive_aggressive_1.hpp',
+      'passive_aggressive_2.hpp',
+      'perceptron.hpp',
+      'nearest_neighbor_classifier.hpp',
       ]
   use = ['jubatus_util']
 

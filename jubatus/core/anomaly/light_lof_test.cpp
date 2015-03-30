@@ -76,7 +76,7 @@ class light_lof_test : public ::testing::Test {
  public:
   static const int K = 0;
   void SetUp() {
-    shared_ptr<table::column_table> nn_table(new table::column_table);
+    shared_ptr<storage::column_table> nn_table(new storage::column_table);
     nn_engine_.reset(new NearestNeighborMethod(
         typename NearestNeighborMethod::config(), nn_table, ID));
     light_lof_.reset(new light_lof(light_lof::config(), ID, nn_engine_));

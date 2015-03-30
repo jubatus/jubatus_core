@@ -81,6 +81,12 @@ bool local_storage_mixture::get_internal(
 void local_storage_mixture::get(
     const std::string& feature,
     feature_val1_t& ret) const {
+  util::concurrent::scoped_lock lk(mutex_);
+  get_nolock(feature, ret);
+}
+void local_storage_mixture::get_nolock(
+    const std::string& feature,
+    feature_val1_t& ret) const {
   ret.clear();
   id_feature_val3_t m3;
   get_internal(feature, m3);
@@ -91,6 +97,12 @@ void local_storage_mixture::get(
 }
 
 void local_storage_mixture::get2(
+    const std::string& feature,
+    feature_val2_t& ret) const {
+  util::concurrent::scoped_lock lk(mutex_);
+  get2_nolock(feature, ret);
+}
+void local_storage_mixture::get2_nolock(
     const std::string& feature,
     feature_val2_t& ret) const {
   ret.clear();
@@ -105,6 +117,12 @@ void local_storage_mixture::get2(
 }
 
 void local_storage_mixture::get3(
+    const std::string& feature,
+    feature_val3_t& ret) const {
+  util::concurrent::scoped_lock lk(mutex_);
+  get3_nolock(feature, ret);
+}
+void local_storage_mixture::get3_nolock(
     const std::string& feature,
     feature_val3_t& ret) const {
   ret.clear();
@@ -149,12 +167,26 @@ void local_storage_mixture::set(
     const string& feature,
     const string& klass,
     const val1_t& w) {
+  util::concurrent::scoped_lock lk(mutex_);
+  set_nolock(feature, klass, w);
+}
+void local_storage_mixture::set_nolock(
+    const string& feature,
+    const string& klass,
+    const val1_t& w) {
   uint64_t class_id = class2id_.get_id(klass);
   float w_in_table = tbl_[feature][class_id].v1;
   tbl_diff_[feature][class_id].v1 = w - w_in_table;
 }
 
 void local_storage_mixture::set2(
+    const string& feature,
+    const string& klass,
+    const val2_t& w) {
+  util::concurrent::scoped_lock lk(mutex_);
+  set2_nolock(feature, klass, w);
+}
+void local_storage_mixture::set2_nolock(
     const string& feature,
     const string& klass,
     const val2_t& w) {
@@ -168,6 +200,13 @@ void local_storage_mixture::set2(
 }
 
 void local_storage_mixture::set3(
+    const string& feature,
+    const string& klass,
+    const val3_t& w) {
+  util::concurrent::scoped_lock lk(mutex_);
+  set3_nolock(feature, klass, w);
+}
+void local_storage_mixture::set3_nolock(
     const string& feature,
     const string& klass,
     const val3_t& w) {
@@ -262,6 +301,11 @@ void local_storage_mixture::register_label(const std::string& label) {
 }
 
 bool local_storage_mixture::delete_label(const std::string& label) {
+  util::concurrent::scoped_lock lk(mutex_);
+  return delete_label_nolock(label);
+}
+
+bool local_storage_mixture::delete_label_nolock(const std::string& label) {
   uint64_t delete_id = class2id_.get_id_const(label);
   if (delete_id == common::key_manager::NOTFOUND) {
     return false;

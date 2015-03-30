@@ -20,11 +20,20 @@
 #include <string>
 
 #include "arm_info.hpp"
-#include "../framework/packer.hpp"
-#include "../common/version.hpp"
 
+namespace msgpack {
+template <typename T>
+class packer;
+}  // namespace msgpack
 namespace jubatus {
 namespace core {
+namespace framework {
+class jubatus_packer;
+typedef msgpack::packer<jubatus_packer> packer;
+}  // namespace framework
+namespace storage {
+class version;
+}  // namespace storage
 namespace bandit {
 
 class bandit_base {
@@ -59,9 +68,7 @@ class bandit_base {
   virtual bool put_diff(const diff_t& diff) = 0;
   virtual void mix(const diff_t& lhs, diff_t& rhs) const = 0;
 
-  core::storage::version get_version() const {
-    return core::storage::version();
-  }
+  virtual core::storage::version get_version() const = 0;
 };
 
 }  // namespace bandit

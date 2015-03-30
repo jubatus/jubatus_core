@@ -78,7 +78,7 @@ class nearest_neighbor_test
 
       using common::jsonconfig::config;
 
-      table_.reset(new table::column_table);
+      table_.reset(new storage::column_table);
       nn_ = create_nearest_neighbor(
           name, config(config_js, ""), table_, "localhost");
     } catch (common::jsonconfig::cast_check_error& e) {
@@ -91,7 +91,7 @@ class nearest_neighbor_test
     }
   }
 
-  table::column_table* get_table() {
+  storage::column_table* get_table() {
     return table_.get();
   }
   nearest_neighbor_base* get_nn() {
@@ -99,7 +99,7 @@ class nearest_neighbor_test
   }
 
  private:
-  shared_ptr<table::column_table> table_;
+  shared_ptr<storage::column_table> table_;
   shared_ptr<nearest_neighbor_base> nn_;
 };
 
@@ -172,29 +172,39 @@ TYPED_TEST_CASE_P(nearest_neighbor_config_test);
 
 TYPED_TEST_P(nearest_neighbor_config_test, config_validation) {
   string id("ID");
-  vector<table::column_type> schema;
+  vector<storage::column_type> schema;
   typename TypeParam::config c;
 
   // 1 <= hash_num
   c.hash_num = 0;
   ASSERT_THROW(TypeParam n(c,
-      shared_ptr<table::column_table>(new table::column_table), id),
+      shared_ptr<storage::column_table>(new storage::column_table), id),
       common::invalid_parameter);
   ASSERT_THROW(TypeParam n(c,
-      shared_ptr<table::column_table>(new table::column_table), schema, id),
+      shared_ptr<storage::column_table>(new storage::column_table), schema, id),
       common::invalid_parameter);
 
   c.hash_num = 1;
-  ASSERT_NO_THROW(TypeParam n(c,
-      shared_ptr<table::column_table>(new table::column_table), id));
-  ASSERT_NO_THROW(TypeParam n(c,
-      shared_ptr<table::column_table>(new table::column_table), schema, id));
+  ASSERT_NO_THROW(
+      TypeParam n(c,
+                  shared_ptr<storage::column_table>(new storage::column_table),
+                  id));
+  ASSERT_NO_THROW(
+      TypeParam n(c,
+                  shared_ptr<storage::column_table>(new storage::column_table),
+                  schema,
+                  id));
 
   c.hash_num = 2;
-  ASSERT_NO_THROW(TypeParam n(c,
-      shared_ptr<table::column_table>(new table::column_table), id));
-  ASSERT_NO_THROW(TypeParam n(c,
-      shared_ptr<table::column_table>(new table::column_table), schema, id));
+  ASSERT_NO_THROW(
+      TypeParam n(c,
+                  shared_ptr<storage::column_table>(new storage::column_table),
+                  id));
+  ASSERT_NO_THROW(
+      TypeParam n(c,
+                  shared_ptr<storage::column_table>(new storage::column_table),
+                  schema,
+                  id));
 }
 
 REGISTER_TYPED_TEST_CASE_P(

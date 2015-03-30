@@ -19,15 +19,16 @@
 
 #include <string>
 #include "jubatus/util/lang/shared_ptr.h"
-#include "jubatus/util/text/json.h"
-
-#include "bandit_base.hpp"
-#include "../common/jsonconfig.hpp"
 
 namespace jubatus {
 namespace core {
+namespace common {
+namespace jsonconfig {
+class config;
+}  // namespace jsonconfig
+}  // namespace common
 namespace bandit {
-
+class bandit_base;
 class bandit_factory {
  public:
   static jubatus::util::lang::shared_ptr<bandit_base> create(

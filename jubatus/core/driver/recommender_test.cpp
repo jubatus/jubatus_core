@@ -32,6 +32,7 @@
 #include "../recommender/recommender_factory.hpp"
 #include "../classifier/classifier_test_util.hpp"
 #include "../framework/stream_writer.hpp"
+#include "../storage/column_table.hpp"
 #include "recommender.hpp"
 
 #include "test_util.hpp"
@@ -51,6 +52,7 @@ using jubatus::util::text::json::json_float;
 using jubatus::util::lang::lexical_cast;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::recommender::recommender_base;
+using jubatus::core::storage::column_table;
 namespace jubatus {
 namespace core {
 namespace driver {
@@ -113,7 +115,7 @@ create_recommender_bases() {
     pattern.push_back(make_pair("minhash", i));
   }
   for (size_t i = 0; i < pattern.size(); ++i) {
-    shared_ptr<core::table::column_table> table(new core::table::column_table);
+    shared_ptr<column_table> table(new column_table);
 
     json jsconf(new json_object);
     json method_param(new json_object);

@@ -19,12 +19,12 @@
 
 #include <string>
 #include "jubatus/util/lang/shared_ptr.h"
-#include "clustering_config.hpp"
-#include "clustering_method.hpp"
 
 namespace jubatus {
 namespace core {
 namespace clustering {
+class clustering_config;
+class clustering_method;
 
 class clustering_method_factory {
  public:

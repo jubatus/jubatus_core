@@ -26,26 +26,28 @@
 #include "../common/type.hpp"
 #include "../framework/mixable_versioned_table.hpp"
 #include "../framework/mixable.hpp"
-#include "../table/column/column_table.hpp"
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}  // namespace storage
 namespace nearest_neighbor {
 
 class nearest_neighbor_base {
  public:
   explicit nearest_neighbor_base(
-      jubatus::util::lang::shared_ptr<table::column_table> table,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
       const std::string& id);
   virtual ~nearest_neighbor_base() {}
 
   void get_all_row_ids(std::vector<std::string>& ids) const;
 
-  jubatus::util::lang::shared_ptr<const table::column_table>
+  jubatus::util::lang::shared_ptr<const storage::column_table>
   get_const_table() const {
     return mixable_table_->get_model();
   }
-  jubatus::util::lang::shared_ptr<table::column_table> get_table() {
+  jubatus::util::lang::shared_ptr<storage::column_table> get_table() {
     return mixable_table_->get_model();
   }
 

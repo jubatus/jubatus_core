@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include "compressive_storage.hpp"
+#include "compressor.hpp"
 
 using jubatus::util::lang::shared_ptr;
 

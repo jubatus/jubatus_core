@@ -30,6 +30,13 @@
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+class datum;
+class datum_to_fv_converter;
+}  // namespace fv_converter
+namespace recommender {
+class recommender_base;
+}  // namespace recommender
 namespace driver {
 
 class recommender : public driver_base {

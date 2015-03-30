@@ -83,6 +83,9 @@ lof_storage::lof_storage(
 lof_storage::~lof_storage() {
 }
 
+/**
+ * Collect neighbor LRDs for the given query.
+ */
 float lof_storage::collect_lrds(
     const common::sfv_t& query,
     unordered_map<string, float>& neighbor_lrd) const {
@@ -92,6 +95,10 @@ float lof_storage::collect_lrds(
   return collect_lrds_from_neighbors(neighbors, neighbor_lrd);
 }
 
+/**
+ * Collect neighbor LRDs for the given ID.
+ * Note that returned `neighbor_lrd` does not contain the ID being queried.
+ */
 float lof_storage::collect_lrds(
     const string& id,
     unordered_map<string, float>& neighbor_lrd) const {
@@ -244,6 +251,12 @@ bool lof_storage::is_removed(const lof_entry& entry) {
   return entry.kdist < 0;
 }
 
+/**
+ * Based on the given neighbors (list of ID and the distance to it),
+ * get the LRDs for each neighbor points and return the calculated
+ * LRD for the point.
+ * `neighbors` donesn't have to be sorted.
+ */
 float lof_storage::collect_lrds_from_neighbors(
     const vector<pair<string, float> >& neighbors,
     unordered_map<string, float>& neighbor_lrd) const {
@@ -263,6 +276,7 @@ float lof_storage::collect_lrds_from_neighbors(
     sum_reachability += max(neighbors[i].second, get_kdist(neighbors[i].first));
   }
 
+  // All the neighbors seem to have a same feature vector.
   if (sum_reachability == 0) {
     return numeric_limits<float>::infinity();
   }
@@ -270,6 +284,9 @@ float lof_storage::collect_lrds_from_neighbors(
   return neighbors.size() / sum_reachability;
 }
 
+/**
+ * Collect neighbors for the given ID.
+ */
 void lof_storage::collect_neighbors(
     const string& row,
     unordered_set<string>& nn) const {
@@ -281,6 +298,9 @@ void lof_storage::collect_neighbors(
   }
 }
 
+/**
+ * Update kdist and LRD for given points and its neighbors.
+ */
 void lof_storage::update_entries(const unordered_set<string>& rows) {
   // NOTE: These two loops are separated, since update_lrd requires new kdist
   // values of k-NN.
@@ -303,12 +323,19 @@ void lof_storage::update_entries(const unordered_set<string>& rows) {
   }
 }
 
+/**
+ * Update kdist for the row.
+ */
 void lof_storage::update_kdist(const string& row) {
   vector<pair<string, float> > neighbors;
   nn_engine_->neighbor_row(row, neighbors, neighbor_num_);
   update_kdist_with_neighbors(row, neighbors);
 }
 
+/**
+ * Update kdist for the row using given NN search result (`neighbors`).
+ * Note that this method expects `neighbors` to be sorted by score.
+ */
 void lof_storage::update_kdist_with_neighbors(
     const string& row,
     const vector<pair<string, float> >& neighbors) {
@@ -317,12 +344,18 @@ void lof_storage::update_kdist_with_neighbors(
   }
 }
 
+/**
+ * Update LRD for the row.
+ */
 void lof_storage::update_lrd(const string& row) {
   vector<pair<string, float> > neighbors;
   nn_engine_->neighbor_row(row, neighbors, neighbor_num_);
   update_lrd_with_neighbors(row, neighbors);
 }
 
+/**
+ * Update LRD for the row using given NN search result (`neighbors`).
+ */
 void lof_storage::update_lrd_with_neighbors(
     const string& row, const vector<pair<string, float> >& neighbors) {
   if (neighbors.empty()) {

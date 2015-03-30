@@ -17,14 +17,15 @@
 #ifndef JUBATUS_CORE_STORAGE_STORAGE_BASE_HPP_
 #define JUBATUS_CORE_STORAGE_STORAGE_BASE_HPP_
 
-#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
 #include <stdexcept>
 #include <vector>
+#include "jubatus/util/concurrent/mutex.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "storage_type.hpp"
+#include "storage_exception.hpp"
 #include "../common/version.hpp"
 #include "../common/exception.hpp"
 #include "../common/type.hpp"
@@ -40,8 +41,14 @@ class storage_base : public framework::model {
   }
 
   virtual void get(const std::string& feature, feature_val1_t& ret) const = 0;
+  virtual void get_nolock(const std::string& feature,
+                          feature_val1_t& ret) const = 0;
   virtual void get2(const std::string& feature, feature_val2_t& ret) const = 0;
+  virtual void get2_nolock(const std::string& feature,
+                           feature_val2_t& ret) const = 0;
   virtual void get3(const std::string& feature, feature_val3_t& ret) const = 0;
+  virtual void get3_nolock(const std::string& feature,
+                           feature_val3_t& ret) const = 0;
 
   // inner product
   virtual void inp(const common::sfv_t& sfv, map_feature_val1_t& ret) const = 0;
@@ -50,11 +57,23 @@ class storage_base : public framework::model {
       const std::string& feature,
       const std::string& klass,
       const val1_t& w) = 0;
+  virtual void set_nolock(
+      const std::string& feature,
+      const std::string& klass,
+      const val1_t& w) = 0;
   virtual void set2(
       const std::string& feature,
       const std::string& klass,
       const val2_t& w) = 0;
+  virtual void set2_nolock(
+      const std::string& feature,
+      const std::string& klass,
+      const val2_t& w) = 0;
   virtual void set3(
+      const std::string& feature,
+      const std::string& klass,
+      const val3_t& w) = 0;
+  virtual void set3_nolock(
       const std::string& feature,
       const std::string& klass,
       const val3_t& w) = 0;
@@ -78,6 +97,8 @@ class storage_base : public framework::model {
       const std::string& inc_class,
       const std::string& dec_class);
 
+  virtual util::concurrent::mutex& get_lock() const = 0;
+
   virtual void get_diff(diff_t&) const;
   virtual bool set_average_and_clear_diff(const diff_t&);
 
@@ -88,23 +109,9 @@ class storage_base : public framework::model {
   virtual std::vector<std::string> get_labels() const = 0;
   virtual bool set_label(const std::string& label) = 0;
   virtual bool delete_label(const std::string& label) = 0;
+  virtual bool delete_label_nolock(const std::string& label) = 0;
 
   virtual std::string type() const = 0;
-};
-
-class storage_exception
-    : public common::exception::jubaexception<storage_exception> {
- public:
-  explicit storage_exception(const std::string& msg)
-      : msg(msg) {
-  }
-  ~storage_exception() throw () {
-  }
-  const char* what() const throw () {
-    return msg.c_str();
-  }
- private:
-  std::string msg;
 };
 
 }  // namespace storage

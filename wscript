@@ -5,7 +5,7 @@ from functools import partial
 import os
 import sys
 
-VERSION = '0.1.0'
+VERSION = '0.1.1'
 ABI_VERSION = VERSION
 APPNAME = 'jubatus_core'
 
@@ -134,7 +134,10 @@ def cpplint(ctx):
   tmp_file = tempfile.NamedTemporaryFile(delete=True);
   tmp_file.write("\n".join(file_list));
   tmp_file.flush()
-  ctx.exec_command('cat ' + tmp_file.name + ' | xargs "' + cpplint.abspath() + '" --filter=-runtime/references,-runtime/rtti 2>&1')
+  sys.stderr.write('Running cpplint...\n')
+  ctx.exec_command('cat ' + tmp_file.name +
+                   ' | xargs "' + cpplint.abspath() + '" --filter=-runtime/references,-runtime/rtti 2>&1' +
+                   ' | grep -v "^Done processing "')
   tmp_file.close()
 
 def check_cmath(ctx):

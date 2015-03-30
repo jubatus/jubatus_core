@@ -19,6 +19,7 @@
 #include <vector>
 #include "lsh.hpp"
 #include "lsh_function.hpp"
+#include "../storage/column_table.hpp"
 
 namespace jubatus {
 namespace core {
@@ -26,7 +27,7 @@ namespace nearest_neighbor {
 
 lsh::lsh(
     const config& conf,
-    jubatus::util::lang::shared_ptr<table::column_table> table,
+    jubatus::util::lang::shared_ptr<storage::column_table> table,
     const std::string& id)
     : bit_vector_nearest_neighbor_base(conf.hash_num, table, id) {
 
@@ -38,8 +39,8 @@ lsh::lsh(
 
 lsh::lsh(
     const config& conf,
-    jubatus::util::lang::shared_ptr<table::column_table> table,
-    std::vector<table::column_type>& schema,
+    jubatus::util::lang::shared_ptr<storage::column_table> table,
+    std::vector<storage::column_type>& schema,
     const std::string& id)
     : bit_vector_nearest_neighbor_base(conf.hash_num, table, schema, id) {
 
@@ -49,7 +50,7 @@ lsh::lsh(
   }
 }
 
-table::bit_vector lsh::hash(const common::sfv_t& sfv) const {
+storage::bit_vector lsh::hash(const common::sfv_t& sfv) const {
   return cosine_lsh(sfv, bitnum());
 }
 

@@ -21,12 +21,12 @@
 #include <vector>
 #include <memory>
 #include <msgpack.hpp>
-#include "../../core/common/exception.hpp"
-#include "../../core/common/byte_buffer.hpp"
-#include "../../core/framework/packer.hpp"
-#include "../../core/framework/stream_writer.hpp"
+#include "../common/exception.hpp"
+#include "../common/byte_buffer.hpp"
+#include "../framework/packer.hpp"
+#include "../framework/stream_writer.hpp"
 
-typedef jubatus::core::table::column_table::version_t version_t;
+typedef jubatus::core::storage::column_table::version_t version_t;
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::core::framework::diff_object;
@@ -37,23 +37,6 @@ using std::vector;
 namespace jubatus {
 namespace core {
 namespace framework {
-namespace {
-
-std::string get_row_key(const std::string& packed) {
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, packed.c_str(), packed.size());
-  JUBATUS_ASSERT_EQ(msgpack::type::ARRAY,
-                    unpacked.get().type,
-                    "packed value must be array here");
-  JUBATUS_ASSERT_GE(1, unpacked.get().via.array.size,
-                    "array's length must be more than 1");
-  JUBATUS_ASSERT_GE(msgpack::type::RAW, unpacked.get().via.array.ptr[0].type,
-                    "first item of array must be string");
-  return unpacked.get().via.array.ptr[0].as<std::string>();
-}
-
-}  // namespace
-
 namespace {
 
 struct internal_diff : framework::diff_object_raw {

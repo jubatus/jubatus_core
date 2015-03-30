@@ -145,6 +145,8 @@ TEST_P(clustering_test, config_validation) {
   ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
 }
 
+
+
 const map<string, string> test_cases[] = {
 #ifdef JUBATUS_USE_EIGEN
   make_case("method", "gmm")

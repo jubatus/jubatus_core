@@ -23,11 +23,11 @@
 #include <string>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/lock.h"
 #include "../framework/model.hpp"
 #include "../common/type.hpp"
 #include "../common/version.hpp"
-#include "counter.hpp"
-#include "datum.hpp"
 #include "keyword_weights.hpp"
 
 namespace jubatus {
@@ -57,10 +57,12 @@ class weight_manager : public framework::model {
   void add_weight(const std::string& key, float weight);
 
   void get_diff(versioned_weight_diff& diff) const {
+    util::concurrent::scoped_lock lk(mutex_);
     diff = versioned_weight_diff(diff_weights_, version_);
   }
 
   bool put_diff(const versioned_weight_diff& diff) {
+    util::concurrent::scoped_lock lk(mutex_);
     if (diff.version_ == version_) {
       master_weights_.merge(diff.weights_);
       diff_weights_.clear();
@@ -82,6 +84,7 @@ class weight_manager : public framework::model {
   }
 
   void clear() {
+    util::concurrent::scoped_lock lk(mutex_);
     diff_weights_.clear();
     master_weights_.clear();
   }
@@ -93,14 +96,17 @@ class weight_manager : public framework::model {
   MSGPACK_DEFINE(version_, diff_weights_, master_weights_);
 
   void pack(framework::packer& pk) const {
+    util::concurrent::scoped_lock lk(mutex_);
     pk.pack(*this);
   }
 
   void unpack(msgpack::object o) {
+    util::concurrent::scoped_lock lk(mutex_);
     o.convert(this);
   }
 
   std::string to_string() const {
+    util::concurrent::scoped_lock lk(mutex_);
     std::stringstream ss;
     ss << "version:" << version_
        << " diff_weights:" << diff_weights_.to_string()
@@ -126,6 +132,7 @@ class weight_manager : public framework::model {
 
   double get_global_weight(const std::string& key) const;
 
+  mutable util::concurrent::mutex mutex_;
   storage::version version_;
   keyword_weights diff_weights_;
   keyword_weights master_weights_;

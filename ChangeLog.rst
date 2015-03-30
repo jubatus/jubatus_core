@@ -1,3 +1,17 @@
+Release 0.1.1 - 2015/03/30
+--------------------------
+
+* Improvements
+    * Move column storage directory (#118, #123)
+    * classifier: install algorithm headers (#117)
+    * fv_converter reports error precisely (#119)
+    * Codes / comments cleanup (#96, #97, #107, #109, #114, #115, #122, #135, #136)
+    * Add language declarations to wscript (#108)
+    * Update to the latest waf-unittest (#128)
+
+* Bug fixes
+    * clustering: avoid clusteirng score to become NaN (#78)
+
 Release 0.1.0 - 2015/02/23
 --------------------------
 

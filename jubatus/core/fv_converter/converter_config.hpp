@@ -23,7 +23,6 @@
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
-#include "jubatus/util/text/json.h"
 #include "type.hpp"
 
 namespace jubatus {

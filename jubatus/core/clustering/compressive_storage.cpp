@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include "compressor.hpp"
 #include "gmm_compressor.hpp"
 #include "kmeans_compressor.hpp"
 

@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 #include "../common/exception.hpp"
+#include "../common/version.hpp"
+#include "../framework/packer.hpp"
 #include "select_by_weights.hpp"
 
 namespace jubatus {
@@ -114,6 +116,10 @@ bool exp3::put_diff(const diff_t& diff) {
 }
 void exp3::mix(const diff_t& lhs, diff_t& rhs) const {
   s_.mix(lhs, rhs);
+}
+
+storage::version exp3::get_version() const {
+  return storage::version();
 }
 
 }  // namespace bandit

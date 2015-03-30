@@ -21,12 +21,13 @@
 #include <vector>
 #include <msgpack.hpp>
 #include "storage.hpp"
-#include "compressor.hpp"
 
 namespace jubatus {
 namespace core {
 namespace clustering {
-
+namespace compressor {
+class compressor;
+}  // namespace compressor
 class compressive_storage : public storage {
  public:
   compressive_storage(

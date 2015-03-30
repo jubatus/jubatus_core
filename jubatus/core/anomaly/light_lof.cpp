@@ -26,13 +26,16 @@
 #include "jubatus/util/lang/bind.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../common/exception.hpp"
+#include "../storage/column_table.hpp"
+#include "../framework/mixable_versioned_table.hpp"
+#include "../nearest_neighbor/nearest_neighbor_base.hpp"
 
 using jubatus::util::data::unordered_map;
 using jubatus::util::data::unordered_set;
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::lang::bind;
 using jubatus::core::nearest_neighbor::nearest_neighbor_base;
-using jubatus::core::table::column_table;
+using jubatus::core::storage::column_table;
 
 namespace jubatus {
 namespace core {
@@ -47,8 +50,8 @@ const size_t LRD_COLUMN_INDEX = 1;
 
 shared_ptr<column_table> create_lof_table() {
   shared_ptr<column_table> table(new column_table);
-  std::vector<table::column_type> schema(
-      2, table::column_type(table::column_type::float_type));
+  std::vector<storage::column_type> schema(
+      2, storage::column_type(storage::column_type::float_type));
   table->init(schema);
   return table;
 }
@@ -96,10 +99,6 @@ light_lof::light_lof(
             "nearest_neighbor_num <= reverse_nearest_neighbor_num"));
   }
 
-  shared_ptr<column_table> table(new column_table);
-  std::vector<table::column_type> schema(
-      2, table::column_type(table::column_type::float_type));
-  table->init(schema);
   mixable_nearest_neighbor_->set_model(nearest_neighbor_engine_->get_table());
   mixable_scores_->set_model(create_lof_table());
 }
@@ -173,7 +172,7 @@ void light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
 
   // Primarily add id to lof table with dummy parameters.
   // update_entries() below overwrites this row.
-  table->add(id, table::owner(my_id_), -1.f, -1.f);
+  table->add(id, storage::owner(my_id_), -1.f, -1.f);
   update_set.insert(id);
   update_entries(update_set);
 }
@@ -302,9 +301,9 @@ void light_lof::collect_neighbors(
 
 void light_lof::update_entries(const unordered_set<std::string>& neighbors) {
   shared_ptr<column_table> table = mixable_scores_->get_model();
-  table::float_column& kdist_column =
+  storage::float_column& kdist_column =
       table->get_float_column(KDIST_COLUMN_INDEX);
-  table::float_column& lrd_column = table->get_float_column(LRD_COLUMN_INDEX);
+  storage::float_column& lrd_column = table->get_float_column(LRD_COLUMN_INDEX);
 
   std::vector<uint64_t> ids;
   ids.reserve(neighbors.size());
@@ -342,7 +341,7 @@ void light_lof::update_entries(const unordered_set<std::string>& neighbors) {
   }
 
   // Calculate LRDs of neighbors.
-  const table::owner owner(my_id_);
+  const storage::owner owner(my_id_);
   for (std::vector<uint64_t>::const_iterator it = ids.begin();
        it != ids.end(); ++it) {
     const std::vector<std::pair<uint64_t, float> >& nn = nested_neighbors[*it];

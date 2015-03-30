@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "../anomaly/anomaly_factory.hpp"
+#include "../anomaly/anomaly_base.hpp"
 #include "../common/vector_util.hpp"
 #include "../fv_converter/datum.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
