@@ -31,6 +31,7 @@ namespace bandit {
 
 TEST(bandit_factory, epsilon_greedy) {
   json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
   js["epsilon"] = json::to_json(0.5);
   common::jsonconfig::config conf(js);
   shared_ptr<bandit_base> p = bandit_factory::create("epsilon_greedy", conf);
@@ -39,6 +40,7 @@ TEST(bandit_factory, epsilon_greedy) {
 
 TEST(bandit_factory, ucb1) {
   json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
   common::jsonconfig::config conf(js);
   shared_ptr<bandit_base> p = bandit_factory::create("ucb1", conf);
   EXPECT_EQ("ucb1", p->name());
@@ -46,6 +48,7 @@ TEST(bandit_factory, ucb1) {
 
 TEST(bandit_factory, softmax) {
   json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
   js["tau"] = json::to_json(0.5);
   common::jsonconfig::config conf(js);
   shared_ptr<bandit_base> p = bandit_factory::create("softmax", conf);
@@ -54,6 +57,7 @@ TEST(bandit_factory, softmax) {
 
 TEST(bandit_factory, exp3) {
   json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
   js["gamma"] = json::to_json(0.5);
   common::jsonconfig::config conf(js);
   shared_ptr<bandit_base> p = bandit_factory::create("exp3", conf);

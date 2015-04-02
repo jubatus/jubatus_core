@@ -54,6 +54,7 @@ double simulate_reward(const std::string& arm_id, mtrand& rand) {
 
 TEST(bandit, epsilon_greedy) {
   json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
   js["epsilon"] = json::to_json(0.1);
   common::jsonconfig::config conf(js);
 

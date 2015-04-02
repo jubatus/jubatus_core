@@ -27,7 +27,8 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-ucb1::ucb1() {
+ucb1::ucb1(bool assume_unrewarded)
+    : s_(assume_unrewarded) {
 }
 
 std::string ucb1::select_arm(const std::string& player_id) {
@@ -58,6 +59,7 @@ std::string ucb1::select_arm(const std::string& player_id) {
       result = arms[i];
     }
   }
+  s_.notify_selected(player_id, result);
   return result;
 }
 
