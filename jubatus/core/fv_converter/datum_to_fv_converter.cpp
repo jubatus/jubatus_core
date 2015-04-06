@@ -658,7 +658,6 @@ void datum_to_fv_converter::clear_weights() {
   pimpl_->clear_weights();
 }
 
-
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus

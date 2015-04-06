@@ -26,7 +26,7 @@
 #include "jubatus/util/math/random.h"
 #include "unlearner_base.hpp"
 #include "unlearner_config.hpp"
-#include "../common/porting_model.hpp"
+#include "../common/export_model.hpp"
 #include "../common/unordered_set.hpp"
 
 namespace jubatus {

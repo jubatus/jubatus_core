@@ -42,7 +42,7 @@ class byte_buffer {
     buf_.reset(new std::vector<char>(first, first+size));
   }
 
-	void write(const char* buf, unsigned int len) {
+  void write(const char* buf, unsigned int len) {
     const size_t old_tail = buf_->size();
     buf_->resize(buf_->size() + len);
     std::memcpy(buf_->data() + old_tail, buf, len);

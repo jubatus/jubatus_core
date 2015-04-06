@@ -42,8 +42,8 @@ namespace core {
 namespace classifier {
 
 linear_classifier::linear_classifier()
-  : storage_(new storage::local_storage_mixture()),
-    mixable_storage_(storage_) {
+    : storage_(new storage::local_storage_mixture()),
+      mixable_storage_(storage_) {
 }
 
 linear_classifier::~linear_classifier() {
@@ -54,7 +54,7 @@ namespace {
 // libc++'s std::function<void (<any types>)> does not accept
 // functions which returns other than void.
 void delete_label_wrapper(linear_classifier* cb, const std::string& label) {
-    cb->unlearn_label(label);
+  cb->unlearn_label(label);
 }
 }
 
@@ -72,7 +72,6 @@ jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
 linear_classifier::get_label_unlearner() const {
   return unlearner_;
 }
-
 
 void linear_classifier::classify_with_scores(
     const common::sfv_t& sfv,
@@ -227,7 +226,7 @@ void linear_classifier::export_model(framework::packer& pk) const {
 }
 
 void linear_classifier::import_model(msgpack::object o) {
-  // TODO
+  // TODO  // NOLINT
 }
 
 framework::mixable* linear_classifier::get_mixable() {

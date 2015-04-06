@@ -31,8 +31,7 @@ namespace classifier {
 
 passive_aggressive_1::passive_aggressive_1(
     float regularization_weight)
-    : linear_classifier(),
-      regularization_weight_(regularization_weight) {
+    : regularization_weight_(regularization_weight) {
   if (!(0.f < regularization_weight_)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));

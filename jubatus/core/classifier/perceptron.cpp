@@ -25,8 +25,7 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-perceptron::perceptron()
-  : linear_classifier() {
+perceptron::perceptron() {
 }
 
 void perceptron::train(const common::sfv_t& sfv, const std::string& label) {

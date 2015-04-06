@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2012 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2015 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_CLASSIFIER_CLASSIFIER_CONFIG_HPP_
 #define JUBATUS_CORE_CLASSIFIER_CLASSIFIER_CONFIG_HPP_
 
+#include <string>
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
@@ -29,8 +30,8 @@ namespace classifier {
 struct classifier_config_base {
   std::string method_;
   virtual ~classifier_config_base() {}
-  classifier_config_base(const std::string& method)
-    : method_(method) {
+  explicit classifier_config_base(const std::string& method)
+      : method_(method) {
   }
 
   template<typename Ar>
@@ -41,7 +42,7 @@ struct classifier_config_base {
 
 namespace detail {
 struct classifier_parameter : public classifier_config_base {
-  classifier_parameter(const std::string& method)
+  explicit classifier_parameter(const std::string& method)
       : classifier_config_base(method),
         regularization_weight(1.0f) {
   }
@@ -57,8 +58,8 @@ struct classifier_parameter : public classifier_config_base {
 struct unlearning_classifier_config : public classifier_parameter {
   unlearning_classifier_config(const std::string& method,
                                const common::jsonconfig::config& param)
-    : classifier_parameter(method) {
-    // TODO
+      : classifier_parameter(method) {
+    // TODO  // NOLINT
     if (param.type() == jubatus::util::text::json::json::Null) {
       throw JUBATUS_EXCEPTION(
           common::config_exception() << common::exception::error_message(
@@ -81,8 +82,8 @@ struct nearest_neighbor_classifier_config : public classifier_config_base {
   util::lang::shared_ptr<unlearner::unlearner_config_base> unlearner_config_;
   nearest_neighbor_classifier_config(const std::string& method,
                                      const common::jsonconfig::config& param)
-    : classifier_config_base(method) {
-    // TODO
+      : classifier_config_base(method) {
+    // TODO  // NOLINT
   }
 
   template<typename Ar>

@@ -40,7 +40,7 @@ namespace classifier {
 class nearest_neighbor_classifier : public classifier_base {
  public:
   nearest_neighbor_classifier(
-      util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
+      jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
           nearest_neighbor_engine,
       size_t k, float alpha);
 

@@ -238,12 +238,11 @@ void nearest_neighbor_classifier::unpack(msgpack::object o) {
 }
 
 void nearest_neighbor_classifier::export_model(framework::packer& pk) const {
-  // TODO
+  // TODO  // NOLINT
 }
 void nearest_neighbor_classifier::import_model(msgpack::object o) {
-  // TODO
+  // TODO  // NOLINT
 }
-
 
 framework::mixable* nearest_neighbor_classifier::get_mixable() {
   return nearest_neighbor_engine_->get_mixable();

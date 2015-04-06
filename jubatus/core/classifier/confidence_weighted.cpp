@@ -32,8 +32,7 @@ namespace core {
 namespace classifier {
 
 confidence_weighted::confidence_weighted(float regularization_weight)
-    : linear_classifier(),
-      regularization_weight_(regularization_weight) {
+    : regularization_weight_(regularization_weight) {
   if (!(0.f < regularization_weight_)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));

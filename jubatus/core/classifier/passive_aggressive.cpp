@@ -25,8 +25,7 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-passive_aggressive::passive_aggressive()
-    : linear_classifier() {
+passive_aggressive::passive_aggressive() {
 }
 
 void passive_aggressive::train(const common::sfv_t& sfv, const string& label) {

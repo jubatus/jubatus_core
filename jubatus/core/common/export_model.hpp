@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2014 Preferred Infrastructure and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2015 Preferred Infrastructure and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -25,9 +25,9 @@
     msgpack::type::make_define(__VA_ARGS__).msgpack_pack(pk);       \
   }
 #define JUBATUS_IMPORT_MODEL(...)                                   \
-  void import_model(msgpack::object o) {                           \
+  void import_model(msgpack::object o) {                            \
     this->clear();                                                  \
-    msgpack::type::make_define(__VA_ARGS__).msgpack_unpack(o);    \
+    msgpack::type::make_define(__VA_ARGS__).msgpack_unpack(o);      \
   }
 
 #define JUBATUS_PORTING_MODEL(...)              \

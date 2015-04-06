@@ -37,10 +37,10 @@ namespace classifier {
 
 class linear_classifier : public classifier_base {
  public:
+  linear_classifier();
   virtual ~linear_classifier();
   virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
 
-  linear_classifier();
   void set_label_unlearner(
       jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
           label_unlearner);

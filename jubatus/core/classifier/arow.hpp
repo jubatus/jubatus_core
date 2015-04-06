@@ -24,11 +24,10 @@
 namespace jubatus {
 namespace core {
 namespace classifier {
-struct classifier_parameter;
 
 class arow : public linear_classifier {
  public:
-  arow(float regularization_weight);
+  explicit arow(float regularization_weight);
   void train(const common::sfv_t& fv, const std::string& label);
   std::string name() const;
  private:

@@ -26,7 +26,7 @@
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "unlearner_base.hpp"
-#include "../common/porting_model.hpp"
+#include "../common/export_model.hpp"
 #include "../common/unordered_map.hpp"
 #include "unlearner_config.hpp"
 
@@ -46,7 +46,9 @@ class lru_unlearner : public unlearner_base {
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_MEMBER(name) & JUBA_MEMBER(max_size) & JUBA_MEMBER(sticky_pattern);
+      ar & JUBA_MEMBER(name)
+          & JUBA_MEMBER(max_size)
+          & JUBA_MEMBER(sticky_pattern);
     }
   };
 
