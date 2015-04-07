@@ -95,7 +95,7 @@ inline int bitcount_dispatcher(T bits) {
 #ifdef __GNUG__
   return fast_bitcount(bits);
 #else
-  return bitcounc_impl<T, sizeof(T)>::call(bits);
+  return bitcount_impl<T, sizeof(T)>::call(bits);
 #endif
 }
 
