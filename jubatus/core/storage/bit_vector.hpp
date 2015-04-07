@@ -112,7 +112,7 @@ inline int bitcount(unsigned long long bits) {
 }
 
 template <class T>
-inline int bitcount(T); // = delete;
+inline int bitcount(T);  // = delete;
 
 }  // namespace detail
 
