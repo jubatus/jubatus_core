@@ -136,7 +136,7 @@ def cpplint(ctx):
   tmp_file.flush()
   sys.stderr.write('Running cpplint...\n')
   ctx.exec_command('cat ' + tmp_file.name +
-                   ' | xargs "' + cpplint.abspath() + '" --filter=-runtime/references,-runtime/rtti,-runtime/int 2>&1' +
+                   ' | xargs "' + cpplint.abspath() + '" --filter=-runtime/references,-runtime/rtti 2>&1' +
                    ' | grep -v "^Done processing "')
   tmp_file.close()
 
