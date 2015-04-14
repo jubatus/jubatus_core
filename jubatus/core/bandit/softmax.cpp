@@ -69,8 +69,8 @@ bool softmax::register_reward(const std::string& player_id,
   return s_.register_reward(player_id, arm_id, reward);
 }
 
-arm_info_map softmax::get_arm_info(const std::string& arm_id) const {
-  return s_.get_arm_info_map(arm_id);
+arm_info_map softmax::get_arm_info(const std::string& player_id) const {
+  return s_.get_arm_info_map(player_id);
 }
 
 bool softmax::reset(const std::string& player_id) {
