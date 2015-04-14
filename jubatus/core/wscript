@@ -11,3 +11,5 @@ def configure(conf):
 
 def build(bld):
   bld.recurse(subdirs)
+  bld.install_files('${PREFIX}/include/jubatus/core',
+                    ['plugin.hpp'])
