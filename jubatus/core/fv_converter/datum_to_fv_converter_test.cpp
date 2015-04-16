@@ -425,9 +425,9 @@ TEST(datum_to_fv_converter, check_datum_key_in_binary) {
 }
 
 TEST(datum_to_fv_converter, combination_feature_num) {
-  datum datum;
-  datum.num_values_.push_back(std::make_pair("val1", 1.0));
-  datum.num_values_.push_back(std::make_pair("val2", 1.1));
+  datum d;
+  d.num_values_.push_back(std::make_pair("val1", 1.0));
+  d.num_values_.push_back(std::make_pair("val2", 1.1));
 
   datum_to_fv_converter conv;
   typedef shared_ptr<combination_feature> combination_feature_t;
@@ -449,7 +449,7 @@ TEST(datum_to_fv_converter, combination_feature_num) {
       all_matcher,
       combination_feature_t(new combination_mul_feature()));
   std::vector<std::pair<std::string, float> > feature;
-  conv.convert(datum, feature);
+  conv.convert(d, feature);
 
   std::vector<std::pair<std::string, float> > expected;
   expected.push_back(std::make_pair("val1@num", 1.0));
@@ -457,6 +457,14 @@ TEST(datum_to_fv_converter, combination_feature_num) {
   expected.push_back(std::make_pair("val1@num&val2@num/add", 2.1));
   expected.push_back(std::make_pair("val1@num&val2@num/mul", 1.1));
 
+  ASSERT_EQ(expected, feature);
+
+  // test for empty datum
+  datum empty_datum;
+  feature.clear();
+  expected.clear();
+
+  conv.convert(empty_datum, feature);
   ASSERT_EQ(expected, feature);
 }
 
