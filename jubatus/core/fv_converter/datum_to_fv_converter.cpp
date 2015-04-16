@@ -547,6 +547,12 @@ class datum_to_fv_converter_impl {
 
   void convert_combinations(common::sfv_t& ret_fv) const {
     const size_t original_size = ret_fv.size();
+
+    if (original_size < 2) {
+      // Must have at least 2 features to generate combinations.
+      return;
+    }
+
     for (size_t i = 0; i < combination_rules_.size(); ++i) {
       const combination_feature_rule& r = combination_rules_[i];
       for (size_t j = 0 ; j < original_size - 1; ++j) {
