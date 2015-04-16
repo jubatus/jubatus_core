@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include "../common/exception.hpp"
 
 namespace jubatus {
 namespace core {
@@ -33,6 +34,12 @@ bool summation_storage::register_arm(const std::string& arm_id) {
     return false;
   }
   arm_ids_.push_back(arm_id);
+  const arm_info a0 = {0, 0.0};
+  for (table_t::iterator iter = unmixed_.begin();
+      iter != unmixed_.end(); ++iter) {
+    arm_info_map& as = iter->second;
+    as.insert(std::make_pair(arm_id, a0));
+  }
   return true;
 }
 
@@ -43,6 +50,32 @@ void delete_arm_(summation_storage::table_t& t, const std::string& arm_id) {
     arm_info_map& as = iter->second;
     as.erase(arm_id);
   }
+}
+arm_info_map& get_arm_info_map_(summation_storage::table_t& t,
+                                const std::vector<std::string>& arm_ids,
+                                const std::string& player_id) {
+  summation_storage::table_t::iterator iter = t.find(player_id);
+  if (iter != t.end()) {
+    return iter->second;
+  }
+  arm_info_map& as = t[player_id];
+  const arm_info a0 = {0, 0.0};
+  for (size_t i = 0; i < arm_ids.size(); ++i) {
+    as.insert(std::make_pair(arm_ids[i], a0));
+  }
+  return as;
+}
+arm_info& get_arm_info_(summation_storage::table_t& t,
+                        const std::vector<std::string>& arm_ids,
+                        const std::string& player_id,
+                        const std::string& arm_id) {
+  arm_info_map& as = get_arm_info_map_(t, arm_ids, player_id);
+  arm_info_map::iterator iter = as.find(arm_id);
+  if (iter == as.end()) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "arm_id is not registered"));
+  }
+  return iter->second;
 }
 }  // namespace
 
@@ -65,8 +98,7 @@ void summation_storage::notify_selected(
   if (!assume_unrewarded_) {
     return;
   }
-  arm_info_map& as = unmixed_[player_id];
-  arm_info& a = as[arm_id];
+  arm_info& a = get_arm_info_(unmixed_, arm_ids_, player_id, arm_id);
   a.trial_count += 1;
 }
 
@@ -74,8 +106,7 @@ bool summation_storage::register_reward(
     const std::string& player_id,
     const std::string& arm_id,
     double reward) {
-  arm_info_map& as = unmixed_[player_id];
-  arm_info& a = as[arm_id];
+  arm_info& a = get_arm_info_(unmixed_, arm_ids_, player_id, arm_id);
   if (!assume_unrewarded_) {
     a.trial_count += 1;
   }
