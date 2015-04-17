@@ -1,5 +1,6 @@
 # -*- python -*-
-import Options
+
+from waflib import Options
 from waflib.Errors import TaskNotReady
 from functools import partial
 import os
@@ -49,7 +50,7 @@ def configure(conf):
   if env.COMPILER_CXX != 'g++' or int(ver[0]) < 4 or (int(ver[0]) == 4 and int(ver[1]) < 6):
     env.append_unique('CXXFLAGS', '-D_FORTIFY_SOURCE=1')
 
-  conf.check_cxx(lib = 'pthread')
+  conf.check(lib = 'pthread')
 
   # Generate config.hpp
   conf.define('JUBATUS_CORE_VERSION', VERSION)
@@ -60,7 +61,7 @@ def configure(conf):
   conf.env.VERSION = VERSION
   conf.env.ABI_VERSION = ABI_VERSION
 
-  conf.check_cxx(lib = 'msgpack')
+  conf.check(lib = 'msgpack')
 
   if Options.options.debug:
     conf.define('_GLIBCXX_DEBUG', 1)

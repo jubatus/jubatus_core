@@ -1,5 +1,4 @@
 # -*- python -*-
-import Options
 
 def options(opt): pass
 

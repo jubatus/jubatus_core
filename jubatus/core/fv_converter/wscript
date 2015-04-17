@@ -1,5 +1,6 @@
 # -*- python -*-
-import Options
+
+from waflib import Options
 
 def options(opt):
   opt.add_option('--regexp-library',
@@ -9,11 +10,13 @@ def options(opt):
 def configure(conf):
   regexp_lib = Options.options.regexp_library
   if regexp_lib == 're2':
-    conf.check_cxx(lib = 're2', define_name = 'HAVE_RE2',
-                   errmsg = 'not found')
+    conf.check(lib = 're2',
+               define_name = 'HAVE_RE2',
+               errmsg = 'not found')
   elif regexp_lib == 'oniguruma':
-    conf.check_cxx(lib = 'onig', define_name = 'HAVE_ONIGURUMA',
-                   errmsg = 'not found')
+    conf.check(lib = 'onig',
+               define_name = 'HAVE_ONIGURUMA',
+               errmsg = 'not found')
   elif regexp_lib == 'none':
     pass
   else:
@@ -115,11 +118,11 @@ def build(bld):
 
   use = ['jubatus_util', 'MSGPACK']
 
-  if bld.env.HAVE_RE2:
+  if bld.is_defined('HAVE_RE2'):
     source += ['re2_match.cpp', 're2_filter.cpp', 're2_splitter.cpp' ]
     test_source += regex_test_source
     use += ['RE2']
-  elif bld.env.HAVE_ONIGURUMA:
+  elif bld.is_defined('HAVE_ONIGURUMA'):
     source += ['onig_match.cpp', 'onig_filter.cpp', 'onig_splitter.cpp']
     test_source += regex_test_source
     use += ['ONIG']
