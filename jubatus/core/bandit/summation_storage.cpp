@@ -73,7 +73,7 @@ arm_info& get_arm_info_(summation_storage::table_t& t,
   arm_info_map::iterator iter = as.find(arm_id);
   if (iter == as.end()) {
     throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-        "arm_id is not registered"));
+        "arm_id is not registered: " + arm_id));
   }
   return iter->second;
 }
