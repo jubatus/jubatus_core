@@ -234,7 +234,6 @@ vector<float> euclid_lsh::calculate_lsh(const common::sfv_t& query) const {
 }
 
 vector<float> euclid_lsh::get_projection(uint32_t seed) const {
-  vector<float> tmpl_proj;
   if (retain_projection_) {
     scoped_lock lk(cache_lock_);  // lock is needed only retain_projection
     vector<float>& proj = projection_cache_[seed];
