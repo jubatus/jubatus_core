@@ -14,9 +14,7 @@ def configure(conf):
                define_name = 'HAVE_RE2',
                errmsg = 'not found')
   elif regexp_lib == 'oniguruma':
-    conf.check(lib = 'onig',
-               define_name = 'HAVE_ONIGURUMA',
-               errmsg = 'not found')
+    conf.check_cfg(package = 'oniguruma', args = '--cflags --libs')
   elif regexp_lib == 'none':
     pass
   else:

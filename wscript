@@ -61,7 +61,7 @@ def configure(conf):
   conf.env.VERSION = VERSION
   conf.env.ABI_VERSION = ABI_VERSION
 
-  conf.check(lib = 'msgpack')
+  conf.check_cfg(package = 'msgpack', args = '--cflags --libs')
 
   if Options.options.debug:
     conf.define('_GLIBCXX_DEBUG', 1)
