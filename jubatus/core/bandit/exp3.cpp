@@ -92,8 +92,8 @@ bool exp3::register_reward(const std::string& player_id,
                             reward * weights[i] * gamma_ / arms.size());
 }
 
-arm_info_map exp3::get_arm_info(const std::string& arm_id) const {
-  return s_.get_arm_info_map(arm_id);
+arm_info_map exp3::get_arm_info(const std::string& player_id) const {
+  return s_.get_arm_info_map(player_id);
 }
 
 bool exp3::reset(const std::string& player_id) {
