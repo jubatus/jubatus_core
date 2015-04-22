@@ -200,6 +200,7 @@ bool summation_storage::reset(const std::string& player_id) {
 }
 
 void summation_storage::clear() {
+  arm_ids_.clear();
   mixed_.clear();
   unmixed_.clear();
 }
