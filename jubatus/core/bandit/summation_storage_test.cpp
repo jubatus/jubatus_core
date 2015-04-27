@@ -17,17 +17,18 @@
 #include "summation_storage.hpp"
 
 #include <string>
-
 #include <gtest/gtest.h>
+#include "../common/exception.hpp"
 
 namespace jubatus {
 namespace core {
 namespace bandit {
 
 TEST(summation_storage, common) {
-  summation_storage s;
+  summation_storage s(false);
   const std::string player_id = "player1";
   const std::string arm_id = "arm1";
+  s.register_arm(arm_id);
 
   {
     arm_info a = s.get_arm_info(player_id, arm_id);
@@ -65,7 +66,13 @@ TEST(summation_storage, common) {
 }
 
 TEST(storage, mix) {
-  summation_storage s1, s2;
+  summation_storage s1(false), s2(false);
+  s1.register_arm("hoge");
+  s1.register_arm("fuga");
+  s1.register_arm("piyo");
+  s2.register_arm("hoge");
+  s2.register_arm("fuga");
+  s2.register_arm("piyo");
 
   s1.register_reward("player1", "hoge", 1.0);
   s1.register_reward("player1", "fuga", 0.0);
@@ -147,6 +154,70 @@ TEST(storage, mix) {
     EXPECT_EQ(1.0, a.weight);
     EXPECT_EQ(0.5, s2.get_expectation("player1", "hoge"));
   }
+}
+
+TEST(summation_storage, notify_selected) {
+  const std::string player_id = "player1";
+  const std::string arm_id = "arm1";
+
+  summation_storage s1(false);
+  s1.register_arm(arm_id);
+
+  s1.notify_selected(player_id, arm_id);
+
+  // if assume_unrewarded is false, notify_selected has no effect
+  {
+    arm_info a = s1.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(0, a.trial_count);
+    EXPECT_EQ(0.0, a.weight);
+  }
+
+  summation_storage s2(true);
+  s2.register_arm(arm_id);
+
+  s2.notify_selected(player_id, arm_id);
+
+  // if assume_unrewarded is true, notify_selected will increment trial_count
+  {
+    arm_info a = s2.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(0.0, a.weight);
+  }
+
+  s2.register_reward(player_id, arm_id, 1.0);
+
+  // and register_reward will not increment trial_count
+  {
+    arm_info a = s2.get_arm_info(player_id, arm_id);
+    EXPECT_EQ(1, a.trial_count);
+    EXPECT_EQ(1.0, a.weight);
+  }
+}
+
+TEST(summation_storage, unregistered_arm) {
+  summation_storage s(false);
+  EXPECT_THROW({
+      s.register_reward("player1", "arm1", 0);
+  }, common::exception::runtime_error);
+
+  s.register_arm("arm1");
+  EXPECT_NO_THROW({
+      s.register_reward("player1", "arm1", 0);
+  });
+  EXPECT_NO_THROW({
+      s.register_reward("player2", "arm1", 0);
+  });
+
+  EXPECT_THROW({
+      s.register_reward("player1", "arm2", 0);
+  }, common::exception::runtime_error);
+  s.register_arm("arm2");
+  EXPECT_NO_THROW({
+      s.register_reward("player1", "arm2", 0);
+  });
+  EXPECT_NO_THROW({
+      s.register_reward("player2", "arm2", 0);
+  });
 }
 
 }  // namespace bandit

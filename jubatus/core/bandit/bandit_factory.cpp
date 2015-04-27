@@ -32,29 +32,41 @@ namespace core {
 namespace bandit {
 
 struct epsilon_greedy_config {
+  bool assume_unrewarded;
   double epsilon;
 
   template<class Ar>
   void serialize(Ar& ar) {
-    ar & JUBA_MEMBER(epsilon);
+    ar & JUBA_MEMBER(assume_unrewarded) & JUBA_MEMBER(epsilon);
+  }
+};
+
+struct ucb1_config {
+  bool assume_unrewarded;
+
+  template<class Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(assume_unrewarded);
   }
 };
 
 struct softmax_config {
+  bool assume_unrewarded;
   double tau;
 
   template<class Ar>
   void serialize(Ar& ar) {
-    ar & JUBA_MEMBER(tau);
+    ar & JUBA_MEMBER(assume_unrewarded) & JUBA_MEMBER(tau);
   }
 };
 
 struct exp3_config {
+  bool assume_unrewarded;
   double gamma;
 
   template<class Ar>
   void serialize(Ar& ar) {
-    ar & JUBA_MEMBER(gamma);
+    ar & JUBA_MEMBER(assume_unrewarded) & JUBA_MEMBER(gamma);
   }
 };
 
@@ -69,9 +81,17 @@ shared_ptr<bandit_base> bandit_factory::create(
     }
     epsilon_greedy_config conf =
         config_cast_check<epsilon_greedy_config>(param);
-    return shared_ptr<bandit_base>(new epsilon_greedy(conf.epsilon));
+    return shared_ptr<bandit_base>(
+        new epsilon_greedy(conf.assume_unrewarded, conf.epsilon));
   } else if (name == "ucb1") {
-    return shared_ptr<bandit_base>(new ucb1());
+    if (param.type() == json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
+    ucb1_config conf =
+        config_cast_check<ucb1_config>(param);
+    return shared_ptr<bandit_base>(new ucb1(conf.assume_unrewarded));
   } else if (name == "softmax") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
@@ -79,7 +99,8 @@ shared_ptr<bandit_base> bandit_factory::create(
               "parameter block is not specified in config"));
     }
     softmax_config conf = config_cast_check<softmax_config>(param);
-    return shared_ptr<bandit_base>(new softmax(conf.tau));
+    return shared_ptr<bandit_base>(
+        new softmax(conf.assume_unrewarded, conf.tau));
   } else if (name == "exp3") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
@@ -87,7 +108,8 @@ shared_ptr<bandit_base> bandit_factory::create(
               "parameter block is not specified in config"));
     }
     exp3_config conf = config_cast_check<exp3_config>(param);
-    return shared_ptr<bandit_base>(new exp3(conf.gamma));
+    return shared_ptr<bandit_base>(
+        new exp3(conf.assume_unrewarded, conf.gamma));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("bandit(" + name + ")"));

@@ -37,7 +37,7 @@ namespace detail {
 template <typename T, size_t N> struct bitcount_impl;
 template <typename T>
 struct bitcount_impl<T, 1> {
-  static size_t call(T bits) {
+  static int call(T bits) {
     bits = (bits & 0x55) + (bits >> 1 & 0x55);
     bits = (bits & 0x33) + (bits >> 2 & 0x33);
     return (bits & 0x0f) + (bits >> 4 & 0x0f);
@@ -45,7 +45,7 @@ struct bitcount_impl<T, 1> {
 };
 template <typename T>
 struct bitcount_impl<T, 2> {
-  static size_t call(T bits) {
+  static int call(T bits) {
     bits = (bits & 0x5555U) + (bits >> 1 & 0x5555U);
     bits = (bits & 0x3333U) + (bits >> 2 & 0x3333U);
     bits = (bits & 0x0f0fU) + (bits >> 4 & 0x0f0fU);
@@ -54,7 +54,7 @@ struct bitcount_impl<T, 2> {
 };
 template <typename T>
 struct bitcount_impl<T, 4> {
-  static size_t call(T bits) {
+  static int call(T bits) {
     bits = (bits & 0x55555555LU) + (bits >> 1 & 0x55555555LU);
     bits = (bits & 0x33333333LU) + (bits >> 2 & 0x33333333LU);
     bits = (bits & 0x0f0f0f0fLU) + (bits >> 4 & 0x0f0f0f0fLU);
@@ -64,7 +64,7 @@ struct bitcount_impl<T, 4> {
 };
 template <typename T>
 struct bitcount_impl<T, 8> {
-  static size_t call(T bits) {
+  static int call(T bits) {
     bits = (bits & 0x5555555555555555LLU) + (bits >> 1 & 0x5555555555555555LLU);
     bits = (bits & 0x3333333333333333LLU) + (bits >> 2 & 0x3333333333333333LLU);
     bits = (bits & 0x0f0f0f0f0f0f0f0fLLU) + (bits >> 4 & 0x0f0f0f0f0f0f0f0fLLU);
@@ -73,10 +73,46 @@ struct bitcount_impl<T, 8> {
     return (bits & 0x00000000ffffffffLLU) + (bits >>32 & 0x00000000ffffffffLLU);
   }
 };
-template <typename T>
-inline size_t bitcount(T bits) {
-  return bitcount_impl<T, sizeof(T)>::call(bits);
+
+#ifdef __GNUG__
+
+inline int fast_bitcount(unsigned bits) {
+  return __builtin_popcount(bits);
 }
+
+inline int fast_bitcount(unsigned long bits) {
+  return __builtin_popcountl(bits);
+}
+
+inline int fast_bitcount(unsigned long long bits) {
+  return __builtin_popcountll(bits);
+}
+
+#endif
+
+template <class T>
+inline int bitcount_dispatcher(T bits) {
+#ifdef __GNUG__
+  return fast_bitcount(bits);
+#else
+  return bitcount_impl<T, sizeof(T)>::call(bits);
+#endif
+}
+
+inline int bitcount(unsigned bits) {
+  return bitcount_dispatcher(bits);
+}
+
+inline int bitcount(unsigned long bits) {
+  return bitcount_dispatcher(bits);
+}
+
+inline int bitcount(unsigned long long bits) {
+  return bitcount_dispatcher(bits);
+}
+
+template <class T>
+inline int bitcount(T); // = delete;
 
 }  // namespace detail
 
@@ -267,25 +303,6 @@ struct bit_vector_base {
     }
     return result;
   }
-  static uint64_t pop_count(uint64_t r) {
-    r = (r & 0x5555555555555555ULL) +
-      ((r >> 1) & 0x5555555555555555ULL);
-    r = (r & 0x3333333333333333ULL) +
-      ((r >> 2) & 0x3333333333333333ULL);
-    r = (r + (r >> 4)) & 0x0f0f0f0f0f0f0f0fULL;
-    r = r + (r >>  8);
-    r = r + (r >> 16);
-    r = r + (r >> 32);
-    return static_cast<uint64_t>(r & 0x7f);
-  }
-  static size_t pop_count(uint8_t r) {
-    r = (r & 0x55U) +
-      ((r >> 1) & 0x55U);
-    r = (r & 0x33U) +
-      ((r >> 2) & 0x33U);
-    r = (r + (r >> 4)) & 0x0fU;
-    return static_cast<size_t>(r & 0x7f);
-  }
 
   bit_base* raw_data_unsafe() {
     return bits_;
@@ -414,32 +431,6 @@ struct bit_vector_base {
   bool own_;
 };
 typedef bit_vector_base<uint64_t> bit_vector;
-
-template<typename bit_base>
-class const_bit_vector_base : private bit_vector_base<bit_base> {
-  typedef bit_vector_base<bit_base> base_bit_vector_t;
-
- public:
-  const_bit_vector_base(const void* bits, int bit_num)
-      : base_bit_vector_t(const_cast<void*>(bits), bit_num) {}
-  explicit const_bit_vector_base(const base_bit_vector_t& orig)
-      : base_bit_vector_t(const_cast<base_bit_vector_t&>(orig)) {}
-  using base_bit_vector_t::debug_print;
-  using base_bit_vector_t::calc_hamming_similarity;
-  using base_bit_vector_t::bit_count;
-  using base_bit_vector_t::operator==;  // NOLINT
-  using base_bit_vector_t::get_bit;
-  using base_bit_vector_t::status;
-  using base_bit_vector_t::bit_num;
-  using base_bit_vector_t::used_bytes;
-  friend std::ostream& operator<<(
-      std::ostream& os,
-      const base_bit_vector_t& bv) {
-    bv.debug_print(os);
-    return os;
-  }
-};
-typedef const_bit_vector_base<uint64_t> const_bit_vector;
 
 }  // namespace storage
 }  // namespace core

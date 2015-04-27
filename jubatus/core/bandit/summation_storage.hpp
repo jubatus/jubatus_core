@@ -30,11 +30,13 @@ class summation_storage {
  public:
   typedef bandit_base::diff_t table_t;
 
-  summation_storage();
+  explicit summation_storage(bool assume_unrewarded);
 
   bool register_arm(const std::string& arm_id);
   bool delete_arm(const std::string& arm_id);
 
+  void notify_selected(const std::string& player_id,
+                       const std::string& arm_id);
   bool register_reward(const std::string& player_id,
                        const std::string& arm_id,
                        double reward);
@@ -59,6 +61,7 @@ class summation_storage {
   MSGPACK_DEFINE(arm_ids_, mixed_, unmixed_);
 
  private:
+  const bool assume_unrewarded_;
   std::vector<std::string> arm_ids_;
   table_t mixed_, unmixed_;
 };

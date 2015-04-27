@@ -30,7 +30,7 @@ namespace bandit {
 
 class exp3 : public bandit_base {
  public:
-  explicit exp3(double gamma);
+  exp3(bool assume_unrewarded, double gamma);
 
   std::string select_arm(const std::string& player_id);
 

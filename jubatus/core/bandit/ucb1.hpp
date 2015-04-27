@@ -28,7 +28,7 @@ namespace bandit {
 
 class ucb1 : public bandit_base {
  public:
-  ucb1();
+  explicit ucb1(bool assume_unrewarded);
 
   std::string select_arm(const std::string& player_id);
 
