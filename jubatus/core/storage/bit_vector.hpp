@@ -80,11 +80,11 @@ inline int fast_bitcount(unsigned bits) {
   return __builtin_popcount(bits);
 }
 
-inline int fast_bitcount(unsigned long bits) {
+inline int fast_bitcount(unsigned long bits) {  // NOLINT
   return __builtin_popcountl(bits);
 }
 
-inline int fast_bitcount(unsigned long long bits) {
+inline int fast_bitcount(unsigned long long bits) {  // NOLINT
   return __builtin_popcountll(bits);
 }
 
@@ -103,16 +103,16 @@ inline int bitcount(unsigned bits) {
   return bitcount_dispatcher(bits);
 }
 
-inline int bitcount(unsigned long bits) {
+inline int bitcount(unsigned long bits) {  // NOLINT
   return bitcount_dispatcher(bits);
 }
 
-inline int bitcount(unsigned long long bits) {
+inline int bitcount(unsigned long long bits) {  // NOLINT
   return bitcount_dispatcher(bits);
 }
 
 template <class T>
-inline int bitcount(T); // = delete;
+inline int bitcount(T);  // = delete;
 
 }  // namespace detail
 
