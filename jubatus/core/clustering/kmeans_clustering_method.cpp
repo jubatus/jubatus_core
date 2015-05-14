@@ -102,6 +102,11 @@ vector<common::sfv_t> kmeans_clustering_method::get_k_center() const {
 
 int64_t kmeans_clustering_method::get_nearest_center_index(
     const common::sfv_t& point) const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "clustering is not performed yet"));
+  }
+
   return min_dist(point, kcenters_).first;
 }
 
