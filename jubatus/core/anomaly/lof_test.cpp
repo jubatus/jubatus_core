@@ -50,6 +50,14 @@ TYPED_TEST_P(lof_test, update_row) {
   l.calc_anomaly_score(id);
 }
 
+TYPED_TEST_P(lof_test, set_row) {
+  lof l(lof_storage::config(), shared_ptr<TypeParam>(new TypeParam));
+  common::sfv_t v, q;
+  const string id = "test";
+  l.set_row(id, v);
+  l.calc_anomaly_score(id);
+}
+
 TYPED_TEST_P(lof_test, config_validation) {
   shared_ptr<TypeParam> nn_engine(new TypeParam);
   shared_ptr<lof> l;
@@ -75,7 +83,7 @@ TYPED_TEST_P(lof_test, config_validation) {
   ASSERT_NO_THROW(l.reset(new lof(c, nn_engine)));
 }
 
-REGISTER_TYPED_TEST_CASE_P(lof_test, update_row, config_validation);
+REGISTER_TYPED_TEST_CASE_P(lof_test, update_row, set_row, config_validation);
 
 typedef testing::Types<recommender::inverted_index, recommender::lsh,
   recommender::minhash, recommender::euclid_lsh> recommender_types;

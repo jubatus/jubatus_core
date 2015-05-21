@@ -118,7 +118,8 @@ void lof::update_row(const string& id, const sfv_diff_t& diff) {
 }
 
 void lof::set_row(const string& id, const common::sfv_t& sfv) {
-  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+  mixable_storage_->get_model()->remove_row(id);
+  mixable_storage_->get_model()->update_row(id, sfv);
 }
 
 void lof::get_all_row_ids(vector<string>& ids) const {
