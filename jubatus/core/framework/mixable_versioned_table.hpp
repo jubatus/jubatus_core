@@ -28,11 +28,6 @@
 
 namespace jubatus {
 namespace core {
-namespace unlearner {
-
-class unlearner_base;
-
-}  // namespace unlearner
 namespace framework {
 
 typedef std::map<storage::owner, uint64_t> version_clock;
