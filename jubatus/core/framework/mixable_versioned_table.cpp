@@ -25,7 +25,6 @@
 #include "../common/byte_buffer.hpp"
 #include "../framework/packer.hpp"
 #include "../framework/stream_writer.hpp"
-#include "../unlearner/unlearner_base.hpp"
 
 typedef jubatus::core::storage::column_table::version_t version_t;
 
@@ -202,17 +201,10 @@ void mixable_versioned_table::push_impl(
     throw JUBATUS_EXCEPTION(
         core::common::exception::runtime_error("bad diff_object"));
   }
-
-  if (unlearner_) {
-    for (uint64_t i = 0; i < o.via.array.size; ++i) {
-      const version_t version = table->set_row(o.via.array.ptr[i], unlearner_.get());
-      update_version(version);
-    }
-  } else {
-    for (uint64_t i = 0; i < o.via.array.size; ++i) {
-      const version_t version = table->set_row(o.via.array.ptr[i]);
-      update_version(version);
-    }
+  for (uint64_t i = 0; i < o.via.array.size; ++i) {
+    const version_t version = table->set_row(o.via.array.ptr[i],
+                                             unlearner_.get());
+    update_version(version);
   }
 }
 
