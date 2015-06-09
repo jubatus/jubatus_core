@@ -449,10 +449,6 @@ void classify_task(int thread_id,
 void pack_task(int thread_id,
                int num,
                shared_ptr<core::driver::classifier> target) {
-  jubatus::util::math::random::mtrand rand;
-  vector<pair<string, datum> > data;
-
-  make_random_data(rand, data, num);
   for (int i = 0; i < num; i++) {
     msgpack::sbuffer user_data_buf;
     core::framework::stream_writer<msgpack::sbuffer> st(user_data_buf);
