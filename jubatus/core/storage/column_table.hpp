@@ -35,7 +35,6 @@
 #include "../common/unordered_map.hpp"
 #include "../framework/packer.hpp"
 #include "storage_exception.hpp"
-#include "storage_exception.hpp"
 #include "../unlearner/unlearner_base.hpp"
 #include "bit_vector.hpp"
 #include "column_type.hpp"
