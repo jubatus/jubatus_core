@@ -467,7 +467,7 @@ void set_label_task(int thread_id,
     labels.push_back(generate_random_string(rand, 10));
   }
   for (int i = 0; i < num; i++) {
-    target->set_label(labels[rand() % labels.size()]);
+    target->set_label(labels[rand.next_int(labels.size())]);
   }
 }
 
