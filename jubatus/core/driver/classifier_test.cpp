@@ -446,6 +446,31 @@ void classify_task(int thread_id,
   }
 }
 
+void pack_task(int thread_id,
+               int num,
+               shared_ptr<core::driver::classifier> target) {
+  for (int i = 0; i < num; i++) {
+    msgpack::sbuffer user_data_buf;
+    core::framework::stream_writer<msgpack::sbuffer> st(user_data_buf);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer packer(jp);
+    target->pack(packer);
+  }
+}
+
+void set_label_task(int thread_id,
+                 int num,
+                 shared_ptr<core::driver::classifier> target) {
+  jubatus::util::math::random::mtrand rand;
+  vector<string> labels;
+  for (int i = 0; i < 100; ++i) {
+    labels.push_back(generate_random_string(rand, 10));
+  }
+  for (int i = 0; i < num; i++) {
+    target->set_label(labels[rand.next_int(labels.size())]);
+  }
+}
+
 TEST_P(concurrent_classifier_test, train_train) {
   thread t0(bind(train_task, 0, 200, classifier_));
   thread t1(bind(train_task, 1, 200, classifier_));
@@ -473,6 +498,33 @@ TEST_P(concurrent_classifier_test, classify_classify) {
   t0.join();
   t1.join();
 }
+
+TEST_P(concurrent_classifier_test, classify_train_save) {
+  train_task(0, 100, classifier_);
+  thread t0(bind(classify_task, 0, 200, classifier_));
+  thread t1(bind(train_task, 1, 200, classifier_));
+  thread t2(bind(pack_task, 2, 100, classifier_));
+  t0.start();
+  t1.start();
+  t2.start();
+  t0.join();
+  t1.join();
+  t2.join();
+}
+
+TEST_P(concurrent_classifier_test, classify_train_set_label) {
+  train_task(0, 100, classifier_);
+  thread t0(bind(classify_task, 0, 200, classifier_));
+  thread t1(bind(train_task, 1, 200, classifier_));
+  thread t2(bind(set_label_task, 2, 200, classifier_));
+  t0.start();
+  t1.start();
+  t2.start();
+  t0.join();
+  t1.join();
+  t2.join();
+}
+
 
 INSTANTIATE_TEST_CASE_P(concurrent_classifier_test_instance,
                         concurrent_classifier_test,

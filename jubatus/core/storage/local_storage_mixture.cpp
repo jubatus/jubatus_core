@@ -217,6 +217,7 @@ void local_storage_mixture::set3_nolock(
 
 void local_storage_mixture::get_status(
     std::map<std::string, std::string>& status) const {
+  util::concurrent::scoped_lock lk(mutex_);
   status["num_features"] =
     jubatus::util::lang::lexical_cast<std::string>(tbl_.size());
   status["num_classes"] = jubatus::util::lang::lexical_cast<std::string>(
@@ -230,6 +231,7 @@ void local_storage_mixture::update(
     const string& inc_class,
     const string& dec_class,
     const val1_t& v) {
+  util::concurrent::scoped_lock lk(mutex_);
   id_feature_val3_t& feature_row = tbl_diff_[feature];
   feature_row[class2id_.get_id(inc_class)].v1 += v;
   feature_row[class2id_.get_id(dec_class)].v1 -= v;
@@ -240,6 +242,7 @@ void local_storage_mixture::bulk_update(
     float step_width,
     const string& inc_class,
     const string& dec_class) {
+  util::concurrent::scoped_lock lk(mutex_);
   uint64_t inc_id = class2id_.get_id(inc_class);
   typedef common::sfv_t::const_iterator iter_t;
   if (dec_class != "") {
@@ -260,6 +263,7 @@ void local_storage_mixture::bulk_update(
 }
 
 void local_storage_mixture::get_diff(diff_t& ret) const {
+  util::concurrent::scoped_lock lk(mutex_);
   ret.diff.clear();
   for (jubatus::util::data::unordered_map<string, id_feature_val3_t>::
       const_iterator it = tbl_diff_.begin(); it != tbl_diff_.end(); ++it) {
@@ -275,6 +279,7 @@ void local_storage_mixture::get_diff(diff_t& ret) const {
 
 bool local_storage_mixture::set_average_and_clear_diff(
     const diff_t& average) {
+  util::concurrent::scoped_lock lk(mutex_);
   if (average.expect_version == model_version_) {
     for (features3_t::const_iterator it = average.diff.begin();
          it != average.diff.end();
@@ -296,6 +301,7 @@ bool local_storage_mixture::set_average_and_clear_diff(
 }
 
 void local_storage_mixture::register_label(const std::string& label) {
+  util::concurrent::scoped_lock lk(mutex_);
   // get_id method creates an entry when the label doesn't exist
   class2id_.get_id(label);
 }
@@ -317,6 +323,7 @@ bool local_storage_mixture::delete_label_nolock(const std::string& label) {
 }
 
 void local_storage_mixture::clear() {
+  util::concurrent::scoped_lock lk(mutex_);
   // Clear and minimize
   id_features3_t().swap(tbl_);
   common::key_manager().swap(class2id_);
@@ -324,18 +331,22 @@ void local_storage_mixture::clear() {
 }
 
 std::vector<std::string> local_storage_mixture::get_labels() const {
+  util::concurrent::scoped_lock lk(mutex_);
   return class2id_.get_all_id2key();
 }
 
 bool local_storage_mixture::set_label(const std::string& label) {
+  util::concurrent::scoped_lock lk(mutex_);
   return class2id_.set_key(label);
 }
 
 void local_storage_mixture::pack(framework::packer& packer) const {
+  util::concurrent::scoped_lock lk(mutex_);
   packer.pack(*this);
 }
 
 void local_storage_mixture::unpack(msgpack::object o) {
+  util::concurrent::scoped_lock lk(mutex_);
   o.convert(this);
 }
 
