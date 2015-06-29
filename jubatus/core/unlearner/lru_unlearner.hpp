@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <list>
 #include <string>
+#include <map>
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/data/unordered_set.h"
@@ -63,6 +64,7 @@ class lru_unlearner : public unlearner_base {
   bool touch(const std::string& id);
   bool remove(const std::string& id);
   bool exists_in_memory(const std::string& id) const;
+  void get_status(std::map<std::string, std::string>& status) const;
 
  private:
   typedef std::list<std::string> lru;
