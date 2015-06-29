@@ -185,7 +185,8 @@ void mixable_versioned_table::push_impl(
         core::common::exception::runtime_error("bad diff_object"));
   }
   for (uint64_t i = 0; i < o.via.array.size; ++i) {
-    const version_t version = table->set_row(o.via.array.ptr[i]);
+    const version_t version = table->set_row(o.via.array.ptr[i],
+                                             unlearner_.get());
     update_version(version);
   }
 }

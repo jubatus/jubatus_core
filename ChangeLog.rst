@@ -1,3 +1,17 @@
+Release 0.2.0 - 2015/06/29
+--------------------------
+
+* Improvements
+    * Support non-commutative functions in combination feature (#152, #156)
+    * anomaly: lof algorithm now supports overwrite method (#154)
+    * classifier: driver is now thread-safe (#144)
+    * Improved compatibility with GCC-5 (#155)
+    * Code cleanup (#140)
+
+* Bug fixes
+    * clustering: fix k-means segmentation fault when get_nearest_center is called before clustering is performed (#150, #151)
+    * Column tables now touches unlearner on MIX (#100, #113)
+
 Release 0.1.2 - 2015/04/27
 --------------------------
 

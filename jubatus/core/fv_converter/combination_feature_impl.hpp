@@ -35,6 +35,10 @@ class combination_add_feature : public combination_feature {
     ret_fv.push_back(
         std::make_pair(key, static_cast<float>(value_left + value_right)));
   }
+
+  bool is_commutative() const {
+    return true;
+  }
 };
 
 class combination_mul_feature : public combination_feature {
@@ -45,6 +49,10 @@ class combination_mul_feature : public combination_feature {
                    common::sfv_t& ret_fv) const {
     ret_fv.push_back(
         std::make_pair(key, static_cast<float>(value_left * value_right)));
+  }
+
+  bool is_commutative() const {
+    return true;
   }
 };
 

@@ -35,6 +35,8 @@ class combination_feature {
       double value_left,
       double value_right,
       std::vector<std::pair<std::string, float> >& ret_fv) const = 0;
+
+  virtual bool is_commutative() const = 0;
 };
 
 }  // namespace fv_converter
