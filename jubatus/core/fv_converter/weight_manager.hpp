@@ -21,6 +21,7 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <map>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/concurrent/mutex.h"
@@ -113,6 +114,8 @@ class weight_manager : public framework::model {
        << " master_weights:" << master_weights_.to_string();
     return ss.str();
   }
+
+  void get_status(std::map<std::string, std::string>& status) const;
 
  private:
   uint64_t get_document_count() const {
