@@ -156,7 +156,7 @@ TEST_P(clustering_test, get_k_center) {
   clustering_->do_clustering();
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(conf_.k, result.size());
+    ASSERT_EQ(std::size_t(conf_.k), result.size());
     ASSERT_LT(1U, result[0].num_values_.size());
     if (result[0].num_values_[0].first == "a"
         || result[0].num_values_[0].first == "b") {
@@ -189,7 +189,7 @@ TEST_P(clustering_test, integer_center) {
   clustering_->push(data);
   const std::vector<fv_converter::datum> centers = clustering_->get_k_center();
 
-  ASSERT_EQ(conf_.k, centers.size());
+  ASSERT_EQ(std::size_t(conf_.k), centers.size());
   /*  debug out
   for (size_t i = 0; i < centers.size(); ++i) {
     std::cout << i << " :[";
@@ -255,7 +255,7 @@ TEST_P(clustering_test, get_nearest_members) {
 
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(conf_.k, result.size());
+    ASSERT_EQ(std::size_t(conf_.k), result.size());
   }
 
   set<check_points, check_point_compare>::const_iterator it;
@@ -266,11 +266,11 @@ TEST_P(clustering_test, get_nearest_members) {
     core::clustering::cluster_unit result =
         clustering_->get_nearest_members(x);
 
-    ASSERT_LT(1, result.size());
+    ASSERT_LT(1u, result.size());
     for (size_t i = 0; i < result.size(); ++i) {
       const vector<pair<string, double> >& near_points =
           result[i].second.num_values_;
-      ASSERT_EQ(2, near_points.size());  // must be 2-dimentional
+      ASSERT_EQ(2u, near_points.size());  // must be 2-dimentional
       ASSERT_EQ("a", near_points[0].first);
       ASSERT_EQ("b", near_points[1].first);
       ASSERT_NE(points.end(),
@@ -303,7 +303,7 @@ TEST_P(clustering_test, get_nearest_center) {
 
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(conf_.k, result.size());
+    ASSERT_EQ(std::size_t(conf_.k), result.size());
   }
 
   for (int i = 0; i < 100; ++i) {

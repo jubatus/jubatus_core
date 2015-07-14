@@ -100,7 +100,7 @@ TEST(revert_feature, dollar_mark_onvalue) {
   ASSERT_EQ(1u, data.string_values_.size());
   EXPECT_EQ("name", data.string_values_[0].first);
   EXPECT_EQ("do$c1", data.string_values_[0].second);
-  ASSERT_EQ(0, data.num_values_.size());
+  ASSERT_EQ(0u, data.num_values_.size());
 }
 
 
