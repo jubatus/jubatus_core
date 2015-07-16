@@ -42,6 +42,7 @@ std::string ucb1::select_arm(const std::string& player_id) {
   for (size_t i = 0; i < arms.size(); ++i) {
     const arm_info& a = s_.get_arm_info(player_id, arms[i]);
     if (a.trial_count == 0) {
+      s_.notify_selected(player_id, arms[i]);
       return arms[i];
     }
     total_trial += a.trial_count;
