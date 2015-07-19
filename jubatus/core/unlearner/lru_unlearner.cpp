@@ -17,12 +17,15 @@
 #include "lru_unlearner.hpp"
 
 #include <string>
+#include <utility>
 #include "jubatus/util/data/unordered_set.h"
+#include "../common/assert.hpp"
 
 // TODO(kmaehashi) move key_matcher to common
 #include "../fv_converter/key_matcher.hpp"
 #include "../fv_converter/key_matcher_factory.hpp"
 #include "../common/exception.hpp"
+#include "../common/unordered_set.hpp"
 
 using jubatus::util::data::unordered_set;
 using jubatus::core::fv_converter::key_matcher_factory;
@@ -30,19 +33,26 @@ using jubatus::core::fv_converter::key_matcher_factory;
 namespace jubatus {
 namespace core {
 namespace unlearner {
+namespace {
+const lru_unlearner::lru_unlearner_config&
+as_lru_unlearner_config(const unlearner_config_base& conf) {
+  return dynamic_cast<const lru_unlearner::lru_unlearner_config&>(conf);
+}
+}  // namespace
 
-lru_unlearner::lru_unlearner(const config& conf)
-    : max_size_(conf.max_size) {
-  if (conf.max_size <= 0) {
+lru_unlearner::lru_unlearner(const unlearner_config_base& conf)
+    : max_size_(as_lru_unlearner_config(conf).max_size) {
+  const lru_unlearner_config& lconfig = as_lru_unlearner_config(conf);
+  if (lconfig.max_size <= 0) {
     throw JUBATUS_EXCEPTION(
         common::config_exception() << common::exception::error_message(
             "max_size must be a positive integer"));
   }
-  entry_map_.reserve(max_size_);
+  entry_map_.reserve(lconfig.max_size);
 
-  if (conf.sticky_pattern) {
+  if (lconfig.sticky_pattern) {
     key_matcher_factory f;
-    sticky_matcher_ = f.create_matcher(*conf.sticky_pattern);
+    sticky_matcher_ = f.create_matcher(*lconfig.sticky_pattern);
   }
 }
 
@@ -124,6 +134,22 @@ bool lru_unlearner::remove(const std::string& id) {
 
 bool lru_unlearner::exists_in_memory(const std::string& id) const {
   return entry_map_.count(id) > 0 || sticky_ids_.count(id) > 0;
+}
+
+void lru_unlearner::export_model(framework::packer& pk) const {
+  pk.pack_array(1);  // [lru_]
+  pk.pack(lru_);
+}
+
+void lru_unlearner::import_model(msgpack::object o) {
+  if(o.type != msgpack::type::ARRAY) {
+    throw msgpack::type_error();
+  }
+  JUBATUS_ASSERT_EQ(1,
+                    o.via.array.size,
+                    "importing lru_unlearner length must be 1");
+  o.via.array.ptr[0].convert(&lru_);
+  rebuild_entry_map();
 }
 
 // private

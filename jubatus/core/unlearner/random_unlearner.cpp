@@ -19,25 +19,32 @@
 #include <string>
 #include <limits>
 #include "../common/exception.hpp"
+#include "../common/assert.hpp"
 
 namespace jubatus {
 namespace core {
 namespace unlearner {
 
-random_unlearner::random_unlearner(const config& conf)
-    : max_size_(conf.max_size) {
-  if (conf.max_size <= 0) {
+const random_unlearner::random_unlearner_config&
+as_random_unlearner_config(const unlearner_config_base& orig) {
+  return dynamic_cast<const random_unlearner::random_unlearner_config&>(orig);
+}
+
+random_unlearner::random_unlearner(const unlearner_config_base& conf)
+    : max_size_(as_random_unlearner_config(conf).max_size) {
+  const random_unlearner_config& rconf = as_random_unlearner_config(conf);
+  if (rconf.max_size <= 0) {
     throw JUBATUS_EXCEPTION(
         common::config_exception() << common::exception::error_message(
             "max_size must be a positive integer"));
   }
-  if (conf.seed) {
-    if (*conf.seed < 0 || std::numeric_limits<uint32_t>::max() < *conf.seed) {
+  if (rconf.seed) {
+    if (*rconf.seed < 0 || std::numeric_limits<uint32_t>::max() < *rconf.seed) {
       throw JUBATUS_EXCEPTION(
           common::config_exception() << common::exception::error_message(
               "unlearner seed must be within unsigned 32 bit integer"));
     }
-    mtr_ = jubatus::util::math::random::mtrand(*conf.seed);
+    mtr_ = jubatus::util::math::random::mtrand(*rconf.seed);
   }
   id_map_.reserve(max_size_);
   ids_.reserve(max_size_);
@@ -87,6 +94,28 @@ bool random_unlearner::remove(const std::string& id) {
   }
 
   return true;
+}
+
+void random_unlearner::export_model(framework::packer& pk) const {
+  pk.pack_array(1);  // [ids_]
+  pk.pack(ids_);
+}
+void random_unlearner::import_model(msgpack::object o) {
+    if(o.type != msgpack::type::ARRAY) {
+    throw msgpack::type_error();
+  }
+  JUBATUS_ASSERT_EQ(1,
+                    o.via.array.size,
+                    "importing random_unlearner length must be 1");
+  o.via.array.ptr[0].convert(&ids_);
+  rebuild_map();
+}
+
+void random_unlearner::rebuild_map() {
+  id_map_.clear();
+  for (size_t i = 0; i < ids_.size(); ++i) {
+    id_map_[ids_[i]] = i;
+  }
 }
 
 bool random_unlearner::exists_in_memory(const std::string& id) const {

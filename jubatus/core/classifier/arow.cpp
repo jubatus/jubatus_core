@@ -23,24 +23,20 @@
 #include "jubatus/util/concurrent/lock.h"
 #include "classifier_util.hpp"
 #include "../common/exception.hpp"
+#include "../storage/storage_base.hpp"
 
 using std::string;
+using jubatus::core::storage_ptr;
 
 namespace jubatus {
 namespace core {
 namespace classifier {
 
-arow::arow(storage_ptr storage)
-    : linear_classifier(storage) {
-}
+arow::arow(float regularization_weight)
+  : linear_classifier(),
+    regularization_weight_(regularization_weight) {
 
-arow::arow(
-    const classifier_config& config,
-    storage_ptr storage)
-    : linear_classifier(storage),
-      config_(config) {
-
-  if (!(0.f < config.regularization_weight)) {
+  if (!(0.f < regularization_weight_)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));
   }
@@ -58,7 +54,7 @@ void arow::train(const common::sfv_t& sfv, const string& label) {
     return;
   }
 
-  float beta = 1.f / (variance + 1.f / config_.regularization_weight);
+  float beta = 1.f / (variance + 1.f / regularization_weight_);
   float alpha = (1.f - margin) * beta;  // max(0, 1 - margin) = 1 - margin
   update(sfv, alpha, beta, label, incorrect_label);
 }

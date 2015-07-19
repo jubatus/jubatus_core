@@ -26,6 +26,7 @@
 #include "storage_base.hpp"
 #include "../common/key_manager.hpp"
 #include "../common/version.hpp"
+#include "../common/export_model.hpp"
 
 namespace jubatus {
 namespace core {
@@ -100,12 +101,15 @@ class local_storage : public storage_base {
 
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
+
   storage::version get_version() const {
     return storage::version();
   }
   std::string type() const;
 
   MSGPACK_DEFINE(tbl_, class2id_);
+  JUBATUS_EXPORT_MODEL(tbl_, class2id_);
+  void import_model(msgpack::object o);
 
  private:
   // map_features3_t tbl_;

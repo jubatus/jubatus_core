@@ -30,18 +30,10 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-normal_herd::normal_herd(storage_ptr storage)
-    : linear_classifier(storage) {
-  config_.regularization_weight = 0.1f;
-}
+normal_herd::normal_herd(float regularization_weight)
+    : regularization_weight_(regularization_weight) {
 
-normal_herd::normal_herd(
-    const classifier_config& config,
-    storage_ptr storage)
-    : linear_classifier(storage),
-      config_(config) {
-
-  if (!(0.f < config.regularization_weight)) {
+  if (!(0.f < regularization_weight_)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 < regularization_weight"));
   }
@@ -81,7 +73,7 @@ void normal_herd::update(
     float val_covariance_pos = val * pos_val.v2;
     float val_covariance_neg = val * neg_val.v2;
 
-    const float C = config_.regularization_weight;
+    const float C = regularization_weight_;
     storage_->set2_nolock(
         feature,
         pos_label,

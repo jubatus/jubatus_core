@@ -29,6 +29,8 @@
 
 #include "../common/exception.hpp"
 #include "classifier_util.hpp"
+#include "../storage/storage_base.hpp"
+#include "../storage/local_storage_mixture.hpp"
 
 using std::string;
 using std::vector;
@@ -39,8 +41,9 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-linear_classifier::linear_classifier(storage_ptr storage)
-  : storage_(storage), mixable_storage_(storage_) {
+linear_classifier::linear_classifier()
+    : storage_(new storage::local_storage_mixture()),
+      mixable_storage_(storage_) {
 }
 
 linear_classifier::~linear_classifier() {
@@ -51,7 +54,7 @@ namespace {
 // libc++'s std::function<void (<any types>)> does not accept
 // functions which returns other than void.
 void delete_label_wrapper(linear_classifier* cb, const std::string& label) {
-    cb->unlearn_label(label);
+  cb->unlearn_label(label);
 }
 }
 
@@ -63,6 +66,11 @@ void linear_classifier::set_label_unlearner(
           delete_label_wrapper, this, jubatus::util::lang::_1));
   mixable_storage_.set_label_unlearner(label_unlearner);
   unlearner_ = label_unlearner;
+}
+
+jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
+linear_classifier::get_label_unlearner() const {
+  return unlearner_;
 }
 
 void linear_classifier::classify_with_scores(
@@ -206,8 +214,19 @@ float linear_classifier::squared_norm(const common::sfv_t& fv) {
 void linear_classifier::pack(framework::packer& pk) const {
   storage_->pack(pk);
 }
+
 void linear_classifier::unpack(msgpack::object o) {
   storage_->unpack(o);
+}
+
+void linear_classifier::export_model(framework::packer& pk) const {
+  pk.pack_array(2);  // [storage_, unlearner_]
+  storage_->export_model(pk);
+  unlearner_->export_model(pk);
+}
+
+void linear_classifier::import_model(msgpack::object o) {
+  // TODO  // NOLINT
 }
 
 framework::mixable* linear_classifier::get_mixable() {

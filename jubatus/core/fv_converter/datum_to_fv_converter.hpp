@@ -25,6 +25,7 @@
 #include "jubatus/util/lang/scoped_ptr.h"
 #include "../common/type.hpp"
 #include "../framework/mixable.hpp"
+#include "../framework/packer.hpp"
 
 namespace jubatus {
 namespace core {
@@ -119,6 +120,9 @@ class datum_to_fv_converter {
 
   void set_weight_manager(jubatus::util::lang::shared_ptr<weight_manager> wm);
   void clear_weights();
+  void swap(datum_to_fv_converter& other) {
+    pimpl_.swap(other.pimpl_);
+  }
 
  private:
   jubatus::util::lang::scoped_ptr<datum_to_fv_converter_impl> pimpl_;

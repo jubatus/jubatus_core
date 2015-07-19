@@ -46,6 +46,12 @@ class key_manager {
     key2id_.swap(km.key2id_);
     id2key_.swap(km.id2key_);
   }
+  key_manager& operator=(const key_manager& rhs) {
+    key2id_ = rhs.key2id_;
+    id2key_ = rhs.id2key_;
+    next_id_ = rhs.next_id_;
+    return *this;
+  }
 
   size_t size() const {
     return key2id_.size();

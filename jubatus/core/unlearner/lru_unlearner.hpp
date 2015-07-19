@@ -26,24 +26,29 @@
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "unlearner_base.hpp"
+#include "../common/export_model.hpp"
+#include "../common/unordered_map.hpp"
+#include "unlearner_config.hpp"
 
 namespace jubatus {
 namespace core {
 namespace fv_converter {
 class key_matcher;
-}
+}  // namespace fv_converter
 namespace unlearner {
 
 // Unlearner based on Least Recently Used algorithm.
 class lru_unlearner : public unlearner_base {
  public:
-  struct config {
+  struct lru_unlearner_config : public unlearner_config_base {
     int32_t max_size;
     jubatus::util::data::optional<std::string> sticky_pattern;
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_MEMBER(max_size) & JUBA_MEMBER(sticky_pattern);
+      ar & JUBA_MEMBER(name)
+          & JUBA_MEMBER(max_size)
+          & JUBA_MEMBER(sticky_pattern);
     }
   };
 
@@ -54,15 +59,17 @@ class lru_unlearner : public unlearner_base {
   void clear() {
     lru_.clear();
     entry_map_.clear();
-    sticky_ids_.clear();
   }
 
-  explicit lru_unlearner(const config& conf);
+  explicit lru_unlearner(const unlearner_config_base& conf);
 
   bool can_touch(const std::string& id);
   bool touch(const std::string& id);
   bool remove(const std::string& id);
   bool exists_in_memory(const std::string& id) const;
+
+  void export_model(framework::packer& pk) const;
+  void import_model(msgpack::object o);
 
  private:
   typedef std::list<std::string> lru;

@@ -49,6 +49,8 @@ class nearest_neighbor_classifier : public classifier_base {
   void set_label_unlearner(
       jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
           label_unlearner);
+  jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
+  get_label_unlearner() const;
 
   std::string classify(const common::sfv_t& fv) const;
   void classify_with_scores(const common::sfv_t& fv,
@@ -65,6 +67,8 @@ class nearest_neighbor_classifier : public classifier_base {
 
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
+  void export_model(framework::packer& pk) const;
+  void import_model(msgpack::object o);
 
   framework::mixable* get_mixable();
 

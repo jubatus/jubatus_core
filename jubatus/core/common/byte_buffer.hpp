@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <vector>
 #include <cstring>
+#include <memory>
 #include <msgpack.hpp>
 #include "jubatus/util/lang/shared_ptr.h"
 
@@ -39,6 +40,12 @@ class byte_buffer {
   byte_buffer(const void* ptr, size_t size) {
     const char* const first = static_cast<const char*>(ptr);
     buf_.reset(new std::vector<char>(first, first+size));
+  }
+
+  void write(const char* buf, unsigned int len) {
+    const size_t old_tail = buf_->size();
+    buf_->resize(buf_->size() + len);
+    std::memcpy(buf_->data() + old_tail, buf, len);
   }
 
   // following member functions are implicily defined:

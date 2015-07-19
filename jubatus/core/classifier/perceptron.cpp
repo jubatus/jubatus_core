@@ -17,6 +17,7 @@
 #include "perceptron.hpp"
 
 #include <string>
+#include "../storage/local_storage_mixture.hpp"
 
 using std::string;
 
@@ -24,8 +25,7 @@ namespace jubatus {
 namespace core {
 namespace classifier {
 
-perceptron::perceptron(storage_ptr storage)
-    : linear_classifier(storage) {
+perceptron::perceptron() {
 }
 
 void perceptron::train(const common::sfv_t& sfv, const std::string& label) {

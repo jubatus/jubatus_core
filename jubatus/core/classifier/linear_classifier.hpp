@@ -37,7 +37,7 @@ namespace classifier {
 
 class linear_classifier : public classifier_base {
  public:
-  explicit linear_classifier(storage_ptr storage);
+  linear_classifier();
   virtual ~linear_classifier();
   virtual void train(const common::sfv_t& fv, const std::string& label) = 0;
 
@@ -46,9 +46,7 @@ class linear_classifier : public classifier_base {
           label_unlearner);
 
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
-  label_unlearner() const {
-    return unlearner_;
-  }
+  get_label_unlearner() const;
 
   std::string classify(const common::sfv_t& fv) const;
   void classify_with_scores(const common::sfv_t& fv,
@@ -69,6 +67,8 @@ class linear_classifier : public classifier_base {
 
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
+  void export_model(framework::packer& pk) const;
+  void import_model(msgpack::object o);
 
   framework::mixable* get_mixable();
 

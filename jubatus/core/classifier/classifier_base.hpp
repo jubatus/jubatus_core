@@ -48,6 +48,8 @@ class classifier_base {
   virtual void set_label_unlearner(
       jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
           label_unlearner) = 0;
+  virtual jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
+  get_label_unlearner() const = 0;
 
   virtual bool delete_label(const std::string& label) = 0;
   virtual std::vector<std::string> get_labels() const = 0;
@@ -60,6 +62,9 @@ class classifier_base {
   virtual void pack(framework::packer& pk) const = 0;
   virtual void unpack(msgpack::object o) = 0;
   virtual void clear() = 0;
+
+  void import_model(msgpack::object src);
+  void export_model(framework::packer& dst) const;
 
   virtual framework::mixable* get_mixable() = 0;
 };

@@ -27,8 +27,7 @@ namespace classifier {
 
 class arow : public linear_classifier {
  public:
-  explicit arow(storage_ptr storage);
-  arow(const classifier_config& config, storage_ptr storage);
+  explicit arow(float regularization_weight);
   void train(const common::sfv_t& fv, const std::string& label);
   std::string name() const;
  private:
@@ -38,7 +37,7 @@ class arow : public linear_classifier {
       float beta,
       const std::string& pos_label,
       const std::string& neg_label);
-  classifier_config config_;
+  float regularization_weight_;
 };
 
 }  // namespace classifier

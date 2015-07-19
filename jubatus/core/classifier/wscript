@@ -15,6 +15,7 @@ def build(bld):
       'normal_herd.cpp',
       'nearest_neighbor_classifier.cpp',
       'classifier_factory.cpp',
+      'classifier_config.cpp',
       ]
   headers = [
       'classifier_base.hpp',

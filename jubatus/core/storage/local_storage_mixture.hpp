@@ -102,6 +102,9 @@ class local_storage_mixture : public storage_base {
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
 
+  void export_model(framework::packer& pk) const;
+  void import_model(msgpack::object o);
+
   version get_version() const {
     return model_version_;
   }

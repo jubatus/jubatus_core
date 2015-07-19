@@ -102,6 +102,10 @@ class linear_mixable_helper : public linear_mixable {
     return model_->get_version();
   }
 
+  void swap(linear_mixable_helper& other) {
+    model_.swap(other.model_);
+  }
+
  private:
   struct internal_diff_object : diff_object_raw {
     void convert_binary(packer& pk) const {

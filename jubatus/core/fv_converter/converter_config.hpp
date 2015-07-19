@@ -112,11 +112,11 @@ struct combination_rule {
 
 struct converter_config {
   jubatus::util::data::optional<std::map<std::string, param_t> >
-    string_filter_types;
+      string_filter_types;
   jubatus::util::data::optional<std::vector<filter_rule> > string_filter_rules;
 
   jubatus::util::data::optional<std::map<std::string, param_t> >
-    num_filter_types;
+      num_filter_types;
   jubatus::util::data::optional<std::vector<filter_rule> > num_filter_rules;
 
   jubatus::util::data::optional<std::map<std::string, param_t> > string_types;
@@ -135,6 +135,21 @@ struct converter_config {
 
 
   jubatus::util::data::optional<int64_t> hash_max_size;
+
+  void swap(converter_config& other) {
+    string_filter_types.swap(other.string_filter_types);
+    string_filter_rules.swap(string_filter_rules);
+    num_filter_types.swap(num_filter_types);
+    num_filter_rules.swap(num_filter_rules);
+    string_types.swap(string_types);
+    string_rules.swap(string_rules);
+    num_types.swap(num_types);
+    num_rules.swap(num_rules);
+    binary_types.swap(binary_types);
+    binary_rules.swap(binary_rules);
+    combination_types.swap(combination_types);
+    combination_rules.swap(combination_rules);
+  }
 
   friend class jubatus::util::data::serialization::access;
   template<class Archive>
