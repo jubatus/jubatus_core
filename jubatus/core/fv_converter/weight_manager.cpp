@@ -117,6 +117,8 @@ void weight_manager::get_status(
   status["weight_manager_version"] =
     jubatus::util::lang::lexical_cast<std::string>(
         version_.get_number());
+  diff_weights_.get_status(status, "diff");
+  master_weights_.get_status(status, "master");
 }
 
 }  // namespace fv_converter
