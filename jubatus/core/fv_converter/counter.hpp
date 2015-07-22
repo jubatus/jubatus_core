@@ -82,6 +82,10 @@ class counter {
     }
   }
 
+  size_t size() const {
+    return data_.size();
+  }
+
   MSGPACK_DEFINE(data_);
 
   friend std::ostream& operator<<(std::ostream& os, const counter<T>& c) {
