@@ -15,6 +15,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
+#include <map>
 #include <gtest/gtest.h>
 #include "test_util.hpp"
 #include "unlearner_base.hpp"
@@ -30,6 +31,8 @@ class mock_unlearner : public unlearner_base {
     return "mock_unlearner";
   }
   void clear() {
+  }
+  void get_status(std::map<std::string, std::string>& status) const {
   }
 
   bool can_touch(const std::string& id) {

@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_UNLEARNER_UNLEARNER_BASE_HPP_
 
 #include <string>
+#include <map>
 #include "jubatus/util/lang/function.h"
 
 namespace jubatus {
@@ -42,6 +43,7 @@ class unlearner_base {
 
   virtual std::string type() const = 0;
   virtual void clear() = 0;
+  virtual void get_status(std::map<std::string, std::string>& status) const = 0;
 
   // Tests if the given id can be touched.
   //

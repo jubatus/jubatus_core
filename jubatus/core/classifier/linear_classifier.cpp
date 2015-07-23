@@ -118,6 +118,10 @@ bool linear_classifier::set_label(const string& label) {
 void linear_classifier::get_status(std::map<string, string>& status) const {
   storage_->get_status(status);
   status["storage"] = storage_->type();
+
+  if (unlearner_) {
+    unlearner_->get_status(status);
+  }
 }
 
 void linear_classifier::update_weight(

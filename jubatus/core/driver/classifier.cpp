@@ -73,6 +73,7 @@ jubatus::core::classifier::classify_result classifier::classify(
 
 void classifier::get_status(std::map<string, string>& status) const {
   classifier_->get_status(status);
+  wm_.get_model()->get_status(status);
 }
 
 bool classifier::delete_label(const std::string& label) {

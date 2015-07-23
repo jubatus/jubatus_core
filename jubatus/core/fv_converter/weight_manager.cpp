@@ -19,6 +19,7 @@
 #include <cmath>
 #include <string>
 #include <utility>
+#include <map>
 #include "../common/type.hpp"
 #include "datum_to_fv_converter.hpp"
 #include "jubatus/util/concurrent/lock.h"
@@ -108,6 +109,16 @@ double weight_manager::get_global_weight(const std::string& key) const {
 void weight_manager::add_weight(const std::string& key, float weight) {
   scoped_lock lk(mutex_);
   diff_weights_.add_weight(key, weight);
+}
+
+void weight_manager::get_status(
+    std::map<std::string, std::string>& status) const {
+  scoped_lock lk(mutex_);
+  status["weight_manager_version"] =
+    jubatus::util::lang::lexical_cast<std::string>(
+        version_.get_number());
+  diff_weights_.get_status(status, "diff");
+  master_weights_.get_status(status, "master");
 }
 
 }  // namespace fv_converter
