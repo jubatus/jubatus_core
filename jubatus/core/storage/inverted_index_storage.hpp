@@ -22,13 +22,20 @@
 #include <vector>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/lang/function.h"
+#include "jubatus/util/lang/bind.h"
 #include "storage_type.hpp"
 #include "../common/version.hpp"
 #include "../common/type.hpp"
 #include "../common/unordered_map.hpp"
 #include "../common/key_manager.hpp"
 #include "../framework/mixable_helper.hpp"
+#include "../unlearner/unlearner_base.hpp"
 #include "sparse_matrix_storage.hpp"
+
+using jubatus::util::lang::function;
+using jubatus::util::lang::bind;
+using jubatus::util::lang::_1;
 
 namespace jubatus {
 namespace core {
@@ -45,10 +52,15 @@ class inverted_index_storage {
 
   inverted_index_storage();
   ~inverted_index_storage();
+  void set_unlearner(
+      util::lang::shared_ptr<unlearner::unlearner_base> unlearner) {
+    unlearner_ = unlearner;
+  }
 
   void set(const std::string& row, const std::string& column, float val);
   float get(const std::string& row, const std::string& column) const;
   void remove(const std::string& row, const std::string& column);
+  void remove_row(const std::string& row);
   void clear();
   void get_all_column_ids(std::vector<std::string>& ids) const;
 
@@ -91,6 +103,7 @@ class inverted_index_storage {
   imap_float_t column2norm_;
   imap_float_t column2norm_diff_;
   common::key_manager column2id_;
+  util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
 };
 
 typedef framework::linear_mixable_helper<

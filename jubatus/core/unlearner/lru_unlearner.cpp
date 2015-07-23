@@ -124,7 +124,7 @@ bool lru_unlearner::remove(const std::string& id) {
 }
 
 bool lru_unlearner::exists_in_memory(const std::string& id) const {
-  return entry_map_.count(id) > 0 || sticky_ids_.count(id) > 0;
+  return 0 < entry_map_.count(id) || 0 < sticky_ids_.count(id);
 }
 
 // private

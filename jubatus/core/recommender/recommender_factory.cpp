@@ -38,6 +38,16 @@ namespace core {
 namespace recommender {
 namespace {
 
+struct inverted_index_config {
+  jubatus::util::data::optional<std::string> unlearner;
+  jubatus::util::data::optional<config> unlearner_parameter;
+
+  template<typename Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(unlearner) & JUBA_MEMBER(unlearner_parameter);
+  }
+};
+
 const std::string NEAREST_NEIGHBOR_PREFIX("nearest_neighbor_recommender:");
 struct nearest_neighbor_recommender_config {
   std::string method;
@@ -58,8 +68,27 @@ shared_ptr<recommender_base> recommender_factory::create_recommender(
     const config& param,
     const string& id) {
   if (name == "inverted_index") {
+    inverted_index_config conf =
+        config_cast_check<inverted_index_config>(param);
     // inverted_index doesn't have parameter
-    return shared_ptr<recommender_base>(new inverted_index);
+    if (conf.unlearner) {
+      if (!conf.unlearner_parameter) {
+        throw JUBATUS_EXCEPTION(
+            common::config_exception() << common::exception::error_message(
+                "unlearner is set but unlearner_parameter is not found"));
+      }
+      return shared_ptr<recommender_base>(
+          new inverted_index(unlearner::create_unlearner(
+              *conf.unlearner, common::jsonconfig::config(
+                  *conf.unlearner_parameter))));
+    } else {
+      if (conf.unlearner_parameter) {
+        throw JUBATUS_EXCEPTION(
+            common::config_exception() << common::exception::error_message(
+                "unlearner_parameter is set but unlearner is not found"));
+      }
+      return shared_ptr<recommender_base>(new inverted_index);
+    }
   } else if (name == "minhash") {
     return shared_ptr<recommender_base>(
         new minhash(config_cast_check<minhash::config>(param)));
