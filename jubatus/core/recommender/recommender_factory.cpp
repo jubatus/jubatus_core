@@ -68,27 +68,28 @@ shared_ptr<recommender_base> recommender_factory::create_recommender(
     const config& param,
     const string& id) {
   if (name == "inverted_index") {
-    inverted_index_config conf =
-        config_cast_check<inverted_index_config>(param);
-    // inverted_index doesn't have parameter
-    if (conf.unlearner) {
-      if (!conf.unlearner_parameter) {
-        throw JUBATUS_EXCEPTION(
-            common::config_exception() << common::exception::error_message(
-                "unlearner is set but unlearner_parameter is not found"));
+    if (!param.is_null()) {
+      inverted_index_config conf =
+          config_cast_check<inverted_index_config>(param);
+      if (conf.unlearner) {
+        if (!conf.unlearner_parameter) {
+          throw JUBATUS_EXCEPTION(
+              common::config_exception() << common::exception::error_message(
+                  "unlearner is set but unlearner_parameter is not found"));
+        }
+        return shared_ptr<recommender_base>(
+            new inverted_index(unlearner::create_unlearner(
+                *conf.unlearner, common::jsonconfig::config(
+                    *conf.unlearner_parameter))));
+      } else {
+        if (conf.unlearner_parameter) {
+          throw JUBATUS_EXCEPTION(
+              common::config_exception() << common::exception::error_message(
+                  "unlearner_parameter is set but unlearner is not found"));
+        }
       }
-      return shared_ptr<recommender_base>(
-          new inverted_index(unlearner::create_unlearner(
-              *conf.unlearner, common::jsonconfig::config(
-                  *conf.unlearner_parameter))));
-    } else {
-      if (conf.unlearner_parameter) {
-        throw JUBATUS_EXCEPTION(
-            common::config_exception() << common::exception::error_message(
-                "unlearner_parameter is set but unlearner is not found"));
-      }
-      return shared_ptr<recommender_base>(new inverted_index);
     }
+    return shared_ptr<recommender_base>(new inverted_index);
   } else if (name == "minhash") {
     return shared_ptr<recommender_base>(
         new minhash(config_cast_check<minhash::config>(param)));
