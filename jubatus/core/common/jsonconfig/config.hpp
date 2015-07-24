@@ -81,6 +81,10 @@ class config {
     return jubatus::util::text::json::is<T>(json_);
   }
 
+  bool is_null() const {
+    return is<jubatus::util::text::json::json_null>();
+  }
+
   jubatus::util::text::json::json::json_type_t type() const {
     return json_.type();
   }
