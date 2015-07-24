@@ -116,29 +116,8 @@ def build(bld):
       VERSION = VERSION)
 
 def cpplint(ctx):
-  import fnmatch, tempfile
-  cpplint = ctx.path.find_node('tools/codestyle/cpplint/cpplint.py')
-  src_dir = ctx.path.find_node('jubatus')
-  file_list = []
-  excludes = ['jubatus/core/third_party/*',
-              'jubatus/util/*.h',
-              'jubatus/util/*.cpp',
-              'jubatus/util/*/*.h',
-              'jubatus/util/*/*.cpp',
-              'jubatus/util/*/*/*.h',
-              'jubatus/util/*/*/*.cpp']
-  for file in src_dir.ant_glob('**/*.cpp **/*.cc **/*.hpp **/*.h'):
-    file_list += [file.path_from(ctx.path)]
-  for exclude in excludes:
-    file_list = [f for f in file_list if not fnmatch.fnmatch(f, exclude)]
-  tmp_file = tempfile.NamedTemporaryFile(delete=True);
-  tmp_file.write("\n".join(file_list));
-  tmp_file.flush()
   sys.stderr.write('Running cpplint...\n')
-  ctx.exec_command('cat ' + tmp_file.name +
-                   ' | xargs "' + cpplint.abspath() + '" --filter=-runtime/references,-runtime/rtti 2>&1' +
-                   ' | grep -v "^Done processing "')
-  tmp_file.close()
+  ctx.cmd_and_log(['tools/codestyle/run_cpplint.sh'] + subdirs)
 
 def check_cmath(ctx):
   ctx.cmd_and_log('tools/codestyle/cmath_finder.sh')
