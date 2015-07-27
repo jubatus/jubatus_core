@@ -17,6 +17,7 @@
 #include "lru_unlearner.hpp"
 
 #include <string>
+#include <map>
 #include "jubatus/util/data/unordered_set.h"
 
 // TODO(kmaehashi) move key_matcher to common
@@ -123,7 +124,7 @@ bool lru_unlearner::remove(const std::string& id) {
 }
 
 bool lru_unlearner::exists_in_memory(const std::string& id) const {
-  return entry_map_.count(id) > 0 || sticky_ids_.count(id) > 0;
+  return 0 < entry_map_.count(id) || 0 < sticky_ids_.count(id);
 }
 
 // private
@@ -133,6 +134,14 @@ void lru_unlearner::rebuild_entry_map() {
   for (lru::iterator it = lru_.begin(); it != lru_.end(); ++it) {
     entry_map_[*it] = it;
   }
+}
+
+void lru_unlearner::get_status(
+    std::map<std::string, std::string>& status) const {
+  status["num_unlearner_unlearned_ids"] =
+    jubatus::util::lang::lexical_cast<std::string>(entry_map_.size());
+  status["num_unlearner_sticky_ids"] =
+    jubatus::util::lang::lexical_cast<std::string>(sticky_ids_.size());
 }
 
 }  // namespace unlearner

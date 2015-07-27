@@ -178,7 +178,7 @@ TEST_P(nearest_neighbor_test, similar_row_from_id) {
   nn_driver_->set_row("b", single_str_datum("y", "fuga"));
   vector<pair<string, float> > result =
       nn_driver_->similar_row("a", 100);
-  ASSERT_EQ(2, result.size());
+  ASSERT_EQ(2u, result.size());
   ASSERT_EQ("a", result[0].first);
   ASSERT_EQ("b", result[1].first);
 }
@@ -188,7 +188,7 @@ TEST_P(nearest_neighbor_test, similar_row_from_datum) {
   nn_driver_->set_row("b", single_str_datum("y", "fuga"));
   vector<pair<string, float> > result =
       nn_driver_->similar_row(single_str_datum("x", "hoge"), 100);
-  ASSERT_EQ(2, result.size());
+  ASSERT_EQ(2u, result.size());
   ASSERT_EQ("a", result[0].first);
   ASSERT_EQ("b", result[1].first);
 }
@@ -198,7 +198,7 @@ TEST_P(nearest_neighbor_test, neighbor_row_from_id) {
   nn_driver_->set_row("b", single_str_datum("y", "fuga"));
   vector<pair<string, float> > result =
       nn_driver_->neighbor_row_from_id("a", 100);
-  ASSERT_EQ(2, result.size());
+  ASSERT_EQ(2u, result.size());
   ASSERT_EQ("a", result[0].first);
   ASSERT_EQ("b", result[1].first);
 }
@@ -209,7 +209,7 @@ TEST_P(nearest_neighbor_test, neighbor_row2_from_datum) {
   vector<pair<string, float> > result =
       nn_driver_->neighbor_row_from_datum(
           single_str_datum("x", "hoge"), 100);
-  ASSERT_EQ(2, result.size());
+  ASSERT_EQ(2u, result.size());
   ASSERT_EQ("a", result[0].first);
   ASSERT_EQ("b", result[1].first);
 }
@@ -499,7 +499,7 @@ TEST_P(nearest_neighbor_idf_test, calc_idf) {
 
   vector<pair<string, float> > hit =
       nn_driver_->neighbor_row_from_datum(d, 2);
-  ASSERT_EQ(2, hit.size());
+  ASSERT_EQ(2u, hit.size());
   if (hit[0].first == "id3") {
     ASSERT_EQ("id4", hit[1].first);
   } else if (hit[0].first == "id4") {

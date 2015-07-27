@@ -224,6 +224,8 @@ void local_storage_mixture::get_status(
       class2id_.size());
   status["diff_size"] =
     jubatus::util::lang::lexical_cast<std::string>(tbl_diff_.size());
+  status["model_version"] = jubatus::util::lang::lexical_cast<std::string>(
+      model_version_.get_number());
 }
 
 void local_storage_mixture::update(

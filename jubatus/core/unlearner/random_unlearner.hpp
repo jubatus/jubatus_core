@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/unordered_map.h"
@@ -57,6 +58,7 @@ class random_unlearner : public unlearner_base {
   bool touch(const std::string& id);
   bool remove(const std::string& id);
   bool exists_in_memory(const std::string& id) const;
+  void get_status(std::map<std::string, std::string>& status) const;
 
  private:
   /**

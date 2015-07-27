@@ -53,7 +53,7 @@ void exp3::calc_weights_(const std::string& player_id,
     total_weight += weight;
   }
   for (size_t i = 0; i < n; ++i) {
-    weights[i] = (1.0 - gamma_) * weights[i] / total_weight + gamma_ * n;
+    weights[i] = (1.0 - gamma_) * weights[i] / total_weight + gamma_ / n;
   }
 }
 
@@ -89,7 +89,7 @@ bool exp3::register_reward(const std::string& player_id,
   std::vector<double> weights;
   calc_weights_(player_id, weights);
   return s_.register_reward(player_id, arm_id,
-                            reward * weights[i] * gamma_ / arms.size());
+                            reward / weights[i] * gamma_ / arms.size());
 }
 
 arm_info_map exp3::get_arm_info(const std::string& player_id) const {
