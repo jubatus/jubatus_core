@@ -1,3 +1,16 @@
+Release 0.2.1 - 2015/07/27
+--------------------------
+
+* Improvements
+    * recommender: support unlearner in inverted_index algorithm (#51, #120)
+    * classifier: expose more status values (#166)
+    * Support building with Python 3.x (#30, #162)
+    * Code cleanup (#161)
+
+* Bug fixes
+    * bandit: fix exp3 algorithm calculations (#157, #158)
+    * bandit: fix ucb1 algorithm calculations (#159, #160)
+
 Release 0.2.0 - 2015/06/29
 --------------------------
 
