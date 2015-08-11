@@ -245,7 +245,7 @@ struct bit_vector_base {
     if (bits_ == NULL) {
       alloc_memory();
     }
-    if (bit_num_ < pos) {
+    if (bit_num_ <= pos) {
       throw bit_vector_unmatch_exception(
           "reverse_bit(): invalid posison " +
           jubatus::util::lang::lexical_cast<std::string>(pos) +
