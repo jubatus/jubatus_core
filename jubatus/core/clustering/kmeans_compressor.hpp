@@ -52,6 +52,8 @@ class kmeans_compressor : public compressor {
       const wplist& bicriteria,
       size_t dstsize,
       wplist& dst);
+
+  jubatus::util::math::random::mtrand rand_;
 };
 
 }  // namespace compressor

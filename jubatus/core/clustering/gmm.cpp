@@ -24,7 +24,6 @@
 #include <iostream>
 #include <utility>
 #include <vector>
-#include "jubatus/util/math/random.h"
 #include "../common/exception.hpp"
 
 using jubatus::util::lang::shared_ptr;
@@ -36,6 +35,10 @@ using std::vector;
 namespace jubatus {
 namespace core {
 namespace clustering {
+
+gmm::gmm()
+    : rand_(0) {
+}
 
 void gmm::batch(const eigen_wsvec_list_t& data, int d, int k) {
   if (data.empty()) {
@@ -123,9 +126,8 @@ void gmm::initialize(const eigen_wsvec_list_t& data, int d, int k) {
     eye_.insert(i, i) = 1;
   }
 
-  jubatus::util::math::random::mtrand r(time(NULL));
   for (int c = 0; c < k; ++c) {
-    means_[c] = data[r.next_int(0, data.size()-1)].data;
+    means_[c] = data[rand_.next_int(0, data.size()-1)].data;
     for (int i = 0; i < d; ++i) {
       covs_[c].insert(i, i) = 1;
     }

@@ -31,6 +31,8 @@ class gmm_test : public ::testing::Test {
   static const size_t d_ = 2;
   static const double epsilon_;
 
+  gmm_test() : r_(0) {}
+
   virtual void SetUp() {
     gmm_.reset(new gmm);
   }
