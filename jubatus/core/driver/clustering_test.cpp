@@ -141,8 +141,6 @@ TEST_P(clustering_test, save_load) {
 
 TEST_P(clustering_test, get_k_center) {
   jubatus::util::math::random::mtrand r(0);
-  vector<datum> one;
-  vector<datum> two;
 
   for (int j = 0; j < conf_.bucket_size; ++j) {
     datum a, b;
@@ -150,11 +148,17 @@ TEST_P(clustering_test, get_k_center) {
     a.num_values_.push_back(make_pair("b", -200 + r.next_gaussian() * 100));
     b.num_values_.push_back(make_pair("c", 50000 + r.next_gaussian() * 100));
     b.num_values_.push_back(make_pair("d", 250000 + r.next_gaussian() * 500));
+
+    vector<datum> one;
     one.push_back(a);
+    clustering_->push(one);
+    one.clear();
+
+    vector<datum> two;
     two.push_back(b);
+    clustering_->push(two);
+    two.clear();
   }
-  clustering_->push(one);
-  clustering_->push(two);
 
   clustering_->do_clustering();
   {
@@ -239,8 +243,6 @@ struct check_point_compare {
 
 TEST_P(clustering_test, get_nearest_members) {
   jubatus::util::math::random::mtrand r(0);
-  vector<datum> one;
-  vector<datum> two;
 
   set<check_points, check_point_compare> points;
 
@@ -254,11 +256,17 @@ TEST_P(clustering_test, get_nearest_members) {
     x.num_values_.push_back(make_pair("b", b));
     y.num_values_.push_back(make_pair("c", -5000 - r.next_gaussian() * 100));
     y.num_values_.push_back(make_pair("d", -1000 - r.next_gaussian() * 50));
+
+    vector<datum> one;
     one.push_back(x);
+    clustering_->push(one);
+    one.clear();
+
+    vector<datum> two;
     two.push_back(y);
+    clustering_->push(two);
+    two.clear();
   }
-  clustering_->push(one);
-  clustering_->push(two);
 
   clustering_->do_clustering();
 
@@ -312,8 +320,6 @@ TEST_P(clustering_test, get_nearest_members) {
 
 TEST_P(clustering_test, get_nearest_center) {
   jubatus::util::math::random::mtrand r(0);
-  vector<datum> one;
-  vector<datum> two;
 
   for (int i = 0; i < conf_.bucket_size * 2; ++i) {
     datum x, y;
@@ -321,11 +327,17 @@ TEST_P(clustering_test, get_nearest_center) {
     x.num_values_.push_back(make_pair("b", 1000 + r.next_gaussian() * 400));
     y.num_values_.push_back(make_pair("c", -500000 - r.next_gaussian() * 100));
     y.num_values_.push_back(make_pair("d", -10000 - r.next_gaussian() * 50));
+
+    vector<datum> one;
     one.push_back(x);
+    clustering_->push(one);
+    one.clear();
+
+    vector<datum> two;
     two.push_back(y);
+    clustering_->push(two);
+    two.clear();
   }
-  clustering_->push(one);
-  clustering_->push(two);
 
   clustering_->do_clustering();
 
