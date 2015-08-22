@@ -294,14 +294,18 @@ TEST_P(clustering_test, get_nearest_members) {
         point.insert(near_points[j]);
       }
 
-      if (point["a"] < 100) {
-        ASSERT_DOUBLE_EQ(0.0, point["b"]);
-        ASSERT_GT(0.0, point["c"]);
-        ASSERT_GT(0.0, point["d"]);
-      } else if (point["c"] < 100.0) {
-        ASSERT_DOUBLE_EQ(0.0, point["d"]);
-        ASSERT_LT(0.0, point["a"]);
-        ASSERT_LT(0.0, point["b"]);
+      if (point.count("c") == 0) {
+        // the point is in cluster of (a, b) dimension
+        ASSERT_NE(0.0, point["a"]);
+        ASSERT_NE(0.0, point["b"]);
+        ASSERT_EQ(0.0, point["c"]);
+        ASSERT_EQ(0.0, point["d"]);
+      } else if (point.count("a") == 0) {
+        // the point is in cluster of (c, d) dimension
+        ASSERT_EQ(0.0, point["a"]);
+        ASSERT_EQ(0.0, point["b"]);
+        ASSERT_NE(0.0, point["c"]);
+        ASSERT_NE(0.0, point["d"]);
       } else {
         std::cout << "{";
         for (map<string, double>::const_iterator it = point.begin();
