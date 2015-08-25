@@ -59,7 +59,8 @@ def build(bld):
     'compressive_storage_test.cpp',
     'mixable_model_test.cpp',
     'model_test.cpp',
-    'storage_test.cpp'
+    'storage_test.cpp',
+    'util_test.cpp',
   ]
   if bld.env.USE_EIGEN:
     test_cases += [

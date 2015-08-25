@@ -148,6 +148,7 @@ common::sfv_t scalar_dot(const common::sfv_t& p, double s) {
   return ret;
 }
 
+// sfv_t must be sorted by key.
 double dist(const common::sfv_t& p1, const common::sfv_t& p2) {
   double ret = 0;
   common::sfv_t::const_iterator it1 = p1.begin();
