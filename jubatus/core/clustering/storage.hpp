@@ -61,7 +61,7 @@ class storage : public event_dispatcher<storage_event_type, wplist> {
   void unpack(msgpack::object o);
   void clear();
 
-  MSGPACK_DEFINE(revision_, name_, config_, common_);
+  MSGPACK_DEFINE(revision_, config_, common_);
 
  protected:
   void increment_revision();
