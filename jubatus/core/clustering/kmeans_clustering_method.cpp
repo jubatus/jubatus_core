@@ -30,7 +30,8 @@ namespace core {
 namespace clustering {
 
 kmeans_clustering_method::kmeans_clustering_method(size_t k)
-    : k_(k) {
+    : k_(k),
+      rand_(0) {
 }
 
 kmeans_clustering_method::~kmeans_clustering_method() {
@@ -58,13 +59,12 @@ void kmeans_clustering_method::initialize_centers(wplist& points) {
       pair<int64_t, double> m = min_dist((*it).data, kcenters_);
       weights.push_back(m.second * it->weight);
     }
-    discrete_distribution d(weights.begin(), weights.end());
+    discrete_distribution d(weights.begin(), weights.end(), rand_.next_int());
     kcenters_.push_back(points[d()].data);
   }
 }
 
 void kmeans_clustering_method::do_batch_update(wplist& points) {
-  static jubatus::util::math::random::mtrand r;
   bool terminated = false;
   if (points.size() < k_) {
     return;

@@ -105,7 +105,8 @@ void bicriteria_as_coreset(
 }  // namespace
 
 kmeans_compressor::kmeans_compressor(const clustering_config& cfg)
-  : compressor(cfg) {
+  : compressor(cfg),
+    rand_(0) {
 }
 
 kmeans_compressor::~kmeans_compressor() {
@@ -153,7 +154,7 @@ void kmeans_compressor::get_bicriteria(
     }
 
     // Sample `bsize` points and insert them to the result
-    discrete_distribution d(weights.begin(), weights.end());
+    discrete_distribution d(weights.begin(), weights.end(), rand_.next_int());
     std::generate(ind.begin(), ind.end(), d);
 
     std::sort(ind.begin(), ind.end());
@@ -231,7 +232,7 @@ void kmeans_compressor::bicriteria_to_coreset(
     sumw += prob;
   }
 
-  discrete_distribution d(weights.begin(), weights.end());
+  discrete_distribution d(weights.begin(), weights.end(), rand_.next_int());
 
   std::vector<size_t> ind(dstsize);
   std::generate(ind.begin(), ind.end(), d);
