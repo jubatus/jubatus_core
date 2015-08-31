@@ -18,6 +18,8 @@
 #define JUBATUS_CORE_CLUSTERING_KMEANS_CLUSTERING_METHOD_HPP_
 
 #include <vector>
+
+#include "jubatus/util/math/random.h"
 #include "clustering_method.hpp"
 
 namespace jubatus {
@@ -43,6 +45,8 @@ class kmeans_clustering_method : public clustering_method {
 
   std::vector<common::sfv_t> kcenters_;
   size_t k_;
+
+  jubatus::util::math::random::mtrand rand_;
 };
 
 }  // namespace clustering

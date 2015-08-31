@@ -56,6 +56,7 @@ void storage::get_diff(diff_t& d) const {
 bool storage::put_diff(const diff_t& diff) {
   common_.clear();
   for (diff_t::const_iterator it = diff.begin(); it != diff.end(); ++it) {
+    // Exclude data originated from me.
     if (it->first != name_) {
       common_.push_back(*it);
     }

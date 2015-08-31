@@ -29,9 +29,9 @@ namespace bandit {
 
 exp3::exp3(bool assume_unrewarded, double gamma)
     : gamma_(gamma), s_(assume_unrewarded) {
-  if (gamma < 0 || 1 < gamma) {
+  if (gamma <= 0 || 1 < gamma) {
     throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("0 <= gamma <= 1"));
+        common::invalid_parameter("0 < gamma <= 1"));
   }
 }
 

@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2013 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2015 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,34 +14,33 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_CLUSTERING_DISCRETE_DISTRIBUTION_HPP_
-#define JUBATUS_CORE_CLUSTERING_DISCRETE_DISTRIBUTION_HPP_
+#include <cmath>
+#include <gtest/gtest.h>
+#include "../common/type.hpp"
+#include "util.hpp"
 
-#include <vector>
-#include "jubatus/util/math/random.h"
+using std::make_pair;
+using jubatus::core::common::sfv_t;
 
 namespace jubatus {
 namespace core {
 namespace clustering {
 
-class discrete_distribution {
- public:
-  discrete_distribution(
-      std::vector<double>::iterator begin,
-      std::vector<double>::iterator end,
-      uint32_t seed);
+class util_test : public ::testing::Test {};
 
-  size_t operator() ();
+TEST_F(util_test, dist) {
+  sfv_t p1;
+  p1.push_back(make_pair("x", 1));
+  p1.push_back(make_pair("y", 1));
 
- private:
-  size_t convert(double d);
-  jubatus::util::math::random::mtrand r_;
-  std::vector<double> whist_;
-  double sum_;
-};
+  sfv_t p2;
+  p2.push_back(make_pair("x", 2));
+  p2.push_back(make_pair("y", 2));
+
+  EXPECT_EQ(dist(p1, p1), 0);
+  EXPECT_EQ(dist(p1, p2), std::sqrt(2));
+}
 
 }  // namespace clustering
 }  // namespace core
 }  // namespace jubatus
-
-#endif  // JUBATUS_CORE_CLUSTERING_DISCRETE_DISTRIBUTION_HPP_
