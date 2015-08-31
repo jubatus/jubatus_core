@@ -1,3 +1,16 @@
+Release 0.2.2 - 2015/08/31
+--------------------------
+
+* Improvements
+    * clustering: improved so that consistent results are returned across runs (#167, #172)
+    * clusteirng: add utility tests (#173)
+
+* Bug fixes
+    * clustering: fix test conditions (#129, #174)
+    * clustering: fix MIX not working as expected (#70, #175)
+    * bandit: fix gamma parameter validation (#163, #169)
+    * fix bit_vector parameter assertion (#170)
+
 Release 0.2.1 - 2015/07/27
 --------------------------
 
