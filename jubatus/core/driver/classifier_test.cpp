@@ -57,7 +57,6 @@ using jubatus::util::text::json::to_json;
 using jubatus::util::text::json::json_object;
 using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
-using jubatus::util::data::optional;
 using jubatus::util::concurrent::thread;
 using jubatus::util::lang::function;
 using jubatus::util::lang::bind;
