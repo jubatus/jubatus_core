@@ -106,7 +106,7 @@ void bicriteria_as_coreset(
 
 kmeans_compressor::kmeans_compressor(const clustering_config& cfg)
   : compressor(cfg),
-    rand_(0) {
+    rand_(cfg.seed) {
 }
 
 kmeans_compressor::~kmeans_compressor() {

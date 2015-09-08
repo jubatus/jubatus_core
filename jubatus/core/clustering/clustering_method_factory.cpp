@@ -36,11 +36,11 @@ shared_ptr<clustering_method> clustering_method_factory::create(
     const clustering_config& config) {
   if (method == "kmeans") {
     return shared_ptr<clustering_method>(
-        new kmeans_clustering_method(config.k));
+        new kmeans_clustering_method(config.k, config.seed));
 #ifdef JUBATUS_USE_EIGEN
   } else if (method == "gmm") {
     return shared_ptr<clustering_method>(
-        new gmm_clustering_method(config.k));
+        new gmm_clustering_method(config.k, config.seed));
 #endif
   }
   throw JUBATUS_EXCEPTION(core::common::unsupported_method(method));

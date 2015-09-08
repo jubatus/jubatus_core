@@ -34,7 +34,7 @@ class gmm_test : public ::testing::Test {
   gmm_test() : r_(0) {}
 
   virtual void SetUp() {
-    gmm_.reset(new gmm);
+    gmm_.reset(new gmm(0));
   }
 
   void do_batch(size_t num) {
