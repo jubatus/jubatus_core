@@ -21,18 +21,12 @@
 #include <string>
 #include <vector>
 
-#include "jubatus/util/lang/cast.h"
-#include "jubatus/util/math/random.h"
-
 #include "../common/hash.hpp"
 #include "../storage/lsh_util.hpp"
 #include "../storage/lsh_vector.hpp"
 
 using jubatus::core::anomaly::lof;
 using jubatus::util::data::unordered_map;
-using jubatus::util::math::random::mtrand;
-using std::istream;
-using std::ostream;
 using std::numeric_limits;
 using std::string;
 using std::vector;
