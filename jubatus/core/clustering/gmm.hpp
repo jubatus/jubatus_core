@@ -27,7 +27,7 @@ namespace clustering {
 
 class gmm {
  public:
-  gmm();
+  explicit gmm(uint32_t seed);
 
   void batch(const eigen_wsvec_list_t& data, int d, int k);
   eigen_svec_list_t get_centers() {
@@ -58,6 +58,7 @@ class gmm {
   eigen_solver_list_t cov_solvers_;
   int d_;
   int k_;
+  int seed_;
 
   jubatus::util::math::random::mtrand rand_;
 };
