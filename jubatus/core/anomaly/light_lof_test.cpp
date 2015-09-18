@@ -79,6 +79,7 @@ class light_lof_test : public ::testing::Test {
     shared_ptr<storage::column_table> nn_table(new storage::column_table);
     light_lof::config config;
     config.nearest_neighbor_num = K;
+    config.ignore_kth_same_point = ignore_kth_same_point();
     nn_engine_.reset(new NearestNeighborMethod(
         typename NearestNeighborMethod::config(), nn_table, ID));
     light_lof_.reset(new light_lof(config, ID, nn_engine_));
@@ -90,9 +91,24 @@ class light_lof_test : public ::testing::Test {
   shared_ptr<nearest_neighbor_base> nn_engine_;
   shared_ptr<light_lof> light_lof_;
   jubatus::util::math::random::mtrand mtr_;
+
+ private:
+  virtual bool ignore_kth_same_point() {
+    return false;
+  }
 };
 
 TYPED_TEST_CASE_P(light_lof_test);
+
+template<typename NearestNeighborMethod>
+class light_lof_with_ignore_kth_test : public light_lof_test<NearestNeighborMethod> {
+ private:
+  virtual bool ignore_kth_same_point() {
+    return true;
+  }
+};
+
+TYPED_TEST_CASE_P(light_lof_with_ignore_kth_test);
 
 TYPED_TEST_P(light_lof_test, name) {
   EXPECT_EQ("light_lof", this->light_lof_->type());
@@ -134,7 +150,7 @@ TYPED_TEST_P(light_lof_test, calc_anomaly_score_on_gaussian_random_samples) {
   EXPECT_LT(2.f, this->light_lof_->calc_anomaly_score(outlier_query));
 }
 
-TYPED_TEST_P(light_lof_test, ignore_kth_same_point) {
+TYPED_TEST_P(light_lof_with_ignore_kth_test, ignore_kth_same_point) {
   common::sfv_t dup1, dup2;
   dup1.push_back(make_pair("a", 1.0));
   dup1.push_back(make_pair("b", 2.0));
@@ -187,11 +203,17 @@ REGISTER_TYPED_TEST_CASE_P(
     name,
     get_all_row_ids,
     calc_anomaly_score_on_gaussian_random_samples,
-    ignore_kth_same_point,
     config_validation);
 
 INSTANTIATE_TYPED_TEST_CASE_P(
     usual_case, light_lof_test, nearest_neighbor_types);
+
+REGISTER_TYPED_TEST_CASE_P(
+    light_lof_with_ignore_kth_test,
+    ignore_kth_same_point);
+
+INSTANTIATE_TYPED_TEST_CASE_P(
+    ignore_kth_case, light_lof_with_ignore_kth_test, nearest_neighbor_types);
 
 // TODO(beam2d): Add test of MIX.
 
