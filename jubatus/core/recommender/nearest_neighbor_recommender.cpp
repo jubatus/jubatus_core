@@ -104,7 +104,8 @@ void nearest_neighbor_recommender::update_row(
   if (unlearner_) {
     if (!unlearner_->touch(id)) {
       throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-          "no more space available to add new ID: " + id));
+          "cannot add new ID as number of sticky IDs reached "
+          "the maximum size of unlearner: " + id));
     }
   }
   orig_.set_row(id, diff);
