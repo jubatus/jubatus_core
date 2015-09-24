@@ -138,6 +138,7 @@ void local_storage_mixture::inp(const common::sfv_t& sfv,
                                 map_feature_val1_t& ret) const {
   ret.clear();
 
+  util::concurrent::scoped_lock lk(mutex_);
   // Use uin64_t map instead of string map as hash function for string is slow
   jubatus::util::data::unordered_map<uint64_t, float> ret_id;
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
