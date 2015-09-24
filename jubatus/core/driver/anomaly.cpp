@@ -88,8 +88,11 @@ float anomaly::overwrite(const string& id, const fv_converter::datum& d) {
   common::sfv_t v;
   converter_->convert_and_update_weight(d, v);
 
-  anomaly_->set_row(id, v);
-  return anomaly_->calc_anomaly_score(id);
+  if (anomaly_->set_row(id, v)) {
+    return anomaly_->calc_anomaly_score(id);
+  } else {
+    return anomaly_->calc_anomaly_score(v);
+  }
 }
 
 void anomaly::clear() {

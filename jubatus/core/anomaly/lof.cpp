@@ -111,9 +111,10 @@ void lof::update_row(const string& id, const sfv_diff_t& diff) {
   mixable_storage_->get_model()->update_row(id, diff);
 }
 
-void lof::set_row(const string& id, const common::sfv_t& sfv) {
+bool lof::set_row(const string& id, const common::sfv_t& sfv) {
   mixable_storage_->get_model()->remove_row(id);
   mixable_storage_->get_model()->update_row(id, sfv);
+  return true;
 }
 
 void lof::get_all_row_ids(vector<string>& ids) const {
