@@ -94,7 +94,8 @@ void nearest_neighbor_classifier::train(
     util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     if (!unlearner_->touch(id)) {
       throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-          "no more space available to add new ID: " + id));
+          "cannot add new ID as number of sticky IDs reached "
+          "the maximum size of unlearner: " + id));
     }
   }
   nearest_neighbor_engine_->set_row(id, fv);
