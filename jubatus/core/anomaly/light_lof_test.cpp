@@ -101,7 +101,8 @@ class light_lof_test : public ::testing::Test {
 TYPED_TEST_CASE_P(light_lof_test);
 
 template<typename NearestNeighborMethod>
-class light_lof_with_ignore_kth_test : public light_lof_test<NearestNeighborMethod> {
+class light_lof_with_ignore_kth_test
+    : public light_lof_test<NearestNeighborMethod> {
  private:
   virtual bool ignore_kth_same_point() {
     return true;
@@ -163,7 +164,8 @@ TYPED_TEST_P(light_lof_with_ignore_kth_test, ignore_kth_same_point) {
   EXPECT_TRUE(this->light_lof_->set_row("dummy_3", dup1));
 
   for (int i = 0; i < (this->K - 1); ++i) {
-    EXPECT_TRUE(this->light_lof_->set_row(lexical_cast<string>(i) + "th_point", dup2));
+    EXPECT_TRUE(this->light_lof_->set_row(
+        lexical_cast<string>(i) + "th_point", dup2));
   }
   EXPECT_FALSE(this->light_lof_->set_row("Kth_point", dup2));
 }
