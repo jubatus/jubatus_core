@@ -1,3 +1,15 @@
+Release 0.2.3 - 2015/09/28
+--------------------------
+
+* Improvements
+    * anomaly: add ignore_kth_same_point configuration option to avoid score to become inf (#130, #134)
+    * clustering: add seed configuration option (#176, #180)
+    * Improve unlearner overflow error message (#178, #187)
+    * Code cleanup (#179)
+
+* Bug fixes
+    * classifier: fix missing lock in local_storage_mixture::inp (#182, #183)
+
 Release 0.2.2 - 2015/08/31
 --------------------------
 
