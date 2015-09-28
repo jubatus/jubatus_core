@@ -21,18 +21,12 @@
 #include <string>
 #include <vector>
 
-#include "jubatus/util/lang/cast.h"
-#include "jubatus/util/math/random.h"
-
 #include "../common/hash.hpp"
 #include "../storage/lsh_util.hpp"
 #include "../storage/lsh_vector.hpp"
 
 using jubatus::core::anomaly::lof;
 using jubatus::util::data::unordered_map;
-using jubatus::util::math::random::mtrand;
-using std::istream;
-using std::ostream;
 using std::numeric_limits;
 using std::string;
 using std::vector;
@@ -117,9 +111,10 @@ void lof::update_row(const string& id, const sfv_diff_t& diff) {
   mixable_storage_->get_model()->update_row(id, diff);
 }
 
-void lof::set_row(const string& id, const common::sfv_t& sfv) {
+bool lof::set_row(const string& id, const common::sfv_t& sfv) {
   mixable_storage_->get_model()->remove_row(id);
   mixable_storage_->get_model()->update_row(id, sfv);
+  return true;
 }
 
 void lof::get_all_row_ids(vector<string>& ids) const {

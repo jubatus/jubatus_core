@@ -229,7 +229,8 @@ void linear_classifier::touch(const std::string& label) {
 void linear_classifier::check_touchable(const std::string& label) {
   if (unlearner_ && !unlearner_->can_touch(label)) {
     throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-        "no more space available to add new label: " + label));
+        "cannot add new label as number of sticky labels reached "
+        "the maximum size of unlearner: " + label));
   }
 }
 

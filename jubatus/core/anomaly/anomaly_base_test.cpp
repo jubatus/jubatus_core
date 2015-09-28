@@ -53,7 +53,8 @@ class anomaly_impl : public anomaly_base {
   void update_row(const std::string& id, const sfv_diff_t& diff) {
   }
 
-  void set_row(const std::string& id, const common::sfv_t& sfv) {
+  bool set_row(const std::string& id, const common::sfv_t& sfv) {
+    return true;
   }
 
   void get_all_row_ids(std::vector<std::string>& ids) const {

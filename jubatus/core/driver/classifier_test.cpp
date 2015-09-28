@@ -33,6 +33,7 @@
 
 #include "../storage/storage_type.hpp"
 #include "../storage/local_storage.hpp"
+#include "../storage/local_storage_mixture.hpp"
 #include "../classifier/classifier_test_util.hpp"
 #include "../classifier/classifier_factory.hpp"
 #include "../classifier/classifier.hpp"
@@ -57,7 +58,6 @@ using jubatus::util::text::json::to_json;
 using jubatus::util::text::json::json_object;
 using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
-using jubatus::util::data::optional;
 using jubatus::util::concurrent::thread;
 using jubatus::util::lang::function;
 using jubatus::util::lang::bind;
@@ -358,7 +358,15 @@ vector<shared_ptr<classifier_base> > create_linear_classifiers() {
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::perceptron(storage)));
 
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::perceptron(storage)));
+
   storage.reset(new core::storage::local_storage);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::passive_aggressive(storage)));
+
+  storage.reset(new core::storage::local_storage_mixture);
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::passive_aggressive(storage)));
 
@@ -366,7 +374,15 @@ vector<shared_ptr<classifier_base> > create_linear_classifiers() {
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::passive_aggressive_1(config, storage)));
 
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::passive_aggressive_1(config, storage)));
+
   storage.reset(new core::storage::local_storage);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::passive_aggressive_2(config, storage)));
+
+  storage.reset(new core::storage::local_storage_mixture);
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::passive_aggressive_2(config, storage)));
 
@@ -374,12 +390,24 @@ vector<shared_ptr<classifier_base> > create_linear_classifiers() {
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::confidence_weighted(config, storage)));
 
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::confidence_weighted(config, storage)));
+
   storage.reset(new core::storage::local_storage);
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::arow(config, storage)));
 
-  storage.reset(new core::storage::local_storage);
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::arow(config, storage)));
+
   config.regularization_weight = 0.1f;
+  storage.reset(new core::storage::local_storage);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::normal_herd(config, storage)));
+
+  storage.reset(new core::storage::local_storage_mixture);
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::normal_herd(config, storage)));
 

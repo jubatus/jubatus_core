@@ -36,13 +36,14 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-gmm::gmm()
-    : rand_(0) {
+gmm::gmm(uint32_t seed)
+    : seed_(seed),
+      rand_(seed) {
 }
 
 void gmm::batch(const eigen_wsvec_list_t& data, int d, int k) {
   if (data.empty()) {
-    *this = gmm();
+    *this = gmm(seed_);
     return;
   }
 

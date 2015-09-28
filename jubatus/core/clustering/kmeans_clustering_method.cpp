@@ -29,9 +29,10 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-kmeans_clustering_method::kmeans_clustering_method(size_t k)
+kmeans_clustering_method::kmeans_clustering_method(size_t k, uint32_t seed)
     : k_(k),
-      rand_(0) {
+      seed_(seed),
+      rand_(seed) {
 }
 
 kmeans_clustering_method::~kmeans_clustering_method() {

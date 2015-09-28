@@ -27,8 +27,8 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-gmm_clustering_method::gmm_clustering_method(size_t k)
-    : k_(k), kcenters_(), mapper_(), gmm_() {
+gmm_clustering_method::gmm_clustering_method(size_t k, uint32_t seed)
+    : k_(k), seed_(seed), kcenters_(), mapper_(), gmm_(seed) {
 }
 
 gmm_clustering_method::~gmm_clustering_method() {
@@ -36,7 +36,7 @@ gmm_clustering_method::~gmm_clustering_method() {
 
 void gmm_clustering_method::batch_update(wplist points) {
   if (points.empty()) {
-    *this = gmm_clustering_method(k_);
+    *this = gmm_clustering_method(k_, seed_);
     return;
   }
   mapper_.clear();

@@ -74,12 +74,15 @@ common::sfv_t create_2d_point(float x, float y) {
 template<typename NearestNeighborMethod>
 class light_lof_test : public ::testing::Test {
  public:
-  static const int K = 0;
+  static const int K = 10;
   void SetUp() {
     shared_ptr<storage::column_table> nn_table(new storage::column_table);
+    light_lof::config config;
+    config.nearest_neighbor_num = K;
+    config.ignore_kth_same_point = ignore_kth_same_point();
     nn_engine_.reset(new NearestNeighborMethod(
         typename NearestNeighborMethod::config(), nn_table, ID));
-    light_lof_.reset(new light_lof(light_lof::config(), ID, nn_engine_));
+    light_lof_.reset(new light_lof(config, ID, nn_engine_));
 
     mtr_ = jubatus::util::math::random::mtrand(SEED);
   }
@@ -88,9 +91,25 @@ class light_lof_test : public ::testing::Test {
   shared_ptr<nearest_neighbor_base> nn_engine_;
   shared_ptr<light_lof> light_lof_;
   jubatus::util::math::random::mtrand mtr_;
+
+ private:
+  virtual bool ignore_kth_same_point() {
+    return false;
+  }
 };
 
 TYPED_TEST_CASE_P(light_lof_test);
+
+template<typename NearestNeighborMethod>
+class light_lof_with_ignore_kth_test
+    : public light_lof_test<NearestNeighborMethod> {
+ private:
+  virtual bool ignore_kth_same_point() {
+    return true;
+  }
+};
+
+TYPED_TEST_CASE_P(light_lof_with_ignore_kth_test);
 
 TYPED_TEST_P(light_lof_test, name) {
   EXPECT_EQ("light_lof", this->light_lof_->type());
@@ -102,7 +121,7 @@ TYPED_TEST_P(light_lof_test, get_all_row_ids) {
       raw_ids, raw_ids + sizeof(raw_ids) / sizeof(raw_ids[0]));
 
   for (size_t i = 0; i < ids.size(); ++i) {
-    this->light_lof_->set_row(ids[i], common::sfv_t());
+    EXPECT_TRUE(this->light_lof_->set_row(ids[i], common::sfv_t()));
   }
   vector<string> actual_ids;
   this->light_lof_->get_all_row_ids(actual_ids);
@@ -110,7 +129,7 @@ TYPED_TEST_P(light_lof_test, get_all_row_ids) {
 
   // duplicated set
   for (size_t i = 0; i < ids.size(); ++i) {
-    this->light_lof_->set_row(ids[i], common::sfv_t());
+    EXPECT_TRUE(this->light_lof_->set_row(ids[i], common::sfv_t()));
   }
   this->light_lof_->get_all_row_ids(actual_ids);
   EXPECT_EQ(ids, actual_ids);
@@ -130,6 +149,25 @@ TYPED_TEST_P(light_lof_test, calc_anomaly_score_on_gaussian_random_samples) {
   // Outlier point should be treated as anomaly.
   const common::sfv_t outlier_query = create_2d_point(0, 3);
   EXPECT_LT(2.f, this->light_lof_->calc_anomaly_score(outlier_query));
+}
+
+TYPED_TEST_P(light_lof_with_ignore_kth_test, ignore_kth_same_point) {
+  common::sfv_t dup1, dup2;
+  dup1.push_back(make_pair("a", 1.0));
+  dup1.push_back(make_pair("b", 2.0));
+  dup2.push_back(make_pair("x", 1.0));
+  dup2.push_back(make_pair("y", 2.0));
+
+  this->light_lof_->clear();
+  EXPECT_TRUE(this->light_lof_->set_row("dummy_1", dup1));
+  EXPECT_TRUE(this->light_lof_->set_row("dummy_2", dup1));
+  EXPECT_TRUE(this->light_lof_->set_row("dummy_3", dup1));
+
+  for (int i = 0; i < (this->K - 1); ++i) {
+    EXPECT_TRUE(this->light_lof_->set_row(
+        lexical_cast<string>(i) + "th_point", dup2));
+  }
+  EXPECT_FALSE(this->light_lof_->set_row("Kth_point", dup2));
 }
 
 TYPED_TEST_P(light_lof_test, config_validation) {
@@ -171,6 +209,13 @@ REGISTER_TYPED_TEST_CASE_P(
 
 INSTANTIATE_TYPED_TEST_CASE_P(
     usual_case, light_lof_test, nearest_neighbor_types);
+
+REGISTER_TYPED_TEST_CASE_P(
+    light_lof_with_ignore_kth_test,
+    ignore_kth_same_point);
+
+INSTANTIATE_TYPED_TEST_CASE_P(
+    ignore_kth_case, light_lof_with_ignore_kth_test, nearest_neighbor_types);
 
 // TODO(beam2d): Add test of MIX.
 
