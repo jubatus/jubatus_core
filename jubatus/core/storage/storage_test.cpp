@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>
-#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/rwmutex.h"
 #include "local_storage.hpp"
 #include "local_storage_mixture.hpp"
 
@@ -167,7 +167,7 @@ class stub_storage : public storage_base {
     labels_.insert(klass);
   }
 
-  util::concurrent::mutex& get_lock() const {
+  util::concurrent::rw_mutex& get_lock() const {
     return mutex_;
   }
 
@@ -257,7 +257,7 @@ class stub_storage : public storage_base {
   std::string type() const {
     return "stub_storage";
   }
-  mutable util::concurrent::mutex mutex_;
+  mutable util::concurrent::rw_mutex mutex_;
 };
 
 }  // namespace storage

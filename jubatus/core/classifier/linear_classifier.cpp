@@ -179,7 +179,7 @@ float linear_classifier::calc_margin_and_variance(
   float margin = calc_margin(sfv, label, incorrect_label);
   var = 0.f;
 
-  util::concurrent::scoped_lock lk(storage_->get_lock());
+  util::concurrent::scoped_rlock lk(storage_->get_lock());
   for (size_t i = 0; i < sfv.size(); ++i) {
     const string& feature = sfv[i].first;
     const float val = sfv[i].second;
