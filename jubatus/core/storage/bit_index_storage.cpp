@@ -103,8 +103,18 @@ bool bit_index_storage::put_diff(
   for (bit_table_t::const_iterator it = mixed_diff.begin();
       it != mixed_diff.end(); ++it) {
     if (it->second.bit_num() == 0) {
+      if (unlearner_) {
+        unlearner_->remove(it->first);
+      }
       bitvals_.erase(it->first);
     } else {
+      if (unlearner_) {
+        if (unlearner_->can_touch(it->first)) {
+          unlearner_->touch(it->first);
+        } else {
+          continue;  // drop untouchable value
+        }
+      }
       bitvals_[it->first] = it->second;
     }
   }
