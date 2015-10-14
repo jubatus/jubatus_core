@@ -43,3 +43,8 @@ def build(bld):
       'nearest_neighbor_test.cpp',
     ],
     use = ['jubatus_util', 'jubatus_core'])
+
+  bld.program(
+    target = 'lsh_benchmark',
+    source = ['lsh_benchmark.cpp', 'lsh_function.cpp'],
+    use = ['jubatus_util', 'jubatus_core'])
