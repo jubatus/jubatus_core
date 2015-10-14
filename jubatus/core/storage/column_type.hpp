@@ -22,6 +22,7 @@
 #include <vector>
 #include <iosfwd>
 
+#include "jubatus/util/lang/cast.h"
 #include "storage_exception.hpp"
 #include "bit_vector.hpp"
 
@@ -89,7 +90,8 @@ class column_type {
     } else if (type_ == double_type) {
       return "double";
     } else if (type_ == bit_vector_type) {
-      return "bit_vector";
+      return "bit_vector[" +
+        util::lang::lexical_cast<std::string>(bit_vector_length_) + "bits]";
     } else if (type_ == string_type) {
       return "string";
     }

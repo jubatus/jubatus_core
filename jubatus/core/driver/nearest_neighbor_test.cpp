@@ -15,6 +15,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "nearest_neighbor.hpp"
+#include <algorithm>
 #include <string>
 #include <utility>
 #include <vector>
@@ -57,7 +58,12 @@ namespace core {
 namespace nearest_neighbor {
 
 void PrintTo(const shared_ptr<nearest_neighbor_base> base, ::std::ostream* os) {
-  *os << "<" << base->type() << ">";
+  *os << "<" << base->type() << " with:";
+  vector<storage::column_type> types = base->get_const_table()->types();
+  for (size_t i = 0; i < types.size(); ++i) {
+    *os << "[" << i<< "](" << types[i].type_as_string() << "),";
+  }
+  *os << ">" << std::endl;
 }
 }  // namespace nearest_neighbor
 namespace unlearner {
@@ -140,7 +146,6 @@ std::vector<shared_ptr<unlearner_base> > create_unlearners() {
 
 }  // namespace
 
-
 class nearest_neighbor_test
     : public ::testing::TestWithParam<
         shared_ptr<core::nearest_neighbor::nearest_neighbor_base> > {
@@ -214,6 +219,67 @@ TEST_P(nearest_neighbor_test, neighbor_row2_from_datum) {
   ASSERT_EQ("b", result[1].first);
 }
 
+bool sort_secondary_key(const pair<string, float>& l,
+                        const pair<string, float>& r) {
+  if (l.second < r.second) {
+    return true;
+  } else if (l.second > r.second) {
+    return false;
+  } else if (lexical_cast<size_t>(l.first) <
+             lexical_cast<size_t>(r.first)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool sort_secondary_key2(const pair<string, float>& l,
+                        const pair<string, float>& r) {
+  if (l.second < r.second) {
+    return true;
+  } else if (l.second > r.second) {
+    return false;
+  } else if (lexical_cast<size_t>(r.first) <
+             lexical_cast<size_t>(l.first)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+TEST_P(nearest_neighbor_test, neighbor_row_must_repeatable) {
+  // surprisingly, this test sometimes failed
+  const size_t num = 200;
+  for (size_t i = 0; i < num; ++i) {
+    const string key = lexical_cast<string>(i);
+    datum d = single_str_datum("x" + key, "a");
+    d.string_values_.push_back(make_pair("y", "b"));
+    d.string_values_.push_back(make_pair("z" + key + key, "c"));
+    nn_driver_->set_row(key, d);
+  }
+
+  const datum d = single_str_datum("x", "a");
+
+  vector<pair<string, float> > original_result =
+        nn_driver_->neighbor_row_from_datum(d, 100);
+  std::sort(original_result.begin(),
+            original_result.end(),
+            sort_secondary_key);
+
+  for (size_t i = 0; i < 10; ++i) {  // check 10 times
+    vector<pair<string, float> > result =
+        nn_driver_->neighbor_row_from_datum(d, 100);
+
+    ASSERT_EQ(original_result.size(), result.size());
+    std::sort(result.begin(), result.end(), sort_secondary_key);
+
+    for (size_t j = 0; j < result.size(); ++j) {
+      ASSERT_EQ(original_result[j].first, result[j].first);
+    }
+  }
+}
+
 TEST_P(nearest_neighbor_test, neighbor_row_and_similar_row) {
   // neighbor_row and similar_row should return the same order result
   const size_t num = 200;
@@ -227,16 +293,32 @@ TEST_P(nearest_neighbor_test, neighbor_row_and_similar_row) {
 
   for (size_t i = 0; i < num; ++i) {
     const string key = lexical_cast<string>(i);
-    datum d = single_str_datum("x" + key, "a");
+    datum d = single_str_datum(key, "a");
 
     vector<pair<string, float> > nr_result =
         nn_driver_->neighbor_row_from_datum(d, 100);
     vector<pair<string, float> > sr_result =
         nn_driver_->similar_row(d, 100);
+
     ASSERT_EQ(nr_result.size(), sr_result.size());
+
+    std::sort(nr_result.begin(), nr_result.end(), sort_secondary_key);
+    std::sort(sr_result.begin(), sr_result.end(), sort_secondary_key2);
+    std::reverse(sr_result.begin(), sr_result.end());
+
+//    std::cout << "[" << std::endl;
     for (size_t j = 0; j < nr_result.size(); ++j) {
-      ASSERT_EQ(nr_result[j].first, sr_result[j].first);
+/*
+      std::cout << "nr: " << nr_result[j].first << ":" << nr_result[j].second
+                << " sr: " << sr_result[j].first << ":" << sr_result[j].second << std::endl;
+*/
+      EXPECT_EQ(nr_result[j].first, sr_result[j].first);
+      if (nr_result[j].first != sr_result[j].first) {
+        std::cout << "nr: " << nr_result[j].first << ":" << nr_result[j].second
+                  << " sr: " << sr_result[j].first << ":" << sr_result[j].second << std::endl;
+      }
     }
+//    std::cout << "]" << std::endl;
   }
 }
 
