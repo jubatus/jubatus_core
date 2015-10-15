@@ -172,7 +172,8 @@ bool light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
     // have (k-1) points that have the same feature vector as given sfv.
     nearest_neighbor_engine_->neighbor_row(
         sfv, nn_result, config_.nearest_neighbor_num - 1);
-    if (nn_result.size() == (config_.nearest_neighbor_num - 1) &&
+    if (nn_result.size() ==
+        static_cast<size_t>(config_.nearest_neighbor_num - 1) &&
        (nn_result.back().second == 0)) {
       return false;
     }

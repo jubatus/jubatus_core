@@ -39,7 +39,7 @@ def options(opt):
 def configure(conf):
   env = conf.env
 
-  env.append_unique('CXXFLAGS', ['-O2', '-Wall', '-g', '-pipe', '-fno-omit-frame-pointer', '-pthread'])
+  env.append_unique('CXXFLAGS', ['-O2', '-Wall', '-g', '-pipe', '-fno-omit-frame-pointer', '-pthread', '-msse4.2'])
 
   conf.load('compiler_cxx')
   conf.load('unittest_gtest')

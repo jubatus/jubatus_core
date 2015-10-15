@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_STORAGE_BIT_VECTOR_HPP_
 #define JUBATUS_CORE_STORAGE_BIT_VECTOR_HPP_
 
+#include <iostream>
 #include <stdint.h>
 #include <algorithm>
 #include <string>
@@ -85,6 +86,7 @@ inline int fast_bitcount(unsigned long bits) {  // NOLINT
 }
 
 inline int fast_bitcount(unsigned long long bits) {  // NOLINT
+  std::cout << "fast" << std::flush;
   return __builtin_popcountll(bits);
 }
 
@@ -318,8 +320,17 @@ struct bit_vector_base {
       return bit_count();
     }
     size_t match_num = 0;
-    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base); i < blocks; ++i) {
+
+    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
+         i < blocks; i += 8) {
       match_num += detail::bitcount(bits_[i] ^ bv.bits_[i]);
+      match_num += detail::bitcount(bits_[i+1] ^ bv.bits_[i+1]);
+      match_num += detail::bitcount(bits_[i+2] ^ bv.bits_[i+2]);
+      match_num += detail::bitcount(bits_[i+3] ^ bv.bits_[i+3]);
+      match_num += detail::bitcount(bits_[i+4] ^ bv.bits_[i+4]);
+      match_num += detail::bitcount(bits_[i+5] ^ bv.bits_[i+5]);
+      match_num += detail::bitcount(bits_[i+6] ^ bv.bits_[i+6]);
+      match_num += detail::bitcount(bits_[i+7] ^ bv.bits_[i+7]);
     }
     return match_num;
   }
