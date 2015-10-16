@@ -37,10 +37,10 @@ generate_dataset(size_t num, size_t dencity) {
 }
 
 int bench() {
-  size_t num = 100000;
-  size_t dencity = 10;
+  size_t num = 100;
+  size_t dencity = 1;
   int ret = 0;
-  int hash_num = 2048;
+  int hash_num = 4096;
   std::vector<common::sfv_t> dataset = generate_dataset(num, dencity);
   storage::column_type conf(storage::column_type::bit_vector_type, hash_num);
   storage::bit_vector_column bc(conf);
@@ -67,7 +67,7 @@ int bench() {
     storage::bit_vector bv(hash_num);
     bv.set_bit(303);
     std::vector<std::pair<uint64_t, float> > ret;
-    const size_t num = 10000;
+    const size_t num = 10;
 
     for (size_t i = 0; i < num; ++i) {
       ranking_hamming_bit_vectors(bv, bc, ret, 64);
