@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <utility>
 #include <vector>
+#include "../storage/thread_pool.hpp"
 
 namespace jubatus {
 namespace core {
@@ -34,11 +35,22 @@ typedef const bit_vector_column const_bit_vector_column;
 }
 namespace nearest_neighbor {
 
-void ranking_hamming_bit_vectors(
-    const storage::bit_vector& query,
-    const storage::const_bit_vector_column& bvs,
-    std::vector<std::pair<uint64_t, float> >& ret,
-    uint64_t ret_num);
+struct bvs_task;
+void bvs_work(util::lang::shared_ptr<bvs_task> desc);
+
+class bit_vector_ranker {
+ public:
+  bit_vector_ranker(size_t thread_num)
+    : workers_(thread_num)
+  {}
+  void ranking_hamming_bit_vectors(
+      const storage::bit_vector& query,
+      const storage::const_bit_vector_column& bvs,
+      std::vector<std::pair<uint64_t, float> >& ret,
+      uint64_t ret_num);
+ private:
+  storage::thread_pool<util::lang::shared_ptr<bvs_task> > workers_;
+};
 
 }  // namespace nearest_neighbor
 }  // namespace core

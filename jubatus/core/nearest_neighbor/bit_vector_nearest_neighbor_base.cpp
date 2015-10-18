@@ -41,6 +41,7 @@ bit_vector_nearest_neighbor_base::bit_vector_nearest_neighbor_base(
     jubatus::util::lang::shared_ptr<storage::column_table> table,
     const std::string& id)
     : nearest_neighbor_base(table, id),
+      ranker_(16),
       bitnum_(bitnum) {
   vector<column_type> schema;
   fill_schema(schema);
@@ -53,6 +54,7 @@ bit_vector_nearest_neighbor_base::bit_vector_nearest_neighbor_base(
     vector<column_type>& schema,
     const std::string& id)
     : nearest_neighbor_base(table, id),
+      ranker_(16),
       bitnum_(bitnum) {
   fill_schema(schema);
 }
@@ -110,7 +112,10 @@ void bit_vector_nearest_neighbor_base::neighbor_row_from_hash(
   // take lock out of this function
   vector<pair<uint64_t, float> > scores;
 
-  ranking_hamming_bit_vectors(query, bit_vector_column(), scores, ret_num);
+  ranker_.ranking_hamming_bit_vectors(query,
+                                      bit_vector_column(),
+                                      scores,
+                                      ret_num);
 
   jubatus::util::lang::shared_ptr<const column_table> table = get_const_table();
   ids.clear();
