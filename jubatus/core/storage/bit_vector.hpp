@@ -261,8 +261,21 @@ struct bit_vector_base {
     }
     return bits_[pos / BASE_BITS] & (1LLU << (pos % BASE_BITS));
   }
+
+  /**
+   * Returns true if all the bits in this vector are 0.
+   * If this vector is not initialized yet, returns true.
+   */
   bool is_empty() const {
-    return bit_count() == 0;
+    if (bits_ == NULL) {
+      return true;
+    }
+    for (int64_t i = (used_bytes() / sizeof(bit_base)) - 1; i >= 0; --i) {
+      if (bits_[i] != 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void clear() {
