@@ -373,10 +373,12 @@ class column_table {
   MSGPACK_DEFINE(keys_, tuples_, versions_, columns_, clock_, index_);
 
   void pack(framework::packer& packer) const {
+    jubatus::util::concurrent::scoped_rlock lk(table_lock_);
     packer.pack(*this);
   }
 
   void unpack(msgpack::object o) {
+    jubatus::util::concurrent::scoped_wlock lk(table_lock_);
     o.convert(this);
   }
 
