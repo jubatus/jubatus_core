@@ -21,6 +21,7 @@
 #include "exception.hpp"
 #include "nearest_neighbor_base.hpp"
 #include "../storage/column_table.hpp"
+#include "jubatus/util/concurrent/rwmutex.h"
 
 using std::pair;
 using std::string;
@@ -42,22 +43,24 @@ nearest_neighbor_base::nearest_neighbor_base(
 void nearest_neighbor_base::get_all_row_ids(vector<string>& ids) const {
   vector<string> ret;
   shared_ptr<const storage::column_table> table = get_const_table();
+  util::concurrent::scoped_rlock lk(table->get_mutex());
+
   ret.reserve(table->size());
   for (size_t i = 0; i < table->size(); ++i) {
-    ret.push_back(table->get_key(i));
+    ret.push_back(table->get_key_nolock(i));
   }
   ret.swap(ids);
 }
 
 void nearest_neighbor_base::clear() {
-  mixable_table_->get_model()->clear();
+  mixable_table_->get_model()->clear();  // lock acquired inside
 }
 
 void nearest_neighbor_base::similar_row(
     const common::sfv_t& query,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
-  neighbor_row(query, ids, ret_num);
+  neighbor_row(query, ids, ret_num);  // lock acquired inside
   for (size_t i = 0; i < ids.size(); ++i) {
     ids[i].second = calc_similarity(ids[i].second);
   }
@@ -67,18 +70,18 @@ void nearest_neighbor_base::similar_row(
     const string& query_id,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
-  neighbor_row(query_id, ids, ret_num);
+  neighbor_row(query_id, ids, ret_num);  // lock acquired inside
   for (size_t i = 0; i < ids.size(); ++i) {
     ids[i].second = calc_similarity(ids[i].second);
   }
 }
 
 void nearest_neighbor_base::pack(framework::packer& packer) const {
-  get_const_table()->pack(packer);
+  get_const_table()->pack(packer);  // lock acquired inside
 }
 
 void nearest_neighbor_base::unpack(msgpack::object o) {
-  get_table()->unpack(o);
+  get_table()->unpack(o);  // lock acquired inside
 }
 
 framework::mixable* nearest_neighbor_base::get_mixable() const {

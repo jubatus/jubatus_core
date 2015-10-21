@@ -74,7 +74,7 @@ struct bitcount_impl<T, 8> {
   }
 };
 
-#ifdef __GNUG__
+#ifdef __POPCNT__
 
 inline int fast_bitcount(unsigned bits) {
   return __builtin_popcount(bits);
@@ -92,7 +92,7 @@ inline int fast_bitcount(unsigned long long bits) {  // NOLINT
 
 template <class T>
 inline int bitcount_dispatcher(T bits) {
-#ifdef __GNUG__
+#ifdef __POPCNT__
   return fast_bitcount(bits);
 #else
   return bitcount_impl<T, sizeof(T)>::call(bits);
