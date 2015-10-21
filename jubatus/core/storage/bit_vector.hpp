@@ -286,6 +286,11 @@ struct bit_vector_base {
   uint64_t calc_hamming_similarity(const bit_vector_base& bv) const {
     return bit_num() - calc_hamming_distance(bv);
   }
+
+  /**
+   * Returns hamming distance between this vector and given vector.
+   * Uninitialized vectors are considered as zero-initialized.
+   */
   uint64_t calc_hamming_distance(const bit_vector_base& bv) const {
     if (bit_num() != bv.bit_num()) {
       throw bit_vector_unmatch_exception(
@@ -293,11 +298,9 @@ struct bit_vector_base {
           jubatus::util::lang::lexical_cast<std::string>(bit_num()) + " with " +
           jubatus::util::lang::lexical_cast<std::string>(bv.bit_num()));
     }
-    if (is_empty() && bv.is_empty()) {
-      return 0;
-    } else if (is_empty()) {
+    if (bits_ == NULL) {
       return bv.bit_count();
-    } else if (bv.is_empty()) {
+    } else if (bv.bits_ == NULL) {
       return bit_count();
     }
     size_t match_num = 0;
