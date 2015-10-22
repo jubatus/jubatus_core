@@ -28,12 +28,36 @@ TEST(bit_vector, length) {
   EXPECT_EQ(bv.bit_num(), 80U);
 }
 
+TEST(bit_vector, bounds_checking) {
+  bit_vector bv(80);
+
+  // reading/writing out-of-bound bits should throw exception
+  EXPECT_THROW(bv.set_bit(bv.bit_num()),
+               jubatus::core::storage::bit_vector_unmatch_exception);
+  EXPECT_THROW(bv.get_bit(bv.bit_num()),
+               jubatus::core::storage::bit_vector_unmatch_exception);
+  EXPECT_THROW(bv.reverse_bit(bv.bit_num()),
+               jubatus::core::storage::bit_vector_unmatch_exception);
+  EXPECT_THROW(bv.clear_bit(bv.bit_num()),
+               jubatus::core::storage::bit_vector_unmatch_exception);
+
+  // writing bits for uninitialized vector should throw exception
+  // get_bit/clear_bit should do nothing for uninitialized vector
+  EXPECT_THROW(bit_vector().set_bit(0),
+               jubatus::core::storage::bit_vector_unmatch_exception);
+  EXPECT_NO_THROW(bit_vector().get_bit(0));
+  EXPECT_THROW(bit_vector().reverse_bit(0),
+               jubatus::core::storage::bit_vector_unmatch_exception);
+  EXPECT_NO_THROW(bit_vector().clear_bit(0));
+}
+
 TEST(bit_vector, set) {
   bit_vector bv(80);
   for (size_t i = 0; i < bv.bit_num(); ++i) {
     bv.set_bit(i);
   }
 }
+
 TEST(bit_vector, is_empty) {
   bit_vector bv(80);
   ASSERT_TRUE(bv.is_empty());
@@ -41,6 +65,9 @@ TEST(bit_vector, is_empty) {
   ASSERT_FALSE(bv.is_empty());
   bv.clear_bit(4);
   ASSERT_TRUE(bv.is_empty());
+
+  // uninitialized bit_vectors must be empty
+  ASSERT_TRUE(bit_vector().is_empty());
 }
 
 TEST(bit_vector, set_get) {

@@ -226,13 +226,20 @@ struct bit_vector_base {
     if (bits_ == NULL) {
       return;
     }
+    if (bit_num_ <= pos) {
+      throw bit_vector_unmatch_exception(
+          "clear_bit(): invalid posison " +
+          jubatus::util::lang::lexical_cast<std::string>(pos) +
+          " for length: " +
+          jubatus::util::lang::lexical_cast<std::string>(bit_num_));
+    }
     bits_[pos / BASE_BITS] &= ~(1LLU << (pos % BASE_BITS));
   }
   void set_bit(size_t pos) {
     if (bits_ == NULL) {
       alloc_memory();
     }
-    if (static_cast<size_t>(bit_num_) < pos) {
+    if (bit_num_ <= pos) {
       throw bit_vector_unmatch_exception(
           "set_bit(): invalid posison " +
           jubatus::util::lang::lexical_cast<std::string>(pos) +
@@ -258,6 +265,13 @@ struct bit_vector_base {
   bool get_bit(size_t pos) const {
     if (bits_ == NULL) {
       return false;
+    }
+    if (bit_num_ <= pos) {
+      throw bit_vector_unmatch_exception(
+          "get_bit(): invalid posison " +
+          jubatus::util::lang::lexical_cast<std::string>(pos) +
+          " for length: " +
+          jubatus::util::lang::lexical_cast<std::string>(bit_num_));
     }
     return bits_[pos / BASE_BITS] & (1LLU << (pos % BASE_BITS));
   }
