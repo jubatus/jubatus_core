@@ -171,7 +171,7 @@ struct bit_vector_base {
     }
   }
 
-  void resize_and_clear(uint64_t bit_num) {
+  void resize_and_clear(size_t bit_num) {
     release();
     own_ = false;
     bit_num_ = bit_num;
