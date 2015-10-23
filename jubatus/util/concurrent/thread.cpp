@@ -51,6 +51,7 @@ public:
   bool start();
   bool join();
   void detach();
+  void cancel();
 
 private:
   static void* start_routine(void* p);
@@ -59,6 +60,7 @@ private:
   pthread_t tid;
 
   jubatus::util::lang::function<void ()> f;
+  jubatus::util::lang::function<void ()>* pf;
 };
 
 thread::thread(const jubatus::util::lang::function<void ()>& f)
@@ -83,6 +85,11 @@ bool thread::join()
 void thread::detach()
 {
   pimpl->detach();
+}
+
+void thread::cancel()
+{
+  pimpl->cancel();
 }
 
 void thread::yield()
@@ -135,7 +142,7 @@ bool thread::impl::start()
   if (running) return false;
 
   running = true;
-  jubatus::util::lang::function<void ()>* pf = new jubatus::util::lang::function<void()>(f);
+  pf = new jubatus::util::lang::function<void()>(f);
   int res = pthread_create(&tid, NULL, start_routine, pf);
   if (res != 0){
     delete pf;
@@ -152,6 +159,7 @@ bool thread::impl::join()
   if (!running) return false;
 
   int res = pthread_join(tid,NULL);
+  delete pf;
   if (res != 0) {
     return false;
   }
@@ -164,6 +172,7 @@ bool thread::impl::join()
 
 void thread::impl::detach()
 {
+  // notice: this->pf will be leak. But it may not be big problem.
   if (!running) return;
 
   // pthread_detach always success as long as tid is correct.
@@ -172,6 +181,18 @@ void thread::impl::detach()
     // it may not fail
     return;
   }
+  running = false;
+  tid = 0;
+}
+
+void thread::impl::cancel()
+{
+  if (!running) return;
+  int res = pthread_cancel(tid);
+  if (res != 0) {
+    return;
+  }
+  join();
   running = false;
   tid = 0;
 }

@@ -14,6 +14,9 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#ifndef JUBATUS_CORE_STORAGE_THREAD_POOL_HPP_
+#define JUBATUS_CORE_STORAGE_THREAD_POOL_HPP_
+
 #include <sched.h>
 #include <functional>
 #include <vector>
@@ -95,7 +98,6 @@ class thread_pool {
       __sync_synchronize();
     }
   }
-
  public:
   thread_pool(int num)
     : threads_(), terminate_(false) {
@@ -109,6 +111,12 @@ class thread_pool {
       threads_.back()->start();
     }
   }
+  ~thread_pool() {
+    for (int i = 0; i < threads_.size(); ++i) {
+      threads_[i]->cancel();
+    }
+  }
+
   void add_task(Arg& arg, util::lang::function<void(Arg)> f) {
     queue_.enqueue(workingset(arg, f));
   }
@@ -122,3 +130,5 @@ class thread_pool {
 }  // namespace storage
 }  // namespace core
 }  // namespace jubatus
+
+#endif  // JUBATUS_CORE_STORAGE_THREAD_POOL_HPP_

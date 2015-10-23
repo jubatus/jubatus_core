@@ -23,6 +23,7 @@
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "bit_vector_nearest_neighbor_base.hpp"
+#include "lsh_hash_worker.hpp"
 
 namespace jubatus {
 namespace core {
@@ -35,6 +36,9 @@ class lsh : public bit_vector_nearest_neighbor_base {
  public:
   struct config {
     config() : hash_num(64u) {
+    }
+    explicit config(int32_t num)
+      : hash_num(num) {
     }
 
     int32_t hash_num;
@@ -56,6 +60,7 @@ class lsh : public bit_vector_nearest_neighbor_base {
 
  private:
   virtual storage::bit_vector hash(const common::sfv_t& sfv) const;
+  mutable lsh_hash_worker hasher;
 };
 
 }  // namespace nearest_neighbor

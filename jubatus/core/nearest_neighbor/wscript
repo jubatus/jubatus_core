@@ -14,6 +14,7 @@ def build(bld):
       'minhash.cpp',
       'lsh.cpp',
       'lsh_function.cpp',
+      'lsh_hash_worker.cpp',
       'euclid_lsh.cpp'
     ]
   headers = [
@@ -23,6 +24,7 @@ def build(bld):
       'exception.hpp',
       'lsh.hpp',
       'lsh_function.hpp',
+      'lsh_hash_worker.hpp',
       'minhash.hpp',
       'nearest_neighbor.hpp',
       'nearest_neighbor_base.hpp',

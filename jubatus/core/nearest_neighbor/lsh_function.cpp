@@ -40,7 +40,7 @@ vector<float> random_projection(const common::sfv_t& sfv, uint32_t hash_num) {
       // cache hit
       const vector<float>& random_vector = it->second;
       for (uint32_t j = 0; j < hash_num; ++j) {
-        proj[j] += sfv[i].second * random_vector[i];
+        proj[j] += sfv[i].second * random_vector[j];
       }
     } else {
       // cache miss-hit
