@@ -284,7 +284,8 @@ struct bit_vector_base {
     if (bits_ == NULL) {
       return true;
     }
-    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base); i < blocks; ++i) {
+    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
+         i < blocks; ++i) {
       if (bits_[i] != 0) {
         return false;
       }
@@ -318,7 +319,8 @@ struct bit_vector_base {
       return bit_count();
     }
     size_t match_num = 0;
-    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base); i < blocks; ++i) {
+    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
+         i < blocks; ++i) {
       match_num += detail::bitcount(bits_[i] ^ bv.bits_[i]);
     }
     return match_num;
@@ -328,7 +330,8 @@ struct bit_vector_base {
       return 0;
     }
     size_t result = 0;
-    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base); i < blocks; ++i) {
+    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
+         i < blocks; ++i) {
       result += detail::bitcount(bits_[i]);
     }
     return result;
