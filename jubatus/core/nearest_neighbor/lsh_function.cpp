@@ -29,7 +29,7 @@ namespace jubatus {
 namespace core {
 namespace nearest_neighbor {
 
-typedef util::data::unordered_map<uint32_t, vector<float> > cache_t;
+typedef util::data::unordered_map<uint32_t, vector<double> > cache_t;
 static cache_t cache;
 
 vector<float> random_projection(const common::sfv_t& sfv, uint32_t hash_num) {
@@ -37,22 +37,21 @@ vector<float> random_projection(const common::sfv_t& sfv, uint32_t hash_num) {
   for (size_t i = 0; i < sfv.size(); ++i) {
     const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
     cache_t::const_iterator it = cache.find(seed);
-    if (it != cache.end() and 0) {
+    if (it != cache.end()) {
       // cache hit
-      const vector<float>& random_vector = it->second;
+      const vector<double>& random_vector = it->second;
       for (uint32_t j = 0; j < hash_num; ++j) {
         proj[j] += sfv[i].second * random_vector[j];
       }
     } else {
       // cache miss-hit
-      vector<float> random_vector;
+      vector<double> random_vector;
       random_vector.reserve(hash_num);
       jubatus::util::math::random::mtrand rnd(seed);
       for (uint32_t j = 0; j < hash_num; ++j) {
-        const float random = rnd.next_gaussian();
-        // for repeatablity, drop the precision
+        const double random = rnd.next_gaussian();
+        proj[j] += sfv[i].second * random;
         random_vector.push_back(random);
-        proj[j] += sfv[i].second * random_vector.back();
       }
       cache.insert(std::make_pair(seed, random_vector));
     }
