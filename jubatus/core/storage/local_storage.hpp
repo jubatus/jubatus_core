@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
-#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/rwmutex.h"
 #include "jubatus/util/concurrent/lock.h"
 #include "storage_base.hpp"
 #include "../common/key_manager.hpp"
@@ -88,7 +88,7 @@ class local_storage : public storage_base {
       const std::string& inc_class,
       const std::string& dec_class);
 
-  util::concurrent::mutex& get_lock() const;
+  util::concurrent::rw_mutex& get_lock() const;
 
   void register_label(const std::string& label);
   bool delete_label(const std::string& label);
@@ -109,13 +109,13 @@ class local_storage : public storage_base {
 
  private:
   // map_features3_t tbl_;
-  mutable util::concurrent::mutex mutex_;
+  mutable util::concurrent::rw_mutex mutex_;
   id_features3_t tbl_;
   common::key_manager class2id_;
 
   // used for dump data
   friend std::ostream& operator<<(std::ostream& os, const local_storage& ls) {
-    util::concurrent::scoped_lock lk(ls.mutex_);
+    util::concurrent::scoped_rlock lk(ls.mutex_);
     os << "{" << std::endl;
     for (id_features3_t::const_iterator it = ls.tbl_.begin();
          it != ls.tbl_.end();

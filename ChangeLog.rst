@@ -1,3 +1,16 @@
+Release 0.2.4 - 2015/10/26
+--------------------------
+
+* Improvements
+    * nearest_neighbor: improve performance of bit_vector based methods (#188, #191, #192, #193, #194, #196)
+    * nearest_neighbor: improve get_all_row_ids performance by eliminating unnecessary lock (#188, #196)
+    * classifier: improve performance by using read/write lock instead of exclusive lock (#184, #197)
+
+* Bug fixes
+    * nearest_neighbor: fix bit_vector bounds checking (#198)
+    * nearest_neighbor: fix bit_vector to use GCC built-in popcount only when performance improvements are expected (#188, #196)
+    * nearest_neighbor: fix missing lock in pack/unpack (#188, #196)
+
 Release 0.2.3 - 2015/09/28
 --------------------------
 

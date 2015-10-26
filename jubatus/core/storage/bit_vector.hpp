@@ -74,7 +74,7 @@ struct bitcount_impl<T, 8> {
   }
 };
 
-#ifdef __GNUG__
+#ifdef __POPCNT__
 
 inline int fast_bitcount(unsigned bits) {
   return __builtin_popcount(bits);
@@ -92,7 +92,7 @@ inline int fast_bitcount(unsigned long long bits) {  // NOLINT
 
 template <class T>
 inline int bitcount_dispatcher(T bits) {
-#ifdef __GNUG__
+#ifdef __POPCNT__
   return fast_bitcount(bits);
 #else
   return bitcount_impl<T, sizeof(T)>::call(bits);
@@ -171,7 +171,7 @@ struct bit_vector_base {
     }
   }
 
-  void resize_and_clear(uint64_t bit_num) {
+  void resize_and_clear(size_t bit_num) {
     release();
     own_ = false;
     bit_num_ = bit_num;
@@ -226,13 +226,20 @@ struct bit_vector_base {
     if (bits_ == NULL) {
       return;
     }
+    if (bit_num_ <= pos) {
+      throw bit_vector_unmatch_exception(
+          "clear_bit(): invalid posison " +
+          jubatus::util::lang::lexical_cast<std::string>(pos) +
+          " for length: " +
+          jubatus::util::lang::lexical_cast<std::string>(bit_num_));
+    }
     bits_[pos / BASE_BITS] &= ~(1LLU << (pos % BASE_BITS));
   }
   void set_bit(size_t pos) {
     if (bits_ == NULL) {
       alloc_memory();
     }
-    if (static_cast<size_t>(bit_num_) < pos) {
+    if (bit_num_ <= pos) {
       throw bit_vector_unmatch_exception(
           "set_bit(): invalid posison " +
           jubatus::util::lang::lexical_cast<std::string>(pos) +
@@ -259,10 +266,31 @@ struct bit_vector_base {
     if (bits_ == NULL) {
       return false;
     }
+    if (bit_num_ <= pos) {
+      throw bit_vector_unmatch_exception(
+          "get_bit(): invalid posison " +
+          jubatus::util::lang::lexical_cast<std::string>(pos) +
+          " for length: " +
+          jubatus::util::lang::lexical_cast<std::string>(bit_num_));
+    }
     return bits_[pos / BASE_BITS] & (1LLU << (pos % BASE_BITS));
   }
+
+  /**
+   * Returns true if all the bits in this vector are 0.
+   * If this vector is not initialized yet, returns true.
+   */
   bool is_empty() const {
-    return bit_count() == 0;
+    if (bits_ == NULL) {
+      return true;
+    }
+    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
+         i < blocks; ++i) {
+      if (bits_[i] != 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   void clear() {
@@ -273,6 +301,11 @@ struct bit_vector_base {
   uint64_t calc_hamming_similarity(const bit_vector_base& bv) const {
     return bit_num() - calc_hamming_distance(bv);
   }
+
+  /**
+   * Returns hamming distance between this vector and given vector.
+   * Uninitialized vectors are considered as zero-initialized.
+   */
   uint64_t calc_hamming_distance(const bit_vector_base& bv) const {
     if (bit_num() != bv.bit_num()) {
       throw bit_vector_unmatch_exception(
@@ -280,15 +313,14 @@ struct bit_vector_base {
           jubatus::util::lang::lexical_cast<std::string>(bit_num()) + " with " +
           jubatus::util::lang::lexical_cast<std::string>(bv.bit_num()));
     }
-    if (is_empty() && bv.is_empty()) {
-      return 0;
-    } else if (is_empty()) {
+    if (bits_ == NULL) {
       return bv.bit_count();
-    } else if (bv.is_empty()) {
+    } else if (bv.bits_ == NULL) {
       return bit_count();
     }
     size_t match_num = 0;
-    for (size_t i = 0; i < used_bytes() / sizeof(bit_base); ++i) {
+    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
+         i < blocks; ++i) {
       match_num += detail::bitcount(bits_[i] ^ bv.bits_[i]);
     }
     return match_num;
@@ -298,7 +330,8 @@ struct bit_vector_base {
       return 0;
     }
     size_t result = 0;
-    for (int64_t i = (used_bytes() / sizeof(bit_base)) - 1; i >= 0; --i) {
+    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
+         i < blocks; ++i) {
       result += detail::bitcount(bits_[i]);
     }
     return result;

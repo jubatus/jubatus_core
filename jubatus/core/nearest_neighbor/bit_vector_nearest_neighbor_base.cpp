@@ -70,16 +70,17 @@ void bit_vector_nearest_neighbor_base::neighbor_row(
     const common::sfv_t& query,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  const bit_vector query_hash = hash(query);
   util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
-  neighbor_row_from_hash(hash(query), ids, ret_num);
+  neighbor_row_from_hash(query_hash, ids, ret_num);
 }
 
 void bit_vector_nearest_neighbor_base::neighbor_row(
     const string& query_id,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
   const storage::column_table& table = *get_const_table();
-  util::concurrent::scoped_rlock lk(table.get_mutex());
   const pair<bool, uint64_t> maybe_index = table.exact_match(query_id);
   if (!maybe_index.first) {
     ids.clear();
@@ -105,7 +106,10 @@ void bit_vector_nearest_neighbor_base::neighbor_row_from_hash(
     const bit_vector& query,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  // this function is not thread safe.
+  // take lock out of this function
   vector<pair<uint64_t, float> > scores;
+
   ranking_hamming_bit_vectors(query, bit_vector_column(), scores, ret_num);
 
   jubatus::util::lang::shared_ptr<const column_table> table = get_const_table();

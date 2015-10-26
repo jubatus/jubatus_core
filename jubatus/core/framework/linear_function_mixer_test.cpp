@@ -21,7 +21,7 @@
 
 #include <gtest/gtest.h>
 
-#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/rwmutex.h"
 #include "linear_function_mixer.hpp"
 #include "../storage/storage_base.hpp"
 
@@ -105,7 +105,7 @@ class storage_mock_base : public storage::storage_base {
       const std::string& dec_class) {
   }
 
-  util::concurrent::mutex& get_lock() const {
+  util::concurrent::rw_mutex& get_lock() const {
     return mutex_;
   }
 
@@ -138,7 +138,7 @@ class storage_mock_base : public storage::storage_base {
   std::string type() const {
     return "";
   }
-  mutable util::concurrent::mutex mutex_;
+  mutable util::concurrent::rw_mutex mutex_;
 };
 
 class storage_mock_1 : public storage_mock_base {
