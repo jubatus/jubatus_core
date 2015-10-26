@@ -319,18 +319,11 @@ struct bit_vector_base {
     } else if (bv.bits_ == NULL) {
       return bit_count();
     }
-    size_t match_num = 0;
 
+    size_t match_num = 0;
     for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
-         i < blocks; i += 8) {
+         i < blocks; ++i) {
       match_num += detail::bitcount(bits_[i] ^ bv.bits_[i]);
-      match_num += detail::bitcount(bits_[i+1] ^ bv.bits_[i+1]);
-      match_num += detail::bitcount(bits_[i+2] ^ bv.bits_[i+2]);
-      match_num += detail::bitcount(bits_[i+3] ^ bv.bits_[i+3]);
-      match_num += detail::bitcount(bits_[i+4] ^ bv.bits_[i+4]);
-      match_num += detail::bitcount(bits_[i+5] ^ bv.bits_[i+5]);
-      match_num += detail::bitcount(bits_[i+6] ^ bv.bits_[i+6]);
-      match_num += detail::bitcount(bits_[i+7] ^ bv.bits_[i+7]);
     }
     return match_num;
   }

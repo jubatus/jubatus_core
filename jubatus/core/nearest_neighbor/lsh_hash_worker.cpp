@@ -138,8 +138,9 @@ void lsh_hash_worker::hash(
     return;
   }
 
+  const size_t work_chunk = 100000;
   const size_t total_hash = hash_num * fv.size();
-  const size_t jobs = total_hash / 100000;
+  const size_t jobs = (total_hash + work_chunk + 1) / work_chunk;
   const size_t chunk = (fv.size() + jobs - 1) / jobs;
   for (uint64_t i = 0; i < fv.size(); i += chunk) {
     uint64_t til = std::min(fv.size(), i + chunk);

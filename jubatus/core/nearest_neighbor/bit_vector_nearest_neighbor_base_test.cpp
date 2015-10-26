@@ -126,6 +126,11 @@ TEST_F(bit_vector_nearest_neighbor_base_test, neighbor_row_from_datum) {
 
   EXPECT_EQ(expect_neighbors, actual_neighbors);
 
+  mock_->neighbor_row(common::sfv_t(), actual_neighbors, 3);
+  EXPECT_EQ(expect_neighbors, actual_neighbors);
+  mock_->neighbor_row(common::sfv_t(), actual_neighbors, 3);
+  EXPECT_EQ(expect_neighbors, actual_neighbors);
+
   vector<pair<string, float> > actual_similars, expect_similars;
 
   mock_->similar_row(common::sfv_t(), actual_similars, 3);

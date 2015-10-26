@@ -119,6 +119,7 @@ void bit_vector_ranker::ranking_hamming_bit_vectors(
   heap.get_sorted(sorted);
 
   ret.clear();
+  ret.reserve(sorted.size());
   const float denom = query.bit_num();
   for (size_t i = 0; i < sorted.size(); ++i) {
     ret.push_back(make_pair(sorted[i].second, sorted[i].first / denom));

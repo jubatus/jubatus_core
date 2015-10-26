@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 #include "../common/type.hpp"
+#include "../common/assert.hpp"
 #include "bit_vector_ranking.hpp"
 #include "jubatus/util/concurrent/rwmutex.h"
 
@@ -39,9 +40,10 @@ namespace nearest_neighbor {
 bit_vector_nearest_neighbor_base::bit_vector_nearest_neighbor_base(
     uint32_t bitnum,
     jubatus::util::lang::shared_ptr<storage::column_table> table,
-    const std::string& id)
+    const std::string& id,
+    size_t parallel)
     : nearest_neighbor_base(table, id),
-      ranker_(16),
+      ranker_(parallel),
       bitnum_(bitnum) {
   vector<column_type> schema;
   fill_schema(schema);
@@ -52,9 +54,10 @@ bit_vector_nearest_neighbor_base::bit_vector_nearest_neighbor_base(
     uint32_t bitnum,
     jubatus::util::lang::shared_ptr<column_table> table,
     vector<column_type>& schema,
-    const std::string& id)
+    const std::string& id,
+    size_t parallel)
     : nearest_neighbor_base(table, id),
-      ranker_(16),
+      ranker_(parallel),
       bitnum_(bitnum) {
   fill_schema(schema);
 }
@@ -116,9 +119,12 @@ void bit_vector_nearest_neighbor_base::neighbor_row_from_hash(
                                       bit_vector_column(),
                                       scores,
                                       ret_num);
+  JUBATUS_ASSERT_LE(scores.size(), ret_num,
+                    "scores must be less or equal to ret_num");
 
   jubatus::util::lang::shared_ptr<const column_table> table = get_const_table();
   ids.clear();
+  ids.reserve(scores.size());
   for (size_t i = 0; i < scores.size(); ++i) {
     ids.push_back(make_pair(table->get_key_nolock(scores[i].first),
                             scores[i].second));
