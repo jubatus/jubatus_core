@@ -72,6 +72,9 @@ void bit_vector_nearest_neighbor_base::neighbor_row(
     uint64_t ret_num) const {
   const bit_vector query_hash = hash(query);
   util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
+
+  /* table lock acquired; all subsequent table operations must be nolock */
+
   neighbor_row_from_hash(query_hash, ids, ret_num);
 }
 
@@ -80,8 +83,11 @@ void bit_vector_nearest_neighbor_base::neighbor_row(
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
   util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
+
+  /* table lock acquired; all subsequent table operations must be nolock */
+
   const storage::column_table& table = *get_const_table();
-  const pair<bool, uint64_t> maybe_index = table.exact_match(query_id);
+  const pair<bool, uint64_t> maybe_index = table.exact_match_nolock(query_id);
   if (!maybe_index.first) {
     ids.clear();
     return;

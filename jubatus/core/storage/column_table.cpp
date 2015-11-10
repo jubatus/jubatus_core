@@ -60,6 +60,11 @@ void column_table::clear() {
 std::pair<bool, uint64_t> column_table::exact_match(
     const std::string& prefix) const {
   jutil::concurrent::scoped_rlock lk(table_lock_);
+  return exact_match_nolock(prefix);
+}
+
+std::pair<bool, uint64_t> column_table::exact_match_nolock(
+    const std::string& prefix) const {
   index_table::const_iterator it = index_.find(prefix);
   if (it == index_.end()) {
     return std::make_pair(false, 0LLU);
