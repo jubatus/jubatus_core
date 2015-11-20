@@ -64,7 +64,7 @@ class lof : public anomaly_base {
 };
 
 }  //  namespace anomaly
-}  // core
+}  //  namespace core
 }  //  namespace jubatus
 
 #endif  // JUBATUS_CORE_ANOMALY_LOF_HPP_
