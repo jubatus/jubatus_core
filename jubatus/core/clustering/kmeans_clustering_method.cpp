@@ -98,6 +98,11 @@ void kmeans_clustering_method::online_update(wplist points) {
 }
 
 vector<common::sfv_t> kmeans_clustering_method::get_k_center() const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "clustering is not performed yet"));
+  }
+
   return kcenters_;
 }
 
