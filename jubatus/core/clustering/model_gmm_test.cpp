@@ -51,8 +51,9 @@ class model_gmm_test : public ::testing::Test {
 };
 
 TEST_F(model_gmm_test, initial_centers) {
-  vector<common::sfv_t> centers = model_->get_k_center();
-  ASSERT_EQ(centers.size(), 0ul);
+  EXPECT_THROW(
+    model_->get_k_center(),
+    common::exception::runtime_error);
 }
 
 TEST_F(model_gmm_test, push_small) {
@@ -63,8 +64,9 @@ TEST_F(model_gmm_test, push_small) {
   ASSERT_EQ(coreset.size(), N);
   ASSERT_EQ(coreset.front().data.size(), D);
 
-  vector<common::sfv_t> centers = model_->get_k_center();
-  ASSERT_EQ(centers.size(), 0ul);
+  EXPECT_THROW(
+    model_->get_k_center(),
+    common::exception::runtime_error);
 }
 
 TEST_F(model_gmm_test, compression_and_clusteringing) {
