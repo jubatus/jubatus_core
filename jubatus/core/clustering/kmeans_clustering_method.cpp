@@ -132,6 +132,11 @@ wplist kmeans_clustering_method::get_cluster(
 
 vector<wplist> kmeans_clustering_method::get_clusters(
     const wplist& points) const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "clustering is not performed yet"));
+  }
+
   vector<wplist> ret(k_);
   for (wplist::const_iterator it = points.begin(); it != points.end(); ++it) {
     pair<int64_t, double> m = min_dist(it->data, kcenters_);
