@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "jubatus/util/lang/scoped_ptr.h"
 #include "jubatus/util/math/random.h"
+#include "clustering.hpp"
 #include "gmm.hpp"
 #include "gmm_types.hpp"
 #include "../common/exception.hpp"
@@ -115,7 +116,7 @@ TEST_F(gmm_test, clear_with_empty_list) {
   do_batch(0);  // batch update with empty list
   EXPECT_THROW(
     eigen_svec_t nc_b = gmm_->get_nearest_center(svec_a),
-    common::exception::runtime_error);
+    not_performed);
 }
 
 }  // namespace clustering

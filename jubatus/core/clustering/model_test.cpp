@@ -51,9 +51,7 @@ class model_test : public ::testing::Test {
 };
 
 TEST_F(model_test, initial_centers) {
-  EXPECT_THROW(
-    model_->get_k_center(),
-    common::exception::runtime_error);
+  EXPECT_THROW(model_->get_k_center(), not_performed);
 }
 
 TEST_F(model_test, push_small) {
@@ -64,9 +62,7 @@ TEST_F(model_test, push_small) {
   ASSERT_EQ(coreset.size(), N);
   ASSERT_EQ(coreset.front().data.size(), D);
 
-  EXPECT_THROW(
-    model_->get_k_center(),
-    common::exception::runtime_error);
+  EXPECT_THROW(model_->get_k_center(), not_performed);
 }
 
 TEST_F(model_test, compression_and_clusteringing) {

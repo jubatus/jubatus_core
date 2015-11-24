@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 #include "../common/exception.hpp"
+#include "clustering.hpp"
 #include "util.hpp"
 
 using std::pair;
@@ -99,8 +100,7 @@ void kmeans_clustering_method::online_update(wplist points) {
 
 vector<common::sfv_t> kmeans_clustering_method::get_k_center() const {
   if (kcenters_.empty()) {
-    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-        "clustering is not performed yet"));
+    throw JUBATUS_EXCEPTION(not_performed());
   }
 
   return kcenters_;
@@ -109,8 +109,7 @@ vector<common::sfv_t> kmeans_clustering_method::get_k_center() const {
 int64_t kmeans_clustering_method::get_nearest_center_index(
     const common::sfv_t& point) const {
   if (kcenters_.empty()) {
-    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-        "clustering is not performed yet"));
+    throw JUBATUS_EXCEPTION(not_performed());
   }
 
   return min_dist(point, kcenters_).first;
@@ -133,8 +132,7 @@ wplist kmeans_clustering_method::get_cluster(
 vector<wplist> kmeans_clustering_method::get_clusters(
     const wplist& points) const {
   if (kcenters_.empty()) {
-    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-        "clustering is not performed yet"));
+    throw JUBATUS_EXCEPTION(not_performed());
   }
 
   vector<wplist> ret(k_);
