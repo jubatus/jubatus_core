@@ -45,7 +45,7 @@ class summation_storage {
                         const std::string& arm_id) const;
   double get_expectation(const std::string& player_id,
                          const std::string& arm_id) const;
-
+  int get_total_trial_count();
   const std::vector<std::string>& get_arm_ids() const {
     return arm_ids_;
   }
@@ -64,6 +64,7 @@ class summation_storage {
   const bool assume_unrewarded_;
   std::vector<std::string> arm_ids_;
   table_t mixed_, unmixed_;
+  int total_trial_count;
 };
 
 }  // namespace bandit

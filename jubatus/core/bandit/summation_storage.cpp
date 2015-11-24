@@ -25,7 +25,7 @@ namespace core {
 namespace bandit {
 
 summation_storage::summation_storage(bool assume_unrewarded)
-    : assume_unrewarded_(assume_unrewarded) {
+  : assume_unrewarded_(assume_unrewarded), total_trial_count(0) {
 }
 
 bool summation_storage::register_arm(const std::string& arm_id) {
@@ -100,6 +100,7 @@ void summation_storage::notify_selected(
   }
   arm_info& a = get_arm_info_(unmixed_, arm_ids_, player_id, arm_id);
   a.trial_count += 1;
+  total_trial_count += 1;
 }
 
 bool summation_storage::register_reward(
@@ -109,10 +110,12 @@ bool summation_storage::register_reward(
   arm_info& a = get_arm_info_(unmixed_, arm_ids_, player_id, arm_id);
   if (!assume_unrewarded_) {
     a.trial_count += 1;
+	total_trial_count += 1;
   }
   a.weight += reward;
   return true;
 }
+
 
 namespace {
 arm_info get_arm_info_(
@@ -154,6 +157,9 @@ double summation_storage::get_expectation(
     return 0;
   }
   return a.weight / a.trial_count;
+}
+int summation_storage::get_total_trial_count(){
+  return total_trial_count;
 }
 
 arm_info_map summation_storage::get_arm_info_map(
