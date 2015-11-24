@@ -75,6 +75,11 @@ wplist gmm_clustering_method::get_cluster(
 
 std::vector<wplist> gmm_clustering_method::get_clusters(
     const wplist& points) const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "clustering is not performed yet"));
+  }
+
   std::vector<wplist> ret(k_);
   for (wplist::const_iterator it = points.begin(); it != points.end(); ++it) {
     int64_t c = get_nearest_center_index(it->data);
