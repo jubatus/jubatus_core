@@ -198,6 +198,12 @@ TYPED_TEST_P(light_lof_test, config_validation) {
   c.reverse_nearest_neighbor_num = 3;
   ASSERT_NO_THROW
     (this->light_lof_.reset(new light_lof(c, ID, this->nn_engine_)));
+
+  // ignore_kth_same_point is undefined
+  c.ignore_kth_same_point = jubatus::util::data::optional<bool>();
+  ASSERT_NO_THROW(
+    this->light_lof_.reset(new light_lof(c, ID, this->nn_engine_)));
+  EXPECT_TRUE(this->light_lof_->set_row("test", common::sfv_t()));
 }
 
 REGISTER_TYPED_TEST_CASE_P(
