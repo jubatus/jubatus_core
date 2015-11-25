@@ -93,7 +93,7 @@ class recommender_base : public framework::model {
 
   virtual framework::mixable* get_mixable() const = 0;
 
-  static float calc_similality(common::sfv_t& q1, common::sfv_t& q2);
+  static float calc_similarity(common::sfv_t& q1, common::sfv_t& q2);
   static float calc_l2norm(const common::sfv_t& query);
 
  protected:
