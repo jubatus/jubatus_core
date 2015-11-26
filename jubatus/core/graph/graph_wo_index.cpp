@@ -161,8 +161,9 @@ void graph_wo_index::remove_node(node_id_t id) {
   }
   if (ni.in_edges.size() > 0 || ni.out_edges.size() > 0) {
     throw JUBATUS_EXCEPTION(jubatus::core::common::exception::runtime_error(
-        string("graph_wo_index::remove_node unknown id=")
-        + lexical_cast<string>(id)));
+        string("graph_wo_index::remove_node node id=")
+        + lexical_cast<string>(id) +
+        string(" cannot be removed because it has edges")));
   }
   local_nodes_.erase(id);
 }
