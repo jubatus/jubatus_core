@@ -82,13 +82,16 @@ void bit_index_storage::clear() {
 
 void bit_index_storage::get_all_row_ids(std::vector<std::string>& ids) const {
   ids.clear();
-  for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
-      ++it) {
-    ids.push_back(it->first);
-  }
   for (bit_table_t::const_iterator it = bitvals_diff_.begin();
       it != bitvals_diff_.end(); ++it) {
-    if (bitvals_.find(it->first) == bitvals_.end()) {
+    // Exclude empty rows in diff area
+    if (it->second.bit_num() != 0) {
+      ids.push_back(it->first);
+    }
+  }
+  for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
+      ++it) {
+    if (bitvals_diff_.find(it->first) == bitvals_diff_.end()) {
       ids.push_back(it->first);
     }
   }
