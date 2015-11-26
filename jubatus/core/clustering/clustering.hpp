@@ -44,6 +44,13 @@ class clustering_error : public common::exception::runtime_error {
   }
 };
 
+class not_performed : public clustering_error {
+ public:
+  explicit not_performed()
+    : clustering_error("clustering is not performed yet") {
+  }
+};
+
 class clustering {
  public:
   clustering(
