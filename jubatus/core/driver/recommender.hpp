@@ -63,7 +63,7 @@ class recommender : public driver_base {
       const fv_converter::datum& data,
       size_t size);
 
-  float calc_similality(
+  float calc_similarity(
       const fv_converter::datum& l,
       const fv_converter::datum& r);
   float calc_l2norm(const fv_converter::datum& q);
