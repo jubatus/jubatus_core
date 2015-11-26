@@ -118,7 +118,29 @@ bool bit_index_storage::put_diff(
       bitvals_[it->first] = it->second;
     }
   }
+
+  // New empty rows were created by unlearner and remove_row
+  // between get_diff and put_diff
+  std::vector<std::string> removed_ids;
+  for (bit_table_t::const_iterator it = bitvals_diff_.begin();
+      it != bitvals_diff_.end(); ++it) {
+    if (it->second.bit_num() == 0) {
+      bit_table_t::const_iterator pos;
+      pos = mixed_diff.find(it->first);
+      if (pos == mixed_diff.end() || pos->second.bit_num() != 0) {
+        removed_ids.push_back(it->first);
+      }
+    }
+  }
+
   bitvals_diff_.clear();
+
+  // Keep empty rows in the diff area until next MIX to
+  // propagate the removal of this data to other nodes.
+  for (size_t i = 0; i < removed_ids.size(); ++i) {
+    bitvals_diff_[removed_ids[i]] = bit_vector();
+  }
+
   return true;
 }
 
