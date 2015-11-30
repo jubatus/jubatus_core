@@ -164,7 +164,7 @@ bool light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
   // Reject adding points that have the same fv for k times.
   // This helps avoiding LRD to become inf (so that LOF scores of its
   // neighbors won't go inf.)
-  if (*config_.ignore_kth_same_point) {
+  if (config_.ignore_kth_same_point && *config_.ignore_kth_same_point) {
     std::vector<std::pair<std::string, float> > nn_result;
 
     // Find k-1 NNs for the given sfv.

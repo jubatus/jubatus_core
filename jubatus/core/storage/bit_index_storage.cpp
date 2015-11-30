@@ -82,13 +82,16 @@ void bit_index_storage::clear() {
 
 void bit_index_storage::get_all_row_ids(std::vector<std::string>& ids) const {
   ids.clear();
-  for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
-      ++it) {
-    ids.push_back(it->first);
-  }
   for (bit_table_t::const_iterator it = bitvals_diff_.begin();
       it != bitvals_diff_.end(); ++it) {
-    if (bitvals_.find(it->first) == bitvals_.end()) {
+    // Exclude empty rows in diff area
+    if (it->second.bit_num() != 0) {
+      ids.push_back(it->first);
+    }
+  }
+  for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
+      ++it) {
+    if (bitvals_diff_.find(it->first) == bitvals_diff_.end()) {
       ids.push_back(it->first);
     }
   }
@@ -103,12 +106,44 @@ bool bit_index_storage::put_diff(
   for (bit_table_t::const_iterator it = mixed_diff.begin();
       it != mixed_diff.end(); ++it) {
     if (it->second.bit_num() == 0) {
+      if (unlearner_) {
+        unlearner_->remove(it->first);
+      }
       bitvals_.erase(it->first);
     } else {
+      if (unlearner_) {
+        if (unlearner_->can_touch(it->first)) {
+          unlearner_->touch(it->first);
+        } else {
+          continue;  // drop untouchable value
+        }
+      }
       bitvals_[it->first] = it->second;
     }
   }
+
+  // New empty rows were created by unlearner and remove_row
+  // between get_diff and put_diff
+  std::vector<std::string> removed_ids;
+  for (bit_table_t::const_iterator it = bitvals_diff_.begin();
+      it != bitvals_diff_.end(); ++it) {
+    if (it->second.bit_num() == 0) {
+      bit_table_t::const_iterator pos;
+      pos = mixed_diff.find(it->first);
+      if (pos == mixed_diff.end() || pos->second.bit_num() != 0) {
+        removed_ids.push_back(it->first);
+      }
+    }
+  }
+
   bitvals_diff_.clear();
+
+  // Keep empty rows in the diff area until next MIX to
+  // propagate the removal of this data to other nodes.
+  for (size_t i = 0; i < removed_ids.size(); ++i) {
+    bitvals_diff_[removed_ids[i]] = bit_vector();
+  }
+
   return true;
 }
 

@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 #include "../common/exception.hpp"
+#include "clustering.hpp"
 #include "util.hpp"
 
 using std::vector;
@@ -49,6 +50,10 @@ void gmm_clustering_method::online_update(wplist points) {
 }
 
 std::vector<common::sfv_t> gmm_clustering_method::get_k_center() const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(not_performed());
+  }
+
   return kcenters_;
 }
 
@@ -70,6 +75,10 @@ wplist gmm_clustering_method::get_cluster(
 
 std::vector<wplist> gmm_clustering_method::get_clusters(
     const wplist& points) const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(not_performed());
+  }
+
   std::vector<wplist> ret(k_);
   for (wplist::const_iterator it = points.begin(); it != points.end(); ++it) {
     int64_t c = get_nearest_center_index(it->data);

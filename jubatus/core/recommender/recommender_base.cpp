@@ -105,7 +105,7 @@ void recommender_base::complete_row(const common::sfv_t& query,
   }
 }
 
-float recommender_base::calc_similality(common::sfv_t& q1, common::sfv_t& q2) {
+float recommender_base::calc_similarity(common::sfv_t& q1, common::sfv_t& q2) {
   float q1_norm = calc_l2norm(q1);
   float q2_norm = calc_l2norm(q2);
   if (q1_norm == 0.f || q2_norm == 0.f) {
