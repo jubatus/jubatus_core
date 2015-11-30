@@ -1,3 +1,17 @@
+Release 0.2.5 - 2015/11/30
+--------------------------
+
+* Improvements
+    * recommender: support unlearning in LSH algorithm (#190)
+    * recommender: fix typo of calc_similarity function name (#206, #208)
+    * clustering: return error on calling get_k_center / get_core_members when clustering is not yet performed (#185, #207)
+    * graph: improve error message (#203)
+    * code cleanup (#205)
+
+* Bug fixes
+    * anomaly: fix crash when ignore_kth_same_point is not specified (#201)
+    * nearest_neighbor: fix deadlock when running update/analyze simultaneously (#199, #200)
+
 Release 0.2.4 - 2015/10/26
 --------------------------
 
