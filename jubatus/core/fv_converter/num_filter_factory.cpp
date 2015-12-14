@@ -85,7 +85,7 @@ shared_ptr<num_filter> num_filter_factory::create(
     return shared_ptr<num_filter>(p);
   } else {
     throw JUBATUS_EXCEPTION(
-        converter_exception("unknonw num filter name: " + name));
+        converter_exception("unknown num filter name: " + name));
   }
 }
 
