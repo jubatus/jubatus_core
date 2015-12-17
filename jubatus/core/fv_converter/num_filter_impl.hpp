@@ -48,7 +48,7 @@ class linear_normalization_filter : public num_filter {
     : min_(min), max_(max), truncate_(truncate) {
     if (max_ <= min_) {
       throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("maximum must be bigger than mininum"));
+          common::invalid_parameter("maximum must be bigger than minimum"));
     }
   }
 

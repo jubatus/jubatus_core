@@ -28,7 +28,7 @@ namespace fv_converter {
 
 TEST(num_filter_factory, unknown_name) {
   num_filter_factory f;
-  EXPECT_THROW(f.create("unknonw", std::map<std::string, std::string>()),
+  EXPECT_THROW(f.create("unknown", std::map<std::string, std::string>()),
       converter_exception);
 }
 
