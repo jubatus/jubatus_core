@@ -25,7 +25,7 @@ namespace core {
 namespace bandit {
 
 summation_storage::summation_storage(bool assume_unrewarded)
-  : assume_unrewarded_(assume_unrewarded), total_trial_count(0) {
+    : assume_unrewarded_(assume_unrewarded) {
 }
 
 bool summation_storage::register_arm(const std::string& arm_id) {
@@ -37,7 +37,7 @@ bool summation_storage::register_arm(const std::string& arm_id) {
   const arm_info a0 = {0, 0.0};
   for (table_t::iterator iter = unmixed_.begin();
       iter != unmixed_.end(); ++iter) {
-    arm_info_map& as = iter->second;
+    arm_info_map& as = iter->second.second;
     as.insert(std::make_pair(arm_id, a0));
   }
   return true;
@@ -47,28 +47,36 @@ namespace {
 void delete_arm_(summation_storage::table_t& t, const std::string& arm_id) {
   for (summation_storage::table_t::iterator iter = t.begin();
        iter != t.end(); ++iter) {
-    arm_info_map& as = iter->second;
+    counted_arm_info_map& ca = iter->second;
+    arm_info_map& as = ca.second;
+    arm_info_map::iterator it = as.find(arm_id);
+    iter->second.first -= it->second.trial_count;
     as.erase(arm_id);
   }
 }
-arm_info_map& get_arm_info_map_(summation_storage::table_t& t,
-                                const std::vector<std::string>& arm_ids,
-                                const std::string& player_id) {
+
+arm_info_map& get_arm_info_map_(
+    summation_storage::table_t& t,
+    const std::vector<std::string>& arm_ids,
+    const std::string& player_id) {
   summation_storage::table_t::iterator iter = t.find(player_id);
   if (iter != t.end()) {
-    return iter->second;
+    return iter->second.second;
   }
-  arm_info_map& as = t[player_id];
+  counted_arm_info_map& ca = t[player_id];
+  arm_info_map& as = ca.second;
   const arm_info a0 = {0, 0.0};
   for (size_t i = 0; i < arm_ids.size(); ++i) {
     as.insert(std::make_pair(arm_ids[i], a0));
   }
   return as;
 }
-arm_info& get_arm_info_(summation_storage::table_t& t,
-                        const std::vector<std::string>& arm_ids,
-                        const std::string& player_id,
-                        const std::string& arm_id) {
+
+arm_info& get_arm_info_(
+    summation_storage::table_t& t,
+    const std::vector<std::string>& arm_ids,
+    const std::string& player_id,
+    const std::string& arm_id) {
   arm_info_map& as = get_arm_info_map_(t, arm_ids, player_id);
   arm_info_map::iterator iter = as.find(arm_id);
   if (iter == as.end()) {
@@ -76,6 +84,36 @@ arm_info& get_arm_info_(summation_storage::table_t& t,
         "arm_id is not registered: " + arm_id));
   }
   return iter->second;
+}
+
+arm_info& get_arm_info_(
+    arm_info_map& as,
+    const std::string& player_id,
+    const std::string& arm_id) {
+  arm_info_map::iterator iter = as.find(arm_id);
+  if (iter == as.end()) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "arm_id is not registered: " + arm_id));
+  }
+  return iter->second;
+}
+
+counted_arm_info_map& get_counted_arm_info_map_(
+    summation_storage::table_t& t,
+    const std::vector<std::string>& arm_ids,
+    const std::string& player_id) {
+  summation_storage::table_t::iterator iter = t.find(player_id);
+  if (iter != t.end()) {
+    return iter->second;
+  }
+  counted_arm_info_map& ca = t[player_id];
+  arm_info_map& as = ca.second;
+  const arm_info a0 = {0, 0.0};
+  for (size_t i = 0; i < arm_ids.size(); ++i) {
+    as.insert(std::make_pair(arm_ids[i], a0));
+  }
+  ca.first = 0;
+  return ca;
 }
 }  // namespace
 
@@ -98,19 +136,23 @@ void summation_storage::notify_selected(
   if (!assume_unrewarded_) {
     return;
   }
-  arm_info& a = get_arm_info_(unmixed_, arm_ids_, player_id, arm_id);
+  counted_arm_info_map& ca =
+    get_counted_arm_info_map_(unmixed_, arm_ids_, player_id);
+  arm_info& a = get_arm_info_(ca.second, player_id, arm_id);
+  ca.first += 1;
   a.trial_count += 1;
-  total_trial_count += 1;
 }
 
 bool summation_storage::register_reward(
     const std::string& player_id,
     const std::string& arm_id,
     double reward) {
-  arm_info& a = get_arm_info_(unmixed_, arm_ids_, player_id, arm_id);
+  counted_arm_info_map& ca =
+    get_counted_arm_info_map_(unmixed_, arm_ids_, player_id);
+  arm_info& a = get_arm_info_(ca.second, player_id, arm_id);
   if (!assume_unrewarded_) {
     a.trial_count += 1;
-	total_trial_count += 1;
+    ca.first += 1;
   }
   a.weight += reward;
   return true;
@@ -127,7 +169,7 @@ arm_info get_arm_info_(
     const arm_info a0 = {0, 0.0};
     return a0;
   }
-  const arm_info_map& as = iter->second;
+  const arm_info_map& as = iter->second.second;
   arm_info_map::const_iterator jter = as.find(arm_id);
   if (jter == as.end()) {
     const arm_info a0 = {0, 0.0};
@@ -158,9 +200,25 @@ double summation_storage::get_expectation(
   }
   return a.weight / a.trial_count;
 }
-int summation_storage::get_total_trial_count(){
-  return total_trial_count;
+
+int get_total_trial_count_(
+    const summation_storage::table_t& t,
+    const std::string& player_id)  {
+  summation_storage::table_t::const_iterator iter = t.find(player_id);
+  if (iter == t.end()) {
+    return 0;
+  } else {
+    return iter->second.first;
+  }
 }
+
+int summation_storage::get_total_trial_count(
+    const std::string& player_id) const {
+  const int total_trial_count1 = get_total_trial_count_(unmixed_, player_id);
+  const int total_trial_count2 = get_total_trial_count_(mixed_, player_id);
+  return total_trial_count1 + total_trial_count2;
+}
+
 
 arm_info_map summation_storage::get_arm_info_map(
     const std::string& player_id) const {
@@ -170,7 +228,6 @@ arm_info_map summation_storage::get_arm_info_map(
        iter != arm_ids_.end(); ++iter) {
     result.insert(std::make_pair(*iter, get_arm_info(player_id, *iter)));
   }
-
   return result;
 }
 
@@ -187,8 +244,10 @@ bool summation_storage::put_diff(const table_t& diff) {
 void summation_storage::mix(const table_t& lhs, table_t& rhs) {
   for (table_t::const_iterator iter = lhs.begin();
        iter != lhs.end(); ++iter) {
-    arm_info_map& as0 = rhs[iter->first];
-    const arm_info_map& as1 = iter->second;
+    counted_arm_info_map& ca0 = rhs[iter->first];
+    arm_info_map& as0 = ca0.second;
+    const int total_trial1 = iter->second.first;
+    const arm_info_map& as1 = iter->second.second;
     for (arm_info_map::const_iterator jter = as1.begin();
          jter != as1.end(); ++jter) {
       arm_info& a0 = as0[jter->first];
@@ -196,6 +255,7 @@ void summation_storage::mix(const table_t& lhs, table_t& rhs) {
       a0.trial_count += a1.trial_count;
       a0.weight += a1.weight;
     }
+    ca0.first += total_trial1;
   }
 }
 
