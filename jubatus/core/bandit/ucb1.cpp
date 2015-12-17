@@ -38,7 +38,7 @@ std::string ucb1::select_arm(const std::string& player_id) {
         common::exception::runtime_error("arm is not registered"));
   }
 
-  double log_total_trial = std::log(s_.get_total_trial_count());
+  double log_total_trial = std::log(s_.get_total_trial_count(player_id));
   double score_max = -DBL_MAX;
   std::string result;
   for (size_t i = 0; i < arms.size(); ++i) {
@@ -47,7 +47,7 @@ std::string ucb1::select_arm(const std::string& player_id) {
       s_.notify_selected(player_id, arms[i]);
       return arms[i];
     }
-	double exp = a.weight / a.trial_count;
+    double exp = a.weight / a.trial_count;
     double score = exp + std::sqrt(2 * log_total_trial / a.trial_count);
     if (score > score_max) {
       score_max = score;
