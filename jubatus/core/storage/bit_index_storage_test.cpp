@@ -113,6 +113,10 @@ TEST(bit_index_storage, row_operations) {
   s1.get_all_row_ids(ids);
   EXPECT_EQ(1u, ids.size());
 
+  std::vector<std::pair<std::string, float> > similar_result;
+  s1.similar_row(make_vector("0101"), similar_result, 10);
+  EXPECT_EQ(1u, similar_result.size());
+
   // do MIX
   bit_table_t d2;
   s1.get_diff(d2);
