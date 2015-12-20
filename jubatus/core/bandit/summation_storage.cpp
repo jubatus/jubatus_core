@@ -50,7 +50,9 @@ void delete_arm_(summation_storage::table_t& t, const std::string& arm_id) {
     counted_arm_info_map& ca = iter->second;
     arm_info_map& as = ca.second;
     arm_info_map::iterator it = as.find(arm_id);
-    iter->second.first -= it->second.trial_count;
+    if (it != as.end()) {
+      iter->second.first -= it->second.trial_count;
+    }
     as.erase(arm_id);
   }
 }
