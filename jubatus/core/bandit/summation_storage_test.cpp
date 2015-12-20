@@ -233,7 +233,7 @@ TEST(summation_storage, unregistered_arm) {
   });
 }
 
-TEST(summation_storage, delete_arm){
+TEST(summation_storage, delete_arm) {
   summation_storage s(false);
   const std::string player_id = "player1";
   EXPECT_FALSE(s.delete_arm("arm1"));
