@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_BANDIT_ARM_INFO_HPP_
 #define JUBATUS_CORE_BANDIT_ARM_INFO_HPP_
 
+#include <utility>
 #include <string>
 #include <msgpack.hpp>
 
@@ -34,6 +35,7 @@ struct arm_info {
 };
 
 typedef jubatus::util::data::unordered_map<std::string, arm_info> arm_info_map;
+typedef std::pair<int, arm_info_map> counted_arm_info_map;
 
 }  // namespace bandit
 }  // namespace core
