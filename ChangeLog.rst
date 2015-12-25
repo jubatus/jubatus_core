@@ -1,3 +1,13 @@
+Release 0.2.6 - 2015/12/25
+--------------------------
+
+* Improvements
+    * bandit: improve performance of select_arm API in ucb1 (#186, #214)
+
+* Bug fixes
+    * recommender: fix bit_index_storage (used by lsh/minhash) to ignore 0-bit vectors when analyzing (#211, #215)
+    * fix typo in exception messages (#212)
+
 Release 0.2.5 - 2015/11/30
 --------------------------
 
