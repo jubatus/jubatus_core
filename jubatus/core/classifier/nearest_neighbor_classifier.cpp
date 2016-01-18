@@ -148,8 +148,11 @@ void nearest_neighbor_classifier::classify_with_scores(
 }
 
 bool nearest_neighbor_classifier::delete_label(const std::string& label) {
-  if (labels_.erase(label) == 0) {
-    return false;
+  {
+    util::concurrent::scoped_lock lk(label_mutex_);
+    if (labels_.erase(label) == 0) {
+      return false;
+    }
   }
 
   shared_ptr<storage::column_table> table =
@@ -177,7 +180,10 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
 
 void nearest_neighbor_classifier::clear() {
   nearest_neighbor_engine_->clear();
-  labels_.clear();
+  {
+    util::concurrent::scoped_lock lk(label_mutex_);
+    labels_.clear();
+  }
   if (unlearner_) {
     unlearner_->clear();
   }
@@ -193,6 +199,7 @@ std::vector<std::string> nearest_neighbor_classifier::get_labels() const {
 }
 
 bool nearest_neighbor_classifier::set_label(const std::string& label) {
+  util::concurrent::scoped_lock lk(label_mutex_);
   return labels_.insert(label).second;
 }
 
@@ -229,7 +236,10 @@ void nearest_neighbor_classifier::unpack(msgpack::object o) {
   for (size_t i = 0; i < labels.via.array.size; ++i) {
     std::string label;
     labels.via.array.ptr[i].convert(&label);
-    labels_.insert(label);
+    {
+      util::concurrent::scoped_lock lk(label_mutex_);
+      labels_.insert(label);
+    }
   }
 }
 

@@ -78,6 +78,7 @@ class nearest_neighbor_classifier : public classifier_base {
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   jubatus::util::concurrent::mutex rand_mutex_;
   jubatus::util::math::random::mtrand rand_;
+  jubatus::util::concurrent::mutex label_mutex_;
 
   class unlearning_callback;
   void unlearn_id(const std::string& id);
