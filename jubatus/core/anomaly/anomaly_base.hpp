@@ -63,7 +63,7 @@ class anomaly_base : public framework::model {
   // Partially updates the row corresponding to given id.
   //
   // Some implementations including light_lof do not support this function.
-  virtual void update_row(const std::string& id, const sfv_diff_t& diff) = 0;
+  virtual bool update_row(const std::string& id, const sfv_diff_t& diff) = 0;
 
   // Updates the row corresponding to given id.
   // Returns true when the row was successfully updated.

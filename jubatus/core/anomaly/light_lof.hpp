@@ -85,7 +85,7 @@ class light_lof : public anomaly_base {
   // clear_row is not supported
   void clear_row(const std::string& id);
   // update_row is not supported
-  void update_row(const std::string& id, const sfv_diff_t& diff);
+  bool update_row(const std::string& id, const sfv_diff_t& diff);
   bool set_row(const std::string& id, const common::sfv_t& sfv);
 
   void get_all_row_ids(std::vector<std::string>& ids) const;

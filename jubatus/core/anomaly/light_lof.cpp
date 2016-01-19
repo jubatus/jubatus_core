@@ -156,7 +156,7 @@ void light_lof::clear_row(const std::string& id) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 
-void light_lof::update_row(const std::string& id, const sfv_diff_t& diff) {
+bool light_lof::update_row(const std::string& id, const sfv_diff_t& diff) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 
