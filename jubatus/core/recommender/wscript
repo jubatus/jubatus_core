@@ -10,6 +10,7 @@ def build(bld):
     'recommender_mock_storage.cpp',
     'recommender_mock_util.cpp',
     'inverted_index.cpp',
+    'inverted_index_euclid.cpp',
     'minhash.cpp',
     'lsh.cpp',
     'recommender_factory.cpp',

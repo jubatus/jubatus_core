@@ -90,6 +90,9 @@ shared_ptr<recommender_base> recommender_factory::create_recommender(
       }
     }
     return shared_ptr<recommender_base>(new inverted_index);
+  } else if (name == "inverted_index_euclid") {
+    // inverted_index_euclid doesn't have parameter
+    return shared_ptr<recommender_base>(new inverted_index_euclid);
   } else if (name == "minhash") {
     return shared_ptr<recommender_base>(
         new minhash(config_cast_check<minhash::config>(param)));
