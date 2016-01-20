@@ -25,15 +25,20 @@
 #include "jubatus/util/lang/cast.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/math/random.h"
+#include "jubatus/util/text/json.h"
 #include "../common/exception.hpp"
 #include "../common/hash.hpp"
+#include "../common/jsonconfig.hpp"
 #include "../common/portable_mixer.hpp"  // TODO(kashihara): use linear_mixer
 #include "../recommender/recommender_mock.hpp"
 #include "../recommender/recommender_mock_util.hpp"
+#include "../recommender/recommender_factory.hpp"
+#include "../recommender/inverted_index_euclid.hpp"
 #include "lof_storage.hpp"
 
 using jubatus::core::recommender::make_sfv;
 using jubatus::core::recommender::make_ids;
+using jubatus::core::recommender::recommender_factory;
 using jubatus::util::data::unordered_map;
 using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
@@ -50,10 +55,12 @@ namespace {
 shared_ptr<lof_storage> make_storage(
     uint32_t k,
     uint32_t ck,
+    bool ig,
     shared_ptr<recommender::recommender_base> mock_nn_engine) {
   lof_storage::config config;
   config.nearest_neighbor_num = k;
   config.reverse_nearest_neighbor_num = ck;
+  config.ignore_kth_same_point = ig;
   shared_ptr<lof_storage> s(new lof_storage(config, mock_nn_engine));
   // s->set_nn_engine(mock_nn_engine);
 
@@ -106,12 +113,28 @@ TEST(lof_storage, get_all_row_ids) {
   EXPECT_EQ(expect, ids);
 }
 
+TEST(lof_storage, ignore_kth_same_point) {
+  lof_storage::config config;
+  config.nearest_neighbor_num = 5;
+  config.reverse_nearest_neighbor_num = 10;
+  config.ignore_kth_same_point = true;
+
+  lof_storage s(config, recommender_factory::create_recommender(
+      "inverted_index_euclid",
+      common::jsonconfig::config(), ""));
+  EXPECT_TRUE(s.update_row("r1", make_sfv("1:1")));
+  EXPECT_TRUE(s.update_row("r2", make_sfv("1:1")));
+  EXPECT_TRUE(s.update_row("r3", make_sfv("1:1")));
+  EXPECT_TRUE(s.update_row("r4", make_sfv("1:1")));
+  EXPECT_FALSE(s.update_row("r5", make_sfv("1:1")));
+}
+
 // One dimensional example (points = { -1, 0, 1, 10 }, k = 2)
 class lof_storage_one_dimensional_test : public ::testing::Test {
  protected:
   virtual void SetUp() {
     rmock_.reset(new recommender::recommender_mock);
-    storage_ = make_storage(2, 2, rmock_);
+    storage_ = make_storage(2, 2, true, rmock_);
 
     storage_->update_row("-1", make_sfv("1:-1"));
     storage_->update_row("0", make_sfv("1:0"));
