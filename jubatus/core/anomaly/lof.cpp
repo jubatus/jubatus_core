@@ -99,6 +99,15 @@ float lof::calc_anomaly_score(const string& id) const {
   return calculate_lof(lrd, neighbor_lrd);
 }
 
+float lof::calc_anomaly_score(
+    const string& id,
+    const common::sfv_t& query) const {
+  unordered_map<string, float> neighbor_lrd;
+  const float lrd = mixable_storage_->get_model()->collect_lrds(
+      id, query, neighbor_lrd);
+  return calculate_lof(lrd, neighbor_lrd);
+}
+
 void lof::clear() {
   mixable_storage_->get_model()->clear();
 }
@@ -107,14 +116,13 @@ void lof::clear_row(const string& id) {
   mixable_storage_->get_model()->remove_row(id);
 }
 
-void lof::update_row(const string& id, const sfv_diff_t& diff) {
-  mixable_storage_->get_model()->update_row(id, diff);
+bool lof::update_row(const string& id, const sfv_diff_t& diff) {
+  return mixable_storage_->get_model()->update_row(id, diff);
 }
 
 bool lof::set_row(const string& id, const common::sfv_t& sfv) {
   mixable_storage_->get_model()->remove_row(id);
-  mixable_storage_->get_model()->update_row(id, sfv);
-  return true;
+  return mixable_storage_->get_model()->update_row(id, sfv);
 }
 
 void lof::get_all_row_ids(vector<string>& ids) const {

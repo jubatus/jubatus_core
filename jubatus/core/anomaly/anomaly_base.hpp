@@ -44,6 +44,12 @@ class anomaly_base : public framework::model {
   // Returns anomaly score of the row corresponding to given id.
   virtual float calc_anomaly_score(const std::string& id) const = 0;
 
+  // Returns anomaly score of the merged vector of
+  // given query and the row corresponding to given id.
+  virtual float calc_anomaly_score(
+      const std::string& id,
+      const common::sfv_t& query) const = 0;
+
   virtual void pack(framework::packer& packer) const = 0;
   virtual void unpack(msgpack::object o) = 0;
 
@@ -63,7 +69,7 @@ class anomaly_base : public framework::model {
   // Partially updates the row corresponding to given id.
   //
   // Some implementations including light_lof do not support this function.
-  virtual void update_row(const std::string& id, const sfv_diff_t& diff) = 0;
+  virtual bool update_row(const std::string& id, const sfv_diff_t& diff) = 0;
 
   // Updates the row corresponding to given id.
   // Returns true when the row was successfully updated.
