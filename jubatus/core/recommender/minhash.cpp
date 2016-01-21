@@ -22,8 +22,11 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "jubatus/util/lang/function.h"
+#include "jubatus/util/lang/bind.h"
 #include "../common/exception.hpp"
 #include "../common/hash.hpp"
+#include "../unlearner/unlearner_factory.hpp"
 
 using std::pair;
 using std::string;
@@ -51,6 +54,25 @@ minhash::minhash(const config& config)
   }
 
   initialize_model();
+
+  if (config.unlearner) {
+    if (!config.unlearner_parameter) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "unlearner is set but unlearner_parameter is not found"));
+    }
+    unlearner_ = core::unlearner::create_unlearner(*config.unlearner,
+            core::common::jsonconfig::config(*config.unlearner_parameter));
+    mixable_storage_->get_model()->set_unlearner(unlearner_);
+    unlearner_->set_callback(
+        util::lang::bind(&minhash::remove_row, this, util::lang::_1));
+  } else {
+    if (config.unlearner_parameter) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "unlearner_parameter is set but unlearner is not found"));
+    }
+  }
 }
 
 minhash::~minhash() {
@@ -83,9 +105,19 @@ void minhash::neighbor_row(
 void minhash::clear() {
   orig_.clear();
   mixable_storage_->get_model()->clear();
+  if (unlearner_) {
+    unlearner_->clear();
+  }
 }
 
 void minhash::clear_row(const string& id) {
+  remove_row(id);
+  if (unlearner_) {
+    unlearner_->remove(id);
+  }
+}
+
+void minhash::remove_row(const string& id) {
   orig_.remove_row(id);
   mixable_storage_->get_model()->remove_row(id);
 }
@@ -115,13 +147,21 @@ void minhash::calc_minhash_values(const common::sfv_t& sfv,
 }
 
 void minhash::update_row(const string& id, const sfv_diff_t& diff) {
-  orig_.set_row(id, diff);
+  if (unlearner_ && !unlearner_->can_touch(id)) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "cannot add new row as number of sticky rows reached "
+            "the maximum size of unlearner: " + id));
+  }
 
+  orig_.set_row(id, diff);
   common::sfv_t row;
   orig_.get_row(id, row);
   bit_vector bv;
   calc_minhash_values(row, bv);
   mixable_storage_->get_model()->set_row(id, bv);
+  if (unlearner_) {
+    unlearner_->touch(id);
+  }
 }
 
 void minhash::get_all_row_ids(std::vector<std::string>& ids) const {
