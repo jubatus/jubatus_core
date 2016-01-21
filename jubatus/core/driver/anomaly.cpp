@@ -83,7 +83,7 @@ float anomaly::update(const string& id, const fv_converter::datum& d) {
   if (anomaly_->update_row(id, v)) {
     return anomaly_->calc_anomaly_score(id);
   } else {
-    return anomaly_->calc_anomaly_score(v);
+    return anomaly_->calc_anomaly_score(id, v);
   }
 
 }

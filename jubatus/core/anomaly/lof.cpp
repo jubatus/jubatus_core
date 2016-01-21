@@ -99,6 +99,15 @@ float lof::calc_anomaly_score(const string& id) const {
   return calculate_lof(lrd, neighbor_lrd);
 }
 
+float lof::calc_anomaly_score(
+    const string& id,
+    const common::sfv_t& query) const {
+  unordered_map<string, float> neighbor_lrd;
+  const float lrd = mixable_storage_->get_model()->collect_lrds(
+      id, query, neighbor_lrd);
+  return calculate_lof(lrd, neighbor_lrd);
+}
+
 void lof::clear() {
   mixable_storage_->get_model()->clear();
 }

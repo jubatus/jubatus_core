@@ -144,6 +144,12 @@ float light_lof::calc_anomaly_score(const std::string& id) const {
   return calculate_lof(lrd, neighbor_lrds);
 }
 
+float light_lof::calc_anomaly_score(
+    const std::string& id,
+    const common::sfv_t& query) const {
+  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+}
+
 void light_lof::clear() {
   nearest_neighbor_engine_->clear();
   mixable_scores_->get_model()->clear();

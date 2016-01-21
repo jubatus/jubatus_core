@@ -95,6 +95,11 @@ class lof_storage {
       const std::string& id,
       jubatus::util::data::unordered_map<std::string, float>&
           neighbor_lrd) const;
+  float collect_lrds(
+      const std::string& id,
+      const common::sfv_t& query,
+      jubatus::util::data::unordered_map<std::string, float>&
+      neighbor_lrd) const;
 
   // For Update
   void remove_row(const std::string& row);
