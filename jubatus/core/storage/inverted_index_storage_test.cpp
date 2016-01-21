@@ -106,12 +106,23 @@ TEST(inverted_index_storage, trivial_euclid) {
   vector<pair<string, float> > scores;
   s.calc_euclid_scores(v, scores, 100);
 
+  ASSERT_EQ(3, scores.size());
   EXPECT_EQ("r1", scores[0].first);
   EXPECT_FLOAT_EQ(-1, scores[0].second);
   EXPECT_EQ("r3", scores[1].first);
   EXPECT_FLOAT_EQ(- sqrt(2), scores[1].second);
   EXPECT_EQ("r2", scores[2].first);
   EXPECT_FLOAT_EQ(- sqrt(3), scores[2].second);
+
+  // remove column "r3"
+  s.remove("c2", "r3");
+  s.remove("c5", "r3");
+
+  scores.clear();
+  s.calc_euclid_scores(v, scores, 100);
+  ASSERT_EQ(2, scores.size());
+  EXPECT_EQ("r1", scores[0].first);
+  EXPECT_EQ("r2", scores[1].first);
 }
 
 TEST(inverted_index_storage, diff) {
