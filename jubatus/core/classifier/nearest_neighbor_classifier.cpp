@@ -130,9 +130,12 @@ void nearest_neighbor_classifier::classify_with_scores(
   nearest_neighbor_engine_->neighbor_row(fv, ids, k_);
 
   std::map<std::string, float> m;
-  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
-       iter != labels_.end(); ++iter) {
-    m.insert(std::make_pair(*iter, 0));
+  {
+    util::concurrent::scoped_lock lk(label_mutex_);
+    for (unordered_set<std::string>::const_iterator iter = labels_.begin();
+         iter != labels_.end(); ++iter) {
+      m.insert(std::make_pair(*iter, 0));
+    }
   }
   for (size_t i = 0; i < ids.size(); ++i) {
     std::string label = get_label_from_id(ids[i].first);
@@ -190,6 +193,7 @@ void nearest_neighbor_classifier::clear() {
 }
 
 std::vector<std::string> nearest_neighbor_classifier::get_labels() const {
+  util::concurrent::scoped_lock lk(label_mutex_);
   std::vector<std::string> result;
   for (unordered_set<std::string>::const_iterator iter = labels_.begin();
        iter != labels_.end(); ++iter) {
@@ -216,6 +220,7 @@ void nearest_neighbor_classifier::pack(framework::packer& pk) const {
   pk.pack_array(2);
   nearest_neighbor_engine_->pack(pk);
 
+  util::concurrent::scoped_lock lk(label_mutex_);
   pk.pack_array(labels_.size());
   for (unordered_set<std::string>::const_iterator iter = labels_.begin();
        iter != labels_.end(); ++iter) {
