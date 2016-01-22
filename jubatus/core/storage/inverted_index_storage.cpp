@@ -388,6 +388,11 @@ void inverted_index_storage::calc_euclid_scores(
   for (size_t i = 0; i < i_scores.size(); ++i) {
     float norm = calc_columnl2norm(i);
 
+    if (norm == 0.f) {
+      // The column is already removed.
+      continue;
+    }
+
     // `d2` is a squared euclidean distance.
     // In edgy cases, `d2` may sliglty become negative (which is actually
     // expected to be 0) due to the floating point precision problem.
