@@ -85,7 +85,6 @@ float anomaly::update(const string& id, const fv_converter::datum& d) {
   } else {
     return anomaly_->calc_anomaly_score(id, v);
   }
-
 }
 
 float anomaly::overwrite(const string& id, const fv_converter::datum& d) {
