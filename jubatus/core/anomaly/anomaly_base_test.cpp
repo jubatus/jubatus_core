@@ -44,13 +44,20 @@ class anomaly_impl : public anomaly_base {
     return 1.0;
   }
 
+  float calc_anomaly_score(
+      const std::string& id,
+      const common::sfv_t& query) const {
+    return 1.0;
+  }
+
   void clear() {
   }
 
   void clear_row(const std::string& id) {
   }
 
-  void update_row(const std::string& id, const sfv_diff_t& diff) {
+  bool update_row(const std::string& id, const sfv_diff_t& diff) {
+    return true;
   }
 
   bool set_row(const std::string& id, const common::sfv_t& sfv) {

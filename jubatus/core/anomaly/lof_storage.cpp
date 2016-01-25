@@ -27,6 +27,7 @@
 #include "anomaly_type.hpp"
 #include "../common/exception.hpp"
 #include "../common/jsonconfig.hpp"
+#include "../common/vector_util.hpp"
 #include "../recommender/euclid_lsh.hpp"
 #include "../recommender/recommender_factory.hpp"
 
@@ -50,15 +51,18 @@ namespace anomaly {
 
 const uint32_t lof_storage::DEFAULT_NEIGHBOR_NUM = 10;
 const uint32_t lof_storage::DEFAULT_REVERSE_NN_NUM = 30;
+const bool lof_storage::DEFAULT_IGNORE_KTH_SAME_POINT = false;
 
 lof_storage::config::config()
     : nearest_neighbor_num(DEFAULT_NEIGHBOR_NUM),
-      reverse_nearest_neighbor_num(DEFAULT_REVERSE_NN_NUM) {
+      reverse_nearest_neighbor_num(DEFAULT_REVERSE_NN_NUM),
+      ignore_kth_same_point(DEFAULT_IGNORE_KTH_SAME_POINT) {
 }
 
 lof_storage::lof_storage()
     : neighbor_num_(DEFAULT_NEIGHBOR_NUM),
       reverse_nn_num_(DEFAULT_REVERSE_NN_NUM),
+      ignore_kth_same_point_(DEFAULT_IGNORE_KTH_SAME_POINT),
       nn_engine_(recommender::recommender_factory::create_recommender(
           "euclid_lsh",
           common::jsonconfig::config(jubatus::util::text::json::to_json(
@@ -69,6 +73,7 @@ lof_storage::lof_storage(
     shared_ptr<recommender::recommender_base> nn_engine)
     : neighbor_num_(DEFAULT_NEIGHBOR_NUM),
       reverse_nn_num_(DEFAULT_REVERSE_NN_NUM),
+      ignore_kth_same_point_(DEFAULT_IGNORE_KTH_SAME_POINT),
       nn_engine_(nn_engine) {
 }
 
@@ -77,6 +82,7 @@ lof_storage::lof_storage(
     shared_ptr<recommender::recommender_base> nn_engine)
     : neighbor_num_(config.nearest_neighbor_num),
       reverse_nn_num_(config.reverse_nearest_neighbor_num),
+      ignore_kth_same_point_(config.ignore_kth_same_point),
       nn_engine_(nn_engine) {
 }
 
@@ -117,6 +123,17 @@ float lof_storage::collect_lrds(
   return collect_lrds_from_neighbors(neighbors, neighbor_lrd);
 }
 
+float lof_storage::collect_lrds(
+    const string& id,
+    const common::sfv_t& query,
+    jubatus::util::data::unordered_map<std::string, float>&
+    neighbor_lrd) const {
+  common::sfv_t updated_row;
+  nn_engine_->decode_row(id, updated_row);
+  common::merge_vector(updated_row, query);
+  return collect_lrds(updated_row, neighbor_lrd);
+}
+
 void lof_storage::remove_row(const string& row) {
   mark_removed(lof_table_diff_[row]);
   nn_engine_->clear_row(row);
@@ -132,7 +149,25 @@ void lof_storage::get_all_row_ids(vector<string>& ids) const {
   nn_engine_->get_all_row_ids(ids);
 }
 
-void lof_storage::update_row(const string& row, const common::sfv_t& diff) {
+bool lof_storage::update_row(const string& row, const common::sfv_t& diff) {
+  if (ignore_kth_same_point_) {
+    std::vector<std::pair<std::string, float> > nn_result;
+
+    // Find k-1 NNs for the given sfv.
+    // If the distance to the (k-1) th neighbor is 0, the model already
+    // have (k-1) points that have the same feature vector as given sfv.
+    common::sfv_t updated_row;
+    nn_engine_->decode_row(row, updated_row);
+    common::merge_vector(updated_row, diff);
+
+    nn_engine_->neighbor_row(
+        updated_row, nn_result, neighbor_num_ - 1);
+    if (nn_result.size() == (neighbor_num_ - 1) &&
+       (nn_result.back().second == 0)) {
+      return false;
+    }
+  }
+
   unordered_set<string> update_set;
 
   {
@@ -149,6 +184,7 @@ void lof_storage::update_row(const string& row, const common::sfv_t& diff) {
   update_set.insert(row);
 
   update_entries(update_set);
+  return true;
 }
 
 string lof_storage::name() const {

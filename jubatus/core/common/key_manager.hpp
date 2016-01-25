@@ -45,6 +45,7 @@ class key_manager {
   void swap(key_manager& km) {
     key2id_.swap(km.key2id_);
     id2key_.swap(km.id2key_);
+    std::swap(next_id_, km.next_id_);
   }
 
   size_t size() const {

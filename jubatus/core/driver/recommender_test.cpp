@@ -214,6 +214,12 @@ create_recommender_configs_with_unlearner() {
   js_lsh["hash_num"] = to_json(64);
   configs.push_back(make_pair("lsh", common::jsonconfig::config(js_lsh)));
 
+  // minhash
+  json js_minhash(js.clone());
+  js_minhash["hash_num"] = to_json(64);
+  configs.push_back(
+      make_pair("minhash", common::jsonconfig::config(js_minhash)));
+
   // TODO(@rimms): Add NN-based algorithm
 
   return configs;

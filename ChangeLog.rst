@@ -1,3 +1,15 @@
+Release 0.2.7 - 2016/01/25
+--------------------------
+
+* Improvements
+    * recommender: add new recommender method (inverted_index_euclid) (#127)
+    * recommender: support unlearning in MinHash algorithm (#220)
+    * anomaly: support ignore_kth_same_option in LOF algorithm (#222, #223)
+
+* Bug fixes
+    * classifier: NN-based classifier does not take lock on label manipulation (#213, #221)
+    * Fix key manager to swap next_id (#224, #226)
+
 Release 0.2.6 - 2015/12/25
 --------------------------
 
