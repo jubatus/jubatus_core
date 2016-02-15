@@ -32,6 +32,11 @@ inverted_index_euclid::inverted_index_euclid() {
 inverted_index_euclid::~inverted_index_euclid() {
 }
 
+inverted_index_euclid::inverted_index_euclid(
+      jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner)
+  : inverted_index(unlearner){
+}
+
 void inverted_index_euclid::similar_row(
     const common::sfv_t& query,
     std::vector<std::pair<std::string, float> >& ids,
