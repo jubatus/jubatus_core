@@ -132,8 +132,8 @@ void local_storage::set(
     const val1_t& w) {
   scoped_wlock lk(mutex_);
   set_nolock(feature, klass, w);
-  tbl_[feature][class2id_.get_id(klass)].v1 = w;
 }
+
 void local_storage::set_nolock(
     const string& feature,
     const string& klass,
