@@ -209,6 +209,10 @@ create_recommender_configs_with_unlearner() {
   configs.push_back(make_pair("inverted_index",
       common::jsonconfig::config(js)));
 
+  // inverted_index_euclid
+  configs.push_back(make_pair("inverted_index_euclid",
+      common::jsonconfig::config(js)));
+
   // lsh
   json js_lsh(js.clone());
   js_lsh["hash_num"] = to_json(64);
