@@ -47,8 +47,9 @@ versioned_weight_diff::versioned_weight_diff(const keyword_weights& w)
   : weights_(w) {
 }
 
-versioned_weight_diff::versioned_weight_diff(const keyword_weights& w,
-                                             const storage::version& v)
+versioned_weight_diff::versioned_weight_diff(
+    const keyword_weights& w,
+    const storage::version& v)
   : weights_(w), version_(v) {
 }
 
