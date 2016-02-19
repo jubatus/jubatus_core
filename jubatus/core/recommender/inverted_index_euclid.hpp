@@ -30,7 +30,7 @@ class inverted_index_euclid : public inverted_index {
  public:
   inverted_index_euclid();
   ~inverted_index_euclid();
-  inverted_index_euclid(
+  explicit inverted_index_euclid(
       jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner);
 
   void similar_row(
