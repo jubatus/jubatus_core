@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "../classifier/classifier_factory.hpp"
+#include "../classifier/classifier_base.hpp"
 #include "../common/vector_util.hpp"
 #include "../fv_converter/datum.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
@@ -72,6 +73,7 @@ jubatus::core::classifier::classify_result classifier::classify(
 
 void classifier::get_status(std::map<string, string>& status) const {
   classifier_->get_status(status);
+  wm_.get_model()->get_status(status);
 }
 
 bool classifier::delete_label(const std::string& label) {

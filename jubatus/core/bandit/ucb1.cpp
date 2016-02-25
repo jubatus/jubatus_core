@@ -20,12 +20,15 @@
 #include <vector>
 #include <cfloat>
 #include "../common/exception.hpp"
+#include "../framework/packer.hpp"
+#include "../common/version.hpp"
 
 namespace jubatus {
 namespace core {
 namespace bandit {
 
-ucb1::ucb1() {
+ucb1::ucb1(bool assume_unrewarded)
+    : s_(assume_unrewarded) {
 }
 
 std::string ucb1::select_arm(const std::string& player_id) {
@@ -35,20 +38,15 @@ std::string ucb1::select_arm(const std::string& player_id) {
         common::exception::runtime_error("arm is not registered"));
   }
 
-  int total_trial = 0;
-  for (size_t i = 0; i < arms.size(); ++i) {
-    const arm_info& a = s_.get_arm_info(player_id, arms[i]);
-    if (a.trial_count == 0) {
-      return arms[i];
-    }
-    total_trial += a.trial_count;
-  }
-  double log_total_trial = std::log(total_trial);
-
+  double log_total_trial = std::log(s_.get_total_trial_count(player_id));
   double score_max = -DBL_MAX;
   std::string result;
   for (size_t i = 0; i < arms.size(); ++i) {
     const arm_info& a = s_.get_arm_info(player_id, arms[i]);
+    if (a.trial_count == 0) {
+      s_.notify_selected(player_id, arms[i]);
+      return arms[i];
+    }
     double exp = a.weight / a.trial_count;
     double score = exp + std::sqrt(2 * log_total_trial / a.trial_count);
     if (score > score_max) {
@@ -56,6 +54,7 @@ std::string ucb1::select_arm(const std::string& player_id) {
       result = arms[i];
     }
   }
+  s_.notify_selected(player_id, result);
   return result;
 }
 
@@ -72,8 +71,8 @@ bool ucb1::register_reward(const std::string& player_id,
   return s_.register_reward(player_id, arm_id, reward);
 }
 
-arm_info_map ucb1::get_arm_info(const std::string& arm_id) const {
-  return s_.get_arm_info_map(arm_id);
+arm_info_map ucb1::get_arm_info(const std::string& player_id) const {
+  return s_.get_arm_info_map(player_id);
 }
 
 bool ucb1::reset(const std::string& player_id) {
@@ -98,6 +97,9 @@ bool ucb1::put_diff(const diff_t& diff) {
 }
 void ucb1::mix(const diff_t& lhs, diff_t& rhs) const {
   s_.mix(lhs, rhs);
+}
+storage::version ucb1::get_version() const {
+  return storage::version();
 }
 
 }  // namespace bandit

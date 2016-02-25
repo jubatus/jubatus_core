@@ -32,8 +32,8 @@ using std::map;
 using std::pair;
 using std::string;
 using std::make_pair;
-using jubatus::core::table::bit_vector;
-using jubatus::core::table::column_table;
+using jubatus::core::storage::bit_vector;
+using jubatus::core::storage::column_table;
 using jubatus::util::data::string::split;
 
 namespace jubatus {
@@ -51,17 +51,6 @@ bit_vector make_bv(const string& in_str) {
   return bv;
 }
 
-common::sfv_t make_sfv(const string& in_str) {
-  common::sfv_t sfv;
-  vector<string> cells = split(in_str, ' ');
-  for (size_t i = 0; i < cells.size(); ++i) {
-    vector<string> pair = split(cells[i], ':');
-    sfv.push_back(
-        make_pair(pair[0], jubatus::util::lang::lexical_cast<float>(pair[1])));
-  }
-  return sfv;
-}
-
 }  // namespace
 
 class bit_vector_nearest_neighbor_mock
@@ -69,7 +58,7 @@ class bit_vector_nearest_neighbor_mock
  public:
   bit_vector_nearest_neighbor_mock(
       uint64_t bitnum,
-      jubatus::util::lang::shared_ptr<table::column_table> table)
+      jubatus::util::lang::shared_ptr<storage::column_table> table)
       : bit_vector_nearest_neighbor_base(bitnum, table, "test"),
         hash_value_(bitnum) {
   }

@@ -45,6 +45,22 @@ void sort_and_merge(sfv_t& sfv) {
   sfv.erase(cur+1, end);
 }
 
+void merge_vector(sfv_t& sfv, const sfv_t& diff) {
+  sfv_t::iterator iter;
+  sfv_t::const_iterator iter_diff;
+  for (iter_diff = diff.begin(); iter_diff != diff.end(); iter_diff++) {
+    for (iter = sfv.begin(); iter != sfv.end(); iter++) {
+      if ((*iter).first == (*iter_diff).first) {
+        (*iter).second = (*iter_diff).second;
+        break;
+      }
+    }
+    if (iter == sfv.end()) {
+      sfv.push_back(*iter_diff);
+    }
+  }
+}
+
 }  // namespace common
 }  // namespace core
 }  // namespace jubatus

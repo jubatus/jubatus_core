@@ -21,7 +21,7 @@
 #include "../common/exception.hpp"
 #include "../common/jsonconfig.hpp"
 #include "../nearest_neighbor/nearest_neighbor_factory.hpp"
-#include "../table/column/column_table.hpp"
+#include "../storage/column_table.hpp"
 #include "../unlearner/unlearner_factory.hpp"
 #include "recommender_factory.hpp"
 #include "recommender.hpp"
@@ -37,6 +37,16 @@ namespace jubatus {
 namespace core {
 namespace recommender {
 namespace {
+
+struct inverted_index_config {
+  jubatus::util::data::optional<std::string> unlearner;
+  jubatus::util::data::optional<config> unlearner_parameter;
+
+  template<typename Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(unlearner) & JUBA_MEMBER(unlearner_parameter);
+  }
+};
 
 const std::string NEAREST_NEIGHBOR_PREFIX("nearest_neighbor_recommender:");
 struct nearest_neighbor_recommender_config {
@@ -58,8 +68,51 @@ shared_ptr<recommender_base> recommender_factory::create_recommender(
     const config& param,
     const string& id) {
   if (name == "inverted_index") {
-    // inverted_index doesn't have parameter
+    if (!param.is_null()) {
+      inverted_index_config conf =
+          config_cast_check<inverted_index_config>(param);
+      if (conf.unlearner) {
+        if (!conf.unlearner_parameter) {
+          throw JUBATUS_EXCEPTION(
+              common::config_exception() << common::exception::error_message(
+                  "unlearner is set but unlearner_parameter is not found"));
+        }
+        return shared_ptr<recommender_base>(
+            new inverted_index(unlearner::create_unlearner(
+                *conf.unlearner, common::jsonconfig::config(
+                    *conf.unlearner_parameter))));
+      } else {
+        if (conf.unlearner_parameter) {
+          throw JUBATUS_EXCEPTION(
+              common::config_exception() << common::exception::error_message(
+                  "unlearner_parameter is set but unlearner is not found"));
+        }
+      }
+    }
     return shared_ptr<recommender_base>(new inverted_index);
+  } else if (name == "inverted_index_euclid") {
+    if (!param.is_null()) {
+      inverted_index_config conf =
+          config_cast_check<inverted_index_config>(param);
+      if (conf.unlearner) {
+        if (!conf.unlearner_parameter) {
+          throw JUBATUS_EXCEPTION(
+              common::config_exception() << common::exception::error_message(
+                  "unlearner is set but unlearner_parameter is not found"));
+        }
+        return shared_ptr<recommender_base>(
+            new inverted_index_euclid(unlearner::create_unlearner(
+                *conf.unlearner, common::jsonconfig::config(
+                    *conf.unlearner_parameter))));
+      } else {
+        if (conf.unlearner_parameter) {
+          throw JUBATUS_EXCEPTION(
+              common::config_exception() << common::exception::error_message(
+                  "unlearner_parameter is set but unlearner is not found"));
+        }
+      }
+    }
+    return shared_ptr<recommender_base>(new inverted_index_euclid);
   } else if (name == "minhash") {
     return shared_ptr<recommender_base>(
         new minhash(config_cast_check<minhash::config>(param)));
@@ -72,7 +125,7 @@ shared_ptr<recommender_base> recommender_factory::create_recommender(
   } else if (name == "nearest_neighbor_recommender") {
     nearest_neighbor_recommender_config conf =
         config_cast_check<nearest_neighbor_recommender_config>(param);
-    shared_ptr<table::column_table> table(new table::column_table);
+    shared_ptr<storage::column_table> table(new storage::column_table);
     shared_ptr<nearest_neighbor::nearest_neighbor_base>
         nearest_neighbor_engine(nearest_neighbor::create_nearest_neighbor(
             conf.method, conf.parameter, table, id));

@@ -18,6 +18,8 @@
 #define JUBATUS_CORE_CLUSTERING_KMEANS_CLUSTERING_METHOD_HPP_
 
 #include <vector>
+
+#include "jubatus/util/math/random.h"
 #include "clustering_method.hpp"
 
 namespace jubatus {
@@ -26,7 +28,7 @@ namespace clustering {
 
 class kmeans_clustering_method : public clustering_method {
  public:
-  explicit kmeans_clustering_method(size_t k);
+  explicit kmeans_clustering_method(size_t k, uint32_t seed);
   ~kmeans_clustering_method();
 
   void batch_update(wplist points);
@@ -43,6 +45,9 @@ class kmeans_clustering_method : public clustering_method {
 
   std::vector<common::sfv_t> kcenters_;
   size_t k_;
+  uint32_t seed_;
+
+  jubatus::util::math::random::mtrand rand_;
 };
 
 }  // namespace clustering

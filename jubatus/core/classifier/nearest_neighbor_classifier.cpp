@@ -21,9 +21,12 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include "../storage/column_table.hpp"
+#include "jubatus/util/concurrent/lock.h"
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::data::unordered_set;
+using jubatus::util::concurrent::scoped_lock;
 
 namespace jubatus {
 namespace core {
@@ -82,11 +85,17 @@ nearest_neighbor_classifier::nearest_neighbor_classifier(
 
 void nearest_neighbor_classifier::train(
     const common::sfv_t& fv, const std::string& label) {
-  std::string id = make_id_from_label(label, rand_);
+  std::string id;
+  {
+    util::concurrent::scoped_lock lk(rand_mutex_);
+    id = make_id_from_label(label, rand_);
+  }
   if (unlearner_) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     if (!unlearner_->touch(id)) {
       throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-          "no more space available to add new ID: " + id));
+          "cannot add new ID as number of sticky IDs reached "
+          "the maximum size of unlearner: " + id));
     }
   }
   nearest_neighbor_engine_->set_row(id, fv);
@@ -121,9 +130,12 @@ void nearest_neighbor_classifier::classify_with_scores(
   nearest_neighbor_engine_->neighbor_row(fv, ids, k_);
 
   std::map<std::string, float> m;
-  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
-       iter != labels_.end(); ++iter) {
-    m.insert(std::make_pair(*iter, 0));
+  {
+    util::concurrent::scoped_lock lk(label_mutex_);
+    for (unordered_set<std::string>::const_iterator iter = labels_.begin();
+         iter != labels_.end(); ++iter) {
+      m.insert(std::make_pair(*iter, 0));
+    }
   }
   for (size_t i = 0; i < ids.size(); ++i) {
     std::string label = get_label_from_id(ids[i].first);
@@ -139,11 +151,14 @@ void nearest_neighbor_classifier::classify_with_scores(
 }
 
 bool nearest_neighbor_classifier::delete_label(const std::string& label) {
-  if (labels_.erase(label) == 0) {
-    return false;
+  {
+    util::concurrent::scoped_lock lk(label_mutex_);
+    if (labels_.erase(label) == 0) {
+      return false;
+    }
   }
 
-  shared_ptr<table::column_table> table =
+  shared_ptr<storage::column_table> table =
       nearest_neighbor_engine_->get_table();
 
   std::vector<std::string> ids_to_be_deleted;
@@ -168,13 +183,17 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
 
 void nearest_neighbor_classifier::clear() {
   nearest_neighbor_engine_->clear();
-  labels_.clear();
+  {
+    util::concurrent::scoped_lock lk(label_mutex_);
+    labels_.clear();
+  }
   if (unlearner_) {
     unlearner_->clear();
   }
 }
 
 std::vector<std::string> nearest_neighbor_classifier::get_labels() const {
+  util::concurrent::scoped_lock lk(label_mutex_);
   std::vector<std::string> result;
   for (unordered_set<std::string>::const_iterator iter = labels_.begin();
        iter != labels_.end(); ++iter) {
@@ -184,6 +203,7 @@ std::vector<std::string> nearest_neighbor_classifier::get_labels() const {
 }
 
 bool nearest_neighbor_classifier::set_label(const std::string& label) {
+  util::concurrent::scoped_lock lk(label_mutex_);
   return labels_.insert(label).second;
 }
 
@@ -200,6 +220,7 @@ void nearest_neighbor_classifier::pack(framework::packer& pk) const {
   pk.pack_array(2);
   nearest_neighbor_engine_->pack(pk);
 
+  util::concurrent::scoped_lock lk(label_mutex_);
   pk.pack_array(labels_.size());
   for (unordered_set<std::string>::const_iterator iter = labels_.begin();
        iter != labels_.end(); ++iter) {
@@ -220,7 +241,10 @@ void nearest_neighbor_classifier::unpack(msgpack::object o) {
   for (size_t i = 0; i < labels.via.array.size; ++i) {
     std::string label;
     labels.via.array.ptr[i].convert(&label);
-    labels_.insert(label);
+    {
+      util::concurrent::scoped_lock lk(label_mutex_);
+      labels_.insert(label);
+    }
   }
 }
 

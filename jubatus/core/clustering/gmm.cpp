@@ -20,10 +20,11 @@
 #include <ctime>
 #include <cfloat>
 #include <cmath>
+#include <limits>
 #include <iostream>
 #include <utility>
 #include <vector>
-#include "jubatus/util/math/random.h"
+#include "clustering.hpp"
 #include "../common/exception.hpp"
 
 using jubatus::util::lang::shared_ptr;
@@ -36,9 +37,14 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
+gmm::gmm(uint32_t seed)
+    : seed_(seed),
+      rand_(seed) {
+}
+
 void gmm::batch(const eigen_wsvec_list_t& data, int d, int k) {
   if (data.empty()) {
-    *this = gmm();
+    *this = gmm(seed_);
     return;
   }
 
@@ -71,7 +77,7 @@ void gmm::batch(const eigen_wsvec_list_t& data, int d, int k) {
         means_[c] += cp * i->data;
         covs_[c] += i->data * (i->data.transpose()) * cp;
         weights[c] += cp;
-        obj -= std::log(cp);
+        obj -= std::log(std::max(cp, std::numeric_limits<double>::min()));
       }
     }
     for (int c = 0; c < k; ++c) {
@@ -93,8 +99,7 @@ eigen_svec_t gmm::get_nearest_center(const eigen_svec_t& p) const {
 
 int64_t gmm::get_nearest_center_index(const eigen_svec_t& p) const {
   if (means_.empty()) {
-    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-        "clustering is not performed yet"));
+    throw JUBATUS_EXCEPTION(not_performed());
   }
 
   double max_prob = 0;
@@ -122,9 +127,8 @@ void gmm::initialize(const eigen_wsvec_list_t& data, int d, int k) {
     eye_.insert(i, i) = 1;
   }
 
-  jubatus::util::math::random::mtrand r(time(NULL));
   for (int c = 0; c < k; ++c) {
-    means_[c] = data[r.next_int(0, data.size()-1)].data;
+    means_[c] = data[rand_.next_int(0, data.size()-1)].data;
     for (int i = 0; i < d; ++i) {
       covs_[c].insert(i, i) = 1;
     }

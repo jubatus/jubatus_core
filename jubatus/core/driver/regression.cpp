@@ -23,6 +23,7 @@
 #include "../fv_converter/datum.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
 #include "../fv_converter/converter_config.hpp"
+#include "../regression/regression_base.hpp"
 #include "../storage/storage_factory.hpp"
 
 using std::string;

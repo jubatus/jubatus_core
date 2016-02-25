@@ -21,13 +21,13 @@
 #include <vector>
 
 #include "column_table.hpp"
-#include "../../common/assert.hpp"
+#include "../common/assert.hpp"
 
 namespace jutil = jubatus::util;
 
 namespace jubatus {
 namespace core {
-namespace table {
+namespace storage {
 
 void column_table::init(const std::vector<column_type>& schema) {
   jutil::concurrent::scoped_wlock lk(table_lock_);
@@ -60,6 +60,11 @@ void column_table::clear() {
 std::pair<bool, uint64_t> column_table::exact_match(
     const std::string& prefix) const {
   jutil::concurrent::scoped_rlock lk(table_lock_);
+  return exact_match_nolock(prefix);
+}
+
+std::pair<bool, uint64_t> column_table::exact_match_nolock(
+    const std::string& prefix) const {
   index_table::const_iterator it = index_.find(prefix);
   if (it == index_.end()) {
     return std::make_pair(false, 0LLU);
@@ -167,6 +172,6 @@ const_bit_vector_column& column_table::get_bit_vector_column(
 }
 
 
-}  // namespace table
+}  // namespace storage
 }  // namespace core
 }  // namespace jubatus

@@ -126,7 +126,7 @@ vector<shared_ptr<anomaly_base> > create_anomaly_base() {
   core::nearest_neighbor::euclid_lsh::config light_lof_lsh_config;
   light_lof_lsh_config.hash_num = 8;
 
-  shared_ptr<table::column_table> nn_table(new table::column_table);
+  shared_ptr<storage::column_table> nn_table(new storage::column_table);
   shared_ptr<core::nearest_neighbor::nearest_neighbor_base> nn_engine(
       new core::nearest_neighbor::euclid_lsh(
           light_lof_lsh_config, nn_table, ID));
@@ -149,8 +149,8 @@ class light_lof_test : public ::testing::Test {
     lof_config.nearest_neighbor_num = 3;
     lof_config.reverse_nearest_neighbor_num = 3;
 
-    shared_ptr<table::column_table> lsh_table(
-        new table::column_table);
+    shared_ptr<storage::column_table> lsh_table(
+        new storage::column_table);
     core::nearest_neighbor::euclid_lsh::config lsh_config;
     shared_ptr<core::nearest_neighbor::nearest_neighbor_base> lsh(
         new core::nearest_neighbor::euclid_lsh(lsh_config, lsh_table, "id"));
@@ -174,7 +174,7 @@ TEST_F(light_lof_test, unlearning) {
   fv_converter::datum datum;
   datum.num_values_.push_back(make_pair("f1", 1.0));
 
-  for (int i = 0; i < 5; ++i) {
+  for (std::size_t i = 0; i < 5; ++i) {
     datum.num_values_[0].second = i;
     anomaly_->overwrite(
         "row" + jubatus::util::lang::lexical_cast<std::string>(i),
@@ -222,7 +222,7 @@ TEST_P(anomaly_with_weight_manager_test, small) {
   }
 
   std::vector<std::string> rows = anomaly_->get_all_rows();
-  ASSERT_EQ(21, rows.size());
+  ASSERT_EQ(21U, rows.size());
 }
 
 INSTANTIATE_TEST_CASE_P(anomaly_with_weight_manager_test_instance,

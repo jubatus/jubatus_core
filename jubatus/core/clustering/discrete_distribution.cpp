@@ -26,8 +26,9 @@ namespace clustering {
 
 discrete_distribution::discrete_distribution(
     vector<double>::iterator begin,
-    vector<double>::iterator end)
-    : r_(),
+    vector<double>::iterator end,
+    uint32_t seed)
+    : r_(seed),
       whist_() {
   sum_ = 0;
   for (vector<double>::iterator it = begin; it != end; ++it) {

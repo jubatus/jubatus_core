@@ -26,17 +26,19 @@
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/data/unordered_set.h"
+#include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/text/json.h"
 
 #include "../common/type.hpp"
 #include "../common/unordered_map.hpp"
 #include "../framework/mixable_helper.hpp"
-#include "../recommender/recommender_base.hpp"
-#include "../recommender/recommender_factory.hpp"
 
 namespace jubatus {
 namespace core {
+namespace recommender {
+class recommender_base;
+}  // namespace recommender
 namespace anomaly {
 
 struct lof_entry {
@@ -52,18 +54,21 @@ class lof_storage {
  public:
   static const uint32_t DEFAULT_NEIGHBOR_NUM;
   static const uint32_t DEFAULT_REVERSE_NN_NUM;
+  static const bool DEFAULT_IGNORE_KTH_SAME_POINT;
 
   struct config {
     config();
 
     int nearest_neighbor_num;
     int reverse_nearest_neighbor_num;
+    jubatus::util::data::optional<bool> ignore_kth_same_point;
 
     template<typename Ar>
     void serialize(Ar& ar) {
       ar
           & JUBA_MEMBER(nearest_neighbor_num)
-          & JUBA_MEMBER(reverse_nearest_neighbor_num);
+          & JUBA_MEMBER(reverse_nearest_neighbor_num)
+          & JUBA_MEMBER(ignore_kth_same_point);
     }
   };
 
@@ -90,12 +95,17 @@ class lof_storage {
       const std::string& id,
       jubatus::util::data::unordered_map<std::string, float>&
           neighbor_lrd) const;
+  float collect_lrds(
+      const std::string& id,
+      const common::sfv_t& query,
+      jubatus::util::data::unordered_map<std::string, float>&
+      neighbor_lrd) const;
 
   // For Update
   void remove_row(const std::string& row);
   void clear();
   void get_all_row_ids(std::vector<std::string>& ids) const;
-  void update_row(const std::string& row, const common::sfv_t& diff);
+  bool update_row(const std::string& row, const common::sfv_t& diff);
 
   void update_all();  // Update kdists and lrds
 
@@ -127,7 +137,8 @@ class lof_storage {
     o.convert(this);
   }
 
-  MSGPACK_DEFINE(lof_table_, lof_table_diff_, neighbor_num_, reverse_nn_num_);
+  MSGPACK_DEFINE(lof_table_, lof_table_diff_,
+      neighbor_num_, reverse_nn_num_, ignore_kth_same_point_);
 
  private:
   static void mark_removed(lof_entry& entry);
@@ -159,6 +170,7 @@ class lof_storage {
 
   uint32_t neighbor_num_;  // k of k-nn
   uint32_t reverse_nn_num_;  // ck of ck-nn as an approx. of k-reverse-nn
+  bool ignore_kth_same_point_;
 
   jubatus::util::lang::shared_ptr<core::recommender::recommender_base>
     nn_engine_;

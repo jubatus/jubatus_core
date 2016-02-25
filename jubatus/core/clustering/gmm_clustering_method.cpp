@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 #include "../common/exception.hpp"
+#include "clustering.hpp"
 #include "util.hpp"
 
 using std::vector;
@@ -27,8 +28,8 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-gmm_clustering_method::gmm_clustering_method(size_t k)
-    : k_(k), kcenters_(), mapper_(), gmm_() {
+gmm_clustering_method::gmm_clustering_method(size_t k, uint32_t seed)
+    : k_(k), seed_(seed), kcenters_(), mapper_(), gmm_(seed) {
 }
 
 gmm_clustering_method::~gmm_clustering_method() {
@@ -36,7 +37,7 @@ gmm_clustering_method::~gmm_clustering_method() {
 
 void gmm_clustering_method::batch_update(wplist points) {
   if (points.empty()) {
-    *this = gmm_clustering_method(k_);
+    *this = gmm_clustering_method(k_, seed_);
     return;
   }
   mapper_.clear();
@@ -49,6 +50,10 @@ void gmm_clustering_method::online_update(wplist points) {
 }
 
 std::vector<common::sfv_t> gmm_clustering_method::get_k_center() const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(not_performed());
+  }
+
   return kcenters_;
 }
 
@@ -70,6 +75,10 @@ wplist gmm_clustering_method::get_cluster(
 
 std::vector<wplist> gmm_clustering_method::get_clusters(
     const wplist& points) const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(not_performed());
+  }
+
   std::vector<wplist> ret(k_);
   for (wplist::const_iterator it = points.begin(); it != points.end(); ++it) {
     int64_t c = get_nearest_center_index(it->data);

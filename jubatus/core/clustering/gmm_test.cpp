@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include "jubatus/util/lang/scoped_ptr.h"
 #include "jubatus/util/math/random.h"
+#include "clustering.hpp"
 #include "gmm.hpp"
 #include "gmm_types.hpp"
 #include "../common/exception.hpp"
@@ -29,10 +30,12 @@ class gmm_test : public ::testing::Test {
  protected:
   static const size_t k_ = 2;
   static const size_t d_ = 2;
-  static const double epsilon_ = 0.3;
+  static const double epsilon_;
+
+  gmm_test() : r_(0) {}
 
   virtual void SetUp() {
-    gmm_.reset(new gmm);
+    gmm_.reset(new gmm(0));
   }
 
   void do_batch(size_t num) {
@@ -56,6 +59,8 @@ class gmm_test : public ::testing::Test {
   jubatus::util::math::random::mtrand r_;
   jubatus::util::lang::scoped_ptr<gmm> gmm_;
 };
+
+const double gmm_test::epsilon_ = 0.3;
 
 TEST_F(gmm_test, centers_and_covs) {
   do_batch(500);
@@ -111,7 +116,7 @@ TEST_F(gmm_test, clear_with_empty_list) {
   do_batch(0);  // batch update with empty list
   EXPECT_THROW(
     eigen_svec_t nc_b = gmm_->get_nearest_center(svec_a),
-    common::exception::runtime_error);
+    not_performed);
 }
 
 }  // namespace clustering

@@ -282,9 +282,7 @@ TEST(json, from_json)
   }
   {
     json j(new json_bool(false));
-    bool const expected = false;
-    bool const actual = json_cast<bool>(j);
-    EXPECT_EQ(expected, actual);
+    EXPECT_FALSE(json_cast<bool>(j));
   }
 
   {
@@ -394,7 +392,7 @@ TEST(json, merge)
 
     json js4 = js1.merge(js1);
     EXPECT_EQ(42, json_cast<int>(js4["a"]));
-    EXPECT_EQ(0, js4.count("b"));
+    EXPECT_EQ(0u, js4.count("b"));
     EXPECT_EQ(std::string("string"), json_cast<std::string>(js4["c"]));
   }
 
@@ -548,18 +546,18 @@ TEST(json, size)
   }
   {
     json j(new json_object);
-    EXPECT_EQ(0, j.size());
+    EXPECT_EQ(0u, j.size());
     j["1"];
     j["2"];
     j["3"];
-    EXPECT_EQ(3, j.size());
+    EXPECT_EQ(3u, j.size());
   }
   {
     json j(new json_array);
-    EXPECT_EQ(0, j.size());
+    EXPECT_EQ(0u, j.size());
     j.add(json(new json_null));
     j.add(json(new json_integer(3)));
-    EXPECT_EQ(2, j.size());
+    EXPECT_EQ(2u, j.size());
   }
 }
 
@@ -708,7 +706,7 @@ TEST(json, parse)
   {
     istringstream iss("false");
     json j;iss>>j;
-    EXPECT_EQ(false, json_cast<bool>(j));
+    EXPECT_FALSE(json_cast<bool>(j));
   }
   {
     istringstream iss("null");
@@ -863,9 +861,9 @@ TEST(json, clone)
     EXPECT_EQ(json_cast<int>(js2["Image"]["IDs"][2]), 42);
     EXPECT_EQ(json_cast<int>(js3["Image"]["IDs"][2]), 234);
 
-    EXPECT_EQ(js1["Image"]["IDs"].size(), 5);
-    EXPECT_EQ(js2["Image"]["IDs"].size(), 5);
-    EXPECT_EQ(js3["Image"]["IDs"].size(), 4);
+    EXPECT_EQ(js1["Image"]["IDs"].size(), 5U);
+    EXPECT_EQ(js2["Image"]["IDs"].size(), 5U);
+    EXPECT_EQ(js3["Image"]["IDs"].size(), 4U);
 
     json js4 = js1["Image"]["Thumbnail"];
     json js5 = js1["Image"]["Thumbnail"].clone();

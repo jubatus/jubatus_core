@@ -425,9 +425,9 @@ TEST(datum_to_fv_converter, check_datum_key_in_binary) {
 }
 
 TEST(datum_to_fv_converter, combination_feature_num) {
-  datum datum;
-  datum.num_values_.push_back(std::make_pair("val1", 1.0));
-  datum.num_values_.push_back(std::make_pair("val2", 1.1));
+  datum d;
+  d.num_values_.push_back(std::make_pair("val1", 1.0));
+  d.num_values_.push_back(std::make_pair("val2", 1.1));
 
   datum_to_fv_converter conv;
   typedef shared_ptr<combination_feature> combination_feature_t;
@@ -449,13 +449,71 @@ TEST(datum_to_fv_converter, combination_feature_num) {
       all_matcher,
       combination_feature_t(new combination_mul_feature()));
   std::vector<std::pair<std::string, float> > feature;
-  conv.convert(datum, feature);
+  conv.convert(d, feature);
 
   std::vector<std::pair<std::string, float> > expected;
   expected.push_back(std::make_pair("val1@num", 1.0));
   expected.push_back(std::make_pair("val2@num", 1.1));
   expected.push_back(std::make_pair("val1@num&val2@num/add", 2.1));
   expected.push_back(std::make_pair("val1@num&val2@num/mul", 1.1));
+
+  ASSERT_EQ(expected, feature);
+
+  // test for empty datum
+  datum empty_datum;
+  feature.clear();
+  expected.clear();
+
+  conv.convert(empty_datum, feature);
+  ASSERT_EQ(expected, feature);
+}
+
+namespace {
+
+class combination_div_feature : public combination_feature {
+ public:
+  void add_feature(const std::string& key,
+                   double value_left,
+                   double value_right,
+                   common::sfv_t& ret_fv) const {
+    ret_fv.push_back(
+        std::make_pair(key, static_cast<float>(value_left / value_right)));
+  }
+
+  bool is_commutative() const {
+    return false;
+  }
+};
+
+}  // namespace
+
+TEST(datum_to_fv_converter, combination_feature_num_non_commutative) {
+  datum d;
+  d.num_values_.push_back(std::make_pair("val1", 2.0));
+  d.num_values_.push_back(std::make_pair("val2", 0.5));
+
+  datum_to_fv_converter conv;
+  typedef shared_ptr<combination_feature> combination_feature_t;
+  typedef shared_ptr<num_feature> num_feature_t;
+  shared_ptr<key_matcher> all_matcher(new match_all());
+
+  conv.register_num_rule(
+      "num",
+      all_matcher,
+      num_feature_t(new num_value_feature()));
+  conv.register_combination_rule(
+      "div",
+      all_matcher,
+      all_matcher,
+      combination_feature_t(new combination_div_feature()));
+  std::vector<std::pair<std::string, float> > feature;
+  conv.convert(d, feature);
+
+  std::vector<std::pair<std::string, float> > expected;
+  expected.push_back(std::make_pair("val1@num", 2.0));
+  expected.push_back(std::make_pair("val2@num", 0.5));
+  expected.push_back(std::make_pair("val1@num&val2@num/div", 4.0));
+  expected.push_back(std::make_pair("val2@num&val1@num/div", 0.25));
 
   ASSERT_EQ(expected, feature);
 }

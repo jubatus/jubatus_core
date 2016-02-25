@@ -19,8 +19,12 @@
 #include <cmath>
 #include <string>
 #include <utility>
+#include <map>
 #include "../common/type.hpp"
 #include "datum_to_fv_converter.hpp"
+#include "jubatus/util/concurrent/lock.h"
+
+using jubatus::util::concurrent::scoped_lock;
 
 namespace jubatus {
 namespace core {
@@ -43,8 +47,9 @@ versioned_weight_diff::versioned_weight_diff(const keyword_weights& w)
   : weights_(w) {
 }
 
-versioned_weight_diff::versioned_weight_diff(const keyword_weights& w,
-                                             const storage::version& v)
+versioned_weight_diff::versioned_weight_diff(
+    const keyword_weights& w,
+    const storage::version& v)
   : weights_(w), version_(v) {
 }
 
@@ -65,10 +70,12 @@ weight_manager::weight_manager()
 }
 
 void weight_manager::update_weight(const common::sfv_t& fv) {
+  scoped_lock lk(mutex_);
   diff_weights_.update_document_frequency(fv);
 }
 
 void weight_manager::get_weight(common::sfv_t& fv) const {
+  scoped_lock lk(mutex_);
   for (common::sfv_t::iterator it = fv.begin(); it != fv.end(); ++it) {
     double global_weight = get_global_weight(it->first);
     it->second = static_cast<float>(it->second * global_weight);
@@ -101,7 +108,18 @@ double weight_manager::get_global_weight(const std::string& key) const {
 }
 
 void weight_manager::add_weight(const std::string& key, float weight) {
+  scoped_lock lk(mutex_);
   diff_weights_.add_weight(key, weight);
+}
+
+void weight_manager::get_status(
+    std::map<std::string, std::string>& status) const {
+  scoped_lock lk(mutex_);
+  status["weight_manager_version"] =
+    jubatus::util::lang::lexical_cast<std::string>(
+        version_.get_number());
+  diff_weights_.get_status(status, "diff");
+  master_weights_.get_status(status, "master");
 }
 
 }  // namespace fv_converter

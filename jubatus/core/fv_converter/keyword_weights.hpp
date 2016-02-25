@@ -17,12 +17,12 @@
 #ifndef JUBATUS_CORE_FV_CONVERTER_KEYWORD_WEIGHTS_HPP_
 #define JUBATUS_CORE_FV_CONVERTER_KEYWORD_WEIGHTS_HPP_
 
+#include <map>
 #include <string>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
 #include "../common/type.hpp"
 #include "counter.hpp"
-#include "datum.hpp"
 
 namespace jubatus {
 namespace core {
@@ -53,6 +53,10 @@ class keyword_weights {
   MSGPACK_DEFINE(document_count_, document_frequencies_, weights_);
 
   std::string to_string() const;
+
+  void get_status(
+      std::map<std::string, std::string>& status,
+      const std::string& prefix) const;
 
  private:
   double get_global_weight(const std::string& key) const;

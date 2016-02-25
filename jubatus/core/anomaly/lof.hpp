@@ -19,8 +19,9 @@
 
 #include <string>
 #include <vector>
+
 #include "jubatus/util/lang/shared_ptr.h"
-#include "jubatus/util/text/json.h"
+
 #include "../recommender/recommender_base.hpp"
 #include "anomaly_base.hpp"
 #include "lof_storage.hpp"
@@ -40,11 +41,14 @@ class lof : public anomaly_base {
   // return anomaly score of query
   float calc_anomaly_score(const common::sfv_t& query) const;
   float calc_anomaly_score(const std::string& id) const;
+  float calc_anomaly_score(
+      const std::string& id,
+      const common::sfv_t& query) const;
 
   void clear();
   void clear_row(const std::string& id);
-  void update_row(const std::string& id, const sfv_diff_t& diff);
-  void set_row(const std::string& id, const common::sfv_t& sfv);
+  bool update_row(const std::string& id, const sfv_diff_t& diff);
+  bool set_row(const std::string& id, const common::sfv_t& sfv);
 
   void get_all_row_ids(std::vector<std::string>& ids) const;
   std::string type() const;
@@ -63,7 +67,7 @@ class lof : public anomaly_base {
 };
 
 }  //  namespace anomaly
-}  // core
+}  //  namespace core
 }  //  namespace jubatus
 
 #endif  // JUBATUS_CORE_ANOMALY_LOF_HPP_

@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 #include "../common/exception.hpp"
+#include "clustering.hpp"
 #include "util.hpp"
 
 using std::pair;
@@ -29,8 +30,10 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-kmeans_clustering_method::kmeans_clustering_method(size_t k)
-    : k_(k) {
+kmeans_clustering_method::kmeans_clustering_method(size_t k, uint32_t seed)
+    : k_(k),
+      seed_(seed),
+      rand_(seed) {
 }
 
 kmeans_clustering_method::~kmeans_clustering_method() {
@@ -58,13 +61,12 @@ void kmeans_clustering_method::initialize_centers(wplist& points) {
       pair<int64_t, double> m = min_dist((*it).data, kcenters_);
       weights.push_back(m.second * it->weight);
     }
-    discrete_distribution d(weights.begin(), weights.end());
+    discrete_distribution d(weights.begin(), weights.end(), rand_.next_int());
     kcenters_.push_back(points[d()].data);
   }
 }
 
 void kmeans_clustering_method::do_batch_update(wplist& points) {
-  static jubatus::util::math::random::mtrand r;
   bool terminated = false;
   if (points.size() < k_) {
     return;
@@ -97,11 +99,19 @@ void kmeans_clustering_method::online_update(wplist points) {
 }
 
 vector<common::sfv_t> kmeans_clustering_method::get_k_center() const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(not_performed());
+  }
+
   return kcenters_;
 }
 
 int64_t kmeans_clustering_method::get_nearest_center_index(
     const common::sfv_t& point) const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(not_performed());
+  }
+
   return min_dist(point, kcenters_).first;
 }
 
@@ -121,6 +131,10 @@ wplist kmeans_clustering_method::get_cluster(
 
 vector<wplist> kmeans_clustering_method::get_clusters(
     const wplist& points) const {
+  if (kcenters_.empty()) {
+    throw JUBATUS_EXCEPTION(not_performed());
+  }
+
   vector<wplist> ret(k_);
   for (wplist::const_iterator it = points.begin(); it != points.end(); ++it) {
     pair<int64_t, double> m = min_dist(it->data, kcenters_);

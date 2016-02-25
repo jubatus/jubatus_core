@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_CLUSTERING_GMM_CLUSTERING_METHOD_HPP_
 
 #include <vector>
+#include "../common/type.hpp"
 #include "clustering_method.hpp"
 #include "eigen_feature_mapper.hpp"
 #include "gmm.hpp"
@@ -29,7 +30,7 @@ namespace clustering {
 
 class gmm_clustering_method : public clustering_method {
  public:
-  explicit gmm_clustering_method(size_t k);
+  gmm_clustering_method(size_t k, uint32_t seed);
   ~gmm_clustering_method();
 
   void batch_update(wplist points);
@@ -42,6 +43,7 @@ class gmm_clustering_method : public clustering_method {
 
  private:
   size_t k_;
+  uint32_t seed_;
   std::vector<common::sfv_t> kcenters_;
   eigen_feature_mapper mapper_;
   gmm gmm_;

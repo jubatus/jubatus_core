@@ -17,6 +17,7 @@
 #include "random_unlearner.hpp"
 
 #include <string>
+#include <map>
 #include <limits>
 #include "../common/exception.hpp"
 
@@ -91,6 +92,12 @@ bool random_unlearner::remove(const std::string& id) {
 
 bool random_unlearner::exists_in_memory(const std::string& id) const {
   return id_map_.count(id) > 0;
+}
+
+void random_unlearner::get_status(
+    std::map<std::string, std::string>& status) const {
+  status["num_unlearner_ids"] =
+    jubatus::util::lang::lexical_cast<std::string>(ids_.size());
 }
 
 }  // namespace unlearner

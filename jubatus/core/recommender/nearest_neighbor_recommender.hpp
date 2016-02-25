@@ -21,12 +21,19 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
-#include "../nearest_neighbor/nearest_neighbor_base.hpp"
-#include "../unlearner/unlearner_base.hpp"
 #include "recommender_base.hpp"
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}  // namespace storage
+namespace nearest_neighbor {
+class nearest_neighbor_base;
+}  // namespace nearest_neighbor
+namespace unlearner {
+class unlearner_base;
+}  // unlearner
 namespace recommender {
 
 // Recommender based on nearest_neighbor algorithms.
@@ -63,8 +70,8 @@ class nearest_neighbor_recommender : public recommender_base {
 
  private:
   void unlearn_row(const std::string& id);
-  jubatus::util::lang::shared_ptr<table::column_table> get_table();
-  jubatus::util::lang::shared_ptr<const table::column_table>
+  jubatus::util::lang::shared_ptr<storage::column_table> get_table();
+  jubatus::util::lang::shared_ptr<const storage::column_table>
       get_const_table() const;
 
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> get_unlearner();

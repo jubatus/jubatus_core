@@ -20,7 +20,6 @@
 #include <stdint.h>
 
 #include <algorithm>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -46,6 +45,7 @@ class key_manager {
   void swap(key_manager& km) {
     key2id_.swap(km.key2id_);
     id2key_.swap(km.id2key_);
+    std::swap(next_id_, km.next_id_);
   }
 
   size_t size() const {
@@ -80,9 +80,9 @@ class key_manager {
  private:
   uint64_t append_key(const std::string& key);
 
-  jubatus::util::data::unordered_map<std::string, uint64_t> key2id_;
-  jubatus::util::data::unordered_map<uint64_t, std::string> id2key_;
   uint64_t next_id_;
+  util::data::unordered_map<std::string, uint64_t> key2id_;
+  util::data::unordered_map<uint64_t, std::string> id2key_;
 };
 
 inline void swap(key_manager& l, key_manager& r) {  // NOLINT

@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2012,2013 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2015 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,41 +14,33 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_TABLE_COLUMN_OWNER_HPP_
-#define JUBATUS_CORE_TABLE_COLUMN_OWNER_HPP_
+#include <cmath>
+#include <gtest/gtest.h>
+#include "../common/type.hpp"
+#include "util.hpp"
 
-#include <ostream>
-#include <string>
-#include <msgpack.hpp>
+using std::make_pair;
+using jubatus::core::common::sfv_t;
 
 namespace jubatus {
 namespace core {
-namespace table {
+namespace clustering {
 
-struct owner {
-  std::string name;
+class util_test : public ::testing::Test {};
 
-  owner() : name("(uninitialized)") {
-  }
-  explicit owner(const std::string& n) : name(n) {
-  }
+TEST_F(util_test, dist) {
+  sfv_t p1;
+  p1.push_back(make_pair("x", 1));
+  p1.push_back(make_pair("y", 1));
 
-  bool operator==(const owner& rhs) const {
-    return name == rhs.name;
-  }
-  bool operator<(const owner& o) const {
-    return name < o.name;
-  }
-  friend std::ostream& operator<<(std::ostream& os, const owner& o) {
-    os << "owner[" << o.name << "]";
-    return os;
-  }
+  sfv_t p2;
+  p2.push_back(make_pair("x", 2));
+  p2.push_back(make_pair("y", 2));
 
-  MSGPACK_DEFINE(name);
-};
+  EXPECT_EQ(dist(p1, p1), 0);
+  EXPECT_EQ(dist(p1, p2), std::sqrt(2));
+}
 
-}  // namespace table
+}  // namespace clustering
 }  // namespace core
 }  // namespace jubatus
-
-#endif  // JUBATUS_CORE_TABLE_COLUMN_OWNER_HPP_

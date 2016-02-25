@@ -21,15 +21,20 @@
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../clustering/types.hpp"
-#include "../clustering/clustering.hpp"
 #include "../framework/mixable.hpp"
 #include "../fv_converter/datum.hpp"
-#include "../fv_converter/datum_to_fv_converter.hpp"
 #include "../fv_converter/mixable_weight_manager.hpp"
 #include "driver.hpp"
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+class datum;
+class datum_to_fv_converter;
+}  // namespace fv_converter
+namespace clustering {
+class clustering;
+}  // namespace clustering
 namespace driver {
 
 class clustering : public driver_base {

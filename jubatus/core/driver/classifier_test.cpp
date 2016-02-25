@@ -26,13 +26,20 @@
 
 #include "jubatus/util/lang/cast.h"
 #include "jubatus/util/text/json.h"
+#include "jubatus/util/concurrent/thread.h"
+#include "jubatus/util/lang/function.h"
+#include "jubatus/util/lang/bind.h"
+#include "jubatus/util/math/random.h"
 
 #include "../storage/storage_type.hpp"
 #include "../storage/local_storage.hpp"
+#include "../storage/local_storage_mixture.hpp"
 #include "../classifier/classifier_test_util.hpp"
+#include "../classifier/classifier_factory.hpp"
 #include "../classifier/classifier.hpp"
 #include "../fv_converter/datum.hpp"
 #include "../framework/stream_writer.hpp"
+#include "../nearest_neighbor/nearest_neighbor_factory.hpp"
 #include "classifier.hpp"
 
 #include "test_util.hpp"
@@ -46,9 +53,16 @@ using std::numeric_limits;
 using std::cout;
 using std::endl;
 
+using jubatus::util::text::json::json;
+using jubatus::util::text::json::to_json;
+using jubatus::util::text::json::json_object;
 using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
-using jubatus::util::data::optional;
+using jubatus::util::concurrent::thread;
+using jubatus::util::lang::function;
+using jubatus::util::lang::bind;
+using jubatus::util::lang::_1;
+using jubatus::util::lang::_2;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::classifier::classify_result;
 using jubatus::core::classifier::classifier_base;
@@ -334,15 +348,25 @@ TEST_P(classifier_test, nan) {
   EXPECT_FALSE(isfinite(result[0].score));
 }
 
-vector<shared_ptr<classifier_base> > create_classifiers() {
+vector<shared_ptr<classifier_base> > create_linear_classifiers() {
   vector<shared_ptr<classifier_base> > method;
 
   shared_ptr<core::storage::storage_base> storage;
   core::classifier::classifier_config config;
 
-  // TODO(unknown): testing with perceptron?
+  storage.reset(new core::storage::local_storage);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::perceptron(storage)));
+
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::perceptron(storage)));
 
   storage.reset(new core::storage::local_storage);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::passive_aggressive(storage)));
+
+  storage.reset(new core::storage::local_storage_mixture);
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::passive_aggressive(storage)));
 
@@ -350,23 +374,193 @@ vector<shared_ptr<classifier_base> > create_classifiers() {
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::passive_aggressive_1(config, storage)));
 
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::passive_aggressive_1(config, storage)));
+
   storage.reset(new core::storage::local_storage);
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::passive_aggressive_2(config, storage)));
 
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::passive_aggressive_2(config, storage)));
+
   storage.reset(new core::storage::local_storage);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::confidence_weighted(config, storage)));
+
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::confidence_weighted(config, storage)));
+
+  storage.reset(new core::storage::local_storage);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::arow(config, storage)));
+
+  storage.reset(new core::storage::local_storage_mixture);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::arow(config, storage)));
+
   config.regularization_weight = 0.1f;
+  storage.reset(new core::storage::local_storage);
+  method.push_back(shared_ptr<classifier_base>(
+          new core::classifier::normal_herd(config, storage)));
+
+  storage.reset(new core::storage::local_storage_mixture);
   method.push_back(shared_ptr<classifier_base>(
           new core::classifier::normal_herd(config, storage)));
 
   return method;
 }
 
+vector<shared_ptr<classifier_base> > create_nn_classifiers() {
+  vector<shared_ptr<classifier_base> > method;
+
+  json js(new json_object);
+  js["hash_num"] = to_json(64);
+  core::common::jsonconfig::config conf(js);
+  shared_ptr<storage::column_table> table(new storage::column_table);
+  shared_ptr<nearest_neighbor::nearest_neighbor_base>
+      nearest_neighbor_engine(nearest_neighbor::create_nearest_neighbor(
+          "lsh", conf, table, ""));
+  method.push_back(shared_ptr<classifier_base>(
+      new core::classifier::nearest_neighbor_classifier(
+          nearest_neighbor_engine, 3, 1.f)));
+
+  return method;
+}
+
 INSTANTIATE_TEST_CASE_P(classifier_test_instance,
     classifier_test,
-    testing::ValuesIn(create_classifiers()));
+    testing::ValuesIn(create_linear_classifiers()));
+
+class concurrent_classifier_test
+    : public ::testing::TestWithParam<shared_ptr<classifier_base> > {
+ protected:
+  void SetUp() {
+    classifier_.reset(new driver::classifier(
+          GetParam(),
+          make_tf_idf_fv_converter()));
+  }
+
+  void TearDown() {
+    classifier_.reset();
+  }
+
+  void my_test();
+
+  shared_ptr<core::driver::classifier> classifier_;
+};
+
+void train_task(int thread_id,
+                 int num,
+                 shared_ptr<core::driver::classifier> target) {
+  jubatus::util::math::random::mtrand rand;
+  for (int i = 0; i < num; i++) {
+    target->train(rand() & 1 ? "ok" : "ng",
+                  generate_random_datum(rand, 10));
+  }
+}
+
+void classify_task(int thread_id,
+                   int num,
+                   shared_ptr<core::driver::classifier> target) {
+  jubatus::util::math::random::mtrand rand;
+  vector<pair<string, datum> > data;
+  make_random_data(rand, data, num);
+  for (int i = 0; i < num; i++) {
+    target->classify(data[i].second);
+  }
+}
+
+void pack_task(int thread_id,
+               int num,
+               shared_ptr<core::driver::classifier> target) {
+  for (int i = 0; i < num; i++) {
+    msgpack::sbuffer user_data_buf;
+    core::framework::stream_writer<msgpack::sbuffer> st(user_data_buf);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer packer(jp);
+    target->pack(packer);
+  }
+}
+
+void set_label_task(int thread_id,
+                 int num,
+                 shared_ptr<core::driver::classifier> target) {
+  jubatus::util::math::random::mtrand rand;
+  vector<string> labels;
+  for (int i = 0; i < 100; ++i) {
+    labels.push_back(generate_random_string(rand, 10));
+  }
+  for (int i = 0; i < num; i++) {
+    target->set_label(labels[rand.next_int(labels.size())]);
+  }
+}
+
+TEST_P(concurrent_classifier_test, train_train) {
+  thread t0(bind(train_task, 0, 200, classifier_));
+  thread t1(bind(train_task, 1, 200, classifier_));
+  t0.start();
+  t1.start();
+  t0.join();
+  t1.join();
+}
+
+TEST_P(concurrent_classifier_test, train_classify) {
+  thread t0(bind(train_task,    0, 200, classifier_));
+  thread t1(bind(classify_task, 1, 200, classifier_));
+  t0.start();
+  t1.start();
+  t0.join();
+  t1.join();
+}
+
+TEST_P(concurrent_classifier_test, classify_classify) {
+  train_task(0, 100, classifier_);
+  thread t0(bind(classify_task, 0, 200, classifier_));
+  thread t1(bind(classify_task, 1, 200, classifier_));
+  t0.start();
+  t1.start();
+  t0.join();
+  t1.join();
+}
+
+TEST_P(concurrent_classifier_test, classify_train_save) {
+  train_task(0, 100, classifier_);
+  thread t0(bind(classify_task, 0, 200, classifier_));
+  thread t1(bind(train_task, 1, 200, classifier_));
+  thread t2(bind(pack_task, 2, 100, classifier_));
+  t0.start();
+  t1.start();
+  t2.start();
+  t0.join();
+  t1.join();
+  t2.join();
+}
+
+TEST_P(concurrent_classifier_test, classify_train_set_label) {
+  train_task(0, 100, classifier_);
+  thread t0(bind(classify_task, 0, 200, classifier_));
+  thread t1(bind(train_task, 1, 200, classifier_));
+  thread t2(bind(set_label_task, 2, 200, classifier_));
+  t0.start();
+  t1.start();
+  t2.start();
+  t0.join();
+  t1.join();
+  t2.join();
+}
 
 
+INSTANTIATE_TEST_CASE_P(concurrent_classifier_test_instance,
+                        concurrent_classifier_test,
+                        testing::ValuesIn(create_linear_classifiers()));
+
+INSTANTIATE_TEST_CASE_P(concurrent_nn_classifier_test_instance,
+                        concurrent_classifier_test,
+                        testing::ValuesIn(create_nn_classifiers()));
 }  // driver namespace
 }  // core namespace
 }  // jubatus namespace

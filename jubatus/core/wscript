@@ -1,7 +1,7 @@
 # -*- python -*-
 import Options
 
-subdirs = "common anomaly bandit burst classifier driver framework fv_converter graph recommender regression stat storage nearest_neighbor table clustering unlearner third_party"
+subdirs = "common anomaly bandit burst classifier driver framework fv_converter graph recommender regression stat storage nearest_neighbor clustering unlearner third_party"
 
 def options(opt):
   opt.recurse(subdirs)
@@ -11,3 +11,5 @@ def configure(conf):
 
 def build(bld):
   bld.recurse(subdirs)
+  bld.install_files('${PREFIX}/include/jubatus/core',
+                    ['plugin.hpp'])

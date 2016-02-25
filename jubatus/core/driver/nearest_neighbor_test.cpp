@@ -14,6 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include "nearest_neighbor.hpp"
 #include <string>
 #include <utility>
 #include <vector>
@@ -28,7 +29,6 @@
 #include "../nearest_neighbor/nearest_neighbor.hpp"
 #include "../nearest_neighbor/nearest_neighbor_factory.hpp"
 #include "../unlearner/unlearner.hpp"
-#include "nearest_neighbor.hpp"
 #include "test_util.hpp"
 
 using std::vector;
@@ -45,7 +45,7 @@ using jubatus::util::text::json::json_float;
 using jubatus::core::nearest_neighbor::euclid_lsh;
 using jubatus::core::nearest_neighbor::lsh;
 using jubatus::core::nearest_neighbor::minhash;
-using jubatus::core::table::column_table;
+using jubatus::core::storage::column_table;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::nearest_neighbor::nearest_neighbor_base;
 using jubatus::core::unlearner::unlearner_base;
@@ -102,7 +102,7 @@ create_nearest_neighbor_bases() {
     pattern.push_back(make_pair("minhash", i));
   }
   for (size_t i = 0; i < pattern.size(); ++i) {
-    shared_ptr<core::table::column_table> table(new core::table::column_table);
+    shared_ptr<column_table> table(new column_table);
 
     json jsconf(new json_object);
     jsconf["hash_num"] = new json_integer(pattern[i].second);
@@ -178,7 +178,7 @@ TEST_P(nearest_neighbor_test, similar_row_from_id) {
   nn_driver_->set_row("b", single_str_datum("y", "fuga"));
   vector<pair<string, float> > result =
       nn_driver_->similar_row("a", 100);
-  ASSERT_EQ(2, result.size());
+  ASSERT_EQ(2u, result.size());
   ASSERT_EQ("a", result[0].first);
   ASSERT_EQ("b", result[1].first);
 }
@@ -188,7 +188,7 @@ TEST_P(nearest_neighbor_test, similar_row_from_datum) {
   nn_driver_->set_row("b", single_str_datum("y", "fuga"));
   vector<pair<string, float> > result =
       nn_driver_->similar_row(single_str_datum("x", "hoge"), 100);
-  ASSERT_EQ(2, result.size());
+  ASSERT_EQ(2u, result.size());
   ASSERT_EQ("a", result[0].first);
   ASSERT_EQ("b", result[1].first);
 }
@@ -198,7 +198,7 @@ TEST_P(nearest_neighbor_test, neighbor_row_from_id) {
   nn_driver_->set_row("b", single_str_datum("y", "fuga"));
   vector<pair<string, float> > result =
       nn_driver_->neighbor_row_from_id("a", 100);
-  ASSERT_EQ(2, result.size());
+  ASSERT_EQ(2u, result.size());
   ASSERT_EQ("a", result[0].first);
   ASSERT_EQ("b", result[1].first);
 }
@@ -209,7 +209,7 @@ TEST_P(nearest_neighbor_test, neighbor_row2_from_datum) {
   vector<pair<string, float> > result =
       nn_driver_->neighbor_row_from_datum(
           single_str_datum("x", "hoge"), 100);
-  ASSERT_EQ(2, result.size());
+  ASSERT_EQ(2u, result.size());
   ASSERT_EQ("a", result[0].first);
   ASSERT_EQ("b", result[1].first);
 }
@@ -363,11 +363,14 @@ class nearest_neighbor_with_unlearning_test
               shared_ptr<nearest_neighbor_base>,
               shared_ptr<unlearner_base> > > {
  protected:
-  void SetUp() {
-    nn_driver_.reset(new nearest_neighbor(
+  shared_ptr<nearest_neighbor> create_driver() {
+    return shared_ptr<nearest_neighbor>(new nearest_neighbor(
         std::tr1::get<0>(GetParam()),
         make_fv_converter(),
         std::tr1::get<1>(GetParam())));
+  }
+  void SetUp() {
+    nn_driver_ = create_driver();
   }
   void TearDown() {
     nn_driver_->clear();
@@ -406,6 +409,51 @@ TEST_P(nearest_neighbor_with_unlearning_test, unlearning) {
   hit_count += is_hit("id2", create_datum_2d(1.f, 1.f), 3);
   hit_count += is_hit("id3", create_datum_2d(1.f, 1.f), 3);
   EXPECT_EQ(2u, hit_count);
+}
+
+TEST_P(nearest_neighbor_with_unlearning_test, mix_and_unlearning) {
+  framework::linear_mixable* nn_mixable =
+    dynamic_cast<framework::linear_mixable*>(nn_driver_->get_mixable());
+  shared_ptr<driver::nearest_neighbor> other = create_driver();
+  framework::linear_mixable* other_mixable =
+    dynamic_cast<framework::linear_mixable*>(other->get_mixable());
+  ASSERT_TRUE(nn_mixable);
+  ASSERT_TRUE(other_mixable);
+
+  nn_driver_->set_row("a", single_str_datum("x", "hoge"));
+  nn_driver_->set_row("b", single_str_datum("y", "fuga"));
+  nn_driver_->set_row("c", single_str_datum("z", "hige"));
+
+  other->set_row("d", single_str_datum("x", "foo"));
+  other->set_row("e", single_str_datum("y", "bar"));
+  other->set_row("f", single_str_datum("z", "baz"));
+
+  msgpack::sbuffer data;
+  {
+    core::framework::stream_writer<msgpack::sbuffer> st(data);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer pk(jp);
+    nn_mixable->get_diff(pk);
+  }
+  {
+    msgpack::sbuffer sbuf;
+    core::framework::stream_writer<msgpack::sbuffer> st(sbuf);
+    core::framework::jubatus_packer jp(st);
+    core::framework::packer pk(jp);
+    other_mixable->get_diff(pk);
+
+    msgpack::unpacked msg;
+    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
+    framework::diff_object diff = other_mixable->convert_diff_object(msg.get());
+
+    msgpack::unpacked data_msg;
+    msgpack::unpack(&data_msg, data.data(), data.size());
+
+    other_mixable->mix(data_msg.get(), diff);
+    other_mixable->put_diff(diff);
+  }
+  ASSERT_EQ(MAX_SIZE, nn_driver_->get_all_rows().size());
+  ASSERT_EQ(MAX_SIZE, other->get_all_rows().size());
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -451,7 +499,7 @@ TEST_P(nearest_neighbor_idf_test, calc_idf) {
 
   vector<pair<string, float> > hit =
       nn_driver_->neighbor_row_from_datum(d, 2);
-  ASSERT_EQ(2, hit.size());
+  ASSERT_EQ(2u, hit.size());
   if (hit[0].first == "id3") {
     ASSERT_EQ("id4", hit[1].first);
   } else if (hit[0].first == "id4") {

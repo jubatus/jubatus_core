@@ -22,16 +22,24 @@
 #include <vector>
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/unordered_set.h"
+#include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
-
-#include "../framework/mixable_versioned_table.hpp"
-#include "../nearest_neighbor/nearest_neighbor_base.hpp"
-#include "../table/column/column_table.hpp"
-#include "../unlearner/unlearner_base.hpp"
 #include "anomaly_base.hpp"
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}  // namespace storage
+namespace unlearner {
+class unlearner_base;
+}  // namespace unlearner
+namespace nearest_neighbor {
+class nearest_neighbor_base;
+}  // namespace nearest_neighbor
+namespace framework {
+class mixable_versioned_table;
+}  // namespace framework
 namespace anomaly {
 
 // LOF implementation using nearest_neighbor as a backend.
@@ -43,12 +51,14 @@ class light_lof : public anomaly_base {
 
     int nearest_neighbor_num;
     int reverse_nearest_neighbor_num;
+    jubatus::util::data::optional<bool> ignore_kth_same_point;
 
     template<typename Ar>
     void serialize(Ar& ar) {
       ar
           & JUBA_MEMBER(nearest_neighbor_num)
-          & JUBA_MEMBER(reverse_nearest_neighbor_num);
+          & JUBA_MEMBER(reverse_nearest_neighbor_num)
+          & JUBA_MEMBER(ignore_kth_same_point);
     }
   };
 
@@ -71,12 +81,17 @@ class light_lof : public anomaly_base {
 
   float calc_anomaly_score(const common::sfv_t& query) const;
   float calc_anomaly_score(const std::string& id) const;
+  // calc_anomaly_score(string, sfv_t) is not supported in light_lof
+  float calc_anomaly_score(
+      const std::string& id,
+      const common::sfv_t& query) const;
+
   void clear();
   // clear_row is not supported
   void clear_row(const std::string& id);
   // update_row is not supported
-  void update_row(const std::string& id, const sfv_diff_t& diff);
-  void set_row(const std::string& id, const common::sfv_t& sfv);
+  bool update_row(const std::string& id, const sfv_diff_t& diff);
+  bool set_row(const std::string& id, const common::sfv_t& sfv);
 
   void get_all_row_ids(std::vector<std::string>& ids) const;
   std::string type() const;

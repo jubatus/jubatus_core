@@ -33,7 +33,7 @@ namespace common {
 typedef unordered_map<string, uint64_t>::const_iterator cit;
 
 key_manager::key_manager()
-    : next_id_(0u) {
+    : next_id_(0llu) {
 }
 
 uint64_t key_manager::append_key(const string& key) {

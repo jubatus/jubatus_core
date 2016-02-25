@@ -27,6 +27,9 @@
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}
 namespace nearest_neighbor {
 
 class euclid_lsh : public nearest_neighbor_base {
@@ -47,12 +50,12 @@ class euclid_lsh : public nearest_neighbor_base {
 
   euclid_lsh(
       const config& conf,
-      jubatus::util::lang::shared_ptr<table::column_table> table,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
       const std::string& id);
   euclid_lsh(
       const config& conf,
-      jubatus::util::lang::shared_ptr<table::column_table> table,
-      std::vector<table::column_type>& schema,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
+      std::vector<storage::column_type>& schema,
       const std::string& id);
 
   virtual std::string type() const {
@@ -75,12 +78,12 @@ class euclid_lsh : public nearest_neighbor_base {
 
  private:
   void set_config(const config& conf);
-  void fill_schema(std::vector<table::column_type>& schema);
-  table::const_bit_vector_column& lsh_column() const;
-  table::const_float_column& norm_column() const;
+  void fill_schema(std::vector<storage::column_type>& schema);
+  storage::const_bit_vector_column& lsh_column() const;
+  storage::const_float_column& norm_column() const;
 
   void neighbor_row_from_hash(
-      const table::bit_vector& bv,
+      const storage::bit_vector& bv,
       float norm,
       std::vector<std::pair<std::string, float> >& ids,
       uint64_t ret_num) const;

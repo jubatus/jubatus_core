@@ -19,17 +19,19 @@
 #include <string>
 #include <vector>
 #include "../common/exception.hpp"
+#include "../common/version.hpp"
+#include "../framework/packer.hpp"
 #include "select_by_weights.hpp"
 
 namespace jubatus {
 namespace core {
 namespace bandit {
 
-exp3::exp3(double gamma)
-    : gamma_(gamma) {
-  if (gamma < 0 || 1 < gamma) {
+exp3::exp3(bool assume_unrewarded, double gamma)
+    : gamma_(gamma), s_(assume_unrewarded) {
+  if (gamma <= 0 || 1 < gamma) {
     throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("0 <= gamma <= 1"));
+        common::invalid_parameter("0 < gamma <= 1"));
   }
 }
 
@@ -51,7 +53,7 @@ void exp3::calc_weights_(const std::string& player_id,
     total_weight += weight;
   }
   for (size_t i = 0; i < n; ++i) {
-    weights[i] = (1.0 - gamma_) * weights[i] / total_weight + gamma_ * n;
+    weights[i] = (1.0 - gamma_) * weights[i] / total_weight + gamma_ / n;
   }
 }
 
@@ -64,7 +66,9 @@ std::string exp3::select_arm(const std::string& player_id) {
 
   std::vector<double> weights;
   calc_weights_(player_id, weights);
-  return arms[select_by_weights(weights, rand_)];
+  std::string result = arms[select_by_weights(weights, rand_)];
+  s_.notify_selected(player_id, result);
+  return result;
 }
 
 bool exp3::register_arm(const std::string& arm_id) {
@@ -85,11 +89,11 @@ bool exp3::register_reward(const std::string& player_id,
   std::vector<double> weights;
   calc_weights_(player_id, weights);
   return s_.register_reward(player_id, arm_id,
-                            reward * weights[i] * gamma_ / arms.size());
+                            reward / weights[i] * gamma_ / arms.size());
 }
 
-arm_info_map exp3::get_arm_info(const std::string& arm_id) const {
-  return s_.get_arm_info_map(arm_id);
+arm_info_map exp3::get_arm_info(const std::string& player_id) const {
+  return s_.get_arm_info_map(player_id);
 }
 
 bool exp3::reset(const std::string& player_id) {
@@ -114,6 +118,10 @@ bool exp3::put_diff(const diff_t& diff) {
 }
 void exp3::mix(const diff_t& lhs, diff_t& rhs) const {
   s_.mix(lhs, rhs);
+}
+
+storage::version exp3::get_version() const {
+  return storage::version();
 }
 
 }  // namespace bandit

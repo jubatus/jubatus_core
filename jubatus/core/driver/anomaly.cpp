@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "../anomaly/anomaly_factory.hpp"
+#include "../anomaly/anomaly_base.hpp"
 #include "../common/vector_util.hpp"
 #include "../fv_converter/datum.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
@@ -79,16 +80,22 @@ float anomaly::update(const string& id, const fv_converter::datum& d) {
   common::sfv_t v;
   converter_->convert_and_update_weight(d, v);
 
-  anomaly_->update_row(id, v);
-  return anomaly_->calc_anomaly_score(id);
+  if (anomaly_->update_row(id, v)) {
+    return anomaly_->calc_anomaly_score(id);
+  } else {
+    return anomaly_->calc_anomaly_score(id, v);
+  }
 }
 
 float anomaly::overwrite(const string& id, const fv_converter::datum& d) {
   common::sfv_t v;
   converter_->convert_and_update_weight(d, v);
 
-  anomaly_->set_row(id, v);
-  return anomaly_->calc_anomaly_score(id);
+  if (anomaly_->set_row(id, v)) {
+    return anomaly_->calc_anomaly_score(id);
+  } else {
+    return anomaly_->calc_anomaly_score(v);
+  }
 }
 
 void anomaly::clear() {

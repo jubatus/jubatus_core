@@ -25,6 +25,8 @@
 #include "../common/jsonconfig.hpp"
 #include "../nearest_neighbor/nearest_neighbor_factory.hpp"
 #include "../unlearner/unlearner_factory.hpp"
+#include "../storage/column_table.hpp"
+#include "../recommender/recommender_factory.hpp"
 #include "anomaly.hpp"
 
 using jubatus::core::common::jsonconfig::config;
@@ -85,8 +87,8 @@ shared_ptr<anomaly_base> anomaly_factory::create_anomaly(
   } else if (name == "light_lof") {
     light_lof_config conf = config_cast_check<light_lof_config>(param);
 
-    jubatus::util::lang::shared_ptr<table::column_table> nearest_neighbor_table(
-        new table::column_table);
+    jubatus::util::lang::shared_ptr<storage::column_table>
+        nearest_neighbor_table(new storage::column_table);
     jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
         nearest_neighbor_engine(nearest_neighbor::create_nearest_neighbor(
             conf.method, conf.parameter, nearest_neighbor_table, id));

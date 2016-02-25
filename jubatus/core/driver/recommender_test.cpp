@@ -14,6 +14,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+
+#include <algorithm>
 #include <vector>
 #include <utility>
 #include <map>
@@ -32,6 +34,8 @@
 #include "../recommender/recommender_factory.hpp"
 #include "../classifier/classifier_test_util.hpp"
 #include "../framework/stream_writer.hpp"
+#include "../storage/column_table.hpp"
+#include "../unlearner/lru_unlearner.hpp"
 #include "recommender.hpp"
 
 #include "test_util.hpp"
@@ -48,9 +52,15 @@ using jubatus::util::text::json::json_object;
 using jubatus::util::text::json::json_integer;
 using jubatus::util::text::json::json_string;
 using jubatus::util::text::json::json_float;
+using jubatus::util::text::json::to_json;
 using jubatus::util::lang::lexical_cast;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::recommender::recommender_base;
+using jubatus::core::storage::column_table;
+using jubatus::core::unlearner::unlearner_base;
+using jubatus::core::unlearner::lru_unlearner;
+using jubatus::core::recommender::inverted_index;
+
 namespace jubatus {
 namespace core {
 namespace driver {
@@ -113,7 +123,7 @@ create_recommender_bases() {
     pattern.push_back(make_pair("minhash", i));
   }
   for (size_t i = 0; i < pattern.size(); ++i) {
-    shared_ptr<core::table::column_table> table(new core::table::column_table);
+    shared_ptr<column_table> table(new column_table);
 
     json jsconf(new json_object);
     json method_param(new json_object);
@@ -156,6 +166,272 @@ TEST_P(nn_recommender_test, update) {
 INSTANTIATE_TEST_CASE_P(nn_recommender_test_instance,
     nn_recommender_test,
     testing::ValuesIn(create_recommender_bases()));
+
+class recommender_with_unlearning_test
+    : public ::testing::TestWithParam<pair<string,
+        common::jsonconfig::config> > {
+ protected:
+  shared_ptr<driver::recommender> create_driver() const {
+    const string id("my_id");
+    return shared_ptr<driver::recommender>(
+        new driver::recommender(
+            core::recommender::recommender_factory::create_recommender(
+                GetParam().first, GetParam().second, id),
+        make_tf_idf_fv_converter()));
+  }
+
+  void SetUp() {
+    recommender_ = create_driver();
+  }
+
+  void TearDown() {
+    recommender_->clear();
+    recommender_.reset();
+  }
+
+  shared_ptr<driver::recommender> recommender_;
+};
+
+const size_t MAX_SIZE = 3;
+
+vector<pair<string, common::jsonconfig::config> >
+create_recommender_configs_with_unlearner() {
+  vector<pair<string, common::jsonconfig::config> > configs;
+
+  json js(new json_object);
+  js["unlearner"] = to_json(string("lru"));
+  js["unlearner_parameter"] = new json_object;
+  js["unlearner_parameter"]["max_size"] = to_json(MAX_SIZE);
+  js["unlearner_parameter"]["sticky_pattern"] =
+    to_json(string("*_sticky"));
+
+  // inverted_index
+  configs.push_back(make_pair("inverted_index",
+      common::jsonconfig::config(js)));
+
+  // inverted_index_euclid
+  configs.push_back(make_pair("inverted_index_euclid",
+      common::jsonconfig::config(js)));
+
+  // lsh
+  json js_lsh(js.clone());
+  js_lsh["hash_num"] = to_json(64);
+  configs.push_back(make_pair("lsh", common::jsonconfig::config(js_lsh)));
+
+  // minhash
+  json js_minhash(js.clone());
+  js_minhash["hash_num"] = to_json(64);
+  configs.push_back(
+      make_pair("minhash", common::jsonconfig::config(js_minhash)));
+
+  // TODO(@rimms): Add NN-based algorithm
+
+  return configs;
+}
+
+TEST_P(recommender_with_unlearning_test, update_row) {
+  recommender_->update_row("id1", create_datum_str("a", "a b c"));
+  recommender_->update_row("id2", create_datum_str("a", "d e f"));
+  recommender_->update_row("id3", create_datum_str("a", "e f g"));
+  recommender_->update_row("id4", create_datum_str("a", "f g h"));
+  recommender_->update_row("id5", create_datum_str("a", "h i j"));
+  recommender_->update_row("id6", create_datum_str("a", "i j a"));
+  recommender_->update_row("id7", create_datum_str("a", "j a b"));
+
+  vector<pair<string, float> > ret =
+    recommender_->similar_row_from_id("id6", MAX_SIZE + 1);
+  ASSERT_EQ(MAX_SIZE, ret.size());
+}
+
+TEST_P(recommender_with_unlearning_test, clear_row) {
+  recommender_->update_row("id1", create_datum_str("a", "a b c"));
+  recommender_->update_row("id2", create_datum_str("a", "d e f"));
+  recommender_->update_row("id3", create_datum_str("a", "e f g"));
+  recommender_->clear_row("id1");
+  recommender_->update_row("id4", create_datum_str("a", "f g h"));
+  recommender_->update_row("id5", create_datum_str("a", "h i j"));
+  recommender_->update_row("id6", create_datum_str("a", "i j a"));
+  recommender_->update_row("id7", create_datum_str("a", "j a b"));
+
+  vector<pair<string, float> > ret =
+    recommender_->similar_row_from_id("id6", MAX_SIZE + 1);
+  ASSERT_EQ(MAX_SIZE, ret.size());
+
+  vector<string> all = recommender_->get_all_rows();
+  ASSERT_EQ(MAX_SIZE, all.size());
+}
+
+INSTANTIATE_TEST_CASE_P(
+    recommender_with_unlearning_test_instance,
+    recommender_with_unlearning_test,
+    testing::ValuesIn(create_recommender_configs_with_unlearner()));
+
+class recommender_mix_with_unlearning_test
+    : public ::testing::TestWithParam<pair<string,
+        common::jsonconfig::config> > {
+ protected:
+  shared_ptr<driver::recommender> create_driver(const string& id) const {
+    return shared_ptr<driver::recommender>(
+        new driver::recommender(
+            core::recommender::recommender_factory::create_recommender(
+                GetParam().first, GetParam().second, id),
+        make_fv_converter()));
+  }
+
+  virtual void SetUp() {
+    recommender1 = create_driver("my_id1");
+    recommender2 = create_driver("my_id2");
+
+    mixable1 =
+        dynamic_cast<framework::linear_mixable*>(recommender1->get_mixable());
+    ASSERT_TRUE(mixable1 != NULL);
+    mixable2 =
+        dynamic_cast<framework::linear_mixable*>(recommender2->get_mixable());
+    ASSERT_TRUE(mixable2 != NULL);
+  }
+
+  virtual void TearDown() {
+    recommender1->clear();
+    recommender1.reset();
+    recommender2->clear();
+    recommender2.reset();
+  }
+
+  framework::diff_object make_diff() {
+    msgpack::sbuffer data1;
+    msgpack::unpacked unpacked1;
+    {
+      core::framework::stream_writer<msgpack::sbuffer> st(data1);
+      core::framework::jubatus_packer jp(st);
+      core::framework::packer pk(jp);
+      mixable1->get_diff(pk);
+      msgpack::unpack(&unpacked1, data1.data(), data1.size());
+    }
+
+    msgpack::sbuffer data2;
+    msgpack::unpacked unpacked2;
+    {
+      core::framework::stream_writer<msgpack::sbuffer> st(data2);
+      core::framework::jubatus_packer jp(st);
+      core::framework::packer pk(jp);
+      mixable2->get_diff(pk);
+      msgpack::unpack(&unpacked2, data2.data(), data2.size());
+    }
+    framework::diff_object diff =
+        mixable2->convert_diff_object(unpacked2.get());
+    mixable2->mix(unpacked1.get(), diff);
+    return diff;
+  }
+  shared_ptr<driver::recommender> recommender1, recommender2;
+  framework::linear_mixable *mixable1, *mixable2;
+};
+
+TEST_P(recommender_mix_with_unlearning_test, basic) {
+  recommender1->update_row("id1", create_datum_str("a", "a b c"));
+  recommender1->update_row("id2", create_datum_str("a", "d e f"));
+  recommender1->update_row("id3", create_datum_str("a", "e f g"));
+
+  recommender2->update_row("id2", create_datum_str("a", "d e f"));
+  recommender2->update_row("id3", create_datum_str("a", "e f g"));
+  recommender2->update_row("id4", create_datum_str("a", "f g h"));
+
+  framework::diff_object diff = make_diff();
+
+  mixable1->put_diff(diff);
+  mixable2->put_diff(diff);
+
+  ASSERT_EQ(3u, recommender1->get_all_rows().size());
+  ASSERT_EQ(3u, recommender2->get_all_rows().size());
+}
+
+TEST_P(recommender_mix_with_unlearning_test, mix_all) {
+  recommender1->update_row("id1", create_datum_str("a", "a b c"));
+  recommender1->update_row("id2", create_datum_str("a", "d e f"));
+  recommender1->update_row("id3", create_datum_str("a", "e f g"));
+
+  recommender2->update_row("id4", create_datum_str("a", "d e f"));
+  recommender2->update_row("id5", create_datum_str("a", "e f g"));
+  recommender2->update_row("id6", create_datum_str("a", "f g h"));
+
+  framework::diff_object diff = make_diff();
+
+  {
+    std::cout << "mixable1" << std::endl;
+    mixable1->put_diff(diff);
+    vector<string> all_row1 = recommender1->get_all_rows();
+    std::cout << "having1: {";
+    for (size_t i = 0; i < all_row1.size(); ++i) {
+      std::cout << all_row1[i] << ", ";
+    }
+    std::cout << "}" << std::endl;
+    ASSERT_EQ(3u, all_row1.size());
+  }
+  {
+    std::cout << "mixable2" << std::endl;
+    mixable2->put_diff(diff);
+    vector<string> all_row2 = recommender2->get_all_rows();
+    std::cout << "having2: {";
+    for (size_t i = 0; i < all_row2.size(); ++i) {
+      std::cout << all_row2[i] << ", ";
+    }
+    std::cout << "}" << std::endl;
+    ASSERT_EQ(3u, all_row2.size());
+  }
+}
+
+TEST_P(recommender_mix_with_unlearning_test, all_sticky) {
+  recommender1->update_row("id1_sticky", create_datum_str("a", "a b c"));
+  recommender1->update_row("id2_sticky", create_datum_str("a", "d e f"));
+  recommender1->update_row("id3_sticky", create_datum_str("a", "e f g"));
+
+  recommender2->update_row("id4_sticky", create_datum_str("a", "d e f"));
+  recommender2->update_row("id5_sticky", create_datum_str("a", "e f g"));
+  recommender2->update_row("id6_sticky", create_datum_str("a", "f g h"));
+
+  framework::diff_object diff = make_diff();
+
+  {
+    std::cout << "mixable1" << std::endl;
+    mixable1->put_diff(diff);
+
+    vector<string> all_rows1 = recommender1->get_all_rows();
+    std::cout << "having1: {";
+    for (size_t i = 0; i < all_rows1.size(); ++i) {
+      std::cout << all_rows1[i] << ", ";
+    }
+    std::cout << "}" << std::endl;
+    ASSERT_EQ(3u, all_rows1.size());
+    std::sort(all_rows1.begin(), all_rows1.end());
+    ASSERT_EQ("id1_sticky", all_rows1[0]);
+    ASSERT_EQ("id2_sticky", all_rows1[1]);
+    ASSERT_EQ("id3_sticky", all_rows1[2]);
+  }
+
+  {
+    std::cout << "mixable2" << std::endl;
+    mixable2->put_diff(diff);
+
+    vector<string> all_rows2 = recommender2->get_all_rows();
+    std::cout << "having2: {";
+    for (size_t i = 0; i < all_rows2.size(); ++i) {
+      std::cout << all_rows2[i] << ", ";
+    }
+    std::cout << "}" << std::endl;
+    ASSERT_EQ(3u, all_rows2.size());
+    std::sort(all_rows2.begin(), all_rows2.end());
+    ASSERT_EQ("id4_sticky", all_rows2[0]);
+    ASSERT_EQ("id5_sticky", all_rows2[1]);
+    ASSERT_EQ("id6_sticky", all_rows2[2]);
+  }
+}
+
+// TODO(kumagi): append test if there are all sticky rows
+
+INSTANTIATE_TEST_CASE_P(
+    recommender_mix_with_lru_unlearning_test_instance,
+    recommender_mix_with_unlearning_test,
+    testing::ValuesIn(create_recommender_configs_with_unlearner()));
+
 }  // namespace driver
 }  // namespace core
 }  // namespace jubatus

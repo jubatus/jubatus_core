@@ -21,13 +21,23 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/data/serialization.h"
+#include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
-
 #include "recommender_base.hpp"
-#include "../storage/bit_index_storage.hpp"
+#include "../unlearner/unlearner_base.hpp"
+#include "../common/jsonconfig.hpp"
 
 namespace jubatus {
 namespace core {
+namespace framework {
+template <typename Model, typename Diff>
+class linear_mixable_helper;
+}  // namespace framework
+namespace storage {
+class bit_index_storage;
+typedef framework::linear_mixable_helper<bit_index_storage, bit_table_t>
+    mixable_bit_index_storage;
+}  // namespace storage
 namespace recommender {
 
 class lsh : public recommender_base {
@@ -37,9 +47,13 @@ class lsh : public recommender_base {
 
     int64_t hash_num;
 
+    util::data::optional<std::string> unlearner;
+    util::data::optional<core::common::jsonconfig::config> unlearner_parameter;
+
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_MEMBER(hash_num);
+      ar & JUBA_MEMBER(hash_num) &
+          JUBA_MEMBER(unlearner) & JUBA_MEMBER(unlearner_parameter);
     }
   };
 
@@ -58,6 +72,7 @@ class lsh : public recommender_base {
       size_t ret_num) const;
   void clear();
   void clear_row(const std::string& id);
+  void remove_row(const std::string& id);
   void update_row(const std::string& id, const sfv_diff_t& diff);
   void get_all_row_ids(std::vector<std::string>& ids) const;
   std::string type() const;
@@ -80,6 +95,9 @@ class lsh : public recommender_base {
 
   jubatus::util::lang::shared_ptr<storage::mixable_bit_index_storage>
       mixable_storage_;
+
+  jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
+      unlearner_;
 
   const uint64_t hash_num_;
 };

@@ -14,9 +14,11 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include <math.h>
 #include <vector>
 #include <string>
 #include <set>
+#include <map>
 #include <utility>
 #include <gtest/gtest.h>
 
@@ -37,6 +39,7 @@ using std::vector;
 using std::string;
 using std::pair;
 using std::set;
+using std::map;
 using std::make_pair;
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::lang::lexical_cast;
@@ -54,29 +57,31 @@ class clustering_test
  protected:
   shared_ptr<driver::clustering> create_driver() const {
     pair<string, string> param = GetParam();
-    clustering_config conf;
-    conf.compressor_method = param.first;
     return shared_ptr<driver::clustering>(
         new driver::clustering(
             shared_ptr<core::clustering::clustering>(
                 new core::clustering::clustering("dummy",
                                                  param.second,
-                                                 conf)),
+                                                 conf_)),
             make_fv_converter()));
   }
   void SetUp() {
     pair<string, string> param = GetParam();
-    clustering_config conf;
-    conf.compressor_method = param.first;
-    conf.bucket_size = 50;
-    conf.bicriteria_base_size = 5;
-    conf.compressed_bucket_size = 10;
+    conf_.k = 2;
+    conf_.compressor_method = param.first;
+    conf_.bucket_size = 200;
+    conf_.compressed_bucket_size = conf_.bucket_size / 10;
+    conf_.bicriteria_base_size = conf_.bucket_size / 100;
+    conf_.bucket_length = 2;
+    conf_.forgetting_factor = 0.0;
+    conf_.forgetting_threshold = 0.5;
     clustering_ = create_driver();
   }
   void TearDown() {
     clustering_.reset();
   }
   shared_ptr<driver::clustering> clustering_;
+  clustering_config conf_;
 };
 
 namespace {  // testing util
@@ -88,22 +93,24 @@ datum single_datum(string key, double v) {
 }
 
 TEST_P(clustering_test, get_revision) {
-  for (int i = 0; i < 2000; ++i) {
+  const int num = conf_.bucket_size * 10;
+  for (int i = 0; i < num; ++i) {
     vector<datum> datums;
     datums.push_back(single_datum("a", 1));
     clustering_->push(datums);
   }
-  ASSERT_EQ(0, clustering_->get_revision());
+  std::size_t expected = num / conf_.bucket_size;
+  ASSERT_EQ(expected, clustering_->get_revision());
 }
 
 TEST_P(clustering_test, push) {
-  for (int j = 0; j < 21 ; j += 5) {
+  for (int j = 0; j < conf_.bucket_size / 5; ++j) {
     vector<datum> datums;
     for (int i = 0; i < 100; i += 5) {
       datums.push_back(single_datum("a", i * 2));
       datums.push_back(single_datum("b", i * 100));
-      clustering_->push(datums);
     }
+    clustering_->push(datums);
   }
 }
 
@@ -134,44 +141,81 @@ TEST_P(clustering_test, save_load) {
 
 TEST_P(clustering_test, get_k_center) {
   jubatus::util::math::random::mtrand r(0);
-  vector<datum> one;
-  vector<datum> two;
 
-  for (int j = 0; j < 200 ; ++j) {
+  for (int j = 0; j < conf_.bucket_size; ++j) {
     datum a, b;
-    a.num_values_.push_back(make_pair("a", -10 + r.next_gaussian() * 20));
-    a.num_values_.push_back(make_pair("b", -200 + r.next_gaussian() * 400));
-    b.num_values_.push_back(make_pair("c", -50 + r.next_gaussian() * 100));
-    b.num_values_.push_back(make_pair("d", -25 + r.next_gaussian() * 50));
+    a.num_values_.push_back(make_pair("a", -100 + r.next_gaussian() * 20));
+    a.num_values_.push_back(make_pair("b", -200 + r.next_gaussian() * 100));
+    b.num_values_.push_back(make_pair("c", 50000 + r.next_gaussian() * 100));
+    b.num_values_.push_back(make_pair("d", 250000 + r.next_gaussian() * 500));
+
+    vector<datum> one;
     one.push_back(a);
+    clustering_->push(one);
+    one.clear();
+
+    vector<datum> two;
     two.push_back(b);
+    clustering_->push(two);
+    two.clear();
   }
-  clustering_->push(one);
-  clustering_->push(two);
 
   clustering_->do_clustering();
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(2, result.size());
-    ASSERT_LT(1, result[0].num_values_.size());
-    if (result[0].num_values_[0].first == "a"
-        || result[0].num_values_[0].first == "b") {
-      // result[0] is {"a":xx, "b":yy} cluster
-      if (result[0].num_values_[0].first == "a") {
-        ASSERT_EQ("b", result[0].num_values_[1].first);
-      } else {
-        ASSERT_EQ("a", result[0].num_values_[1].first);
+    ASSERT_EQ(std::size_t(conf_.k), result.size());
+    ASSERT_LT(1U, result[0].num_values_.size());
+
+    // two center should be far about sqrt(100^2 + 200^2 + 5000^2 + 250000^2)
+    double squared_diff = 0;
+    std::vector<map<string, double> > centers;
+
+    for (size_t i = 0; i < result.size(); ++i) {
+      map<string, double> center;
+      const vector<pair<string, double> >& num_values = result[i].num_values_;
+      for (size_t j = 0; j < num_values.size(); ++j) {
+        center.insert(num_values[j]);
       }
-    } else {
-      // result[1] is {"a":xx, "b":yy} cluster
-      if (result[1].num_values_[0].first == "a") {
-        ASSERT_EQ("b", result[1].num_values_[1].first);
-      } else {
-        ASSERT_EQ("a", result[1].num_values_[1].first);
-      }
+      centers.push_back(center);
     }
+    squared_diff += std::pow(centers[0]["a"] - centers[1]["a"], 2);
+    squared_diff += std::pow(centers[0]["b"] - centers[1]["b"], 2);
+    squared_diff += std::pow(centers[0]["c"] - centers[1]["c"], 2);
+    squared_diff += std::pow(centers[0]["d"] - centers[1]["d"], 2);
+
+    const double min_diff =
+        std::pow(80, 2)    + std::pow(100, 2) +
+        std::pow(49900, 2) + std::pow(249500, 2);
+    ASSERT_LT(min_diff * 0.8, squared_diff);
   }
 }
+
+TEST_P(clustering_test, integer_center) {
+  jubatus::util::math::random::mtrand r(0);
+  const int quantity = conf_.bucket_size * 5;
+  std::vector<datum> data(quantity);
+
+  for (int i = 0; i < quantity ; ++i) {
+    data[i].num_values_.push_back(make_pair("x", 100 + r.next_int(-10, 10)));
+  }
+
+  clustering_->push(data);
+  const std::vector<fv_converter::datum> centers = clustering_->get_k_center();
+
+  ASSERT_EQ(std::size_t(conf_.k), centers.size());
+  /*  debug out
+  for (size_t i = 0; i < centers.size(); ++i) {
+    std::cout << i << " :[";
+    for (size_t j = 0; j < centers[i].num_values_.size(); ++j) {
+      std::cout
+        << centers[i].num_values_[j].first << " => "
+        << centers[i].num_values_[j].second << ", ";
+    }
+    std::cout << "]" << std::endl;;
+  }
+  //*/
+}
+
 struct check_points {
   float a;
   float b;
@@ -199,32 +243,36 @@ struct check_point_compare {
 
 TEST_P(clustering_test, get_nearest_members) {
   jubatus::util::math::random::mtrand r(0);
-  vector<datum> one;
-  vector<datum> two;
 
   set<check_points, check_point_compare> points;
 
-  for (int i = 0; i < 200 ; ++i) {
+  for (int i = 0; i < conf_.bucket_size * 2 + 1; ++i) {
     datum x, y;
-    float a = 10 + r.next_gaussian() * 20;
+    float a = 100 + r.next_gaussian() * 20;
     float b = 1000 + r.next_gaussian() * 400;
     points.insert(check_points(a, b));
 
     x.num_values_.push_back(make_pair("a", a));
     x.num_values_.push_back(make_pair("b", b));
-    y.num_values_.push_back(make_pair("c", -500000 - r.next_gaussian() * 100));
-    y.num_values_.push_back(make_pair("d", -10000 - r.next_gaussian() * 50));
+    y.num_values_.push_back(make_pair("c", -5000 - r.next_gaussian() * 100));
+    y.num_values_.push_back(make_pair("d", -1000 - r.next_gaussian() * 50));
+
+    vector<datum> one;
     one.push_back(x);
+    clustering_->push(one);
+    one.clear();
+
+    vector<datum> two;
     two.push_back(y);
+    clustering_->push(two);
+    two.clear();
   }
-  clustering_->push(one);
-  clustering_->push(two);
 
   clustering_->do_clustering();
 
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(2u, result.size());
+    ASSERT_EQ(std::size_t(conf_.k), result.size());
   }
 
   set<check_points, check_point_compare>::const_iterator it;
@@ -235,16 +283,39 @@ TEST_P(clustering_test, get_nearest_members) {
     core::clustering::cluster_unit result =
         clustering_->get_nearest_members(x);
 
-    ASSERT_LT(1, result.size());
+    ASSERT_LT(1u, result.size());
     for (size_t i = 0; i < result.size(); ++i) {
       const vector<pair<string, double> >& near_points =
           result[i].second.num_values_;
-      ASSERT_EQ(2u, near_points.size());
-      ASSERT_EQ("a", near_points[0].first);
-      ASSERT_EQ("b", near_points[1].first);
-      ASSERT_NE(points.end(),
-                points.find(check_points(near_points[0].second,
-                                         near_points[1].second)));
+      ASSERT_EQ(2u, near_points.size());  // must be 2-dimentional
+
+      map<string, double> point;
+      for (size_t j = 0; j < near_points.size(); ++j) {
+        point.insert(near_points[j]);
+      }
+
+      if (point.count("c") == 0) {
+        // the point is in cluster of (a, b) dimension
+        ASSERT_NE(0.0, point["a"]);
+        ASSERT_NE(0.0, point["b"]);
+        ASSERT_EQ(0.0, point["c"]);
+        ASSERT_EQ(0.0, point["d"]);
+      } else if (point.count("a") == 0) {
+        // the point is in cluster of (c, d) dimension
+        ASSERT_EQ(0.0, point["a"]);
+        ASSERT_EQ(0.0, point["b"]);
+        ASSERT_NE(0.0, point["c"]);
+        ASSERT_NE(0.0, point["d"]);
+      } else {
+        std::cout << "{";
+        for (map<string, double>::const_iterator it = point.begin();
+             it != point.end();
+             ++it) {
+          std::cout << it->first << ":" << it->second << ", ";
+        }
+        std::cout << "}";
+        ASSERT_FALSE("invalid center");
+      }
     }
   }
 }
@@ -253,47 +324,53 @@ TEST_P(clustering_test, get_nearest_members) {
 
 TEST_P(clustering_test, get_nearest_center) {
   jubatus::util::math::random::mtrand r(0);
-  vector<datum> one;
-  vector<datum> two;
 
-  for (int i = 0; i < 1000 ; ++i) {
+  for (int i = 0; i < conf_.bucket_size * 2; ++i) {
     datum x, y;
-    x.num_values_.push_back(make_pair("a", 10 + r.next_gaussian() * 20));
+    x.num_values_.push_back(make_pair("a", 10000 + r.next_gaussian() * 20));
     x.num_values_.push_back(make_pair("b", 1000 + r.next_gaussian() * 400));
     y.num_values_.push_back(make_pair("c", -500000 - r.next_gaussian() * 100));
     y.num_values_.push_back(make_pair("d", -10000 - r.next_gaussian() * 50));
+
+    vector<datum> one;
     one.push_back(x);
+    clustering_->push(one);
+    one.clear();
+
+    vector<datum> two;
     two.push_back(y);
+    clustering_->push(two);
+    two.clear();
   }
-  clustering_->push(one);
-  clustering_->push(two);
 
   clustering_->do_clustering();
 
   {
     vector<datum> result = clustering_->get_k_center();
-    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(std::size_t(conf_.k), result.size());
   }
 
   for (int i = 0; i < 100; ++i) {
     {
       datum x;
-      x.num_values_.push_back(make_pair("a", 10 + r.next_gaussian() * 20));
+      x.num_values_.push_back(make_pair("a", 10000 + r.next_gaussian() * 20));
       x.num_values_.push_back(make_pair("b", 1000 + r.next_gaussian() * 400));
       datum expect_near_x = clustering_->get_nearest_center(x);
       const vector<pair<string, double> >& result = expect_near_x.num_values_;
-      for (size_t i = 0; i < result.size(); ++i) {
-        // Check if the result is belonging to the same cluster.
-        // Difference of the value and the mean of its distribution are expected
-        // to be lesser than 2-sigma.
-        if (result[i].first == "a") {
-          const double diff = std::abs(result[i].second - 10);
-          ASSERT_GT(20 * 2, diff);
-        } else if (result[i].first == "b") {
-          const double diff = std::abs(result[i].second - 1000);
-          ASSERT_GT(400 * 2, diff);
-        }
+      map<string, double> point;
+      for (size_t j = 0; j < result.size(); ++j) {
+        point.insert(result[j]);
       }
+      // Check if the result is belonging to the same cluster.
+      // Difference of the value and the mean of its distribution are expected
+      // to be lesser than 3-sigma.
+      ASSERT_GT(20  * 3, std::abs(point["a"] - 10000));
+      ASSERT_GT(400 * 3, std::abs(point["b"] - 1000));
+
+      // center position sometimes includes a bit "c" or "d" component
+      ASSERT_GT(100, std::abs(point["c"]));
+      ASSERT_GT(100, std::abs(point["d"]));
+      ASSERT_GE(4u, point.size());
     }
   }
 }
@@ -414,3 +491,4 @@ INSTANTIATE_TEST_CASE_P(clustering_with_idf_test_instance,
 }  // namespace driver
 }  // namespace core
 }  // namespace jubatus
+

@@ -36,7 +36,7 @@ using std::make_pair;
 class nearest_neighbor_mock : public nearest_neighbor_base {
  public:
   explicit nearest_neighbor_mock(
-      jubatus::util::lang::shared_ptr<table::column_table> table)
+      jubatus::util::lang::shared_ptr<storage::column_table> table)
       : nearest_neighbor_base(table, "test") {}
 
   void add_next_answer(const string& id, float dist) {
@@ -76,11 +76,11 @@ class nearest_neighbor_mock : public nearest_neighbor_base {
 class nearest_neighbor_base_test : public testing::Test {
  protected:
   virtual void SetUp() {
-    ct_.reset(new table::column_table);
+    ct_.reset(new storage::column_table);
     mock_.reset(new nearest_neighbor_mock(ct_));
   }
 
-  jubatus::util::lang::shared_ptr<table::column_table> ct_;
+  jubatus::util::lang::shared_ptr<storage::column_table> ct_;
   jubatus::util::lang::scoped_ptr<nearest_neighbor_mock> mock_;
 };
 

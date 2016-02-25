@@ -15,9 +15,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <cmath>
+#include <map>
 #include <string>
 #include <sstream>
 #include <utility>
+#include "jubatus/util/lang/cast.h"
 #include "../common/type.hpp"
 #include "datum_to_fv_converter.hpp"
 #include "keyword_weights.hpp"
@@ -93,6 +95,19 @@ string keyword_weights::to_string() const {
   }
   ss << " }";
   return ss.str();
+}
+
+void keyword_weights::get_status(
+    std::map<std::string, std::string>& status,
+    const std::string& prefix) const {
+  status[prefix + "_document_count"] =
+    jubatus::util::lang::lexical_cast<std::string>(
+        document_count_);
+  status[prefix + "_num_document_frequencies"] =
+    jubatus::util::lang::lexical_cast<std::string>(
+        document_frequencies_.size());
+  status[prefix + "_num_weights"] =
+    jubatus::util::lang::lexical_cast<std::string>(weights_.size());
 }
 
 }  // namespace fv_converter

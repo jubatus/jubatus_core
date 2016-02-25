@@ -26,18 +26,21 @@
 
 namespace jubatus {
 namespace core {
+namespace storage {
+class column_table;
+}
 namespace nearest_neighbor {
 
 class bit_vector_nearest_neighbor_base : public nearest_neighbor_base {
  public:
   bit_vector_nearest_neighbor_base(
       uint32_t bitnum,
-      jubatus::util::lang::shared_ptr<table::column_table> table,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
       const std::string& id);
   bit_vector_nearest_neighbor_base(
       uint32_t bitnum,
-      jubatus::util::lang::shared_ptr<table::column_table> table,
-      std::vector<table::column_type>& schema,
+      jubatus::util::lang::shared_ptr<storage::column_table> table,
+      std::vector<storage::column_type>& schema,
       const std::string& id);
 
   uint32_t bitnum() const { return bitnum_; }
@@ -53,13 +56,13 @@ class bit_vector_nearest_neighbor_base : public nearest_neighbor_base {
       uint64_t ret_num) const;
 
  private:
-  virtual table::bit_vector hash(const common::sfv_t& sfv) const = 0;
+  virtual storage::bit_vector hash(const common::sfv_t& sfv) const = 0;
 
-  void fill_schema(std::vector<table::column_type>& schema);
-  table::const_bit_vector_column& bit_vector_column() const;
+  void fill_schema(std::vector<storage::column_type>& schema);
+  storage::const_bit_vector_column& bit_vector_column() const;
 
   void neighbor_row_from_hash(
-      const table::bit_vector& query,
+      const storage::bit_vector& query,
       std::vector<std::pair<std::string, float> >& ids,
       uint64_t ret_num) const;
 

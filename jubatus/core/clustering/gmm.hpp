@@ -17,6 +17,8 @@
 #ifndef JUBATUS_CORE_CLUSTERING_GMM_HPP_
 #define JUBATUS_CORE_CLUSTERING_GMM_HPP_
 
+#include "jubatus/util/math/random.h"
+
 #include "gmm_types.hpp"
 
 namespace jubatus {
@@ -25,6 +27,8 @@ namespace clustering {
 
 class gmm {
  public:
+  explicit gmm(uint32_t seed);
+
   void batch(const eigen_wsvec_list_t& data, int d, int k);
   eigen_svec_list_t get_centers() {
     return means_;
@@ -54,6 +58,9 @@ class gmm {
   eigen_solver_list_t cov_solvers_;
   int d_;
   int k_;
+  int seed_;
+
+  jubatus::util::math::random::mtrand rand_;
 };
 
 }  // namespace clustering

@@ -66,9 +66,25 @@ TEST(key_manager, delete_key) {
 
 TEST(key_manager, delete_unknown_key) {
   key_manager m;
-  EXPECT_EQ(0, m.size());
+  EXPECT_EQ(0U, m.size());
   EXPECT_NO_THROW(m.delete_key("key1"));  // no modification
-  EXPECT_EQ(0, m.size());
+  EXPECT_EQ(0U, m.size());
+}
+
+TEST(key_manager, swap) {
+  key_manager m1;
+  m1.get_id("key1");  // id = 0
+  m1.get_id("key2");  // id = 1
+
+  EXPECT_EQ(2U, m1.size());
+  EXPECT_EQ(1U, m1.get_max_id());
+
+  key_manager m2;
+  m1.swap(m2);
+
+  EXPECT_EQ(0U, m1.size());
+  EXPECT_EQ(2U, m2.size());
+  EXPECT_EQ(1U, m2.get_max_id());
 }
 
 }  // namespace common

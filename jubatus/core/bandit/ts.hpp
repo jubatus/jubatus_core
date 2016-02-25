@@ -30,7 +30,7 @@ namespace bandit {
 
 class ts : public bandit_base {
  public:
-  explicit ts();
+  explicit ts(bool assume_unrewarded);
 
   std::string select_arm(const std::string& player_id);
 
@@ -56,6 +56,7 @@ class ts : public bandit_base {
   void get_diff(diff_t& diff) const;
   bool put_diff(const diff_t& diff);
   void mix(const diff_t& lhs, diff_t& rhs) const;
+  storage::version get_version() const;
 
  private:
   jubatus::util::math::random::mtrand rand_;

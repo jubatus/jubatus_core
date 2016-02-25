@@ -30,6 +30,13 @@
 
 namespace jubatus {
 namespace core {
+namespace fv_converter {
+class datum;
+class datum_to_fv_converter;
+}  // namespace fv_converter
+namespace recommender {
+class recommender_base;
+}  // namespace recommender
 namespace driver {
 
 class recommender : public driver_base {
@@ -56,7 +63,7 @@ class recommender : public driver_base {
       const fv_converter::datum& data,
       size_t size);
 
-  float calc_similality(
+  float calc_similarity(
       const fv_converter::datum& l,
       const fv_converter::datum& r);
   float calc_l2norm(const fv_converter::datum& q);

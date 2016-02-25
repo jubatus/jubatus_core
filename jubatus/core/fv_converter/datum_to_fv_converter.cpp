@@ -202,7 +202,7 @@ class datum_to_fv_converter_impl {
       jubatus::util::lang::shared_ptr<string_feature> splitter,
       const std::vector<splitter_weight_type>& weights) {
     string_rules_.push_back(
-        string_feature_rule(name, matcher, splitter, weights));
+       string_feature_rule(name, matcher, splitter, weights));
   }
 
   void register_num_rule(
@@ -370,8 +370,9 @@ class datum_to_fv_converter_impl {
     }
   }
 
-  void convert_strings(const datum::sv_t& string_values,
-                       common::sfv_t& ret_fv) const {
+  void convert_strings(
+      const datum::sv_t& string_values,
+      common::sfv_t& ret_fv) const {
     for (size_t i = 0; i < string_rules_.size(); ++i) {
       convert_strings(string_rules_[i], string_values, ret_fv);
     }
@@ -402,8 +403,9 @@ class datum_to_fv_converter_impl {
     }
   }
 
-  void convert_binaries(const datum::sv_t& binary_values,
-                         common::sfv_t& ret_fv) const {
+  void convert_binaries(
+      const datum::sv_t& binary_values,
+      common::sfv_t& ret_fv) const {
     for (size_t i = 0; i < binary_rules_.size(); ++i) {
       convert_binaries(binary_rules_[i], binary_values, ret_fv);
     }
@@ -525,16 +527,18 @@ class datum_to_fv_converter_impl {
     }
   }
 
-  void convert_nums(const datum::nv_t& num_values,
-                    common::sfv_t& ret_fv) const {
+  void convert_nums(
+      const datum::nv_t& num_values,
+      common::sfv_t& ret_fv) const {
     for (size_t i = 0; i < num_values.size(); ++i) {
       convert_num(num_values[i].first, num_values[i].second, ret_fv);
     }
   }
 
-  void convert_num(const std::string& key,
-                   double value,
-                   common::sfv_t& ret_fv) const {
+  void convert_num(
+      const std::string& key,
+      double value,
+      common::sfv_t& ret_fv) const {
     for (size_t i = 0; i < num_rules_.size(); ++i) {
       const num_feature_rule& r = num_rules_[i];
       if (r.matcher_->match(key)) {
@@ -547,17 +551,43 @@ class datum_to_fv_converter_impl {
 
   void convert_combinations(common::sfv_t& ret_fv) const {
     const size_t original_size = ret_fv.size();
+
+    if (original_size < 2) {
+      // Must have at least 2 features to generate combinations.
+      return;
+    }
+
     for (size_t i = 0; i < combination_rules_.size(); ++i) {
       const combination_feature_rule& r = combination_rules_[i];
-      for (size_t j = 0 ; j < original_size - 1; ++j) {
-        for (size_t m = j + 1; m < original_size; ++m) {
-          if (r.matcher_left_->match(ret_fv[j].first)
-              && r.matcher_right_->match(ret_fv[m].first)) {
-            r.feature_func_->add_feature(
-                ret_fv[j].first + "&" + ret_fv[m].first + "/" + r.name_,
-                ret_fv[j].second,
-                ret_fv[m].second,
-                ret_fv);
+      if (r.feature_func_->is_commutative()) {
+        for (size_t j = 0 ; j < original_size - 1; ++j) {
+          for (size_t m = j + 1; m < original_size; ++m) {
+            if ((r.matcher_left_->match(ret_fv[j].first)
+                  && r.matcher_right_->match(ret_fv[m].first)) ||
+                (r.matcher_right_->match(ret_fv[j].first)
+                  && r.matcher_left_->match(ret_fv[m].first))) {
+              r.feature_func_->add_feature(
+                  ret_fv[j].first + "&" + ret_fv[m].first + "/" + r.name_,
+                  ret_fv[j].second,
+                  ret_fv[m].second,
+                  ret_fv);
+            }
+          }
+        }
+      } else {
+        for (size_t j = 0 ; j < original_size; ++j) {
+          for (size_t m = 0; m < original_size; ++m) {
+            if (j == m) {
+              continue;
+            }
+            if (r.matcher_left_->match(ret_fv[j].first)
+                  && r.matcher_right_->match(ret_fv[m].first)) {
+              r.feature_func_->add_feature(
+                  ret_fv[j].first + "&" + ret_fv[m].first + "/" + r.name_,
+                  ret_fv[j].second,
+                  ret_fv[m].second,
+                  ret_fv);
+            }
           }
         }
       }
@@ -572,8 +602,9 @@ datum_to_fv_converter::datum_to_fv_converter()
 datum_to_fv_converter::~datum_to_fv_converter() {
 }
 
-void datum_to_fv_converter::convert(const datum& datum,
-                                    common::sfv_t& ret_fv) const {
+void datum_to_fv_converter::convert(
+    const datum& datum,
+    common::sfv_t& ret_fv) const {
   pimpl_->convert(datum, ret_fv);
 }
 

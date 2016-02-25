@@ -14,20 +14,20 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_TABLE_COLUMN_COLUMN_TYPE_HPP_
-#define JUBATUS_CORE_TABLE_COLUMN_COLUMN_TYPE_HPP_
+#ifndef JUBATUS_CORE_STORAGE_COLUMN_TYPE_HPP_
+#define JUBATUS_CORE_STORAGE_COLUMN_TYPE_HPP_
 
 #include <algorithm>
-#include <iostream>
 #include <string>
 #include <vector>
+#include <iosfwd>
 
-#include "../storage_exception.hpp"
+#include "storage_exception.hpp"
 #include "bit_vector.hpp"
 
 namespace jubatus {
 namespace core {
-namespace table {
+namespace storage {
 
 class column_type {
  public:
@@ -130,13 +130,7 @@ class column_type {
     }
     return bit_vector_length_;
   }
-  void dump() const {
-    std::cout << "{ " << type_as_string();
-    if (type_ == bit_vector_type) {
-      std::cout << ": " << bit_vector_length_;
-    }
-    std::cout << " }";
-  }
+
   column_type& operator=(const column_type& orig) {
     type_ = orig.type_;
     bit_vector_length_ = orig.bit_vector_length_;
@@ -148,8 +142,13 @@ class column_type {
     swap(type_, rhs.type_);
     swap(bit_vector_length_, rhs.bit_vector_length_);
   }
+
   friend std::ostream& operator<<(std::ostream& os, const column_type& type) {
-    os << type.type_ << type.bit_vector_length_;
+    os << "{ " << type.type_as_string();
+    if (type.type_ == bit_vector_type) {
+      os << ": " << type.bit_vector_length_;
+    }
+    os << " }";
     return os;
   }
 
@@ -183,8 +182,8 @@ class column_type {
   int bit_vector_length_;
 };
 
-}  // namespace table
+}  // namespace storage
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_TABLE_COLUMN_COLUMN_TYPE_HPP_
+#endif  // JUBATUS_CORE_STORAGE_COLUMN_TYPE_HPP_

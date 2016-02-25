@@ -28,7 +28,8 @@ class discrete_distribution {
  public:
   discrete_distribution(
       std::vector<double>::iterator begin,
-      std::vector<double>::iterator end);
+      std::vector<double>::iterator end,
+      uint32_t seed);
 
   size_t operator() ();
 

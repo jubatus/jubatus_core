@@ -15,26 +15,27 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 
-#ifndef JUBATUS_CORE_TABLE_COLUMN_ABSTRACT_COLUMN_HPP_
-#define JUBATUS_CORE_TABLE_COLUMN_ABSTRACT_COLUMN_HPP_
+#ifndef JUBATUS_CORE_STORAGE_ABSTRACT_COLUMN_HPP_
+#define JUBATUS_CORE_STORAGE_ABSTRACT_COLUMN_HPP_
 
 #include <algorithm>
 #include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
+#include <iosfwd>
 #include <msgpack.hpp>
 #include "jubatus/util/lang/demangle.h"
 #include "jubatus/util/lang/noncopyable.h"
-#include "../../common/assert.hpp"
-#include "../../framework/packer.hpp"
-#include "../storage_exception.hpp"
+#include "../common/assert.hpp"
+#include "../framework/packer.hpp"
+#include "storage_exception.hpp"
 #include "bit_vector.hpp"
 #include "column_type.hpp"
 
 namespace jubatus {
 namespace core {
-namespace table {
+namespace storage {
 
 namespace detail {
 
@@ -90,7 +91,6 @@ class abstract_column_base : jubatus::util::lang::noncopyable {
   virtual void pack_with_index(
       const uint64_t index, framework::packer& pk) const {
   }
-  virtual void dump() const = 0;
   virtual void dump(std::ostream& os, uint64_t target) const = 0;
 
  private:
@@ -183,14 +183,17 @@ class typed_column : public detail::abstract_column_base {
     pk.pack((*this)[index]);
   }
 
-  void dump() const {
-    std::cout << "[column (" << type().type_as_string() << ")"
-        << " size:" << size() << " {" << std::endl;
-    for (size_t i = 0; i <  size(); ++i) {
-      dump(std::cout, i);
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const typed_column<T>& it) {
+    os << "[column (" << it.type().type_as_string() << ")"
+        << " size:" << it.size() << " {" << std::endl;
+    for (size_t i = 0; i < it.size(); ++i) {
+      it.dump(os, i);
     }
-    std::cout << "} ]" << std::endl;
+    os << "} ]" << std::endl;
+    return os;
   }
+
   void dump(std::ostream& os, uint64_t target) const {
     os << "[" << target << "] " << (*this)[target] << std::endl;
   }
@@ -291,14 +294,18 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
       const uint64_t index, framework::packer& pk) const {
     pk.pack((*this)[index]);
   }
-  void dump() const {
-    std::cout << "[column (bit_vector)"
-        << " size:" << size() << " {" << std::endl;
-    for (size_t i = 0; i <  size(); ++i) {
-      dump(std::cout, i);
+
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const typed_column<bit_vector>& c) {
+    os << "[column (bit_vector)"
+        << " size:" << c.size() << " {" << std::endl;
+    for (size_t i = 0; i < c.size(); ++i) {
+      c.dump(os, i);
     }
-    std::cout << "} ]" << std::endl;
+    os << "} ]" << std::endl;
+    return os;
   }
+
   void dump(std::ostream& os, uint64_t target) const {
     os << "[" << target << "] " << (*this)[target] << std::endl;
   }
@@ -454,10 +461,6 @@ class abstract_column {
     return base_.get();
   }
 
-  void dump() const {
-    JUBATUS_ASSERT(base_ != NULL);
-    base_->dump();
-  }
   void dump(std::ostream& os, uint64_t target) const {
     JUBATUS_ASSERT(base_ != NULL);
     base_->dump(os, target);
@@ -565,8 +568,8 @@ class abstract_column {
 
 }  // namespace detail
 
-}  // namespace table
+}  // namespace storage
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_TABLE_COLUMN_ABSTRACT_COLUMN_HPP_
+#endif  // JUBATUS_CORE_STORAGE_ABSTRACT_COLUMN_HPP_

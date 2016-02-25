@@ -21,8 +21,10 @@
 #include <sstream>
 #include <vector>
 
+#include "jubatus/util/math/random.h"
 #include "../fv_converter/converter_config.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
+#include "../fv_converter/datum.hpp"
 #include "../framework/mixable.hpp"
 
 
@@ -49,6 +51,27 @@ jubatus::util::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_convert
 
   jubatus::core::fv_converter::initialize_converter(c, *converter);
   return converter;
+}
+
+std::string generate_random_string(jubatus::util::math::random::mtrand& rand,
+                                   int length) {
+  static const std::string alphabets =
+      "abcdefghijklmnopqrstuvwxyz"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  std::string ret(length, 'a');
+  for (int i = 0; i < length; ++i) {
+    ret[i] = alphabets[rand.next_int(alphabets.length())];
+  }
+  return ret;
+}
+
+jubatus::core::fv_converter::datum generate_random_datum(
+    jubatus::util::math::random::mtrand& rand,
+    int datum_length) {
+  jubatus::core::fv_converter::datum d;
+  std::string value = generate_random_string(rand, datum_length);
+  d.string_values_.push_back(std::make_pair("key", value));
+  return d;
 }
 
 jubatus::util::lang::shared_ptr<jubatus::core::fv_converter::datum_to_fv_converter>  // NOLINT

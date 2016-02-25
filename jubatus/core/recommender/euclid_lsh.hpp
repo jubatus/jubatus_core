@@ -22,13 +22,26 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/concurrent/mutex.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/text/json.h"
 #include "recommender_base.hpp"
-#include "../storage/lsh_index_storage.hpp"
 
 namespace jubatus {
 namespace core {
+namespace framework {
+template <typename Model, typename Diff>
+class linear_mixable_helper;
+}  // namespace framework
+namespace storage {
+class lsh_index_storage;
+struct lsh_entry;
+typedef jubatus::util::data::unordered_map<std::string, lsh_entry>
+    lsh_master_table_t;
+typedef framework::linear_mixable_helper<lsh_index_storage, lsh_master_table_t>
+    mixable_lsh_index_storage;
+}  // namespace storage
 namespace recommender {
 
 class euclid_lsh : public recommender_base {
@@ -100,8 +113,8 @@ class euclid_lsh : public recommender_base {
   void unpack(msgpack::object o);
 
  private:
-  std::vector<float> calculate_lsh(const common::sfv_t& query);
-  std::vector<float> get_projection(uint32_t seed);
+  std::vector<float> calculate_lsh(const common::sfv_t& query) const;
+  std::vector<float> get_projection(uint32_t seed) const;
 
   void initialize_model();
 
@@ -110,7 +123,9 @@ class euclid_lsh : public recommender_base {
   float bin_width_;
   uint32_t num_probe_;
 
-  jubatus::util::data::unordered_map<uint32_t, std::vector<float> > projection_;
+  mutable jubatus::util::data::unordered_map<uint32_t, std::vector<float> >
+      projection_cache_;
+  mutable jubatus::util::concurrent::mutex cache_lock_;
   bool retain_projection_;
 };
 

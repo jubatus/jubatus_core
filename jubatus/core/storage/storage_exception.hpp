@@ -14,15 +14,15 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_TABLE_STORAGE_EXCEPTION_HPP_
-#define JUBATUS_CORE_TABLE_STORAGE_EXCEPTION_HPP_
+#ifndef JUBATUS_CORE_STORAGE_STORAGE_EXCEPTION_HPP_
+#define JUBATUS_CORE_STORAGE_STORAGE_EXCEPTION_HPP_
 
 #include <string>
 #include "../common/exception.hpp"
 
 namespace jubatus {
 namespace core {
-namespace table {
+namespace storage {
 
 class storage_exception
   : public common::exception::jubaexception<storage_exception> {
@@ -56,8 +56,8 @@ class array_range_exception : public storage_exception {
     : storage_exception(msg) {}
 };
 
-}  // namespace table
+}  // namespace storage
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_TABLE_STORAGE_EXCEPTION_HPP_
+#endif  // JUBATUS_CORE_STORAGE_STORAGE_EXCEPTION_HPP_

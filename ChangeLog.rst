@@ -1,3 +1,133 @@
+Release 0.2.7 - 2016/01/25
+--------------------------
+
+* Improvements
+    * recommender: add new recommender method (inverted_index_euclid) (#127)
+    * recommender: support unlearning in MinHash algorithm (#220)
+    * anomaly: support ignore_kth_same_option in LOF algorithm (#222, #223)
+
+* Bug fixes
+    * classifier: NN-based classifier does not take lock on label manipulation (#213, #221)
+    * Fix key manager to swap next_id (#224, #226)
+
+Release 0.2.6 - 2015/12/25
+--------------------------
+
+* Improvements
+    * bandit: improve performance of select_arm API in ucb1 (#186, #214)
+
+* Bug fixes
+    * recommender: fix bit_index_storage (used by lsh/minhash) to ignore 0-bit vectors when analyzing (#211, #215)
+    * fix typo in exception messages (#212)
+
+Release 0.2.5 - 2015/11/30
+--------------------------
+
+* Improvements
+    * recommender: support unlearning in LSH algorithm (#190)
+    * recommender: fix typo of calc_similarity function name (#206, #208)
+    * clustering: return error on calling get_k_center / get_core_members when clustering is not yet performed (#185, #207)
+    * graph: improve error message (#203)
+    * code cleanup (#205)
+
+* Bug fixes
+    * anomaly: fix crash when ignore_kth_same_point is not specified (#201)
+    * nearest_neighbor: fix deadlock when running update/analyze simultaneously (#199, #200)
+
+Release 0.2.4 - 2015/10/26
+--------------------------
+
+* Improvements
+    * nearest_neighbor: improve performance of bit_vector based methods (#188, #191, #192, #193, #194, #196)
+    * nearest_neighbor: improve get_all_row_ids performance by eliminating unnecessary lock (#188, #196)
+    * classifier: improve performance by using read/write lock instead of exclusive lock (#184, #197)
+
+* Bug fixes
+    * nearest_neighbor: fix bit_vector bounds checking (#198)
+    * nearest_neighbor: fix bit_vector to use GCC built-in popcount only when performance improvements are expected (#188, #196)
+    * nearest_neighbor: fix missing lock in pack/unpack (#188, #196)
+
+Release 0.2.3 - 2015/09/28
+--------------------------
+
+* Improvements
+    * anomaly: add ignore_kth_same_point configuration option to avoid score to become inf (#130, #134)
+    * clustering: add seed configuration option (#176, #180)
+    * Improve unlearner overflow error message (#178, #187)
+    * Code cleanup (#179)
+
+* Bug fixes
+    * classifier: fix missing lock in local_storage_mixture::inp (#182, #183)
+
+Release 0.2.2 - 2015/08/31
+--------------------------
+
+* Improvements
+    * clustering: improved so that consistent results are returned across runs (#167, #172)
+    * clusteirng: add utility tests (#173)
+
+* Bug fixes
+    * clustering: fix test conditions (#129, #174)
+    * clustering: fix MIX not working as expected (#70, #175)
+    * bandit: fix gamma parameter validation (#163, #169)
+    * fix bit_vector parameter assertion (#170)
+
+Release 0.2.1 - 2015/07/27
+--------------------------
+
+* Improvements
+    * recommender: support unlearner in inverted_index algorithm (#51, #120)
+    * classifier: expose more status values (#166)
+    * Support building with Python 3.x (#30, #162)
+    * Code cleanup (#161)
+
+* Bug fixes
+    * bandit: fix exp3 algorithm calculations (#157, #158)
+    * bandit: fix ucb1 algorithm calculations (#159, #160)
+
+Release 0.2.0 - 2015/06/29
+--------------------------
+
+* Improvements
+    * Support non-commutative functions in combination feature (#152, #156)
+    * anomaly: lof algorithm now supports overwrite method (#154)
+    * classifier: driver is now thread-safe (#144)
+    * Improved compatibility with GCC-5 (#155)
+    * Code cleanup (#140)
+
+* Bug fixes
+    * clustering: fix k-means segmentation fault when get_nearest_center is called before clustering is performed (#150, #151)
+    * Column tables now touches unlearner on MIX (#100, #113)
+
+Release 0.1.2 - 2015/04/27
+--------------------------
+
+* Improvements
+   * bandit: add assume_unrewarded option (#125, #133)
+   * Improved performance of bit_vector calculations (#137)
+   * Codes cleanup (#132, #141, #143)
+
+* Bug fixes
+    * bandit: reject specifying unknown arm ID in register_reward API (#138, #148)
+    * bandit: fix clear API to reset arm IDs (#142, #149)
+    * recommender: fix retain_projection option not working in euclid_lsh (#98, #116)
+    * Fix fv_converter become unresponsive when empty datum is given (#146, #147)
+    * plugin.hpp is missing from installation (#139, #145)
+
+Release 0.1.1 - 2015/03/30
+--------------------------
+
+* Improvements
+    * Move column storage directory (#118, #123)
+    * classifier: install algorithm headers (#117)
+    * fv_converter reports error precisely (#119)
+    * Codes / comments cleanup (#96, #97, #107, #109, #114, #115, #122, #135, #136)
+    * Add language declarations to wscript (#108)
+    * Update to the latest waf-unittest (#128)
+
+* Bug fixes
+    * clustering: avoid clusteirng score to become NaN (#78)
+
 Release 0.1.0 - 2015/02/23
 --------------------------
 
