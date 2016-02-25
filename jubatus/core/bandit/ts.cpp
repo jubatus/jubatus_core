@@ -21,6 +21,9 @@
 #include <cfloat>
 #include "../common/exception.hpp"
 #include "select_by_weights.hpp"
+#include "../framework/packer.hpp"
+#include "../common/version.hpp"
+
 
 namespace jubatus {
 namespace core {
@@ -28,7 +31,7 @@ namespace bandit {
 
 using jubatus::util::math::random::mtrand;
 
-ts::ts() {
+ts::ts(bool assume_unrewarded): s_(assume_unrewarded) {
 }
 
 std::string ts::select_arm(const std::string& player_id) {
@@ -102,6 +105,10 @@ bool ts::put_diff(const diff_t& diff) {
 }
 void ts::mix(const diff_t& lhs, diff_t& rhs) const {
   s_.mix(lhs, rhs);
+}
+
+storage::version ts::get_version() const {
+  return storage::version();
 }
 
 }  // namespace bandit

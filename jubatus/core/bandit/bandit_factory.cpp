@@ -51,6 +51,15 @@ struct ucb1_config {
   }
 };
 
+struct ts_config {
+  bool assume_unrewarded;
+
+  template<class Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(assume_unrewarded);
+  }
+};
+
 struct softmax_config {
   bool assume_unrewarded;
   double tau;
@@ -94,7 +103,14 @@ shared_ptr<bandit_base> bandit_factory::create(
         config_cast_check<ucb1_config>(param);
     return shared_ptr<bandit_base>(new ucb1(conf.assume_unrewarded));
   } else if (name == "ts") {
-    return shared_ptr<bandit_base>(new ts());
+    if (param.type() == json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
+    ts_config conf =
+        config_cast_check<ts_config>(param);
+    return shared_ptr<bandit_base>(new ts(conf.assume_unrewarded));
   } else if (name == "softmax") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
