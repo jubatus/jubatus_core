@@ -1,3 +1,13 @@
+Release 0.2.8 - 2016/02/29
+--------------------------
+
+* Improvements
+    * recommender: support unlearning in inverted_index_euclid algorithm (#237)
+
+* Bug fixes
+    * classifier: fix updating the same weight column for two times (#233, #236)
+    * Code cleanup (#229)
+
 Release 0.2.7 - 2016/01/25
 --------------------------
 
