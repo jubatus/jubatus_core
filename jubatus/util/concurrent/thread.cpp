@@ -159,7 +159,7 @@ bool thread::impl::join()
   if (!running) return false;
 
   int res = pthread_join(tid,NULL);
-  delete pf;
+  if (!pf) delete pf;
   if (res != 0) {
     return false;
   }

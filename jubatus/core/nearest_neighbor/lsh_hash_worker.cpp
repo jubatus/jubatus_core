@@ -134,7 +134,7 @@ void lsh_hash_worker::hash(
     storage::bit_vector& result) {
   std::vector<util::lang::shared_ptr<hash_task> > tasks;
   if (fv.size() == 0) {
-    result = bit_vector();
+    result = bit_vector(hash_num);
     return;
   }
 
