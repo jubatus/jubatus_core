@@ -87,13 +87,15 @@ class micro_timer {
 benchtime_t nn_bench(
     const std::string& type,
     const std::vector<sfv_t>& dataset,
-    size_t threads,
+    int threads,
     size_t num,
     size_t dencity,
     int ret_num,
     int hash_num) {
   json js(new json_object);
-  js["hash_num"] = new json_integer(hash_num);
+  //  js["hash_num"] = new json_integer(hash_num);
+  js["hash_num"] = to_json(hash_num);
+  js["thread"] = to_json(threads);
   config conf(js);
   shared_ptr<column_table> table(new column_table);
   const std::string id("id");
@@ -153,7 +155,7 @@ void dump_time(
 
 int main() {
   size_t num = 100000;
-  size_t threads = 16;
+  int threads = 16;
   size_t dencity = 100;
   int ret_num = 16;
   int hash_num = 4096;
