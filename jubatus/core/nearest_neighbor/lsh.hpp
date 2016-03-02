@@ -35,17 +35,18 @@ namespace nearest_neighbor {
 class lsh : public bit_vector_nearest_neighbor_base {
  public:
   struct config {
-    config() : hash_num(64u) {
+    config() : hash_num(64u), thread(1u) {
     }
-    explicit config(int32_t num)
-      : hash_num(num) {
+    explicit config(int32_t num, int32_t thread)
+      : hash_num(num), thread(thread) {
     }
 
     int32_t hash_num;
+    int32_t thread;
 
     template <typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_MEMBER(hash_num);
+      ar & JUBA_MEMBER(hash_num) & JUBA_MEMBER(thread);
     }
   };
   lsh(const config& conf,
