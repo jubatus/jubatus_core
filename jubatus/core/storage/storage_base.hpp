@@ -22,7 +22,7 @@
 #include <utility>
 #include <stdexcept>
 #include <vector>
-#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/rwmutex.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "storage_type.hpp"
 #include "storage_exception.hpp"
@@ -97,7 +97,7 @@ class storage_base : public framework::model {
       const std::string& inc_class,
       const std::string& dec_class);
 
-  virtual util::concurrent::mutex& get_lock() const = 0;
+  virtual util::concurrent::rw_mutex& get_lock() const = 0;
 
   virtual void get_diff(diff_t&) const;
   virtual bool set_average_and_clear_diff(const diff_t&);

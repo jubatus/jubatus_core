@@ -84,6 +84,47 @@ TEST(inverted_index_storage, trivial) {
   EXPECT_EQ("r2", scores2[2].first);
 }
 
+TEST(inverted_index_storage, trivial_euclid) {
+  inverted_index_storage s;
+  // r1: (1, 1, 1, 0, 0)
+  s.set("c1", "r1", 1);
+  s.set("c2", "r1", 1);
+  s.set("c3", "r1", 1);
+  // r2: (1, 0, 1, 1, 0)
+  s.set("c1", "r2", 1);
+  s.set("c3", "r2", 1);
+  s.set("c4", "r2", 1);
+  // r3: (0, 1, 0, 0, 1)
+  s.set("c2", "r3", 1);
+  s.set("c5", "r3", 1);
+
+  // v:  (1, 1, 0, 0, 0)
+  common::sfv_t v;
+  v.push_back(make_pair("c1", 1.0));
+  v.push_back(make_pair("c2", 1.0));
+
+  vector<pair<string, float> > scores;
+  s.calc_euclid_scores(v, scores, 100);
+
+  ASSERT_EQ(3, scores.size());
+  EXPECT_EQ("r1", scores[0].first);
+  EXPECT_FLOAT_EQ(-1, scores[0].second);
+  EXPECT_EQ("r3", scores[1].first);
+  EXPECT_FLOAT_EQ(- sqrt(2), scores[1].second);
+  EXPECT_EQ("r2", scores[2].first);
+  EXPECT_FLOAT_EQ(- sqrt(3), scores[2].second);
+
+  // remove column "r3"
+  s.remove("c2", "r3");
+  s.remove("c5", "r3");
+
+  scores.clear();
+  s.calc_euclid_scores(v, scores, 100);
+  ASSERT_EQ(2, scores.size());
+  EXPECT_EQ("r1", scores[0].first);
+  EXPECT_EQ("r2", scores[1].first);
+}
+
 TEST(inverted_index_storage, diff) {
   inverted_index_storage s;
   // r1: (1, 1, 0, 0, 0)

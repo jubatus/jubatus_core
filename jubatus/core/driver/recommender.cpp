@@ -113,13 +113,13 @@ recommender::similar_row_from_datum(
   return ret;
 }
 
-float recommender::calc_similality(
+float recommender::calc_similarity(
     const fv_converter::datum& l,
     const fv_converter::datum& r) {
   common::sfv_t v0, v1;
   converter_->convert(l, v0);
   converter_->convert(r, v1);
-  return jubatus::core::recommender::recommender_base::calc_similality(v0, v1);
+  return jubatus::core::recommender::recommender_base::calc_similarity(v0, v1);
 }
 
 float recommender::calc_l2norm(const fv_converter::datum& q) {

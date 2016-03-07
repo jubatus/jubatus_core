@@ -144,6 +144,12 @@ float light_lof::calc_anomaly_score(const std::string& id) const {
   return calculate_lof(lrd, neighbor_lrds);
 }
 
+float light_lof::calc_anomaly_score(
+    const std::string& id,
+    const common::sfv_t& query) const {
+  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+}
+
 void light_lof::clear() {
   nearest_neighbor_engine_->clear();
   mixable_scores_->get_model()->clear();
@@ -156,7 +162,7 @@ void light_lof::clear_row(const std::string& id) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 
-void light_lof::update_row(const std::string& id, const sfv_diff_t& diff) {
+bool light_lof::update_row(const std::string& id, const sfv_diff_t& diff) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 
@@ -164,7 +170,7 @@ bool light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
   // Reject adding points that have the same fv for k times.
   // This helps avoiding LRD to become inf (so that LOF scores of its
   // neighbors won't go inf.)
-  if (*config_.ignore_kth_same_point) {
+  if (config_.ignore_kth_same_point && *config_.ignore_kth_same_point) {
     std::vector<std::pair<std::string, float> > nn_result;
 
     // Find k-1 NNs for the given sfv.

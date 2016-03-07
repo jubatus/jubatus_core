@@ -41,10 +41,13 @@ class lof : public anomaly_base {
   // return anomaly score of query
   float calc_anomaly_score(const common::sfv_t& query) const;
   float calc_anomaly_score(const std::string& id) const;
+  float calc_anomaly_score(
+      const std::string& id,
+      const common::sfv_t& query) const;
 
   void clear();
   void clear_row(const std::string& id);
-  void update_row(const std::string& id, const sfv_diff_t& diff);
+  bool update_row(const std::string& id, const sfv_diff_t& diff);
   bool set_row(const std::string& id, const common::sfv_t& sfv);
 
   void get_all_row_ids(std::vector<std::string>& ids) const;
@@ -64,7 +67,7 @@ class lof : public anomaly_base {
 };
 
 }  //  namespace anomaly
-}  // core
+}  //  namespace core
 }  //  namespace jubatus
 
 #endif  // JUBATUS_CORE_ANOMALY_LOF_HPP_

@@ -20,7 +20,9 @@
 #include <string>
 #include <vector>
 
+
 #include "bandit_base.hpp"
+
 
 namespace jubatus {
 namespace core {
@@ -45,7 +47,7 @@ class summation_storage {
                         const std::string& arm_id) const;
   double get_expectation(const std::string& player_id,
                          const std::string& arm_id) const;
-
+  int get_total_trial_count(const std::string& player_id) const;
   const std::vector<std::string>& get_arm_ids() const {
     return arm_ids_;
   }

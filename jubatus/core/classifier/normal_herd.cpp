@@ -67,7 +67,7 @@ void normal_herd::update(
     float variance,
     const string& pos_label,
     const string& neg_label) {
-  util::concurrent::scoped_lock lk(storage_->get_lock());
+  util::concurrent::scoped_wlock lk(storage_->get_lock());
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
     float val = it->second;

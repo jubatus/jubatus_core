@@ -365,6 +365,53 @@ void inverted_index_storage::calc_scores(
   }
 }
 
+/**
+ * Returns the nearest neighbors measured by euclidean distance.
+ * Scores are represented in sign-inverted euclidean distance (<= 0);
+ * i.e., larger score means high similarity.
+ */
+void inverted_index_storage::calc_euclid_scores(
+    const common::sfv_t& query,
+    vector<pair<string, float> >& scores,
+    size_t ret_num) const {
+  std::vector<float> i_scores(column2id_.get_max_id() + 1, 0.0);
+  for (size_t i = 0; i < query.size(); ++i) {
+    const string& fid = query[i].first;
+    float val = query[i].second;
+    add_inp_scores(fid, val, i_scores);
+  }
+
+  storage::fixed_size_heap<pair<float, uint64_t>,
+                           std::greater<pair<float, uint64_t> > > heap(ret_num);
+
+  float query_norm = calc_l2norm(query);
+  for (size_t i = 0; i < i_scores.size(); ++i) {
+    float norm = calc_columnl2norm(i);
+
+    if (norm == 0.f) {
+      // The column is already removed.
+      continue;
+    }
+
+    // `d2` is a squared euclidean distance.
+    // In edgy cases, `d2` may sliglty become negative (which is actually
+    // expected to be 0) due to the floating point precision problem.
+    // This cause `sqrt(d2)` to return NaN, which is not what we want.
+    // To avoid this we use `sqrt(max(0, d2))`.
+    float d2 = query_norm * query_norm + norm * norm - 2 * i_scores[i];
+    heap.push(make_pair(-std::sqrt(std::max(0.0f, d2)), i));
+  }
+
+  vector<pair<float, uint64_t> > sorted_scores;
+  heap.get_sorted(sorted_scores);
+
+  for (size_t i = 0; i < sorted_scores.size() && i < ret_num; ++i) {
+    scores.push_back(
+        make_pair(column2id_.get_key(sorted_scores[i].second),
+                  sorted_scores[i].first));
+  }
+}
+
 float inverted_index_storage::calc_l2norm(const common::sfv_t& sfv) {
   float ret = 0.f;
   for (size_t i = 0; i < sfv.size(); ++i) {

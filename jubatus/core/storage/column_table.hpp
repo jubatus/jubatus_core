@@ -205,6 +205,10 @@ class column_table {
 
   uint64_t size() const {
     jubatus::util::concurrent::scoped_rlock lk(table_lock_);
+    return size_nolock();
+  }
+
+  uint64_t size_nolock() const {
     return tuples_;
   }
 
@@ -216,6 +220,8 @@ class column_table {
   }
 
   std::pair<bool, uint64_t> exact_match(const std::string& prefix) const;
+  std::pair<bool, uint64_t> exact_match_nolock(
+      const std::string& prefix) const;
 
   friend std::ostream& operator<<(std::ostream& os, const column_table& tbl) {
     jubatus::util::concurrent::scoped_rlock lk(tbl.table_lock_);

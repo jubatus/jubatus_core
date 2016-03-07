@@ -24,6 +24,7 @@ namespace core {
 namespace common {
 
 void sort_and_merge(sfv_t& sfv);
+void merge_vector(sfv_t&, const sfv_t&);
 
 }  // namespace common
 }  // namespace core

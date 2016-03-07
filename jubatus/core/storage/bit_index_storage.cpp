@@ -47,13 +47,17 @@ void bit_index_storage::set_row(const string& row, const bit_vector& bv) {
 
 void bit_index_storage::get_row(const string& row, bit_vector& bv) const {
   {
+    // First find the row in the diff table.
     bit_table_t::const_iterator it = bitvals_diff_.find(row);
-    if (it != bitvals_diff_.end()) {
+    if (it != bitvals_diff_.end() && it->second.bit_num() != 0) {
+      // Row found, and is not 0-bit.  0-bit rows in the diff table means
+      // that the row has been removed but not MIXed yet.
       bv = it->second;
       return;
     }
   }
   {
+    // Next we find the row in the master table.
     bit_table_t::const_iterator it = bitvals_.find(row);
     if (it != bitvals_.end()) {
       bv = it->second;
@@ -69,7 +73,8 @@ void bit_index_storage::remove_row(const string& row) {
     // immedeately remove it from the diff table.
     bitvals_diff_.erase(row);
   } else {
-    // Keep the row in the diff table until next MIX to
+    // The row is in the master table; we keep the row as
+    // 0-bit bit_vector in the diff table until next MIX to
     // propagate the removal of this row to other nodes.
     bitvals_diff_[row] = bit_vector();
   }
@@ -82,13 +87,21 @@ void bit_index_storage::clear() {
 
 void bit_index_storage::get_all_row_ids(std::vector<std::string>& ids) const {
   ids.clear();
-  for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
-      ++it) {
-    ids.push_back(it->first);
-  }
+
+  // Collect rows from diff table.
   for (bit_table_t::const_iterator it = bitvals_diff_.begin();
       it != bitvals_diff_.end(); ++it) {
-    if (bitvals_.find(it->first) == bitvals_.end()) {
+    // Exclude removed (0-bit) rows in diff table.
+    if (it->second.bit_num() != 0) {
+      ids.push_back(it->first);
+    }
+  }
+
+  // Collect rows from master table.
+  for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
+      ++it) {
+    // Exclude rows overwritten in diff table.
+    if (bitvals_diff_.find(it->first) == bitvals_diff_.end()) {
       ids.push_back(it->first);
     }
   }
@@ -103,12 +116,46 @@ bool bit_index_storage::put_diff(
   for (bit_table_t::const_iterator it = mixed_diff.begin();
       it != mixed_diff.end(); ++it) {
     if (it->second.bit_num() == 0) {
+      // 0-bit bit_vector was propagated from other nodes.  This indicates
+      // that the row should be removed globally from the master table.
+      if (unlearner_) {
+        unlearner_->remove(it->first);
+      }
       bitvals_.erase(it->first);
     } else {
+      if (unlearner_) {
+        if (unlearner_->can_touch(it->first)) {
+          unlearner_->touch(it->first);
+        } else {
+          continue;  // drop untouchable value
+        }
+      }
       bitvals_[it->first] = it->second;
     }
   }
+
+  // New empty rows were created by unlearner and remove_row
+  // between get_diff and put_diff
+  std::vector<std::string> removed_ids;
+  for (bit_table_t::const_iterator it = bitvals_diff_.begin();
+      it != bitvals_diff_.end(); ++it) {
+    if (it->second.bit_num() == 0) {
+      bit_table_t::const_iterator pos;
+      pos = mixed_diff.find(it->first);
+      if (pos == mixed_diff.end() || pos->second.bit_num() != 0) {
+        removed_ids.push_back(it->first);
+      }
+    }
+  }
+
   bitvals_diff_.clear();
+
+  // Keep empty rows in the diff area until next MIX to
+  // propagate the removal of this data to other nodes.
+  for (size_t i = 0; i < removed_ids.size(); ++i) {
+    bitvals_diff_[removed_ids[i]] = bit_vector();
+  }
+
   return true;
 }
 
@@ -143,7 +190,10 @@ void bit_index_storage::similar_row(
 
   for (bit_table_t::const_iterator it = bitvals_diff_.begin();
       it != bitvals_diff_.end(); ++it) {
-    similar_row_one(bv, *it, heap);
+    // Exclude removed (0-bit) rows in diff table.
+    if (it->second.bit_num() != 0) {
+      similar_row_one(bv, *it, heap);
+    }
   }
   for (bit_table_t::const_iterator it = bitvals_.begin(); it != bitvals_.end();
       ++it) {

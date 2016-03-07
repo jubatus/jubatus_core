@@ -52,6 +52,7 @@ using jubatus::util::text::json::json_object;
 using jubatus::util::text::json::json_integer;
 using jubatus::util::text::json::json_string;
 using jubatus::util::text::json::json_float;
+using jubatus::util::text::json::to_json;
 using jubatus::util::lang::lexical_cast;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::recommender::recommender_base;
@@ -59,6 +60,7 @@ using jubatus::core::storage::column_table;
 using jubatus::core::unlearner::unlearner_base;
 using jubatus::core::unlearner::lru_unlearner;
 using jubatus::core::recommender::inverted_index;
+
 namespace jubatus {
 namespace core {
 namespace driver {
@@ -165,87 +167,133 @@ INSTANTIATE_TEST_CASE_P(nn_recommender_test_instance,
     nn_recommender_test,
     testing::ValuesIn(create_recommender_bases()));
 
-TEST(inverted_index_unlearner, lru_update) {
-  unlearner::lru_unlearner::config conf;
-  conf.max_size = 3;
-  shared_ptr<unlearner::unlearner_base> unl(new unlearner::lru_unlearner(conf));
-  shared_ptr<recommender_base> inv =
-      shared_ptr<recommender_base>(new core::recommender::inverted_index(unl));
-  shared_ptr<driver::recommender> recommender =
-      shared_ptr<driver::recommender>(
-          new driver::recommender(inv,
-                                  make_tf_idf_fv_converter()));
-  recommender->update_row("id1", create_datum_str("a", "a b c"));
-  recommender->update_row("id2", create_datum_str("a", "d e f"));
-  recommender->update_row("id3", create_datum_str("a", "e f g"));
-  recommender->update_row("id4", create_datum_str("a", "f g h"));
-  recommender->update_row("id5", create_datum_str("a", "h i j"));
-  recommender->update_row("id6", create_datum_str("a", "i j a"));
-  recommender->update_row("id7", create_datum_str("a", "j a b"));
-
-  vector<pair<string, float> > ret = recommender->similar_row_from_id("id6", 4);
-  ASSERT_EQ(3u, ret.size());
-}
-
-TEST(inverted_index_unlearner, lru_delete) {
-  unlearner::lru_unlearner::config conf;
-  conf.max_size = 3;
-  shared_ptr<unlearner::unlearner_base> unl(new unlearner::lru_unlearner(conf));
-  shared_ptr<recommender_base> inv =
-      shared_ptr<recommender_base>(new core::recommender::inverted_index(unl));
-  shared_ptr<driver::recommender> recommender =
-      shared_ptr<driver::recommender>(
-          new driver::recommender(inv,
-                                  make_tf_idf_fv_converter()));
-  recommender->update_row("id1", create_datum_str("a", "a b c"));
-  recommender->update_row("id2", create_datum_str("a", "d e f"));
-  recommender->update_row("id3", create_datum_str("a", "e f g"));
-  recommender->clear_row("id1");
-  recommender->update_row("id4", create_datum_str("a", "f g h"));
-  recommender->update_row("id5", create_datum_str("a", "h i j"));
-  recommender->update_row("id6", create_datum_str("a", "i j a"));
-  recommender->update_row("id7", create_datum_str("a", "j a b"));
-
-  vector<pair<string, float> > ret = recommender->similar_row_from_id("id6", 4);
-  ASSERT_EQ(3u, ret.size());
-
-  vector<string> all = recommender->get_all_rows();
-  ASSERT_EQ(3u, all.size());
-}
-
-class inverted_index_mix_test : public ::testing::Test {
+class recommender_with_unlearning_test
+    : public ::testing::TestWithParam<pair<string,
+        common::jsonconfig::config> > {
  protected:
+  shared_ptr<driver::recommender> create_driver() const {
+    const string id("my_id");
+    return shared_ptr<driver::recommender>(
+        new driver::recommender(
+            core::recommender::recommender_factory::create_recommender(
+                GetParam().first, GetParam().second, id),
+        make_tf_idf_fv_converter()));
+  }
+
+  void SetUp() {
+    recommender_ = create_driver();
+  }
+
+  void TearDown() {
+    recommender_->clear();
+    recommender_.reset();
+  }
+
+  shared_ptr<driver::recommender> recommender_;
+};
+
+const size_t MAX_SIZE = 3;
+
+vector<pair<string, common::jsonconfig::config> >
+create_recommender_configs_with_unlearner() {
+  vector<pair<string, common::jsonconfig::config> > configs;
+
+  json js(new json_object);
+  js["unlearner"] = to_json(string("lru"));
+  js["unlearner_parameter"] = new json_object;
+  js["unlearner_parameter"]["max_size"] = to_json(MAX_SIZE);
+  js["unlearner_parameter"]["sticky_pattern"] =
+    to_json(string("*_sticky"));
+
+  // inverted_index
+  configs.push_back(make_pair("inverted_index",
+      common::jsonconfig::config(js)));
+
+  // inverted_index_euclid
+  configs.push_back(make_pair("inverted_index_euclid",
+      common::jsonconfig::config(js)));
+
+  // lsh
+  json js_lsh(js.clone());
+  js_lsh["hash_num"] = to_json(64);
+  configs.push_back(make_pair("lsh", common::jsonconfig::config(js_lsh)));
+
+  // minhash
+  json js_minhash(js.clone());
+  js_minhash["hash_num"] = to_json(64);
+  configs.push_back(
+      make_pair("minhash", common::jsonconfig::config(js_minhash)));
+
+  // TODO(@rimms): Add NN-based algorithm
+
+  return configs;
+}
+
+TEST_P(recommender_with_unlearning_test, update_row) {
+  recommender_->update_row("id1", create_datum_str("a", "a b c"));
+  recommender_->update_row("id2", create_datum_str("a", "d e f"));
+  recommender_->update_row("id3", create_datum_str("a", "e f g"));
+  recommender_->update_row("id4", create_datum_str("a", "f g h"));
+  recommender_->update_row("id5", create_datum_str("a", "h i j"));
+  recommender_->update_row("id6", create_datum_str("a", "i j a"));
+  recommender_->update_row("id7", create_datum_str("a", "j a b"));
+
+  vector<pair<string, float> > ret =
+    recommender_->similar_row_from_id("id6", MAX_SIZE + 1);
+  ASSERT_EQ(MAX_SIZE, ret.size());
+}
+
+TEST_P(recommender_with_unlearning_test, clear_row) {
+  recommender_->update_row("id1", create_datum_str("a", "a b c"));
+  recommender_->update_row("id2", create_datum_str("a", "d e f"));
+  recommender_->update_row("id3", create_datum_str("a", "e f g"));
+  recommender_->clear_row("id1");
+  recommender_->update_row("id4", create_datum_str("a", "f g h"));
+  recommender_->update_row("id5", create_datum_str("a", "h i j"));
+  recommender_->update_row("id6", create_datum_str("a", "i j a"));
+  recommender_->update_row("id7", create_datum_str("a", "j a b"));
+
+  vector<pair<string, float> > ret =
+    recommender_->similar_row_from_id("id6", MAX_SIZE + 1);
+  ASSERT_EQ(MAX_SIZE, ret.size());
+
+  vector<string> all = recommender_->get_all_rows();
+  ASSERT_EQ(MAX_SIZE, all.size());
+}
+
+INSTANTIATE_TEST_CASE_P(
+    recommender_with_unlearning_test_instance,
+    recommender_with_unlearning_test,
+    testing::ValuesIn(create_recommender_configs_with_unlearner()));
+
+class recommender_mix_with_unlearning_test
+    : public ::testing::TestWithParam<pair<string,
+        common::jsonconfig::config> > {
+ protected:
+  shared_ptr<driver::recommender> create_driver(const string& id) const {
+    return shared_ptr<driver::recommender>(
+        new driver::recommender(
+            core::recommender::recommender_factory::create_recommender(
+                GetParam().first, GetParam().second, id),
+        make_fv_converter()));
+  }
+
   virtual void SetUp() {
-    lru_unlearner::config conf;
-    conf.max_size = 3;
-    conf.sticky_pattern = "*_sticky";
-    unl1 = shared_ptr<unlearner_base>(new lru_unlearner(conf));
-    inv1 = shared_ptr<recommender_base>(new inverted_index(unl1));
-    recommender1 =
-        shared_ptr<driver::recommender>(
-            new driver::recommender(inv1,
-                                    make_fv_converter()));
+    recommender1 = create_driver("my_id1");
+    recommender2 = create_driver("my_id2");
+
     mixable1 =
         dynamic_cast<framework::linear_mixable*>(recommender1->get_mixable());
     ASSERT_TRUE(mixable1 != NULL);
-
-    unl2 = shared_ptr<unlearner_base>(new lru_unlearner(conf));
-    inv2 = shared_ptr<recommender_base>(new inverted_index(unl2));
-    recommender2 =
-        shared_ptr<driver::recommender>(
-            new driver::recommender(inv2,
-                                    make_fv_converter()));
     mixable2 =
         dynamic_cast<framework::linear_mixable*>(recommender2->get_mixable());
     ASSERT_TRUE(mixable2 != NULL);
   }
 
   virtual void TearDown() {
-    unl1.reset();
-    inv1.reset();
+    recommender1->clear();
     recommender1.reset();
-    unl2.reset();
-    inv2.reset();
+    recommender2->clear();
     recommender2.reset();
   }
 
@@ -274,13 +322,11 @@ class inverted_index_mix_test : public ::testing::Test {
     mixable2->mix(unpacked1.get(), diff);
     return diff;
   }
-  shared_ptr<unlearner::unlearner_base> unl1, unl2;
-  shared_ptr<recommender_base> inv1, inv2;
   shared_ptr<driver::recommender> recommender1, recommender2;
   framework::linear_mixable *mixable1, *mixable2;
 };
 
-TEST_F(inverted_index_mix_test, basic) {
+TEST_P(recommender_mix_with_unlearning_test, basic) {
   recommender1->update_row("id1", create_datum_str("a", "a b c"));
   recommender1->update_row("id2", create_datum_str("a", "d e f"));
   recommender1->update_row("id3", create_datum_str("a", "e f g"));
@@ -298,7 +344,7 @@ TEST_F(inverted_index_mix_test, basic) {
   ASSERT_EQ(3u, recommender2->get_all_rows().size());
 }
 
-TEST_F(inverted_index_mix_test, mix_all) {
+TEST_P(recommender_mix_with_unlearning_test, mix_all) {
   recommender1->update_row("id1", create_datum_str("a", "a b c"));
   recommender1->update_row("id2", create_datum_str("a", "d e f"));
   recommender1->update_row("id3", create_datum_str("a", "e f g"));
@@ -333,7 +379,7 @@ TEST_F(inverted_index_mix_test, mix_all) {
   }
 }
 
-TEST_F(inverted_index_mix_test, all_sticky) {
+TEST_P(recommender_mix_with_unlearning_test, all_sticky) {
   recommender1->update_row("id1_sticky", create_datum_str("a", "a b c"));
   recommender1->update_row("id2_sticky", create_datum_str("a", "d e f"));
   recommender1->update_row("id3_sticky", create_datum_str("a", "e f g"));
@@ -380,6 +426,11 @@ TEST_F(inverted_index_mix_test, all_sticky) {
 }
 
 // TODO(kumagi): append test if there are all sticky rows
+
+INSTANTIATE_TEST_CASE_P(
+    recommender_mix_with_lru_unlearning_test_instance,
+    recommender_mix_with_unlearning_test,
+    testing::ValuesIn(create_recommender_configs_with_unlearner()));
 
 }  // namespace driver
 }  // namespace core

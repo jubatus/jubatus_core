@@ -90,6 +90,29 @@ shared_ptr<recommender_base> recommender_factory::create_recommender(
       }
     }
     return shared_ptr<recommender_base>(new inverted_index);
+  } else if (name == "inverted_index_euclid") {
+    if (!param.is_null()) {
+      inverted_index_config conf =
+          config_cast_check<inverted_index_config>(param);
+      if (conf.unlearner) {
+        if (!conf.unlearner_parameter) {
+          throw JUBATUS_EXCEPTION(
+              common::config_exception() << common::exception::error_message(
+                  "unlearner is set but unlearner_parameter is not found"));
+        }
+        return shared_ptr<recommender_base>(
+            new inverted_index_euclid(unlearner::create_unlearner(
+                *conf.unlearner, common::jsonconfig::config(
+                    *conf.unlearner_parameter))));
+      } else {
+        if (conf.unlearner_parameter) {
+          throw JUBATUS_EXCEPTION(
+              common::config_exception() << common::exception::error_message(
+                  "unlearner_parameter is set but unlearner is not found"));
+        }
+      }
+    }
+    return shared_ptr<recommender_base>(new inverted_index_euclid);
   } else if (name == "minhash") {
     return shared_ptr<recommender_base>(
         new minhash(config_cast_check<minhash::config>(param)));

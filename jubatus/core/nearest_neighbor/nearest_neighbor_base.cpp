@@ -45,8 +45,11 @@ void nearest_neighbor_base::get_all_row_ids(vector<string>& ids) const {
   shared_ptr<const storage::column_table> table = get_const_table();
   util::concurrent::scoped_rlock lk(table->get_mutex());
 
-  ret.reserve(table->size());
-  for (size_t i = 0; i < table->size(); ++i) {
+  /* table lock acquired; all subsequent table operations must be nolock */
+
+  uint64_t table_size = table->size_nolock();
+  ret.reserve(table_size);
+  for (size_t i = 0; i < table_size; ++i) {
     ret.push_back(table->get_key_nolock(i));
   }
   ret.swap(ids);

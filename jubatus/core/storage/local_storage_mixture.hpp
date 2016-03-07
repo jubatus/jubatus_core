@@ -21,7 +21,7 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/rwmutex.h"
 #include "jubatus/util/data/intern.h"
 #include "local_storage.hpp"
 #include "../common/version.hpp"
@@ -87,7 +87,7 @@ class local_storage_mixture : public storage_base {
       const std::string& inc_class,
       const std::string& dec_class);
 
-  util::concurrent::mutex& get_lock() const {
+  util::concurrent::rw_mutex& get_lock() const {
     return mutex_;
   }
 
@@ -113,7 +113,7 @@ class local_storage_mixture : public storage_base {
  private:
   bool get_internal(const std::string& feature, id_feature_val3_t& ret) const;
 
-  mutable util::concurrent::mutex mutex_;
+  mutable util::concurrent::rw_mutex mutex_;
   id_features3_t tbl_;
   common::key_manager class2id_;
   id_features3_t tbl_diff_;

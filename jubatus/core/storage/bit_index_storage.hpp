@@ -21,12 +21,14 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/lang/shared_ptr.h"
 #include "../common/key_manager.hpp"
 #include "../common/unordered_map.hpp"
 #include "../framework/mixable_helper.hpp"
 #include "storage_type.hpp"
 #include "sparse_matrix_storage.hpp"
 #include "bit_vector.hpp"
+#include "../unlearner/unlearner_base.hpp"
 
 namespace jubatus {
 namespace core {
@@ -36,6 +38,11 @@ class bit_index_storage : public framework::model {
  public:
   bit_index_storage();
   ~bit_index_storage();
+
+  void set_unlearner(
+      util::lang::shared_ptr<unlearner::unlearner_base> unlearner) {
+    unlearner_ = unlearner;
+  }
 
   void set_row(const std::string& row, const bit_vector& bv);
   void get_row(const std::string& row, bit_vector& bv) const;
@@ -64,6 +71,7 @@ class bit_index_storage : public framework::model {
  private:
   bit_table_t bitvals_;
   bit_table_t bitvals_diff_;
+  util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
 };
 
 typedef framework::linear_mixable_helper<bit_index_storage, bit_table_t>

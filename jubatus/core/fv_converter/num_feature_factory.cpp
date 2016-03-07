@@ -35,7 +35,7 @@ shared_ptr<num_feature> num_feature_factory::create(
     return shared_ptr<num_feature>(p);
   } else {
     throw JUBATUS_EXCEPTION(
-        converter_exception(std::string("unknonwn num feature name: ") + name));
+        converter_exception(std::string("unknown num feature name: ") + name));
   }
 }
 

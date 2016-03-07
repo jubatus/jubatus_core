@@ -69,6 +69,11 @@ class inverted_index_storage {
       std::vector<std::pair<std::string, float> >& scores,
       size_t ret_num) const;
 
+  void calc_euclid_scores(
+      const common::sfv_t& sfv,
+      std::vector<std::pair<std::string, float> >& scores,
+      size_t ret_num) const;
+
   void get_diff(diff_type& diff_str) const;
   bool put_diff(const diff_type& mixed_diff);
   void mix(const diff_type& lhs_str, diff_type& rhs_str) const;

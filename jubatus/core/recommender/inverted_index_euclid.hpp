@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2011 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2016 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,65 +14,47 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_RECOMMENDER_INVERTED_INDEX_HPP_
-#define JUBATUS_CORE_RECOMMENDER_INVERTED_INDEX_HPP_
+#ifndef JUBATUS_CORE_RECOMMENDER_INVERTED_INDEX_EUCLID_HPP_
+#define JUBATUS_CORE_RECOMMENDER_INVERTED_INDEX_EUCLID_HPP_
 
 #include <string>
 #include <utility>
 #include <vector>
-#include "jubatus/util/lang/shared_ptr.h"
-#include "recommender_base.hpp"
-#include "../storage/inverted_index_storage.hpp"
+#include "inverted_index.hpp"
 
 namespace jubatus {
 namespace core {
-namespace framework {
-template <typename Model, typename Diff>
-class linear_mixable_helper;
-}  // namespace framework
-namespace unlearner {
-
-class unlearner_base;
-
-}  // namespace unlearner
 namespace recommender {
 
-class inverted_index : public recommender_base {
+class inverted_index_euclid : public inverted_index {
  public:
-  inverted_index();
-  ~inverted_index();
-  inverted_index(
+  inverted_index_euclid();
+  ~inverted_index_euclid();
+  explicit inverted_index_euclid(
       jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner);
 
   void similar_row(
       const common::sfv_t& query,
       std::vector<std::pair<std::string, float> >& ids,
       size_t ret_num) const;
+  void similar_row(
+      const std::string& id,
+      std::vector<std::pair<std::string, float> >& ids,
+      size_t ret_num) const;
   void neighbor_row(
       const common::sfv_t& query,
       std::vector<std::pair<std::string, float> >& ids,
       size_t ret_num) const;
-  void clear();
-  void clear_row(const std::string& id);
-  void remove_row(const std::string& id);
-  void update_row(const std::string& id, const sfv_diff_t& diff);
-  void get_all_row_ids(std::vector<std::string>& ids) const;
+  void neighbor_row(
+      const std::string& id,
+      std::vector<std::pair<std::string, float> >& ids,
+      size_t ret_num) const;
+
   std::string type() const;
-
-  framework::mixable* get_mixable() const;
-
-  void pack(framework::packer& packer) const;
-  void unpack(msgpack::object o);
-
- protected:
-  jubatus::util::lang::shared_ptr<storage::mixable_inverted_index_storage>
-      mixable_storage_;
-  jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
-      unlearner_;
 };
 
 }  // namespace recommender
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_RECOMMENDER_INVERTED_INDEX_HPP_
+#endif  // JUBATUS_CORE_RECOMMENDER_INVERTED_INDEX_EUCLID_HPP_

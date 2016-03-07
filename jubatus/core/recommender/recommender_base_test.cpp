@@ -142,7 +142,7 @@ TEST(recommender_base, calc_l2norm) {
   EXPECT_FLOAT_EQ(std::sqrt(1.0 + 4.0 + 9.0), r.calc_l2norm(q));
 }
 
-TEST(recommender_base, calc_similality) {
+TEST(recommender_base, calc_similarity) {
   recommender_impl r;
   common::sfv_t q1;
   common::sfv_t q2;
@@ -157,7 +157,7 @@ TEST(recommender_base, calc_similality) {
 
   EXPECT_FLOAT_EQ(
       (2.0 * 3.0 + 3.0 * 3.0) / r.calc_l2norm(q1) / r.calc_l2norm(q2),
-      r.calc_similality(q1, q2));
+      r.calc_similarity(q1, q2));
 }
 
 }  // namespace recommender

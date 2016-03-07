@@ -1,3 +1,62 @@
+Release 0.2.8 - 2016/02/29
+--------------------------
+
+* Improvements
+    * recommender: support unlearning in inverted_index_euclid algorithm (#237)
+
+* Bug fixes
+    * classifier: fix updating the same weight column for two times (#233, #236)
+    * Code cleanup (#229)
+
+Release 0.2.7 - 2016/01/25
+--------------------------
+
+* Improvements
+    * recommender: add new recommender method (inverted_index_euclid) (#127)
+    * recommender: support unlearning in MinHash algorithm (#220)
+    * anomaly: support ignore_kth_same_option in LOF algorithm (#222, #223)
+
+* Bug fixes
+    * classifier: NN-based classifier does not take lock on label manipulation (#213, #221)
+    * Fix key manager to swap next_id (#224, #226)
+
+Release 0.2.6 - 2015/12/25
+--------------------------
+
+* Improvements
+    * bandit: improve performance of select_arm API in ucb1 (#186, #214)
+
+* Bug fixes
+    * recommender: fix bit_index_storage (used by lsh/minhash) to ignore 0-bit vectors when analyzing (#211, #215)
+    * fix typo in exception messages (#212)
+
+Release 0.2.5 - 2015/11/30
+--------------------------
+
+* Improvements
+    * recommender: support unlearning in LSH algorithm (#190)
+    * recommender: fix typo of calc_similarity function name (#206, #208)
+    * clustering: return error on calling get_k_center / get_core_members when clustering is not yet performed (#185, #207)
+    * graph: improve error message (#203)
+    * code cleanup (#205)
+
+* Bug fixes
+    * anomaly: fix crash when ignore_kth_same_point is not specified (#201)
+    * nearest_neighbor: fix deadlock when running update/analyze simultaneously (#199, #200)
+
+Release 0.2.4 - 2015/10/26
+--------------------------
+
+* Improvements
+    * nearest_neighbor: improve performance of bit_vector based methods (#188, #191, #192, #193, #194, #196)
+    * nearest_neighbor: improve get_all_row_ids performance by eliminating unnecessary lock (#188, #196)
+    * classifier: improve performance by using read/write lock instead of exclusive lock (#184, #197)
+
+* Bug fixes
+    * nearest_neighbor: fix bit_vector bounds checking (#198)
+    * nearest_neighbor: fix bit_vector to use GCC built-in popcount only when performance improvements are expected (#188, #196)
+    * nearest_neighbor: fix missing lock in pack/unpack (#188, #196)
+
 Release 0.2.3 - 2015/09/28
 --------------------------
 

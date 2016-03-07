@@ -24,6 +24,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include "clustering.hpp"
 #include "../common/exception.hpp"
 
 using jubatus::util::lang::shared_ptr;
@@ -98,8 +99,7 @@ eigen_svec_t gmm::get_nearest_center(const eigen_svec_t& p) const {
 
 int64_t gmm::get_nearest_center_index(const eigen_svec_t& p) const {
   if (means_.empty()) {
-    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-        "clustering is not performed yet"));
+    throw JUBATUS_EXCEPTION(not_performed());
   }
 
   double max_prob = 0;
