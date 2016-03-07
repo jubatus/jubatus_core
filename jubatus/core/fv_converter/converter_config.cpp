@@ -344,8 +344,8 @@ void init_combination_rules(
   key_matcher_factory f;
   for (size_t i = 0; i < combination_rules.size(); ++i) {
     const combination_rule& rule = combination_rules[i];
-    matcher_ptr m_left(f.create_matcher(rule.key_left));
-    matcher_ptr m_right(f.create_matcher(rule.key_right));
+    matcher_ptr m_left(create_key_matcher(rule.key_left, rule.except_left));
+    matcher_ptr m_right(create_key_matcher(rule.key_right, rule.except_right));
     map<string, combination_feature_ptr>::const_iterator it =
       combination_features.find(rule.type);
     if (it == combination_features.end()) {
