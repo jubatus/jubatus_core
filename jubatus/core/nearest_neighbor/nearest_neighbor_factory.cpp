@@ -28,6 +28,9 @@ using jubatus::util::lang::shared_ptr;
 namespace jubatus {
 namespace core {
 namespace nearest_neighbor {
+namespace {
+  const int32_t DEFAULT_THREAD = 1;
+}
 
 shared_ptr<nearest_neighbor_base> create_nearest_neighbor(
     const std::string& name,
@@ -40,11 +43,15 @@ shared_ptr<nearest_neighbor_base> create_nearest_neighbor(
   if (name == "euclid_lsh") {
     return shared_ptr<nearest_neighbor_base>(
         new euclid_lsh(config_cast_check<euclid_lsh::config>(config),
-                       table,
+		       table,
                        id));
   } else if (name == "lsh") {
+    lsh::config conf = config_cast_check<lsh::config>(config);
+    if (!conf.thread) {
+      conf.thread = DEFAULT_THREAD ;
+    }
     return shared_ptr<nearest_neighbor_base>(
-        new lsh(config_cast_check<lsh::config>(config), table, id));
+        new lsh(conf, table, id));
   } else if (name == "minhash") {
     return shared_ptr<nearest_neighbor_base>(
         new minhash(config_cast_check<minhash::config>(config), table, id));

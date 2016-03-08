@@ -24,26 +24,19 @@
 namespace jubatus {
 namespace core {
 namespace nearest_neighbor {
-// namespace {
-//     const int32_t DEFAULT_THREAD = 1 ;
-// } // namespace
-
-// lsh::config::config() {
-//     : hash
-// }
 
 lsh::lsh(
     const config& conf,
     jubatus::util::lang::shared_ptr<storage::column_table> table,
     const std::string& id)
-    : bit_vector_nearest_neighbor_base(conf.hash_num, table, id),
+    : bit_vector_nearest_neighbor_base(conf.hash_num, table, id, *conf.thread),
       hasher(*conf.thread) {
 
   if (!(1 <= conf.hash_num)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("1 <= hash_num"));
   }
-
+  
   if (!(1 <= *conf.thread)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("1 <= thread")) ;
@@ -55,7 +48,7 @@ lsh::lsh(
     jubatus::util::lang::shared_ptr<storage::column_table> table,
     std::vector<storage::column_type>& schema,
     const std::string& id)
-    : bit_vector_nearest_neighbor_base(conf.hash_num, table, schema, id),
+    : bit_vector_nearest_neighbor_base(conf.hash_num, table, schema, id, *conf.thread),
       hasher(*conf.thread) {
 
   if (!(1 <= conf.hash_num)) {

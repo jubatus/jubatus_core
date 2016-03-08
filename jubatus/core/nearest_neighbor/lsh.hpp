@@ -36,10 +36,10 @@ namespace nearest_neighbor {
 class lsh : public bit_vector_nearest_neighbor_base {
  public:
   struct config {
-    config() : hash_num(64u), thread(1) {
+    config() : hash_num(64u), thread(1u) {
     }
-    explicit config(int32_t num) 
-      : hash_num(num), thread(1) {
+    config(int32_t num) 
+      : hash_num(num), thread(1u) {
     }
     explicit config(int32_t num, int32_t thread)
       : hash_num(num), thread(thread) {
