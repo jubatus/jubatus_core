@@ -39,6 +39,7 @@
 #include "../system/time_util.h"
 #include "constant.h"
 #include "random/mersenne_twister.h"
+#include "random/sfmt.h"
 
 namespace jubatus {
 namespace util{
@@ -68,6 +69,10 @@ public:
   /// generate [0,0xffffffff] random number
   uint32_t next_int(){
     return g.next();
+  }
+
+  void fill_int_unsafe(uint32_t *out, size_t count) {
+    g.fill_int_unsafe(out, count);
   }
   
   /// generate [0,\a a) random integer
@@ -162,6 +167,8 @@ private:
 };
 
 typedef random<mersenne_twister> mtrand;
+typedef random<sfmt607> sfmt607rand;
+typedef random<sfmt19937> sfmt19937rand;
 
 /// select k random integer from range [0,n), allowing multiple occurrence. O(k)
 template<typename RAND>
