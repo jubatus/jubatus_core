@@ -34,7 +34,7 @@ vector<float> random_projection(const common::sfv_t& sfv, uint32_t hash_num) {
     const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
     jubatus::util::math::random::mtrand rnd(seed);
     for (uint32_t j = 0; j < hash_num; ++j) {
-      proj[j] += sfv[i].second * rnd.next_gaussian();
+      proj[j] += sfv[i].second * rnd.next_gaussian_float();
     }
   }
   return proj;

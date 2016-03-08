@@ -80,6 +80,11 @@ public:
     return a+next_int(b-a);
   }
 
+  /// generates [0,1) random real number with 24bit resolution
+  float next_float(){
+    return (g.next() >> 8) * (1.0f / 16777216.0f);
+  }
+
   /// generates [0,1) random real number with 53bit resolution
   double next_double(){
     uint32_t a=g.next()>>5;
@@ -95,6 +100,23 @@ public:
   /// generate [\a a,\a b) random real number
   double next_double(double a, double b){
     return a+next_double(b-a);
+  }
+
+  /// generate normalized standard distribution
+  float next_gaussian_float(){
+    static const float pi2 = (float)(2.0 * jubatus::util::math::pi);
+    if(next_gaussian_stocked){
+      next_gaussian_stocked=false;
+      return (float)next_gaussian_stock;
+    }else{
+      float a = 1.0f-next_float();
+      float b = 1.0f-next_float();
+      float r1 = std::sqrt(-2.0f*std::log(a))*std::sin(pi2*b);
+      float r2 = std::sqrt(-2.0f*std::log(a))*std::cos(pi2*b);
+      next_gaussian_stock=r2;
+      next_gaussian_stocked=true;
+      return r1;
+    }
   }
 
   /// generate normalized standard distribution
