@@ -109,9 +109,14 @@ create_nearest_neighbor_bases() {
   }
   for (size_t i = 0; i < pattern.size(); ++i) {
     shared_ptr<column_table> table(new column_table);
-
+    std::cout << "i:" << i << std::endl ;
+    std::cout << "pattern[i].first:" << pattern[i].first << std::endl ;
+    std::cout << "pattern[i].second:" << pattern[i].second << std::endl ;
     json jsconf(new json_object);
     jsconf["hash_num"] = new json_integer(pattern[i].second);
+    if(pattern[i].first == "lsh") {
+      jsconf["thread"] = new json_integer(4) ;
+    }
     common::jsonconfig::config conf(jsconf);
     nearest_neighbors.push_back(
         core::nearest_neighbor::create_nearest_neighbor(

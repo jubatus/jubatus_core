@@ -70,6 +70,7 @@ class nearest_neighbor_test
       json config_js(new jubatus::util::text::json::json_object);
       for (map<string, string>::iterator it = param.begin();
            it != param.end(); ++it) {
+	std::cout << it->first << ":" << it->second << std::endl ;
         config_js.add(
             it->first,
             json(new jubatus::util::text::json::json_integer(
@@ -81,6 +82,7 @@ class nearest_neighbor_test
       table_.reset(new storage::column_table);
       nn_ = create_nearest_neighbor(
           name, config(config_js, ""), table_, "localhost");
+      std::cout << "test!!" << std::endl ;
     } catch (common::jsonconfig::cast_check_error& e) {
       std::cout << "In Setup():" <<e.what() << '\n';
       vector<shared_ptr<common::jsonconfig::config_error> > v = e.errors();
@@ -152,6 +154,7 @@ TEST_P(nearest_neighbor_test, empty_neighbor_row) {
 // TODO(beam2d): Write approximated test of neighbor_row().
 
 const map<string, string> configs[] = {
+  //  make_config("nearest_neighbor:name", "lsh")("hash_num", "64")("thread", "1")(),
   make_config("nearest_neighbor:name", "lsh")("hash_num", "64")(),
   make_config("nearest_neighbor:name", "minhash")("hash_num", "64")(),
   make_config(

@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/data/serialization.h"
+#include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "bit_vector_nearest_neighbor_base.hpp"
 #include "lsh_hash_worker.hpp"
@@ -35,14 +36,17 @@ namespace nearest_neighbor {
 class lsh : public bit_vector_nearest_neighbor_base {
  public:
   struct config {
-    config() : hash_num(64u), thread(1u) {
+    config() : hash_num(64u), thread(1) {
+    }
+    explicit config(int32_t num) 
+      : hash_num(num), thread(1) {
     }
     explicit config(int32_t num, int32_t thread)
       : hash_num(num), thread(thread) {
     }
 
     int32_t hash_num;
-    int32_t thread;
+    jubatus::util::data::optional<int32_t> thread;
 
     template <typename Ar>
     void serialize(Ar& ar) {

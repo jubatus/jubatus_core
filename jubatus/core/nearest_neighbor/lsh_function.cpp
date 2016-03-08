@@ -37,7 +37,7 @@ vector<float> random_projection(const common::sfv_t& sfv, uint32_t hash_num) {
   for (size_t i = 0; i < sfv.size(); ++i) {
     const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
     cache_t::const_iterator it = cache.find(seed);
-    if (it != cache.end()) {
+    if (0 and it != cache.end()) { // TODO(yuhara) cache disable. because of test(neighbor_row_and_similar_row) failed
       // cache hit
       const vector<double>& random_vector = it->second;
       for (uint32_t j = 0; j < hash_num; ++j) {
