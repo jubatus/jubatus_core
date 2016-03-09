@@ -87,7 +87,7 @@ void euclid_lsh::set_row(const string& id, const common::sfv_t& sfv) {
   // TODO(beam2d): support nested algorithm, e.g. when used by lof and then we
   // cannot suppose that the first two columns are assigned to euclid_lsh.
   get_table()->add(id, owner(my_id_),
-                   cosine_lsh(sfv, hash_num_, threads_), l2norm(sfv));
+                   cosine_lsh(sfv, hash_num_, threads_, cache_), l2norm(sfv));
 }
 
 void euclid_lsh::neighbor_row(
@@ -95,7 +95,7 @@ void euclid_lsh::neighbor_row(
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
   neighbor_row_from_hash(
-      cosine_lsh(query, hash_num_, threads_),
+      cosine_lsh(query, hash_num_, threads_, cache_),
       l2norm(query),
       ids,
       ret_num);
@@ -124,6 +124,16 @@ void euclid_lsh::set_config(const config& conf) {
   }
   hash_num_ = conf.hash_num;
   threads_ = read_threads_config(conf.threads);
+
+  if (conf.cache_size.bool_test()) {
+    if (!(0 <= *(conf.cache_size))) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("0 <= cache_size"));
+    }
+    if (*(conf.cache_size) > 0) {
+      cache_.reset(new random_projection_cache(*(conf.cache_size)));
+    }
+  }
 }
 
 void euclid_lsh::fill_schema(vector<column_type>& schema) {
