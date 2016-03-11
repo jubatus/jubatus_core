@@ -275,6 +275,9 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
   bit_vector operator[](uint64_t index) const {
     return bit_vector(get_data_at_(index), type().bit_vector_length());
   }
+  const uint64_t* get_data_at_unsafe(size_t index) const {
+    return get_data_at_(index);
+  }
   bool remove(uint64_t target) {
     if (target >= size()) {
       return false;

@@ -318,23 +318,20 @@ struct bit_vector_base {
     } else if (bv.bits_ == NULL) {
       return bit_count();
     }
+    return calc_hamming_distance_unsafe(bv.bits_);
+  }
+  uint64_t calc_hamming_distance_unsafe(const bit_base *bv) const {
+    if (bits_ == NULL)
+      return bit_count_unsafe(bv, used_bytes());
     size_t match_num = 0;
     for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
          i < blocks; ++i) {
-      match_num += detail::bitcount(bits_[i] ^ bv.bits_[i]);
+      match_num += detail::bitcount(bits_[i] ^ bv[i]);
     }
     return match_num;
   }
   size_t bit_count() const {
-    if (bits_ == NULL) {
-      return 0;
-    }
-    size_t result = 0;
-    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
-         i < blocks; ++i) {
-      result += detail::bitcount(bits_[i]);
-    }
-    return result;
+    return bit_count_unsafe(bits_, used_bytes());
   }
 
   bit_base* raw_data_unsafe() {
@@ -457,6 +454,18 @@ struct bit_vector_base {
       alloc_memory();
     }
     memcpy(bits_, orig.bits_, used_bytes());
+  }
+
+  static size_t bit_count_unsafe(const bit_base *bits, size_t bytes) {
+    if (bits == NULL) {
+      return 0;
+    }
+    size_t result = 0;
+    for (size_t i = 0, blocks = bytes / sizeof(bit_base);
+         i < blocks; ++i) {
+      result += detail::bitcount(bits[i]);
+    }
+    return result;
   }
 
   bit_base* bits_;
