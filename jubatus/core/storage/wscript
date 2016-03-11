@@ -29,7 +29,8 @@ def build(bld):
       'bit_index_storage.cpp',
       'lsh_vector.cpp',
       'lsh_util.cpp',
-      'lsh_index_storage.cpp'
+      'lsh_index_storage.cpp',
+      'bit_vector.cpp'
   ]
   headers = [
       'abstract_column.hpp',
