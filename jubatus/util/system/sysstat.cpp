@@ -51,6 +51,12 @@
 #include <mach/mach_types.h>
 #include <mach/mach.h>
 #endif
+#if defined(__FreeBSD__)
+#include <sys/sysctl.h>
+#include <sys/vmmeter.h>
+#include <vm/vm_param.h>
+#endif
+
 
 using namespace std;
 
@@ -105,6 +111,10 @@ static double get_loadavg()
   kern_return_t error = host_statistics(mach_host_self(), HOST_LOAD_INFO, (host_info_t)&hl,&count);
   double res = static_cast<double>(hl.avenrun[2]) / static_cast<double>(LOAD_SCALE);
   return res;
+#elif defined(__FreeBSD__)
+  double avg[3];
+  getloadavg(avg, 3);
+  return avg[0];
 #else
 #error I dont know how to get loadavg
 #endif
@@ -142,6 +152,15 @@ static uint64_t get_total_memory()
   mach_msg_type_number_t count = HOST_BASIC_INFO_COUNT;
   host_info(mach_host_self(), HOST_BASIC_INFO, (host_info_t)&host, &count);
   return host.memory_size;
+#elif defined(__FreeBSD__)
+  int mib[2];
+  size_t len;
+  uint64_t res;
+  len = sizeof(res);
+  mib[0] = CTL_HW;
+  mib[1] = HW_REALMEM;
+  sysctl(mib, 2, &res, &len, NULL, 0);
+  return res;
 #else
 #error I dont know how to get total memory size
 #endif
@@ -194,6 +213,20 @@ static uint64_t get_free_memory()
   mach_msg_type_number_t count = HOST_VM_INFO_COUNT;
   host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vm_info, &count);
   return vm_info.free_count*vm_page_size;
+#elif defined(__FreeBSD__)
+  int mib[2];
+  size_t len;
+  uint64_t res;
+  len = sizeof(res);
+  mib[0] = CTL_HW;
+  mib[1] = HW_PAGESIZE;
+  sysctl(mib, 2, &res, &len, NULL, 0);
+  struct vmtotal vmsize;
+  mib[0] = CTL_VM;
+  mib[1] = VM_TOTAL;
+  len = sizeof(vmsize);
+  sysctl(mib, 2, &vmsize, &len, NULL, 0);
+  return res * vmsize.t_free;
 #else
 #error I dont know how to get free memory size
 #endif
