@@ -34,7 +34,7 @@
 
 #include <exception>
 #include <memory>
-#ifdef __GLIBCXX__
+#if defined(__GLIBCXX__) && __cplusplus < 201103
 #include <tr1/memory>
 #endif
 
@@ -64,7 +64,7 @@ template <class T>
 class enable_shared_from_this;
 
 namespace detail {
-#ifdef __GLIBCXX__
+#if defined(__GLIBCXX__) && __cplusplus < 201103
 namespace shared_ptr_ns = ::std::tr1;
 #else
 namespace shared_ptr_ns = ::std;

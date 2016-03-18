@@ -33,7 +33,7 @@
 #define JUBATUS_UTIL_LANG_FUNCTION_H_
 
 #include <functional>
-#ifdef __GLIBCXX__
+#if defined(__GLIBCXX__) && __cplusplus < 201103
 #include <tr1/functional>
 #endif
 
@@ -42,7 +42,7 @@ namespace util {
 namespace lang {
 
 namespace detail {
-#ifdef __GLIBCXX__
+#if defined(__GLIBCXX__) && __cplusplus < 201103
 namespace function_ns = ::std::tr1;
 #else
 namespace function_ns = ::std;

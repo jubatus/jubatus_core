@@ -62,6 +62,18 @@ def configure(conf):
 
   conf.check_cxx(lib = 'msgpack')
 
+  if conf.check_cxx(cxxflags='-std=c++11', mandatory=False, uselib_store='cpp11'):
+    # __GLIBCXX__:
+    # Ubuntu 14.04: 20150426
+    #     CentOS 7: 20150623
+    libstdcpp_test = (
+      '#include <iostream>\n'
+      '#if defined(__GLIBCXX__) && __GLIBCXX__ < 20150426\n'
+      '#error\n#endif\nint main(){}')
+    if conf.check_cxx(fragment=libstdcpp_test, mandatory=False,
+                      msg='Checkint libstdc++ version', uselib='cpp11'):
+      env.append_unique('CXXFLAGS', ['-std=c++11', '-Wno-deprecated-declarations'])
+
   if Options.options.debug:
     conf.define('_GLIBCXX_DEBUG', 1)
   else:

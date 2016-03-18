@@ -33,7 +33,7 @@
 #define JUBATUS_UTIL_LANG_ENABLE_SHARED_FROM_THIS_H_
 
 #include <memory>
-#ifdef __GLIBCXX__
+#if defined(__GLIBCXX__) && __cplusplus < 201103
 #include <tr1/memory>
 #endif
 #include "shared_ptr.h"
@@ -43,7 +43,7 @@ namespace util {
 namespace lang {
 
 namespace detail {
-#ifdef __GLIBCXX__
+#if defined(__GLIBCXX__) && __cplusplus < 201103
 namespace enable_shared_from_this_ns = ::std::tr1;
 #else
 namespace enable_shared_from_this_ns = ::std;

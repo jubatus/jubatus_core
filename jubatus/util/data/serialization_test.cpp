@@ -40,11 +40,11 @@
 
 #include "jubatus/util/util-config.h"
 
-#if HAVE_TR1_UNORDERED_MAP
+#if !HAVE_UNORDERED_MAP && HAVE_TR1_UNORDERED_MAP
 #include "./serialization/tr1_unordered_map.h"
 #endif
 
-#if HAVE_TR1_UNORDERED_SET
+#if !HAVE_UNORDERED_SET && HAVE_TR1_UNORDERED_SET
 #include "./serialization/tr1_unordered_set.h"
 #endif
 
@@ -302,7 +302,7 @@ TEST(serialization, string) {
   for (string::iterator it=vs1.begin(),jt=vs2.begin();it!=vs1.end();++it,++jt) EXPECT_EQ(*it,*jt);  
 }
 
-#if HAVE_TR1_UNORDERED_MAP
+#if !HAVE_UNORDERED_MAP && HAVE_TR1_UNORDERED_MAP
 
 TEST(serialization, tr1_unordered_map) {
   srandom(time(NULL));
@@ -348,7 +348,7 @@ TEST(serialization, pficommon_unordered_map){
   }
 }
 
-#if HAVE_TR1_UNORDERED_SET
+#if !HAVE_UNORDERED_SET && HAVE_TR1_UNORDERED_SET
 
 TEST(serialization, tr1_unordered_set) {
   srandom(time(NULL));
