@@ -389,11 +389,11 @@ void inverted_index_storage::calc_euclid_scores(
   storage::fixed_size_heap<pair<float, uint64_t>,
                            std::greater<pair<float, uint64_t> > > heap(ret_num);
 
-  float query_norm = calc_l2norm(query);
+  float squared_query_norm = calc_squared_l2norm(query);
   for (size_t i = 0; i < i_scores.size(); ++i) {
-    float norm = calc_columnl2norm(i);
+    float squared_norm = calc_column_squared_l2norm(i);
 
-    if (norm == 0.f) {
+    if (squared_norm == 0.f) {
       // The column is already removed.
       continue;
     }
@@ -403,8 +403,8 @@ void inverted_index_storage::calc_euclid_scores(
     // expected to be 0) due to the floating point precision problem.
     // This cause `sqrt(d2)` to return NaN, which is not what we want.
     // To avoid this we use `sqrt(max(0, d2))`.
-    float d2 = query_norm * query_norm + norm * norm - 2 * i_scores[i];
-    heap.push(make_pair(-std::sqrt(std::max(0.0f, d2)), i));
+    float d2 = squared_query_norm + squared_norm - 2 * i_scores[i];
+    heap.push(make_pair(-std::sqrt(std::max(0.f, d2)), i));
   }
 
   vector<pair<float, uint64_t> > sorted_scores;
