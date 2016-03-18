@@ -331,8 +331,8 @@ void inverted_index_storage::calc_scores(
     const common::sfv_t& query,
     vector<pair<string, float> >& scores,
     size_t ret_num) const {
-  float query_norm = calc_l2norm(query);
-  if (query_norm == 0.f) {
+  float query_squared_norm = calc_squared_l2norm(query);
+  if (query_squared_norm == 0.f) {
     return;
   }
 
@@ -349,11 +349,16 @@ void inverted_index_storage::calc_scores(
     float score = i_scores[i];
     if (score == 0.f)
       continue;
-    float norm = calc_columnl2norm(i);
-    if (norm == 0.f)
+    float squared_norm = calc_column_squared_l2norm(i);
+    if (squared_norm == 0.f)
       continue;
-    float normed_score = score / norm / query_norm;
-    heap.push(make_pair(normed_score, i));
+    float cosine_similarity = 1.f;
+    if (squared_norm != query_squared_norm || squared_norm != score) {
+      cosine_similarity = score
+                          / std::sqrt(squared_norm)
+                          / std::sqrt(query_squared_norm);
+    }
+    heap.push(make_pair(cosine_similarity, i));
   }
   vector<pair<float, uint64_t> > sorted_scores;
   heap.get_sorted(sorted_scores);
@@ -413,14 +418,23 @@ void inverted_index_storage::calc_euclid_scores(
 }
 
 float inverted_index_storage::calc_l2norm(const common::sfv_t& sfv) {
+  return std::sqrt(calc_squared_l2norm(sfv));
+}
+
+float inverted_index_storage::calc_squared_l2norm(const common::sfv_t& sfv) {
   float ret = 0.f;
   for (size_t i = 0; i < sfv.size(); ++i) {
     ret += sfv[i].second * sfv[i].second;
   }
-  return std::sqrt(ret);
+  return ret;
 }
 
 float inverted_index_storage::calc_columnl2norm(uint64_t column_id) const {
+  return std::sqrt(calc_column_squared_l2norm(column_id));
+}
+
+float inverted_index_storage::calc_column_squared_l2norm(
+    uint64_t column_id) const {
   float ret = 0.f;
   imap_float_t::const_iterator it_diff = column2norm_diff_.find(column_id);
   if (it_diff != column2norm_diff_.end()) {
@@ -430,7 +444,7 @@ float inverted_index_storage::calc_columnl2norm(uint64_t column_id) const {
   if (it != column2norm_.end()) {
     ret += it->second;
   }
-  return std::sqrt(ret);
+  return ret;
 }
 
 void inverted_index_storage::add_inp_scores(
