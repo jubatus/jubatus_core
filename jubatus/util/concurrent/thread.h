@@ -51,6 +51,7 @@ public:
 
   static void yield();
   static bool sleep(double sec);
+  static unsigned hardware_concurrency();
 
   typedef int64_t tid_t;
   static tid_t id();
