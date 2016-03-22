@@ -68,6 +68,9 @@ class bit_vector_nearest_neighbor_base : public nearest_neighbor_base {
 
   uint64_t bit_vector_column_id_;
   uint32_t bitnum_;
+
+ protected:
+  uint32_t threads_;
 };
 
 }  // namespace nearest_neighbor

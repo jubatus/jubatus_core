@@ -19,6 +19,7 @@
 #include <vector>
 #include "lsh.hpp"
 #include "lsh_function.hpp"
+#include "bit_vector_ranking.hpp"
 #include "../storage/column_table.hpp"
 
 namespace jubatus {
@@ -31,10 +32,7 @@ lsh::lsh(
     const std::string& id)
     : bit_vector_nearest_neighbor_base(conf.hash_num, table, id) {
 
-  if (!(1 <= conf.hash_num)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("1 <= hash_num"));
-  }
+  set_config(conf);
 }
 
 lsh::lsh(
@@ -44,14 +42,19 @@ lsh::lsh(
     const std::string& id)
     : bit_vector_nearest_neighbor_base(conf.hash_num, table, schema, id) {
 
-  if (!(1 <= conf.hash_num)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("1 <= hash_num"));
-  }
+  set_config(conf);
 }
 
 storage::bit_vector lsh::hash(const common::sfv_t& sfv) const {
   return cosine_lsh(sfv, bitnum());
+}
+
+void lsh::set_config(const config& conf) {
+  if (!(1 <= conf.hash_num)) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("1 <= hash_num"));
+  }
+  threads_ = read_threads_config(conf.threads);
 }
 
 }  // namespace nearest_neighbor

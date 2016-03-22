@@ -22,6 +22,7 @@
 #include <utility>
 #include <vector>
 #include "jubatus/util/data/serialization.h"
+#include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "nearest_neighbor_base.hpp"
 
@@ -36,15 +37,16 @@ class euclid_lsh : public nearest_neighbor_base {
  public:
   struct config {
     config()
-        : hash_num(64u) {
+        : hash_num(64u), threads() {
     }
 
     // TODO(beam2d): make it uint32_t (by modifying pficommon)
     int32_t hash_num;
+    jubatus::util::data::optional<int32_t> threads;
 
     template <typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_MEMBER(hash_num);
+      ar & JUBA_MEMBER(hash_num) & JUBA_MEMBER(threads);
     }
   };
 
@@ -90,6 +92,7 @@ class euclid_lsh : public nearest_neighbor_base {
 
   uint64_t first_column_id_;
   uint32_t hash_num_;
+  uint32_t threads_;
 };
 
 }  // namespace nearest_neighbor_base

@@ -28,6 +28,11 @@ namespace storage {
 template <typename T, typename Comp = std::less<T> >
 class fixed_size_heap {
  public:
+  fixed_size_heap()
+      : max_size_(0),
+        comp_(Comp()) {
+  }
+
   explicit fixed_size_heap(size_t max)
       : max_size_(max),
         comp_(Comp()) {
@@ -53,6 +58,11 @@ class fixed_size_heap {
     }
   }
 
+  void merge(const fixed_size_heap<T, Comp>& other) {
+    for (size_t i = 0; i < other.data_.size(); ++i)
+      push(other.data_[i]);
+  }
+
   void get_sorted(std::vector<T>& v) const {
     std::vector<T> vec(data_);
     std::sort(vec.begin(), vec.end(), comp_);
@@ -69,8 +79,8 @@ class fixed_size_heap {
 
  private:
   std::vector<T> data_;
-  const size_t max_size_;
-  const Comp comp_;
+  size_t max_size_;
+  Comp comp_;
 };
 
 }  // namespace storage
