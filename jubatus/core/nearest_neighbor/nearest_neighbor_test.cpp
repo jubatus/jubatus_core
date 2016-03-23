@@ -70,6 +70,7 @@ class nearest_neighbor_test
       json config_js(new jubatus::util::text::json::json_object);
       for (map<string, string>::iterator it = param.begin();
            it != param.end(); ++it) {
+	std::cout << it->first << ":" << it->second << std::endl ;
         config_js.add(
             it->first,
             json(new jubatus::util::text::json::json_integer(
@@ -152,7 +153,8 @@ TEST_P(nearest_neighbor_test, empty_neighbor_row) {
 // TODO(beam2d): Write approximated test of neighbor_row().
 
 const map<string, string> configs[] = {
-  make_config("nearest_neighbor:name", "lsh")("hash_num", "64")(),
+  make_config("nearest_neighbor:name", "lsh")("hash_num", "64")("thread", "1")(),
+  make_config("nearest_neighbor:name", "lsh")("hash_num", "64")("thread", "16")(),
   make_config("nearest_neighbor:name", "minhash")("hash_num", "64")(),
   make_config(
       "nearest_neighbor:name", "euclid_lsh")(
@@ -160,7 +162,7 @@ const map<string, string> configs[] = {
 };
 
 INSTANTIATE_TEST_CASE_P(
-    lsh_test,
+    nn_test,
     nearest_neighbor_test,
     ::testing::ValuesIn(configs));
 
@@ -207,6 +209,7 @@ TYPED_TEST_P(nearest_neighbor_config_test, config_validation) {
                   id));
 }
 
+
 REGISTER_TYPED_TEST_CASE_P(
     nearest_neighbor_config_test, config_validation);
 
@@ -215,6 +218,58 @@ typedef testing::Types<nearest_neighbor::lsh,
 
 INSTANTIATE_TYPED_TEST_CASE_P(nn_config_test,
   nearest_neighbor_config_test, nn_types);
+
+template<typename T>
+class nearest_neighbor_with_parallel_config_test : public testing::Test {
+};
+
+TYPED_TEST_CASE_P(nearest_neighbor_with_parallel_config_test);
+
+TYPED_TEST_P(nearest_neighbor_with_parallel_config_test, config_validation) {
+  string id("ID");
+  vector<storage::column_type> schema;
+  typename TypeParam::config c;
+
+  // 1 <= thread
+  c.thread = 0;
+  ASSERT_THROW(TypeParam n(c,
+      shared_ptr<storage::column_table>(new storage::column_table), id),
+      common::invalid_parameter);
+  ASSERT_THROW(TypeParam n(c,
+      shared_ptr<storage::column_table>(new storage::column_table), schema, id),
+      common::invalid_parameter);
+
+  c.thread = 1;
+  ASSERT_NO_THROW(
+      TypeParam n(c,
+                  shared_ptr<storage::column_table>(new storage::column_table),
+                  id));
+  ASSERT_NO_THROW(
+      TypeParam n(c,
+                  shared_ptr<storage::column_table>(new storage::column_table),
+                  schema,
+                  id));
+
+  c.thread = 2;
+  ASSERT_NO_THROW(
+      TypeParam n(c,
+                  shared_ptr<storage::column_table>(new storage::column_table),
+                  id));
+  ASSERT_NO_THROW(
+      TypeParam n(c,
+                  shared_ptr<storage::column_table>(new storage::column_table),
+                  schema,
+                  id));
+}
+
+
+REGISTER_TYPED_TEST_CASE_P(
+    nearest_neighbor_with_parallel_config_test, config_validation);
+
+typedef testing::Types<nearest_neighbor::lsh> nn_types_with_parallel;
+
+INSTANTIATE_TYPED_TEST_CASE_P(nn_with_parallel_config_test,
+  nearest_neighbor_with_parallel_config_test, nn_types_with_parallel);
 
 }  // namespace nearest_neighbor
 }  // namespace core

@@ -29,11 +29,17 @@ lsh::lsh(
     const config& conf,
     jubatus::util::lang::shared_ptr<storage::column_table> table,
     const std::string& id)
-    : bit_vector_nearest_neighbor_base(conf.hash_num, table, id) {
+    : bit_vector_nearest_neighbor_base(conf.hash_num, table, id, *conf.thread),
+      hasher(*conf.thread) {
 
   if (!(1 <= conf.hash_num)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("1 <= hash_num"));
+  }
+  
+  if (!(1 <= *conf.thread)) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("1 <= thread")) ;
   }
 }
 
@@ -42,16 +48,25 @@ lsh::lsh(
     jubatus::util::lang::shared_ptr<storage::column_table> table,
     std::vector<storage::column_type>& schema,
     const std::string& id)
-    : bit_vector_nearest_neighbor_base(conf.hash_num, table, schema, id) {
+    : bit_vector_nearest_neighbor_base(conf.hash_num, table, schema, id, *conf.thread),
+      hasher(*conf.thread) {
 
   if (!(1 <= conf.hash_num)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("1 <= hash_num"));
   }
+
+  if (!(1 <= *conf.thread)) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("1 <= thread")) ;
+  }
+
 }
 
 storage::bit_vector lsh::hash(const common::sfv_t& sfv) const {
-  return cosine_lsh(sfv, bitnum());
+  storage::bit_vector ret;
+  hasher.hash(sfv, bitnum(), ret);
+  return ret;
 }
 
 }  // namespace nearest_neighbor

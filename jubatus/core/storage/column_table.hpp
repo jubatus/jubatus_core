@@ -260,6 +260,15 @@ class column_table {
     }
   }
 
+  std::vector<column_type> types() const {
+    std::vector<column_type> ret;
+    ret.reserve(columns_.size());
+    for (size_t i = 0; i < columns_.size(); ++i) {
+      ret.push_back(columns_[i].type());
+    }
+    return ret;
+  }
+
   version_t set_row(const msgpack::object& o,
                     unlearner::unlearner_base* unlearner = NULL) {
     if (o.type != msgpack::type::ARRAY || o.via.array.size != 3) {

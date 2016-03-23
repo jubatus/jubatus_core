@@ -41,6 +41,9 @@ class minhash : public bit_vector_nearest_neighbor_base {
     config()
       : hash_num(64u) {
     }
+    explicit config(uint32_t num)
+      : hash_num(num) {
+    }
 
     int32_t hash_num;
 

@@ -23,6 +23,7 @@
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
 #include "nearest_neighbor_base.hpp"
+#include "bit_vector_ranking.hpp"
 
 namespace jubatus {
 namespace core {
@@ -36,12 +37,14 @@ class bit_vector_nearest_neighbor_base : public nearest_neighbor_base {
   bit_vector_nearest_neighbor_base(
       uint32_t bitnum,
       jubatus::util::lang::shared_ptr<storage::column_table> table,
-      const std::string& id);
+      const std::string& id,
+      size_t parallel = 1);
   bit_vector_nearest_neighbor_base(
       uint32_t bitnum,
       jubatus::util::lang::shared_ptr<storage::column_table> table,
       std::vector<storage::column_type>& schema,
-      const std::string& id);
+      const std::string& id,
+      size_t parallel = 1);
 
   uint32_t bitnum() const { return bitnum_; }
 
@@ -66,6 +69,7 @@ class bit_vector_nearest_neighbor_base : public nearest_neighbor_base {
       std::vector<std::pair<std::string, float> >& ids,
       uint64_t ret_num) const;
 
+  mutable bit_vector_ranker ranker_;
   uint64_t bit_vector_column_id_;
   uint32_t bitnum_;
 };
