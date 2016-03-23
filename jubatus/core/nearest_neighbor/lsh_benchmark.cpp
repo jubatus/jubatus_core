@@ -155,10 +155,9 @@ void dump_time(
 
 int main() {
   size_t num = 100000;
-  int threads = 16;
   size_t dencity = 100;
   int ret_num = 16;
-  int hash_num = 4096;
+  int hash_num = 2048;
 
   std::cout << "perparing dataset :"
             << num << " entries "
@@ -171,17 +170,27 @@ int main() {
   types.push_back("lsh");
   //types.push_back("euclid_lsh");
 
+  std::vector<int> threads;
+  threads.push_back(1) ;
+  threads.push_back(2) ;
+  threads.push_back(4) ;
+  threads.push_back(8) ;
+
   for (size_t i = 0; i < types.size(); ++i) {
     std::cout << "benchmarking :" << types[i] << std::endl;
-    std::pair<double, double> time = nn_bench(
-        types[i],
+    for (size_t j = 0; j< threads.size(); ++j) {
+      std::cout << "thread :" << threads[j] << std::endl ;
+      std::pair<double, double> time = nn_bench(
+	types[i],
         dataset,
-        threads,
+        threads[j],
         num,
         dencity,
         ret_num,
         hash_num);
-    dump_time(types[i], time, num, dencity, hash_num);
+      dump_time(types[i], time, num, dencity, hash_num);
+    }
   }
+
   return 0;
 }
