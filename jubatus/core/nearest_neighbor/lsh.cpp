@@ -46,7 +46,7 @@ lsh::lsh(
 }
 
 storage::bit_vector lsh::hash(const common::sfv_t& sfv) const {
-  return cosine_lsh(sfv, bitnum());
+  return cosine_lsh(sfv, bitnum(), threads_);
 }
 
 void lsh::set_config(const config& conf) {

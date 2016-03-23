@@ -16,11 +16,14 @@
 
 #include "lsh_function.hpp"
 
+#include <algorithm>
 #include <vector>
 #include "../common/hash.hpp"
+#include "../common/thread_pool.hpp"
 #include "jubatus/util/math/random.h"
 #include "sse_mathfunc.hpp"
 #include "avx_mathfunc.hpp"
+#include "bit_vector_ranking.hpp"
 
 using std::vector;
 using jubatus::core::storage::bit_vector;
@@ -31,7 +34,7 @@ namespace nearest_neighbor {
 namespace {
 
 std::vector<float> random_projection_internal(
-  const common::sfv_t& sfv, uint32_t hash_num);
+  const common::sfv_t& sfv, uint32_t hash_num, size_t start, size_t end);
 
 #if defined(__SSE2__) || defined(JUBATUS_USE_FMV)
 template <class RND>
@@ -41,23 +44,56 @@ inline void next_gaussian_float8(RND& g, float *out);
 #ifdef JUBATUS_USE_FMV
 __attribute__((target("default")))
 std::vector<float> random_projection_internal(
-  const common::sfv_t& sfv, uint32_t hash_num);
+  const common::sfv_t& sfv, uint32_t hash_num, size_t start, size_t end);
 
 __attribute__((target("sse2")))
 std::vector<float> random_projection_internal(
-  const common::sfv_t& sfv, uint32_t hash_num);
+  const common::sfv_t& sfv, uint32_t hash_num, size_t start, size_t end);
 
 __attribute__((target("avx2")))
 std::vector<float> random_projection_internal(
-  const common::sfv_t& sfv, uint32_t hash_num);
+  const common::sfv_t& sfv, uint32_t hash_num, size_t start, size_t end);
 
 template <class RND> __attribute__((target("avx2")))
 inline void next_gaussian_float16(RND& g, float *out);
 #endif
-}
 
-vector<float> random_projection(const common::sfv_t& sfv, uint32_t hash_num) {
-  return random_projection_internal(sfv, hash_num);
+std::vector<float> random_projection_dispatcher(
+  const jubatus::core::common::sfv_t *sfv,
+  uint32_t hash_num, size_t start, size_t end) {
+  return random_projection_internal(*sfv, hash_num, start, end);
+}
+}  // namespace
+
+vector<float> random_projection(const common::sfv_t& sfv,
+                                uint32_t hash_num, uint32_t threads) {
+  typedef std::vector<
+    jubatus::util::lang::shared_ptr<
+      common::thread_pool::future<std::vector<float> > > > future_list_t;
+  if (threads > 1 && sfv.size() > 0) {
+    size_t block_size =
+      static_cast<size_t>(std::ceil(sfv.size() / static_cast<float>(threads)));
+    vector<float> proj(hash_num);
+    std::vector<jubatus::util::lang::function<std::vector<float>()> > funcs;
+    funcs.reserve(sfv.size() / block_size + 1);
+    for (size_t t = 0, end = 0; t < threads && end < sfv.size() ; ++t) {
+      size_t off = end;
+      end += std::min(block_size, sfv.size() - off);
+      funcs.push_back(jubatus::util::lang::bind(
+        &random_projection_dispatcher, &sfv, hash_num, off, end));
+    }
+    future_list_t futures =
+      jubatus::core::common::default_thread_pool::async_all(funcs);
+    for (future_list_t::iterator it = futures.begin();
+         it != futures.end(); ++it) {
+      const std::vector<float>& pj = (*it)->get();
+      for (size_t i = 0; i < proj.size(); ++i)
+        proj[i] += pj[i];
+    }
+    return proj;
+  } else {
+    return random_projection_internal(sfv, hash_num, 0, sfv.size());
+  }
 }
 
 bit_vector binarize(const vector<float>& proj) {
@@ -70,8 +106,9 @@ bit_vector binarize(const vector<float>& proj) {
   return bv;
 }
 
-bit_vector cosine_lsh(const common::sfv_t& sfv, uint32_t hash_num) {
-  return binarize(random_projection(sfv, hash_num));
+bit_vector cosine_lsh(const common::sfv_t& sfv,
+                      uint32_t hash_num, uint32_t threads) {
+  return binarize(random_projection(sfv, hash_num, threads));
 }
 
 namespace {
@@ -81,9 +118,10 @@ namespace {
 __attribute__((target("default")))
 #endif
 vector<float> random_projection_internal(const common::sfv_t& sfv,
-                                         uint32_t hash_num) {
+                                         uint32_t hash_num,
+                                         size_t start, size_t end) {
   vector<float> proj(hash_num);
-  for (size_t i = 0; i < sfv.size(); ++i) {
+  for (size_t i = start; i < end; ++i) {
     const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
     jubatus::util::math::random::sfmt607rand rnd(seed);
     for (uint32_t j = 0; j < hash_num; ++j) {
@@ -92,19 +130,20 @@ vector<float> random_projection_internal(const common::sfv_t& sfv,
   }
   return proj;
 }
-#endif  // #if !defined(__SSE2__) || defined(JUBATUS_ENABLED_FUNCTION_MULTIV...
+#endif  // #if !defined(__SSE2__) || defined(JUBATUS_USE_FMV)
 
 #if defined(__SSE2__) || defined(JUBATUS_USE_FMV)
 #ifdef JUBATUS_USE_FMV
 __attribute__((target("sse2")))
 #endif
 vector<float> random_projection_internal(const common::sfv_t& sfv,
-                                         uint32_t hash_num) {
+                                         uint32_t hash_num,
+                                         size_t start, size_t end) {
   std::vector<float> proj(hash_num);
   float *p = const_cast<float*>(proj.data());
   uint32_t hash_num_sse = hash_num & 0xfffffff8;
   float grnd[8] __attribute__((aligned(16)));
-  for (size_t i = 0; i < sfv.size(); ++i) {
+  for (size_t i = start; i < end; ++i) {
     const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
     jubatus::util::math::random::sfmt607rand rnd(seed);
     const float v = sfv[i].second;
@@ -158,17 +197,18 @@ inline void next_gaussian_float8(RND& g, float *out) {
   _mm_storeu_ps(out + 4, _mm_unpackhi_ps(b, a));
 }
 
-#endif  // #if defined(__SSE2__) || defined(JUBATUS_ENABLED_FUNCTION_MULTIVE...
+#endif  // #if defined(__SSE2__) || defined(JUBATUS_USE_FMV)
 
 #ifdef JUBATUS_USE_FMV
 __attribute__((target("avx2")))
 vector<float> random_projection_internal(const common::sfv_t& sfv,
-                                         uint32_t hash_num) {
+                                         uint32_t hash_num,
+                                         size_t start, size_t end) {
   std::vector<float> proj(hash_num);
   float *p = const_cast<float*>(proj.data());
   uint32_t hash_num_avx = hash_num & 0xfffffff0;
   float grnd[16] __attribute__((aligned(32)));
-  for (size_t i = 0; i < sfv.size(); ++i) {
+  for (size_t i = start; i < end; ++i) {
     const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
     jubatus::util::math::random::sfmt607rand rnd(seed);
     const float v = sfv[i].second;
