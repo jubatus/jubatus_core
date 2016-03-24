@@ -38,9 +38,6 @@ class euclid_lsh : public nearest_neighbor_base {
     config()
         : hash_num(64u) {
     }
-    explicit config(int32_t num)
-      : hash_num(num) {
-    }
 
     // TODO(beam2d): make it uint32_t (by modifying pficommon)
     int32_t hash_num;

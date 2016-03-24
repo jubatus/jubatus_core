@@ -86,7 +86,6 @@ inline int fast_bitcount(unsigned long bits) {  // NOLINT
 }
 
 inline int fast_bitcount(unsigned long long bits) {  // NOLINT
-  std::cout << "fast" << std::flush;
   return __builtin_popcountll(bits);
 }
 
