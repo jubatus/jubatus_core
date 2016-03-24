@@ -114,21 +114,27 @@ TEST(converter_config, combination) {
   config.num_rules = std::vector<num_rule>();
   config.num_rules->push_back(nr);
 
-  combination_rule cr = {"*@num", "*@num", optional<string>("b*"), optional<string>("b*"), "add"};
+  combination_rule cr = {
+      "*@num",
+      "*@num",
+      optional<string>("b*"),
+      optional<string>("b*"),
+      "add"
+  };
   config.combination_rules = std::vector<combination_rule>();
   config.combination_rules->push_back(cr);
 
   datum_to_fv_converter conv;
   initialize_converter(config, conv);
-  
+
   datum d;
   d.num_values_.push_back(std::make_pair("a1", 1.0));
   d.num_values_.push_back(std::make_pair("a2", 2.0));
   d.num_values_.push_back(std::make_pair("b", 300.0));
-  
+
   common::sfv_t f;
   conv.convert(d, f);
-  
+
   common::sfv_t exp;
   exp.push_back(std::make_pair("a1@num", 1.0));
   exp.push_back(std::make_pair("a2@num", 2.0));
