@@ -134,7 +134,7 @@ public:
         }else{
           x = -log((1.0-u1)/(c*alpha));
           if( log(u2) <= (alpha-1)*log(x) ){
-            return true;
+            return x;                                                                                                                                                                                                                                                
           }
         }
       }

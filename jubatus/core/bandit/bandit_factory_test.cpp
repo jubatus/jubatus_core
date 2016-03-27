@@ -48,6 +48,7 @@ TEST(bandit_factory, ucb1) {
 
 TEST(bandit_factory, ts) {
   json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);                                                                                                                                                                                                                     
   common::jsonconfig::config conf(js);
   shared_ptr<bandit_base> p = bandit_factory::create("ts", conf);
   EXPECT_EQ("ts", p->name());
