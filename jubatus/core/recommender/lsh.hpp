@@ -26,6 +26,7 @@
 #include "recommender_base.hpp"
 #include "../unlearner/unlearner_base.hpp"
 #include "../common/jsonconfig.hpp"
+#include "../nearest_neighbor/lsh_function.hpp"
 
 namespace jubatus {
 namespace core {
@@ -46,14 +47,19 @@ class lsh : public recommender_base {
     config();
 
     int64_t hash_num;
-
+    util::data::optional<int32_t> threads;
+    util::data::optional<int32_t> cache_size;
     util::data::optional<std::string> unlearner;
     util::data::optional<core::common::jsonconfig::config> unlearner_parameter;
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_MEMBER(hash_num) &
-          JUBA_MEMBER(unlearner) & JUBA_MEMBER(unlearner_parameter);
+      ar
+        & JUBA_MEMBER(hash_num)
+        & JUBA_MEMBER(threads)
+        & JUBA_MEMBER(cache_size)
+        & JUBA_MEMBER(unlearner)
+        & JUBA_MEMBER(unlearner_parameter);
     }
   };
 
@@ -91,8 +97,6 @@ class lsh : public recommender_base {
   void unpack(msgpack::object o);
 
  private:
-  void calc_lsh_values(const common::sfv_t& sfv, storage::bit_vector& bv) const;
-
   void initialize_model();
 
   jubatus::util::lang::shared_ptr<storage::mixable_bit_index_storage>
@@ -102,6 +106,8 @@ class lsh : public recommender_base {
       unlearner_;
 
   const uint64_t hash_num_;
+  const uint32_t threads_;
+  mutable jubatus::core::nearest_neighbor::cache_t cache_;
 };
 
 }  // namespace recommender

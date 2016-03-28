@@ -24,15 +24,15 @@
 #include "jubatus/util/lang/function.h"
 #include "jubatus/util/lang/bind.h"
 #include "../common/exception.hpp"
-#include "../common/hash.hpp"
-#include "lsh_util.hpp"
 #include "../storage/bit_index_storage.hpp"
 #include "../unlearner/unlearner_factory.hpp"
+#include "../nearest_neighbor/bit_vector_ranking.hpp"
 
 using std::pair;
 using std::string;
 using std::vector;
 using jubatus::core::storage::bit_vector;
+using jubatus::core::nearest_neighbor::cosine_lsh;
 
 namespace jubatus {
 namespace core {
@@ -45,7 +45,7 @@ lsh::config::config()
 }
 
 lsh::lsh(uint64_t hash_num)
-    : hash_num_(hash_num) {
+    : hash_num_(hash_num), threads_(1), cache_() {
   if (!(1 <= hash_num)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("1 <= hash_num"));
@@ -54,12 +54,14 @@ lsh::lsh(uint64_t hash_num)
 }
 
 lsh::lsh(const config& config)
-    : hash_num_(config.hash_num) {
+    : hash_num_(config.hash_num),
+      threads_(nearest_neighbor::read_threads_config(config.threads)) {
 
   if (!(1 <= config.hash_num)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("1 <= hash_num"));
   }
+  nearest_neighbor::init_cache_from_config(cache_, config.cache_size);
 
   initialize_model();
 
@@ -84,7 +86,7 @@ lsh::lsh(const config& config)
 }
 
 lsh::lsh()
-    : hash_num_(DEFAULT_HASH_NUM) {
+    : hash_num_(DEFAULT_HASH_NUM), threads_(1) {
   initialize_model();
 }
 
@@ -100,8 +102,7 @@ void lsh::similar_row(
     return;
   }
 
-  bit_vector query_bv;
-  calc_lsh_values(query, query_bv);
+  bit_vector query_bv = cosine_lsh(query, hash_num_, threads_, cache_);
   mixable_storage_->get_model()->similar_row(query_bv, ids, ret_num);
 }
 
@@ -153,12 +154,6 @@ void lsh::remove_row(const string& id) {
   mixable_storage_->get_model()->remove_row(id);
 }
 
-void lsh::calc_lsh_values(const common::sfv_t& sfv, bit_vector& bv) const {
-  vector<float> lsh_vals;
-  prod_invert_and_vector(sfv, hash_num_, lsh_vals);
-  set_bit_vector(lsh_vals, bv);
-}
-
 void lsh::update_row(const string& id, const sfv_diff_t& diff) {
   if (unlearner_ && !unlearner_->can_touch(id)) {
     throw JUBATUS_EXCEPTION(common::exception::runtime_error(
@@ -168,8 +163,7 @@ void lsh::update_row(const string& id, const sfv_diff_t& diff) {
   orig_.set_row(id, diff);
   common::sfv_t row;
   orig_.get_row(id, row);
-  bit_vector bv;
-  calc_lsh_values(row, bv);
+  bit_vector bv = cosine_lsh(row, hash_num_, threads_, cache_);
   mixable_storage_->get_model()->set_row(id, bv);
   if (unlearner_) {
     unlearner_->touch(id);

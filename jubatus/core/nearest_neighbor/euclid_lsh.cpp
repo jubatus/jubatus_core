@@ -132,16 +132,7 @@ void euclid_lsh::set_config(const config& conf) {
   }
   hash_num_ = conf.hash_num;
   threads_ = read_threads_config(conf.threads);
-
-  if (conf.cache_size.bool_test()) {
-    if (!(0 <= *(conf.cache_size))) {
-      throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("0 <= cache_size"));
-    }
-    if (*(conf.cache_size) > 0) {
-      cache_.reset(new random_projection_cache(*(conf.cache_size)));
-    }
-  }
+  init_cache_from_config(cache_, conf.cache_size);
 }
 
 void euclid_lsh::fill_schema(vector<column_type>& schema) {

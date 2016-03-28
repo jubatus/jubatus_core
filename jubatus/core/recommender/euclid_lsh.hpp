@@ -30,6 +30,7 @@
 #include "recommender_base.hpp"
 #include "../unlearner/unlearner_base.hpp"
 #include "../common/jsonconfig.hpp"
+#include "../nearest_neighbor/lsh_function.hpp"
 
 namespace jubatus {
 namespace core {
@@ -66,6 +67,8 @@ class euclid_lsh : public recommender_base {
     float bin_width;
     int32_t probe_num;
     int32_t seed;
+    jubatus::util::data::optional<int32_t> threads;
+    jubatus::util::data::optional<int32_t> cache_size;
 
     util::data::optional<std::string> unlearner;
     util::data::optional<core::common::jsonconfig::config> unlearner_parameter;
@@ -78,6 +81,8 @@ class euclid_lsh : public recommender_base {
           & JUBA_MEMBER(bin_width)
           & JUBA_MEMBER(probe_num)
           & JUBA_MEMBER(seed)
+          & JUBA_MEMBER(threads)
+          & JUBA_MEMBER(cache_size)
           & JUBA_MEMBER(unlearner)
           & JUBA_MEMBER(unlearner_parameter);
     }
@@ -120,7 +125,6 @@ class euclid_lsh : public recommender_base {
 
  private:
   std::vector<float> calculate_lsh(const common::sfv_t& query) const;
-  std::vector<float> get_projection(uint32_t seed) const;
 
   void initialize_model();
 
@@ -128,6 +132,8 @@ class euclid_lsh : public recommender_base {
     mixable_storage_;
   float bin_width_;
   uint32_t num_probe_;
+  const uint32_t threads_;
+  mutable jubatus::core::nearest_neighbor::cache_t cache_;
 
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
       unlearner_;
