@@ -1,3 +1,13 @@
+Release 0.2.9 - 2016/03/28
+--------------------------
+
+* Improvements
+    * Expose fv_converter APIs (#256)
+
+* Bug fixes
+    * Fix bit_vector memory allocation size (#240)
+    * Fix combination_rules to support except_{left,right} (#232, #258)
+
 Release 0.2.8 - 2016/02/29
 --------------------------
 
