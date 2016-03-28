@@ -107,6 +107,46 @@ TEST(converter_config, hash_negative) {
   EXPECT_THROW(initialize_converter(config, conv), converter_exception);
 }
 
+TEST(converter_config, combination) {
+  converter_config config;
+
+  num_rule nr = {"*", optional<string>(), "num"};
+  config.num_rules = std::vector<num_rule>();
+  config.num_rules->push_back(nr);
+
+  combination_rule cr = {
+      "*@num",
+      "*@num",
+      optional<string>("b*"),
+      optional<string>("b*"),
+      "add"
+  };
+  config.combination_rules = std::vector<combination_rule>();
+  config.combination_rules->push_back(cr);
+
+  datum_to_fv_converter conv;
+  initialize_converter(config, conv);
+
+  datum d;
+  d.num_values_.push_back(std::make_pair("a1", 1.0));
+  d.num_values_.push_back(std::make_pair("a2", 2.0));
+  d.num_values_.push_back(std::make_pair("b", 300.0));
+
+  common::sfv_t f;
+  conv.convert(d, f);
+
+  common::sfv_t exp;
+  exp.push_back(std::make_pair("a1@num", 1.0));
+  exp.push_back(std::make_pair("a2@num", 2.0));
+  exp.push_back(std::make_pair("b@num", 300.0));
+  exp.push_back(std::make_pair("a1@num&a2@num/add", 3.0));
+
+  std::sort(f.begin(), f.end());
+  std::sort(exp.begin(), exp.end());
+  ASSERT_EQ(exp, f);
+  ASSERT_EQ(4u, f.size());
+}
+
 TEST(make_fv_converter, empty_config) {
   jubatus::util::text::json::json
     js(new jubatus::util::text::json::json_object);

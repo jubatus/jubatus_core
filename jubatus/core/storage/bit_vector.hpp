@@ -428,7 +428,7 @@ struct bit_vector_base {
 
   void alloc_memory() {
     JUBATUS_ASSERT(!own_);
-    bits_ = new bit_base[used_bytes()];
+    bits_ = new bit_base[used_bytes() / sizeof(bit_base)];
     own_ = true;
     memset(bits_, 0, used_bytes());
   }
