@@ -231,7 +231,6 @@ create_recommender_configs_with_unlearner() {
   js_euclid_lsh["seed"] = to_json(1091);
   js_euclid_lsh["probe_num"] = to_json(64);
   js_euclid_lsh["bin_width"] = to_json(100);
-  js_euclid_lsh["retain_projection"] = to_json(false);
   configs.push_back(
       make_pair("euclid_lsh", common::jsonconfig::config(js_euclid_lsh)));
 

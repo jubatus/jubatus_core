@@ -57,7 +57,6 @@ class euclid_lsh : public recommender_base {
   static const float DEFAULT_BIN_WIDTH;
   static const uint32_t DEFAULT_NUM_PROBE;
   static const uint32_t DEFAULT_SEED;
-  static const bool DEFAULT_RETAIN_PROJECTION;
 
   struct config {
     config();
@@ -67,7 +66,6 @@ class euclid_lsh : public recommender_base {
     float bin_width;
     int32_t probe_num;
     int32_t seed;
-    bool retain_projection;
 
     util::data::optional<std::string> unlearner;
     util::data::optional<core::common::jsonconfig::config> unlearner_parameter;
@@ -80,7 +78,6 @@ class euclid_lsh : public recommender_base {
           & JUBA_MEMBER(bin_width)
           & JUBA_MEMBER(probe_num)
           & JUBA_MEMBER(seed)
-          & JUBA_MEMBER(retain_projection)
           & JUBA_MEMBER(unlearner)
           & JUBA_MEMBER(unlearner_parameter);
     }
@@ -131,11 +128,6 @@ class euclid_lsh : public recommender_base {
     mixable_storage_;
   float bin_width_;
   uint32_t num_probe_;
-
-  mutable jubatus::util::data::unordered_map<uint32_t, std::vector<float> >
-      projection_cache_;
-  mutable jubatus::util::concurrent::mutex cache_lock_;
-  bool retain_projection_;
 
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
       unlearner_;

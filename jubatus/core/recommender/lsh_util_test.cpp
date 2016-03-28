@@ -65,20 +65,11 @@ TEST(set_bit_vector, trivial) {
 }
 
 TEST(prod_invert_and_vector, trivial) {
-  unordered_map<string, vector<float> > m;
-  m["c1"].push_back(1.0);
-  m["c1"].push_back(0.0);
-  m["c1"].push_back(2.0);
-
-  m["c2"].push_back(0.0);
-  m["c2"].push_back(1.0);
-  m["c2"].push_back(0.0);
-
   common::sfv_t v;
   v.push_back(make_pair("c1", 2.0));
 
   vector<float> r;
-  prod_invert_and_vector(m, v, 3, r);
+  prod_invert_and_vector(v, 3, r);
 
   ASSERT_EQ(3u, r.size());
   EXPECT_FLOAT_EQ(2.0, r[0]);

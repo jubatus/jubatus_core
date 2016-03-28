@@ -79,8 +79,7 @@ euclid_lsh::config::config()
       table_num(DEFAULT_TABLE_NUM),
       bin_width(DEFAULT_BIN_WIDTH),
       probe_num(DEFAULT_NUM_PROBE),
-      seed(DEFAULT_SEED),
-      retain_projection(DEFAULT_RETAIN_PROJECTION) {
+      seed(DEFAULT_SEED) {
 }
 
 const uint64_t euclid_lsh::DEFAULT_HASH_NUM = 64;  // should be in config
@@ -88,7 +87,6 @@ const uint64_t euclid_lsh::DEFAULT_TABLE_NUM = 4;  // should be in config
 const float euclid_lsh::DEFAULT_BIN_WIDTH = 100;  // should be in config
 const uint32_t euclid_lsh::DEFAULT_NUM_PROBE = 64;  // should be in config
 const uint32_t euclid_lsh::DEFAULT_SEED = 1091;  // should be in config
-const bool euclid_lsh::DEFAULT_RETAIN_PROJECTION = false;
 
 typedef storage::mixable_lsh_index_storage::model_ptr model_ptr;
 typedef storage::lsh_index_storage lsh_index_storage;
@@ -99,15 +97,13 @@ euclid_lsh::euclid_lsh()
                                         DEFAULT_TABLE_NUM,
                                         DEFAULT_SEED)))),
       bin_width_(DEFAULT_BIN_WIDTH),
-      num_probe_(DEFAULT_NUM_PROBE),
-      retain_projection_(DEFAULT_RETAIN_PROJECTION) {
+      num_probe_(DEFAULT_NUM_PROBE) {
 }
 
 euclid_lsh::euclid_lsh(const config& config)
     : mixable_storage_(),
       bin_width_(config.bin_width),
-      num_probe_(config.probe_num),
-      retain_projection_(config.retain_projection) {
+      num_probe_(config.probe_num) {
 
   if (!(1 <= config.hash_num)) {
     throw JUBATUS_EXCEPTION(
@@ -208,10 +204,6 @@ void euclid_lsh::clear() {
   orig_.clear();
   mixable_storage_->get_model()->clear();
 
-  // Clear projection cache
-  jubatus::util::data::unordered_map<uint32_t, std::vector<float> >()
-    .swap(projection_cache_);
-
   if (unlearner_) {
     unlearner_->clear();
   }
@@ -276,19 +268,9 @@ vector<float> euclid_lsh::calculate_lsh(const common::sfv_t& query) const {
 }
 
 vector<float> euclid_lsh::get_projection(uint32_t seed) const {
-  if (retain_projection_) {
-    scoped_lock lk(cache_lock_);  // lock is needed only retain_projection
-    vector<float>& proj = projection_cache_[seed];
-    if (!proj.empty()) {
-      return proj;
-    }
-    calc_projection(seed, mixable_storage_->get_model()->all_lsh_num(), proj);
-    return proj;
-  } else {
-    vector<float> proj;
-    calc_projection(seed, mixable_storage_->get_model()->all_lsh_num(), proj);
-    return proj;
-  }
+  vector<float> proj;
+  calc_projection(seed, mixable_storage_->get_model()->all_lsh_num(), proj);
+  return proj;
 }
 
 void euclid_lsh::initialize_model() {

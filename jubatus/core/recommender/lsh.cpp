@@ -135,8 +135,6 @@ void lsh::neighbor_row(
 
 void lsh::clear() {
   orig_.clear();
-  jubatus::util::data::unordered_map<std::string, std::vector<float> >()
-    .swap(column2baseval_);
   mixable_storage_->get_model()->clear();
   if (unlearner_) {
     unlearner_->clear();
@@ -156,25 +154,9 @@ void lsh::remove_row(const string& id) {
 }
 
 void lsh::calc_lsh_values(const common::sfv_t& sfv, bit_vector& bv) const {
-  const_cast<lsh*>(this)->generate_column_bases(sfv);
-
   vector<float> lsh_vals;
-  prod_invert_and_vector(column2baseval_, sfv, hash_num_, lsh_vals);
+  prod_invert_and_vector(sfv, hash_num_, lsh_vals);
   set_bit_vector(lsh_vals, bv);
-}
-
-void lsh::generate_column_bases(const common::sfv_t& sfv) {
-  for (size_t i = 0; i < sfv.size(); ++i) {
-    generate_column_base(sfv[i].first);
-  }
-}
-
-void lsh::generate_column_base(const string& column) {
-  if (column2baseval_.count(column) != 0) {
-    return;
-  }
-  const uint32_t seed = common::hash_util::calc_string_hash(column);
-  generate_random_vector(hash_num_, seed, column2baseval_[column]);
 }
 
 void lsh::update_row(const string& id, const sfv_diff_t& diff) {
@@ -183,7 +165,6 @@ void lsh::update_row(const string& id, const sfv_diff_t& diff) {
         "cannot add new row as number of sticky rows reached "
             "the maximum size of unlearner: " + id));
   }
-  generate_column_bases(diff);
   orig_.set_row(id, diff);
   common::sfv_t row;
   orig_.get_row(id, row);

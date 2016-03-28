@@ -92,14 +92,8 @@ class lsh : public recommender_base {
 
  private:
   void calc_lsh_values(const common::sfv_t& sfv, storage::bit_vector& bv) const;
-  void generate_column_base(const std::string& column);
-  void generate_column_bases(const common::sfv_t& v);
 
   void initialize_model();
-
-  // bases for lsh
-  jubatus::util::data::unordered_map<std::string, std::vector<float> >
-      column2baseval_;
 
   jubatus::util::lang::shared_ptr<storage::mixable_bit_index_storage>
       mixable_storage_;
