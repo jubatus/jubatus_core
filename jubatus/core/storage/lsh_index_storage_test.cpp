@@ -272,10 +272,10 @@ TEST(lsh_index_storage, clear_row_before_mix) {
 
   s1.remove_row("r1");
 
-  // Expect size = 2 before MIX after remove
+  // Expect size = 1 before MIX after remove
   ids.clear();
   s1.get_all_row_ids(ids);
-  EXPECT_EQ(2u, ids.size());
+  EXPECT_EQ(1u, ids.size());
 
   s1.get_diff(d1);
   s2.get_diff(d2);
@@ -393,11 +393,9 @@ TEST(lsh_index_storage, row_operations) {
   s1.get_all_row_ids(ids);
   EXPECT_EQ(2u, ids.size());
 
-  // Once MIXed, removing row does not take affect
-  // until next MIX.
   s1.remove_row("r2");
   s1.get_all_row_ids(ids);
-  EXPECT_EQ(2u, ids.size());
+  EXPECT_EQ(1u, ids.size());
 
   // do MIX
   lsh_master_table_t d2;
