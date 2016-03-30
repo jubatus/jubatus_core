@@ -20,6 +20,7 @@
 #include "../common/jsonconfig.hpp"
 #include "epsilon_greedy.hpp"
 #include "ucb1.hpp"
+#include "ts.hpp"
 #include "softmax.hpp"
 #include "exp3.hpp"
 
@@ -42,6 +43,15 @@ struct epsilon_greedy_config {
 };
 
 struct ucb1_config {
+  bool assume_unrewarded;
+
+  template<class Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(assume_unrewarded);
+  }
+};
+
+struct ts_config {
   bool assume_unrewarded;
 
   template<class Ar>
@@ -92,6 +102,15 @@ shared_ptr<bandit_base> bandit_factory::create(
     ucb1_config conf =
         config_cast_check<ucb1_config>(param);
     return shared_ptr<bandit_base>(new ucb1(conf.assume_unrewarded));
+  } else if (name == "ts") {
+    if (param.type() == json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
+    ts_config conf =
+        config_cast_check<ts_config>(param);
+    return shared_ptr<bandit_base>(new ts(conf.assume_unrewarded));
   } else if (name == "softmax") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
