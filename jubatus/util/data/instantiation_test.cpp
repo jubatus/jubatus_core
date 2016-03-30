@@ -9,7 +9,6 @@
 #include "suffix_array/rmq.h"
 #include "suffix_array/invsa.h"
 #include "intern.h"
-#include "lru.h"
 #include <stddef.h>
 #include <deque>
 #include <string>
@@ -81,8 +80,6 @@ template void invert_suffix_array<size_t*>(size_t*, size_t*, std::vector<int>&);
 
 template class intern<int>;
 template void intern<int>::serialize<serialization::binary_iarchive>(serialization::binary_iarchive&);
-
-template class lru<int, int>;
 
 } // namespace data
 } // namespace util

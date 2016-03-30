@@ -14,7 +14,6 @@ def configure(conf):
 def build(bld):
   bld.install_files('${HPREFIX}/data', [
       'fenwick_tree.h',
-      'lru.h',
       'optional.h',
       'serialization.h',
       'serialization/array.h',
@@ -84,7 +83,6 @@ def build(bld):
   t('sparse_matrix/sparse_matrix_test.cpp')
   t('intern_test.cpp')
   t('suffix_array/rmq_test.cpp')
-  t('lru_test.cpp')
   t('optional_test.cpp')
   t('serialization_test.cpp')
   t('digest/md5_test.cpp')
