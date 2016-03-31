@@ -41,9 +41,9 @@ bit_vector_nearest_neighbor_base::bit_vector_nearest_neighbor_base(
     uint32_t bitnum,
     jubatus::util::lang::shared_ptr<storage::column_table> table,
     const std::string& id,
-    size_t parallel)
+    uint32_t threads)
     : nearest_neighbor_base(table, id),
-      ranker_(parallel),
+      ranker_(threads),
       bitnum_(bitnum) {
   vector<column_type> schema;
   fill_schema(schema);
@@ -55,9 +55,9 @@ bit_vector_nearest_neighbor_base::bit_vector_nearest_neighbor_base(
     jubatus::util::lang::shared_ptr<column_table> table,
     vector<column_type>& schema,
     const std::string& id,
-    size_t parallel)
+    uint32_t threads)
     : nearest_neighbor_base(table, id),
-      ranker_(parallel),
+      ranker_(threads),
       bitnum_(bitnum) {
   fill_schema(schema);
 }

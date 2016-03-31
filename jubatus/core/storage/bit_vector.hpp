@@ -17,7 +17,6 @@
 #ifndef JUBATUS_CORE_STORAGE_BIT_VECTOR_HPP_
 #define JUBATUS_CORE_STORAGE_BIT_VECTOR_HPP_
 
-#include <iostream>
 #include <stdint.h>
 #include <algorithm>
 #include <string>

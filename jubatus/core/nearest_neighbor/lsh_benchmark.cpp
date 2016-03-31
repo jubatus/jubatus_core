@@ -154,9 +154,9 @@ void dump_time(
 }
 
 int main() {
-  size_t num = 100000;
-  size_t dencity = 100;
-  int ret_num = 16;
+  size_t num = 10000;
+  size_t dencity = 10;
+  int ret_num = 4;
   int hash_num = 2048;
 
   std::cout << "perparing dataset :"
@@ -173,7 +173,9 @@ int main() {
   std::vector<int> threads;
   threads.push_back(1) ;
   threads.push_back(2) ;
+  threads.push_back(3) ;
   threads.push_back(4) ;
+  threads.push_back(5) ;
   threads.push_back(8) ;
 
   for (size_t i = 0; i < types.size(); ++i) {

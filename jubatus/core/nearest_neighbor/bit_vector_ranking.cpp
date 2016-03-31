@@ -92,28 +92,37 @@ void bit_vector_ranker::ranking_hamming_bit_vectors(
     vector<pair<uint64_t, float> >& ret,
     uint64_t ret_num) {
   std::vector<util::lang::shared_ptr<bvs_task> > tasks;
-  for (uint64_t i = 0; i < bvs.size(); i += 10000) {
-    uint64_t til = std::min(bvs.size(), i + 10000);
-    util::lang::shared_ptr<bvs_task> new_task
-      (new bvs_task(query, bvs, i, til, ret_num));
-    tasks.push_back(new_task);
-    workers_.add_task(new_task, &bvs_work);
-  }
 
+  const size_t chunk = static_cast<size_t>((bvs.size() + 1) / threads_) ;
   storage::fixed_size_heap<pair<uint32_t, uint64_t> > heap(ret_num);
-  std::vector<pair<uint32_t, uint64_t> > result;
-  for (size_t i = 0; i < tasks.size(); ++i) {
-    __sync_synchronize();
-    if (!tasks[i]->is_finished()) {
-      --i;
-      detail::yield();
-      continue;
+  if (threads_ > 1) {
+    for (uint64_t i = 0; i < bvs.size(); i += chunk) {
+      uint64_t til = std::min(bvs.size(), i + chunk);
+      util::lang::shared_ptr<bvs_task> new_task
+	(new bvs_task(query, bvs, i, til, ret_num));
+      tasks.push_back(new_task);
+      workers_.add_task(new_task, &bvs_work);
     }
-    tasks[i]->result.get_sorted(result);
-    for (size_t i = 0; i < result.size(); ++i) {
-      heap.push(result[i]);
+    std::vector<pair<uint32_t, uint64_t> > result;
+    for (size_t i = 0; i < tasks.size(); ++i) {
+      __sync_synchronize();
+      if (!tasks[i]->is_finished()) {
+	--i;
+	detail::yield();
+	continue;
+      }
+      tasks[i]->result.get_sorted(result);
+      for (size_t i = 0; i < result.size(); ++i) {
+	heap.push(result[i]);
+      }
     }
+  } else { // for single thread
+	for (uint64_t i = 0; i < bvs.size(); ++i) {
+	  const size_t dist = query.calc_hamming_distance(bvs[i]);
+	  heap.push(make_pair(dist, i));
+	}
   }
+      
 
   vector<pair<uint32_t, uint64_t> > sorted;
   heap.get_sorted(sorted);

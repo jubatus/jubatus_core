@@ -38,13 +38,14 @@ class bit_vector_nearest_neighbor_base : public nearest_neighbor_base {
       uint32_t bitnum,
       jubatus::util::lang::shared_ptr<storage::column_table> table,
       const std::string& id,
-      size_t parallel = 1);
+      uint32_t threads=1);
+
   bit_vector_nearest_neighbor_base(
       uint32_t bitnum,
       jubatus::util::lang::shared_ptr<storage::column_table> table,
       std::vector<storage::column_type>& schema,
       const std::string& id,
-      size_t parallel = 1);
+      uint32_t threads=1);
 
   uint32_t bitnum() const { return bitnum_; }
 

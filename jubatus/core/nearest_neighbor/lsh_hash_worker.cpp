@@ -28,6 +28,7 @@
 #include "jubatus/util/lang/function.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/data/unordered_map.h"
+#include <iostream>
 
 using std::make_pair;
 using std::pair;
@@ -74,54 +75,21 @@ struct hash_task {
   {}
 };
 
-typedef util::data::unordered_map<std::string, vector<float> > cache_t;
-static __thread cache_t* cache;
-static __thread bool init;
-
-cache_t& get_cache() {
-  if (init) {
-    return *cache;
-  } else {
-    init = true;
-    cache = new cache_t();
-    return *cache;
-  }
-}
-
 void hash_work(util::lang::shared_ptr<hash_task> desc) {
   const sfv_t& sfv = desc->sfv;
   const size_t fv_offset = desc->fv_offset;
   const size_t fv_length = desc->fv_length;
   const size_t hash_num = desc->hash_num;
   vector<float>& result = desc->result;
-
   for (size_t i = fv_offset; i < fv_offset + fv_length; ++i) {
-    cache_t& cache = get_cache();
-    cache_t::const_iterator it = cache.find(sfv[i].first);
-    if (it != cache.end()) {
-      // cache hit
-      const vector<float>& random_vector = it->second;
-      const float value = sfv[i].second;
-      for (uint32_t j = 0; j < hash_num; j+=4) {
-        float* target = &result[j];
-        const float* mult = &random_vector[j];
-        *target++ += value * *mult++;
-        *target++ += value * *mult++;
-        *target++ += value * *mult++;
-        *target++ += value * *mult++;
-      }
-    } else {
-      // cache miss-hit
-      vector<float> random_vector;
-      random_vector.reserve(hash_num);
-      const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
-      jubatus::util::math::random::mtrand rnd(seed);
-      for (uint32_t j = 0; j < hash_num; ++j) {
-        const float random = rnd.next_gaussian();
-        result[j] += sfv[i].second * random;
-        random_vector.push_back(random);
-      }
-      cache.insert(std::make_pair(sfv[i].first, random_vector));
+    vector<float> random_vector;
+    random_vector.reserve(hash_num);
+    const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
+    jubatus::util::math::random::mtrand rnd(seed);
+    for (uint32_t j = 0; j < hash_num; ++j) {
+      const float random = rnd.next_gaussian();
+      result[j] += sfv[i].second * random;
+      random_vector.push_back(random);
     }
   }
   __sync_synchronize();
@@ -138,33 +106,39 @@ void lsh_hash_worker::hash(
     return;
   }
 
-  const size_t work_chunk = 100000;
-  const size_t total_hash = hash_num * fv.size();
-  const size_t jobs = (total_hash + work_chunk + 1) / work_chunk;
-  const size_t chunk = (fv.size() + jobs - 1) / jobs;
-  for (uint64_t i = 0; i < fv.size(); i += chunk) {
-    uint64_t til = std::min(fv.size(), i + chunk);
-    util::lang::shared_ptr<hash_task> new_task
-      (new hash_task(fv, i, til - i, hash_num));
-    tasks.push_back(new_task);
-    workers_.add_task(new_task, &hash_work);
-  }
-
-  std::vector<float> result_f(hash_num);
-  for (size_t i = 0; i < tasks.size(); ++i) {
-    __sync_synchronize();
-    if (!tasks[i]->is_finished()) {
-      --i;
-      detail::yield();
-      continue;
+  // const size_t work_chunk = 100000;
+  // const size_t total_hash = hash_num * fv.size();
+  // const size_t jobs = (total_hash + work_chunk + 1) / work_chunk;
+  // const size_t chunk = (fv.size() + jobs - 1) / jobs;
+  const size_t chunk = static_cast<size_t>((fv.size() + 1) / threads_) ;
+  if (threads_ > 1) {
+    for (uint64_t i = 0; i < fv.size(); i += chunk) {
+      uint64_t til = std::min(fv.size(), i + chunk);
+      util::lang::shared_ptr<hash_task> new_task
+	(new hash_task(fv, i, til - i, hash_num));
+      tasks.push_back(new_task);
+      workers_.add_task(new_task, &hash_work);
     }
-    std::vector<float>& ret = tasks[i]->result;
-    for (size_t i = 0; i < ret.size(); ++i) {
-      result_f[i] += ret[i];
+    
+    std::vector<float> result_f(hash_num);
+    for (size_t i = 0; i < tasks.size(); ++i) {
+      __sync_synchronize();
+      if (!tasks[i]->is_finished()) {
+	--i;
+	detail::yield();
+	continue;
+      }
+      std::vector<float>& ret = tasks[i]->result;
+      for (size_t i = 0; i < ret.size(); ++i) {
+	result_f[i] += ret[i];
+      }
     }
+    storage::bit_vector result_bin(binarize(result_f));
+    result.swap(result_bin);
+  } else {
+    storage::bit_vector result_bin(cosine_lsh(fv,hash_num));
+    result.swap(result_bin);
   }
-  storage::bit_vector result_bin(binarize(result_f));
-  result.swap(result_bin);
 }
 
 }  // namespace nearest_neighbor

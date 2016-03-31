@@ -65,6 +65,7 @@ class lsh : public bit_vector_nearest_neighbor_base {
 
  private:
   virtual storage::bit_vector hash(const common::sfv_t& sfv) const;
+  void set_config(const config& conf);
   mutable lsh_hash_worker hasher;
 };
 

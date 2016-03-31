@@ -41,14 +41,16 @@ void hash_work(util::lang::shared_ptr<hash_task> desc);
 
 class lsh_hash_worker {
  public:
-  lsh_hash_worker(size_t thread_num)
-    : workers_(thread_num)
+  lsh_hash_worker(uint32_t threads)
+    : threads_(threads),
+      workers_(threads)
   {}
   void hash(
     const common::sfv_t& sfv,
     uint32_t hash_num,
     storage::bit_vector& result);
  private:
+  uint32_t threads_;
   storage::thread_pool<util::lang::shared_ptr<hash_task> > workers_;
 };
 

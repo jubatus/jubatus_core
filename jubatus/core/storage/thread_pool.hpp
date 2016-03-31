@@ -112,7 +112,7 @@ class thread_pool {
     }
   }
   ~thread_pool() {
-    for (int i = 0; i < threads_.size(); ++i) {
+    for (uint32_t i = 0; i < threads_.size(); ++i) {
       threads_[i]->cancel();
     }
   }

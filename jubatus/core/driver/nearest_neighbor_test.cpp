@@ -254,7 +254,6 @@ bool sort_secondary_key2(const pair<string, float>& l,
 
 
 TEST_P(nearest_neighbor_test, neighbor_row_must_repeatable) {
-  // surprisingly, this test sometimes failed
   const size_t num = 200;
   for (size_t i = 0; i < num; ++i) {
     const string key = lexical_cast<string>(i);
@@ -272,16 +271,14 @@ TEST_P(nearest_neighbor_test, neighbor_row_must_repeatable) {
             original_result.end(),
             sort_secondary_key);
 
-  for (size_t i = 0; i < 10; ++i) {  // check 10 times
-    vector<pair<string, float> > result =
-        nn_driver_->neighbor_row_from_datum(d, 100);
+  vector<pair<string, float> > result =
+    nn_driver_->neighbor_row_from_datum(d, 100);
 
-    ASSERT_EQ(original_result.size(), result.size());
-    std::sort(result.begin(), result.end(), sort_secondary_key);
+  ASSERT_EQ(original_result.size(), result.size());
+  std::sort(result.begin(), result.end(), sort_secondary_key);
 
-    for (size_t j = 0; j < result.size(); ++j) {
-      ASSERT_EQ(original_result[j].first, result[j].first);
-    }
+  for (size_t j = 0; j < result.size(); ++j) {
+    ASSERT_EQ(original_result[j].first, result[j].first);
   }
 }
 
@@ -311,19 +308,13 @@ TEST_P(nearest_neighbor_test, neighbor_row_and_similar_row) {
     std::sort(sr_result.begin(), sr_result.end(), sort_secondary_key2);
     std::reverse(sr_result.begin(), sr_result.end());
 
-//    std::cout << "[" << std::endl;
     for (size_t j = 0; j < nr_result.size(); ++j) {
-/*
-      std::cout << "nr: " << nr_result[j].first << ":" << nr_result[j].second
-                << " sr: " << sr_result[j].first << ":" << sr_result[j].second << std::endl;
-*/
       EXPECT_EQ(nr_result[j].first, sr_result[j].first);
       if (nr_result[j].first != sr_result[j].first) {
         std::cout << "nr: " << nr_result[j].first << ":" << nr_result[j].second
                   << " sr: " << sr_result[j].first << ":" << sr_result[j].second << std::endl;
       }
     }
-//    std::cout << "]" << std::endl;
   }
 }
 

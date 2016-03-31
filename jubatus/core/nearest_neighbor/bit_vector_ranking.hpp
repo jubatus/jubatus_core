@@ -40,15 +40,18 @@ void bvs_work(util::lang::shared_ptr<bvs_task> desc);
 
 class bit_vector_ranker {
  public:
-  bit_vector_ranker(size_t thread_num)
-    : workers_(thread_num)
+  bit_vector_ranker(uint32_t threads)
+    : threads_(threads),
+      workers_(threads)
   {}
+
   void ranking_hamming_bit_vectors(
       const storage::bit_vector& query,
       const storage::const_bit_vector_column& bvs,
       std::vector<std::pair<uint64_t, float> >& ret,
       uint64_t ret_num);
  private:
+  uint32_t threads_;
   storage::thread_pool<util::lang::shared_ptr<bvs_task> > workers_;
 };
 
