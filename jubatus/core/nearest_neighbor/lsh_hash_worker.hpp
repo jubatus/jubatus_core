@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2012 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2015 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,12 +14,13 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_BIT_VECTOR_RANKING_HPP_
-#define JUBATUS_CORE_NEAREST_NEIGHBOR_BIT_VECTOR_RANKING_HPP_
+#ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_LSH_HASH_WORKER_HPP_
+#define JUBATUS_CORE_NEAREST_NEIGHBOR_LSH_HASH_WORKER_HPP_
 
 #include <stdint.h>
 #include <utility>
 #include <vector>
+#include "../common/type.hpp"
 #include "../storage/thread_pool.hpp"
 
 namespace jubatus {
@@ -35,28 +36,26 @@ typedef const bit_vector_column const_bit_vector_column;
 }
 namespace nearest_neighbor {
 
-struct bvs_task;
-void bvs_work(util::lang::shared_ptr<bvs_task> desc);
+struct hash_task;
+void hash_work(util::lang::shared_ptr<hash_task> desc);
 
-class bit_vector_ranker {
+class lsh_hash_worker {
  public:
-  bit_vector_ranker(uint32_t threads)
+  lsh_hash_worker(uint32_t threads)
     : threads_(threads),
       workers_(threads)
   {}
-
-  void ranking_hamming_bit_vectors(
-      const storage::bit_vector& query,
-      const storage::const_bit_vector_column& bvs,
-      std::vector<std::pair<uint64_t, float> >& ret,
-      uint64_t ret_num);
+  void hash(
+    const common::sfv_t& sfv,
+    uint32_t hash_num,
+    storage::bit_vector& result);
  private:
   uint32_t threads_;
-  storage::thread_pool<util::lang::shared_ptr<bvs_task> > workers_;
+  storage::thread_pool<util::lang::shared_ptr<hash_task> > workers_;
 };
 
 }  // namespace nearest_neighbor
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_NEAREST_NEIGHBOR_BIT_VECTOR_RANKING_HPP_
+#endif  // JUBATUS_CORE_NEAREST_NEIGHBOR_LSH_HASH_WORKER_HPP_

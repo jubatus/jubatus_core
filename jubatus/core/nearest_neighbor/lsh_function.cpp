@@ -20,6 +20,7 @@
 #include "../common/type.hpp"
 #include "../storage/bit_vector.hpp"
 #include "lsh_function.hpp"
+#include "jubatus/util/data/unordered_map.h"
 
 using std::vector;
 using jubatus::core::storage::bit_vector;
@@ -32,11 +33,16 @@ vector<float> random_projection(const common::sfv_t& sfv, uint32_t hash_num) {
   vector<float> proj(hash_num);
   for (size_t i = 0; i < sfv.size(); ++i) {
     const uint32_t seed = common::hash_util::calc_string_hash(sfv[i].first);
+    vector<double> random_vector;
+    random_vector.reserve(hash_num);
     jubatus::util::math::random::mtrand rnd(seed);
     for (uint32_t j = 0; j < hash_num; ++j) {
-      proj[j] += sfv[i].second * rnd.next_gaussian();
+      const double random = rnd.next_gaussian();
+      proj[j] += sfv[i].second * random;
+      random_vector.push_back(random);
     }
   }
+
   return proj;
 }
 

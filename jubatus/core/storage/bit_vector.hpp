@@ -318,6 +318,7 @@ struct bit_vector_base {
     } else if (bv.bits_ == NULL) {
       return bit_count();
     }
+
     size_t match_num = 0;
     for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
          i < blocks; ++i) {

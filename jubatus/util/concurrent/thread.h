@@ -48,6 +48,7 @@ public:
   bool start();
   bool join();
   void detach();
+  void cancel();
 
   static void yield();
   static bool sleep(double sec);
