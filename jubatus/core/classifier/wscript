@@ -14,6 +14,7 @@ def build(bld):
       'arow.cpp',
       'normal_herd.cpp',
       'nearest_neighbor_classifier.cpp',
+      'recommender_classifier.cpp',
       'classifier_factory.cpp',
       ]
   headers = [
@@ -31,6 +32,7 @@ def build(bld):
       'passive_aggressive_2.hpp',
       'perceptron.hpp',
       'nearest_neighbor_classifier.hpp',
+      'recommender_classifier.hpp',
       ]
   use = ['jubatus_util']
 

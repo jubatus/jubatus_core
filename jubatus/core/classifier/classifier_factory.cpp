@@ -24,6 +24,7 @@
 #include "../storage/storage_base.hpp"
 #include "../unlearner/unlearner_factory.hpp"
 #include "../nearest_neighbor/nearest_neighbor_factory.hpp"
+#include "../recommender/recommender_factory.hpp"
 
 using jubatus::core::common::jsonconfig::config;
 using jubatus::core::common::jsonconfig::config_cast_check;
@@ -69,6 +70,24 @@ struct nearest_neighbor_classifier_config
     unlearner_config::serialize(ar);
   }
 };
+
+struct recommender_classifier_config
+    : public unlearner_config {
+  std::string method;
+  jubatus::util::data::optional<config> parameter;
+  int nearest_neighbor_num;
+  float local_sensitivity;
+
+  template<typename Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(method)
+        & JUBA_MEMBER(parameter)
+        & JUBA_MEMBER(nearest_neighbor_num)
+        & JUBA_MEMBER(local_sensitivity);
+    unlearner_config::serialize(ar);
+  }
+};
+
 
 jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
 create_unlearner(const unlearner_config& conf) {
@@ -173,7 +192,25 @@ shared_ptr<classifier_base> classifier_factory::create_classifier(
         new nearest_neighbor_classifier(nearest_neighbor_engine,
                                         conf.nearest_neighbor_num,
                                         conf.local_sensitivity));
-  } else {
+  } else if (name == "recommender") {
+    if (param.type() != jubatus::util::text::json::json::Null) {
+      recommender_classifier_config conf
+        = config_cast_check<recommender_classifier_config>(param);
+      config param;
+      if (conf.parameter) {
+	param = *conf.parameter;
+      }
+      unlearner = create_unlearner(conf);
+      shared_ptr<recommender::recommender_base>
+	recommender_engine(recommender::recommender_factory::create_recommender(
+			conf.method, param, ""));
+      res.reset(
+	      new recommender_classifier(recommender_engine,
+                                        conf.nearest_neighbor_num,
+                                        conf.local_sensitivity));
+    }
+  }
+  else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("classifier(" + name + ")"));
   }

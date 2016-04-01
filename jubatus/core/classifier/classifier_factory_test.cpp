@@ -92,6 +92,34 @@ TEST(classifier_factory, create_with_unlearner) {
     EXPECT_NO_THROW(classifier_factory::create_classifier("AROW", conf, s));
     EXPECT_NO_THROW(classifier_factory::create_classifier("NHERD", conf, s));
   }
+  {
+    json js(new json_object);
+    js["method"] = to_json(std::string("inverted_index"));
+    js["nearest_neighbor_num"] = to_json(10);
+    js["local_sensitivity"] = to_json(1.0);
+    js["unlearner"] = to_json(std::string("lru"));
+    js["unlearner_parameter"] = new json_object;
+    js["unlearner_parameter"]["max_size"] = to_json(1);
+    common::jsonconfig::config conf(js);
+
+    EXPECT_NO_THROW(classifier_factory::create_classifier("recommender", conf, s));
+  }
+  {
+    json js(new json_object);
+    js["method"] = to_json(std::string("lsh"));
+    js["method"] = to_json(std::string("lsh"));
+    js["parameter"] = new json_object;
+    js["parameter"]["hash_num"] = to_json(64);
+    js["nearest_neighbor_num"] = to_json(10);
+    js["local_sensitivity"] = to_json(1.0);
+    js["unlearner"] = to_json(std::string("lru"));
+    js["unlearner_parameter"] = new json_object;
+    js["unlearner_parameter"]["max_size"] = to_json(1);
+    common::jsonconfig::config conf(js);
+    EXPECT_NO_THROW(classifier_factory::create_classifier("nearest_neighbor", conf, s));
+    EXPECT_NO_THROW(classifier_factory::create_classifier("recommender", conf, s));
+  }
+
 }
 
 // --- validation test ---
