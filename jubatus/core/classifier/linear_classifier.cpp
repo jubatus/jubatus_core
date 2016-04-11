@@ -214,8 +214,10 @@ void linear_classifier::unpack(msgpack::object o) {
   storage_->unpack(o);
 }
 
-framework::mixable* linear_classifier::get_mixable() {
-  return &mixable_storage_;
+std::vector<framework::mixable*> linear_classifier::get_mixables() {
+  std::vector<framework::mixable*> mixables;
+  mixables.push_back(&mixable_storage_);
+  return mixables;
 }
 
 void linear_classifier::touch(const std::string& label) {

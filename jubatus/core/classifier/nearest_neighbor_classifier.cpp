@@ -76,7 +76,9 @@ nearest_neighbor_classifier::nearest_neighbor_classifier(
     shared_ptr<nearest_neighbor::nearest_neighbor_base> engine,
     size_t k,
     float alpha)
-    : nearest_neighbor_engine_(engine), k_(k), alpha_(alpha) {
+    : nearest_neighbor_engine_(engine),
+      labels_(core::storage::mixable_labels::model_ptr(
+          new core::storage::labels())), k_(k), alpha_(alpha) {
   if (!(alpha >= 0)) {
     throw JUBATUS_EXCEPTION(common::invalid_parameter(
         "local_sensitivity should >= 0"));
@@ -132,8 +134,9 @@ void nearest_neighbor_classifier::classify_with_scores(
   std::map<std::string, float> m;
   {
     util::concurrent::scoped_lock lk(label_mutex_);
-    for (unordered_set<std::string>::const_iterator iter = labels_.begin();
-         iter != labels_.end(); ++iter) {
+    core::storage::labels& labels = *labels_.get_model();
+    for (unordered_set<std::string>::const_iterator iter = labels.begin();
+         iter != labels.end(); ++iter) {
       m.insert(std::make_pair(*iter, 0));
     }
   }
@@ -153,7 +156,7 @@ void nearest_neighbor_classifier::classify_with_scores(
 bool nearest_neighbor_classifier::delete_label(const std::string& label) {
   {
     util::concurrent::scoped_lock lk(label_mutex_);
-    if (labels_.erase(label) == 0) {
+    if (labels_.get_model()->erase(label) == 0) {
       return false;
     }
   }
@@ -185,7 +188,7 @@ void nearest_neighbor_classifier::clear() {
   nearest_neighbor_engine_->clear();
   {
     util::concurrent::scoped_lock lk(label_mutex_);
-    labels_.clear();
+    labels_.get_model()->clear();
   }
   if (unlearner_) {
     unlearner_->clear();
@@ -195,8 +198,9 @@ void nearest_neighbor_classifier::clear() {
 std::vector<std::string> nearest_neighbor_classifier::get_labels() const {
   util::concurrent::scoped_lock lk(label_mutex_);
   std::vector<std::string> result;
-  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
-       iter != labels_.end(); ++iter) {
+  core::storage::labels& labels = *labels_.get_model();
+  for (unordered_set<std::string>::const_iterator iter = labels.begin();
+       iter != labels.end(); ++iter) {
     result.push_back(*iter);
   }
   return result;
@@ -204,7 +208,7 @@ std::vector<std::string> nearest_neighbor_classifier::get_labels() const {
 
 bool nearest_neighbor_classifier::set_label(const std::string& label) {
   util::concurrent::scoped_lock lk(label_mutex_);
-  return labels_.insert(label).second;
+  return labels_.get_model()->insert(label).second;
 }
 
 std::string nearest_neighbor_classifier::name() const {
@@ -219,13 +223,8 @@ void nearest_neighbor_classifier::get_status(
 void nearest_neighbor_classifier::pack(framework::packer& pk) const {
   pk.pack_array(2);
   nearest_neighbor_engine_->pack(pk);
-
   util::concurrent::scoped_lock lk(label_mutex_);
-  pk.pack_array(labels_.size());
-  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
-       iter != labels_.end(); ++iter) {
-    pk.pack(*iter);
-  }
+  labels_.get_model()->pack(pk);
 }
 
 void nearest_neighbor_classifier::unpack(msgpack::object o) {
@@ -233,23 +232,15 @@ void nearest_neighbor_classifier::unpack(msgpack::object o) {
     throw msgpack::type_error();
   }
   nearest_neighbor_engine_->unpack(o.via.array.ptr[0]);
-
-  msgpack::object labels = o.via.array.ptr[1];
-  if (labels.type != msgpack::type::ARRAY) {
-    throw msgpack::type_error();
-  }
-  for (size_t i = 0; i < labels.via.array.size; ++i) {
-    std::string label;
-    labels.via.array.ptr[i].convert(&label);
-    {
-      util::concurrent::scoped_lock lk(label_mutex_);
-      labels_.insert(label);
-    }
-  }
+  util::concurrent::scoped_lock lk(label_mutex_);
+  labels_.get_model()->unpack(o.via.array.ptr[1]);
 }
 
-framework::mixable* nearest_neighbor_classifier::get_mixable() {
-  return nearest_neighbor_engine_->get_mixable();
+std::vector<framework::mixable*> nearest_neighbor_classifier::get_mixables() {
+  std::vector<framework::mixable*> mixables;
+  mixables.push_back(nearest_neighbor_engine_->get_mixable());
+  mixables.push_back(&labels_);
+  return mixables;
 }
 
 void nearest_neighbor_classifier::unlearn_id(const std::string& id) {

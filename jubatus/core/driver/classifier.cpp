@@ -45,7 +45,10 @@ classifier::classifier(
     : converter_(converter)
     , classifier_(classifier_method)
     , wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
-  register_mixable(classifier_->get_mixable());
+  vector<framework::mixable*> mixables = classifier_->get_mixables();
+  for (size_t i = 0; i < mixables.size(); i++) {
+    register_mixable(mixables[i]);
+  }
   register_mixable(&wm_);
 
   converter_->set_weight_manager(wm_.get_model());

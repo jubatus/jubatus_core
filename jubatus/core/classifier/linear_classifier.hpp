@@ -70,7 +70,7 @@ class linear_classifier : public classifier_base {
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
 
-  framework::mixable* get_mixable();
+  std::vector<framework::mixable*> get_mixables();
 
  protected:
   void update_weight(
