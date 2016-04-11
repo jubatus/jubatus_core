@@ -1,26 +1,74 @@
+sudo: required
+dist: trusty
+
 language: cpp
 
-compiler:
-# gcc test is disabled (see #120)
-#  - gcc
-  - clang
+services:
+  - docker
+
+matrix:
+  include:
+    - env:
+      - DIST=centos
+      - VERSION=6
+    - env:
+      - DIST=centos
+      - VERSION=7
+    - env:
+      - DIST=centos
+      - VERSION=7
+      - SCL=devtoolset-4 # gcc 5.2 (enabled function multiversioning)
+    - env:
+      - DIST=ubuntu
+      - VERSION=12.04
+    - env:
+      - DIST=ubuntu
+      - VERSION=14.04
+    - env:
+      - DIST=ubuntu
+      - VERSION=16.04 # gcc 5.3 (enabled function multiversioning)
 
 before_install:
-  - lsb_release -a
-  - uname -a
-  - sudo apt-get -qq update
+  - docker pull ${DIST}:${VERSION}
+  - docker run -w /root --name test -d ${DIST}:${VERSION} sleep infinity
+  - docker cp . test:/root/
+  - if [ "$DIST" == "centos" ]; then
+      if [ $VERSION -eq 6 ]; then
+        docker exec test rpm -Uvh http://download.jubat.us/yum/rhel/6/stable/x86_64/jubatus-release-6-2.el6.x86_64.rpm;
+      elif [ $VERSION -eq 7 ]; then
+        docker exec test rpm -Uvh http://download.jubat.us/yum/rhel/7/stable/x86_64/jubatus-release-7-2.el7.x86_64.rpm;
+      fi;
+      if [ -n "$SCL" ]; then
+        docker exec test yum -y install centos-release-scl;
+      fi;
+    fi
 
 install:
-  # msgpack
-  - sudo apt-get -qq install libmsgpack-dev
-  # oniguruma
-  - wget https://github.com/kkos/oniguruma/releases/download/v5.9.6/onig-5.9.6.tar.gz && tar xvf onig-5.9.6.tar.gz
-  - pushd onig-5.9.6 && ./configure && make && sudo make install && popd
-  - sudo ldconfig
+  - if [ "$DIST" == "centos" ]; then
+      docker exec test yum -y install redhat-lsb gcc-c++ bzip2 msgpack-devel oniguruma-devel;
+      if [ -n "$SCL" ]; then
+        docker exec test yum -y install ${SCL}-gcc-c++ ${SCL}-binutils;
+        docker exec test bash -c "echo 'source scl_source enable ${SCL}' > /root/.bashrc";
+      fi;
+    fi
+  - if [ "$DIST" == "ubuntu" ]; then
+      docker exec test apt-get update;
+      docker exec test apt-get -qq install lsb-release autoconf automake make g++ python2.7 wget tar bzip2 libmsgpack-dev;
+      docker exec test bash -c "wget --no-check-certificate https://github.com/kkos/oniguruma/releases/download/v5.9.6/onig-5.9.6.tar.gz && tar xvf onig-5.9.6.tar.gz && cd onig-5.9.6 && ./configure && make && make install && ldconfig";
+      if [ "$VERSION" != "12.04" ]; then
+        docker exec test ln -sf /usr/bin/python2.7 /usr/bin/python;
+      fi;
+    fi
+
+before_script:
+  - docker exec test lsb_release -a
+  - docker exec -t test bash -ic "g++ --version"
 
 script:
-  - ./waf configure
-  - ./waf build --checkall
+  - docker exec -t test bash -ic "./waf configure"
+  - docker exec -t test bash -ic "./waf build --checkall"
+  - docker exec -t test bash -ic "./waf cpplint"
+  - if [ -n "$SCL" ]; then docker exec test ./waf build --checkall; fi
 
 branches:
   only:
