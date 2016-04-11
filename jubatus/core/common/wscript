@@ -27,6 +27,7 @@ def build(bld):
       'key_manager.hpp',
       'type.hpp',
       'unordered_map.hpp',
+      'unordered_set.hpp',
       'vector_util.hpp',
       'version.hpp',
       'jsonconfig/cast.hpp',

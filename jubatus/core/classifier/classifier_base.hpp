@@ -61,7 +61,7 @@ class classifier_base {
   virtual void unpack(msgpack::object o) = 0;
   virtual void clear() = 0;
 
-  virtual framework::mixable* get_mixable() = 0;
+  virtual std::vector<framework::mixable*> get_mixables() = 0;
 };
 
 }  // namespace classifier

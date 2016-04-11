@@ -28,6 +28,7 @@
 #include "jubatus/util/concurrent/mutex.h"
 
 #include "../common/type.hpp"
+#include "../storage/labels.hpp"
 #include "../nearest_neighbor/nearest_neighbor_base.hpp"
 #include "../unlearner/unlearner_base.hpp"
 #include "classifier_type.hpp"
@@ -66,12 +67,12 @@ class nearest_neighbor_classifier : public classifier_base {
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
 
-  framework::mixable* get_mixable();
+  std::vector<framework::mixable*> get_mixables();
 
  private:
   jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
       nearest_neighbor_engine_;
-  jubatus::util::data::unordered_set<std::string> labels_;
+  jubatus::core::storage::mixable_labels labels_;
   size_t k_;
   float alpha_;
   jubatus::util::concurrent::mutex unlearner_mutex_;
