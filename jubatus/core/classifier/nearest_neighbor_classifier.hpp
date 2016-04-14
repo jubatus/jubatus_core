@@ -84,6 +84,7 @@ class nearest_neighbor_classifier : public classifier_base {
   class unlearning_callback;
   void unlearn_id(const std::string& id);
   void unlearn_label(const std::string& label);
+  void regenerate_labels();
 };
 
 }  // namespace classifier

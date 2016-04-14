@@ -26,6 +26,8 @@
 #include "../storage/column_table.hpp"
 #include "jubatus/util/concurrent/lock.h"
 #include "nearest_neighbor_classifier_util.hpp"
+#include "jubatus/util/lang/bind.h"
+#include "jubatus/util/lang/function.h"
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::concurrent::scoped_lock;
@@ -58,6 +60,10 @@ nearest_neighbor_classifier::nearest_neighbor_classifier(
     throw JUBATUS_EXCEPTION(common::invalid_parameter(
         "local_sensitivity should >= 0"));
   }
+  dynamic_cast<framework::mixable_versioned_table*>
+      (nearest_neighbor_engine_->get_mixable())->set_update_callback(
+          util::lang::bind(
+              &nearest_neighbor_classifier::regenerate_labels, this));
 }
 
 void nearest_neighbor_classifier::train(
@@ -235,6 +241,21 @@ void nearest_neighbor_classifier::unlearn_label(const std::string& label) {
   if (labels_[label] <= 0) {
     labels_.erase(label);
   }
+}
+
+void nearest_neighbor_classifier::regenerate_labels() {
+  shared_ptr<const storage::column_table> table =
+      nearest_neighbor_engine_->get_const_table();
+
+  labels_t labels;
+  for (size_t i = 0, n = table->size(); i < n; ++i) {
+    std::string id = table->get_key(i);
+    std::string label = get_label_from_id(id);
+    labels[label] += 1;
+  }
+
+  util::concurrent::scoped_lock lk(label_mutex_);
+  labels_.swap(labels);
 }
 
 }  // namespace classifier
