@@ -39,6 +39,7 @@
 #include "../system/time_util.h"
 #include "constant.h"
 #include "random/mersenne_twister.h"
+#include "random/sfmt.h"
 
 namespace jubatus {
 namespace util{
@@ -69,6 +70,10 @@ public:
   uint32_t next_int(){
     return g.next();
   }
+
+  void fill_int_unsafe(uint32_t *out, size_t count) {
+    g.fill_int_unsafe(out, count);
+  }
   
   /// generate [0,\a a) random integer
   uint32_t next_int(uint32_t a){
@@ -78,6 +83,11 @@ public:
   /// generate [\a a,\a b) random integer
   uint32_t next_int(uint32_t a, uint32_t b){
     return a+next_int(b-a);
+  }
+
+  /// generates [0,1) random real number with 24bit resolution
+  float next_float(){
+    return (g.next() >> 8) * (1.0f / 16777216.0f);
   }
 
   /// generates [0,1) random real number with 53bit resolution
@@ -95,6 +105,23 @@ public:
   /// generate [\a a,\a b) random real number
   double next_double(double a, double b){
     return a+next_double(b-a);
+  }
+
+  /// generate normalized standard distribution
+  float next_gaussian_float(){
+    static const float pi2 = (float)(2.0 * jubatus::util::math::pi);
+    if(next_gaussian_stocked){
+      next_gaussian_stocked=false;
+      return (float)next_gaussian_stock;
+    }else{
+      float a = 1.0f-next_float();
+      float b = 1.0f-next_float();
+      float r1 = std::sqrt(-2.0f*std::log(a))*std::sin(pi2*b);
+      float r2 = std::sqrt(-2.0f*std::log(a))*std::cos(pi2*b);
+      next_gaussian_stock=r2;
+      next_gaussian_stocked=true;
+      return r1;
+    }
   }
 
   /// generate normalized standard distribution
@@ -190,6 +217,8 @@ private:
 };
 
 typedef random<mersenne_twister> mtrand;
+typedef random<sfmt607> sfmt607rand;
+typedef random<sfmt19937> sfmt19937rand;
 
 /// select k random integer from range [0,n), allowing multiple occurrence. O(k)
 template<typename RAND>
