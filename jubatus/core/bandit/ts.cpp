@@ -53,7 +53,7 @@ std::string ts::select_arm(const std::string& player_id) {
       result = arms[i];
     }
   }
-  s_.notify_selected(player_id, result);                                                                                                                                                                                                                             
+  s_.notify_selected(player_id, result);
   return result;
 }
 
@@ -64,14 +64,14 @@ bool ts::delete_arm(const std::string& arm_id) {
   return s_.delete_arm(arm_id);
 }
 
-bool ts::register_reward(                                                                                                                                                                                                                                            
-    const std::string& player_id,                                                                                                                                                                                                                                    
-    const std::string& arm_id,                                                                                                                                                                                                                                       
-    double reward) {                                                                                                                                                                                                                                                 
-  // Thompson sampling assumes binary rewards                                                                                                                                                                                                                        
-  if ((reward != 0.0) && (reward != 1.0)) {                                                                                                                                                                                                                          
+bool ts::register_reward(
+    const std::string& player_id,
+    const std::string& arm_id,
+    double reward) {
+  // Thompson sampling assumes binary rewards
+  if ((reward != 0.0) && (reward != 1.0)) {
     throw JUBATUS_EXCEPTION(
-         common::exception::runtime_error("reward is not in {0,1}"));                                                                                                                                                                                                
+         common::exception::runtime_error("reward is not in {0,1}"));
   }
   const std::vector<std::string>& arms = s_.get_arm_ids();
   size_t i = std::find(arms.begin(), arms.end(), arm_id) - arms.begin();
