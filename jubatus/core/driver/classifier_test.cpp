@@ -323,8 +323,7 @@ TEST_P(classifier_test, save_load_3) {
   }
 
   {
-    vector<string> labels_expected;  // empty
-    EXPECT_EQ(labels_expected, classifier_->get_labels());
+    EXPECT_EQ(0u, classifier_->get_labels().size());
   }
 
   {

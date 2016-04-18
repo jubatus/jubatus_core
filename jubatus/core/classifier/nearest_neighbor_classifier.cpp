@@ -181,14 +181,9 @@ void nearest_neighbor_classifier::clear() {
   }
 }
 
-std::vector<std::string> nearest_neighbor_classifier::get_labels() const {
+labels_t nearest_neighbor_classifier::get_labels() const {
   util::concurrent::scoped_lock lk(label_mutex_);
-  std::vector<std::string> result;
-  for (labels_t::const_iterator iter = labels_.begin();
-       iter != labels_.end(); ++iter) {
-    result.push_back(iter->first);
-  }
-  return result;
+  return labels_;
 }
 
 bool nearest_neighbor_classifier::set_label(const std::string& label) {
@@ -227,8 +222,10 @@ void nearest_neighbor_classifier::unpack(msgpack::object o) {
   o.via.array.ptr[1].convert(&labels_);
 }
 
-framework::mixable* nearest_neighbor_classifier::get_mixable() {
-  return nearest_neighbor_engine_->get_mixable();
+std::vector<framework::mixable*> nearest_neighbor_classifier::get_mixables() {
+  std::vector<framework::mixable*> mixables;
+  mixables.push_back(nearest_neighbor_engine_->get_mixable());
+  return mixables;
 }
 
 void nearest_neighbor_classifier::unlearn_id(const std::string& id) {

@@ -56,7 +56,7 @@ class nearest_neighbor_classifier : public classifier_base {
   bool delete_label(const std::string& label);
   void clear();
 
-  std::vector<std::string> get_labels() const;
+  labels_t get_labels() const;
   bool set_label(const std::string& label);
 
   std::string name() const;
@@ -66,12 +66,11 @@ class nearest_neighbor_classifier : public classifier_base {
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
 
-  framework::mixable* get_mixable();
+  std::vector<framework::mixable*> get_mixables();
 
  private:
   jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
       nearest_neighbor_engine_;
-  typedef jubatus::util::data::unordered_map<std::string, size_t> labels_t;
   // A map from label to number of records that belongs to the label.
   labels_t labels_;
   size_t k_;
