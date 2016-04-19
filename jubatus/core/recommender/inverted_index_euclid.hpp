@@ -37,16 +37,8 @@ class inverted_index_euclid : public inverted_index {
       const common::sfv_t& query,
       std::vector<std::pair<std::string, float> >& ids,
       size_t ret_num) const;
-  void similar_row(
-      const std::string& id,
-      std::vector<std::pair<std::string, float> >& ids,
-      size_t ret_num) const;
   void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
-      size_t ret_num) const;
-  void neighbor_row(
-      const std::string& id,
       std::vector<std::pair<std::string, float> >& ids,
       size_t ret_num) const;
 
