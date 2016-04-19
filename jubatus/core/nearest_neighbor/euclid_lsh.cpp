@@ -150,7 +150,8 @@ void euclid_lsh::neighbor_row_from_hash(
 
     const float denom = bv.bit_num();
     for (size_t i = 0; i < table->size(); ++i) {
-      const size_t hamm_dist = bv.calc_hamming_distance(bv_col[i]);
+      const size_t hamm_dist =
+          bv.calc_hamming_distance_unsafe(bv_col.get_data_at_unsafe(i));
       const float theta = hamm_dist * M_PI / denom;
       const float score =
           norm_col[i] * (norm_col[i] - 2 * norm * std::cos(theta));

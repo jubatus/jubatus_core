@@ -74,29 +74,9 @@ struct bitcount_impl<T, 8> {
   }
 };
 
-#ifdef __POPCNT__
-
-inline int fast_bitcount(unsigned bits) {
-  return __builtin_popcount(bits);
-}
-
-inline int fast_bitcount(unsigned long bits) {  // NOLINT
-  return __builtin_popcountl(bits);
-}
-
-inline int fast_bitcount(unsigned long long bits) {  // NOLINT
-  return __builtin_popcountll(bits);
-}
-
-#endif
-
 template <class T>
 inline int bitcount_dispatcher(T bits) {
-#ifdef __POPCNT__
-  return fast_bitcount(bits);
-#else
   return bitcount_impl<T, sizeof(T)>::call(bits);
-#endif
 }
 
 inline int bitcount(unsigned bits) {
@@ -113,6 +93,10 @@ inline int bitcount(unsigned long long bits) {  // NOLINT
 
 template <class T>
 inline int bitcount(T);  // = delete;
+
+size_t calc_hamming_distance_internal(
+    const uint64_t *x, const uint64_t *y, size_t blocks);
+size_t bit_count_internal(const uint64_t *x, size_t blocks);
 
 }  // namespace detail
 
@@ -318,23 +302,16 @@ struct bit_vector_base {
     } else if (bv.bits_ == NULL) {
       return bit_count();
     }
-    size_t match_num = 0;
-    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
-         i < blocks; ++i) {
-      match_num += detail::bitcount(bits_[i] ^ bv.bits_[i]);
-    }
-    return match_num;
+    return calc_hamming_distance_unsafe(bv.bits_);
+  }
+  uint64_t calc_hamming_distance_unsafe(const bit_base *bv) const {
+    if (bits_ == NULL)
+      return bit_count_unsafe(bv, used_bytes());
+    return detail::calc_hamming_distance_internal(
+        bits_, bv, used_bytes() / sizeof(bit_base));
   }
   size_t bit_count() const {
-    if (bits_ == NULL) {
-      return 0;
-    }
-    size_t result = 0;
-    for (size_t i = 0, blocks = used_bytes() / sizeof(bit_base);
-         i < blocks; ++i) {
-      result += detail::bitcount(bits_[i]);
-    }
-    return result;
+    return bit_count_unsafe(bits_, used_bytes());
   }
 
   bit_base* raw_data_unsafe() {
@@ -457,6 +434,13 @@ struct bit_vector_base {
       alloc_memory();
     }
     memcpy(bits_, orig.bits_, used_bytes());
+  }
+
+  static size_t bit_count_unsafe(const bit_base *bits, size_t bytes) {
+    if (bits == NULL) {
+      return 0;
+    }
+    return detail::bit_count_internal(bits, bytes / sizeof(bit_base));
   }
 
   bit_base* bits_;
