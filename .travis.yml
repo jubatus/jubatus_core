@@ -24,9 +24,10 @@ matrix:
     - env:
       - DIST=ubuntu
       - VERSION=14.04
-    - env:
-      - DIST=ubuntu
-      - VERSION=16.04 # gcc 5.3 (enabled function multiversioning)
+# Bug: https://bugs.launchpad.net/ubuntu/+source/gcc-5/+bug/1568899
+#    - env:
+#      - DIST=ubuntu
+#      - VERSION=16.04 # gcc 5.3 (enabled function multiversioning)
 
 before_install:
   - docker pull ${DIST}:${VERSION}
