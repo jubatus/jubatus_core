@@ -48,16 +48,6 @@ void inverted_index_euclid::similar_row(
   mixable_storage_->get_model()->calc_euclid_scores(query, ids, ret_num);
 }
 
-void inverted_index_euclid::similar_row(
-    const std::string& id,
-    std::vector<std::pair<std::string, float> >& ids,
-    size_t ret_num) const {
-  ids.clear();
-  common::sfv_t sfv;
-  orig_.get_row(id, sfv);
-  similar_row(sfv, ids, ret_num);
-}
-
 /**
  * Reverse the sign of each score.
  */
@@ -66,19 +56,6 @@ void inverted_index_euclid::neighbor_row(
     std::vector<std::pair<std::string, float> >& ids,
     size_t ret_num) const {
   similar_row(query, ids, ret_num);
-  for (size_t i = 0; i < ids.size(); ++i) {
-    ids[i].second = -ids[i].second;
-  }
-}
-
-/**
- * Reverse the sign of each score.
- */
-void inverted_index_euclid::neighbor_row(
-    const std::string& id,
-    std::vector<std::pair<std::string, float> >& ids,
-    size_t ret_num) const {
-  similar_row(id, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {
     ids[i].second = -ids[i].second;
   }
