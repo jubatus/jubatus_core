@@ -49,7 +49,7 @@ string get_error_msg(int err)
   char *ret;
   ret=strerror_r(err,buf,BUF_SIZE);
   return string(ret);
-#elif defined(__sparcv8) || defined(__sparcv9) || defined(__APPLE__)
+#elif defined(__sparcv8) || defined(__sparcv9) || defined(__APPLE__) || defined(__FreeBSD__)
   strerror_r(err,buf,BUF_SIZE);
   return string(buf);
 #else
