@@ -211,6 +211,22 @@ void bit_index_storage::similar_row(
   }
 }
 
+void bit_index_storage::similar_row(
+    const std::string& id,
+    vector<pair<string, float> >& ids,
+    uint64_t ret_num) const {
+  ids.clear();
+  bit_table_t::const_iterator it = bitvals_diff_.find(id);
+  if (it == bitvals_diff_.end()) {
+    it = bitvals_.find(id);
+    if (it == bitvals_.end()) {
+      return;
+    }
+  }
+
+  similar_row(it->second, ids, ret_num);
+}
+
 void bit_index_storage::pack(framework::packer& packer) const {
   packer.pack(*this);
 }
