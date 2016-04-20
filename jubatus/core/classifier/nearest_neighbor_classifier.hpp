@@ -72,6 +72,7 @@ class nearest_neighbor_classifier : public classifier_base {
   jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
       nearest_neighbor_engine_;
   typedef jubatus::util::data::unordered_map<std::string, size_t> labels_t;
+  // A map from label to number of records that belongs to the label.
   labels_t labels_;
   size_t k_;
   float alpha_;
