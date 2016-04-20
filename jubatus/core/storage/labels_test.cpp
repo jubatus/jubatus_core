@@ -35,7 +35,7 @@ TEST(labels, trivial) {
   EXPECT_FALSE(labels.erase("hoge"));
   EXPECT_EQ(0u, labels.get().size());
 
-  EXPECT_TRUE(labels.set("hoge"));
+  EXPECT_TRUE(labels.add("hoge"));
   EXPECT_EQ(1u, labels.get().size());
   EXPECT_EQ(1u, labels.get().count("hoge"));
   EXPECT_EQ(0ull, labels.get()["hoge"]);
@@ -53,7 +53,7 @@ TEST(labels, trivial) {
   EXPECT_EQ(1u, labels.get().count("hoge"));
   EXPECT_EQ(2ull, labels.get()["hoge"]);
 
-  labels.set("fuga");
+  labels.add("fuga");
   labels.increment("fuga");
   labels.increment("foo");
   EXPECT_EQ(3u, labels.get().size());
@@ -71,15 +71,15 @@ TEST(labels, trivial) {
 TEST(labels, duplicate) {
   labels labels;
 
-  EXPECT_TRUE(labels.set("hoge"));
-  EXPECT_FALSE(labels.set("hoge"));
+  EXPECT_TRUE(labels.add("hoge"));
+  EXPECT_FALSE(labels.add("hoge"));
   EXPECT_EQ(1u, labels.get().size());
 }
 
 TEST(labels, pack_unpack) {
   labels l1, l2;
 
-  l1.set("hoge");
+  l1.add("hoge");
   l1.increment("fuga");
   l1.increment("fuga");
 
