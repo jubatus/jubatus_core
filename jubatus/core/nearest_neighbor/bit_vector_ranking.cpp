@@ -27,21 +27,36 @@ using std::vector;
 using jubatus::core::storage::bit_vector;
 using jubatus::core::storage::const_bit_vector_column;
 
+typedef jubatus::core::storage::fixed_size_heap<
+  pair<uint32_t, uint64_t> > heap_t;
+
 namespace jubatus {
 namespace core {
 namespace nearest_neighbor {
+
+static heap_t ranking_hamming_bit_vectors_worker(
+    const bit_vector *query, const_bit_vector_column *bvs,
+    uint64_t ret_num, size_t off, size_t end) {
+  heap_t heap(ret_num);
+  for (uint64_t i = off; i < end; ++i) {
+    const size_t dist = query->calc_hamming_distance_unsafe(
+      bvs->get_data_at_unsafe(i));
+    heap.push(make_pair(dist, i));
+  }
+  return heap;
+}
 
 void ranking_hamming_bit_vectors(
     const bit_vector& query,
     const const_bit_vector_column& bvs,
     vector<pair<uint64_t, float> >& ret,
-    uint64_t ret_num) {
-  storage::fixed_size_heap<pair<uint32_t, uint64_t> > heap(ret_num);
-  for (uint64_t i = 0; i < bvs.size(); ++i) {
-    const size_t dist =
-        query.calc_hamming_distance_unsafe(bvs.get_data_at_unsafe(i));
-    heap.push(make_pair(dist, i));
-  }
+    uint64_t ret_num, uint32_t threads) {
+  heap_t heap(ret_num);
+  jubatus::util::lang::function<heap_t(size_t, size_t)> f =
+    jubatus::util::lang::bind(
+      &ranking_hamming_bit_vectors_worker,
+      &query, &bvs, ret_num, jubatus::util::lang::_1, jubatus::util::lang::_2);
+  ranking_hamming_bit_vectors_internal(f, bvs.size(), threads, heap);
 
   vector<pair<uint32_t, uint64_t> > sorted;
   heap.get_sorted(sorted);

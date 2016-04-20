@@ -20,8 +20,8 @@
 #include <map>
 #include <string>
 #include <vector>
-
 #include "../common/hash.hpp"
+#include "bit_vector_ranking.hpp"
 
 using std::string;
 using std::map;
@@ -106,10 +106,7 @@ minhash::minhash(
     const std::string& id)
     : bit_vector_nearest_neighbor_base(conf.hash_num, table, id) {
 
-  if (!(1 <= conf.hash_num)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("1 <= hash_num"));
-  }
+  set_config(conf);
 }
 
 minhash::minhash(
@@ -119,10 +116,7 @@ minhash::minhash(
     const std::string& id)
     : bit_vector_nearest_neighbor_base(conf.hash_num, table, schema, id) {
 
-  if (!(1 <= conf.hash_num)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("1 <= hash_num"));
-  }
+  set_config(conf);
 }
 
 bit_vector minhash::hash(const common::sfv_t& sfv) const {
@@ -148,6 +142,14 @@ bit_vector minhash::hash(const common::sfv_t& sfv) const {
   }
 
   return bv;
+}
+
+void minhash::set_config(const config& conf) {
+  if (!(1 <= conf.hash_num)) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("1 <= hash_num"));
+  }
+  threads_ = read_threads_config(conf.threads);
 }
 
 }  // namespace nearest_neighbor

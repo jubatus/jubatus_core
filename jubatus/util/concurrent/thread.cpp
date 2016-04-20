@@ -184,6 +184,15 @@ void* thread::impl::start_routine(void* p)
   return NULL;
 }
 
+unsigned thread::hardware_concurrency()
+{
+#ifdef __linux
+  return sysconf(_SC_NPROCESSORS_ONLN);
+#else
+  return 0;
+#endif
+}
+
 } // concurrent
 } // util
 } // jubatus
