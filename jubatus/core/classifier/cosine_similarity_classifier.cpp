@@ -51,7 +51,7 @@ void cosine_similarity_classifier::classify_with_scores(
   }
   for (size_t i = 0; i < ids.size(); ++i) {
     std::string label = get_label_from_id(ids[i].first);
-    m[label] += std::exp(-alpha_ * ids[i].second);
+    m[label] += std::exp(-alpha_ * (1 - ids[i].second));
   }
 
   scores.clear();
