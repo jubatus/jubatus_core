@@ -70,6 +70,17 @@ struct nearest_neighbor_classifier_config
   }
 };
 
+struct inverted_index_config {
+  int nearest_neighbor_num;
+  float local_sensitivity;
+
+  template<typename Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(nearest_neighbor_num)
+        & JUBA_MEMBER(local_sensitivity);
+  }
+};
+
 jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
 create_unlearner(const unlearner_config& conf) {
   if (conf.unlearner) {
@@ -173,11 +184,30 @@ shared_ptr<classifier_base> classifier_factory::create_classifier(
         new nearest_neighbor_classifier(nearest_neighbor_engine,
                                         conf.nearest_neighbor_num,
                                         conf.local_sensitivity));
+  } else if (name == "cosine") {
+    if (param.type() == jubatus::util::text::json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
+    inverted_index_config conf
+        = config_cast_check<inverted_index_config>(param);
+    res.reset(new cosine_similarity_classifier(
+        conf.nearest_neighbor_num, conf.local_sensitivity));
+  } else if (name == "euclidean") {
+    if (param.type() == jubatus::util::text::json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
+    inverted_index_config conf
+        = config_cast_check<inverted_index_config>(param);
+    res.reset(new euclidean_distance_classifier(
+        conf.nearest_neighbor_num, conf.local_sensitivity));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("classifier(" + name + ")"));
   }
-
   if (unlearner) {
     res->set_label_unlearner(unlearner);
   }
