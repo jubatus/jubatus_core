@@ -23,7 +23,6 @@
 
 #include "jubatus/util/concurrent/rwmutex.h"
 #include "jubatus/util/data/unordered_map.h"
-#include "../classifier/classifier_type.hpp"
 #include "../common/unordered_map.hpp"
 #include "../common/version.hpp"
 #include "../framework/mixable_helper.hpp"
@@ -34,7 +33,7 @@ namespace storage {
 
 class labels {
  public:
-  typedef classifier::labels_t data_t;
+  typedef jubatus::util::data::unordered_map<std::string, uint64_t> data_t;
 
   labels();
   ~labels();
