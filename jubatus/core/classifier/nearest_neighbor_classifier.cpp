@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include "../framework/mixable_versioned_table.hpp"
 #include "../storage/column_table.hpp"
 #include "jubatus/util/concurrent/lock.h"
 
@@ -106,6 +107,9 @@ void nearest_neighbor_classifier::set_label_unlearner(
     shared_ptr<unlearner::unlearner_base> label_unlearner) {
   label_unlearner->set_callback(unlearning_callback(this));
   unlearner_ = label_unlearner;
+  // Support unlearning in MIX
+  dynamic_cast<framework::mixable_versioned_table*>
+      (nearest_neighbor_engine_->get_mixable())->set_unlearner(unlearner_);
 }
 
 std::string nearest_neighbor_classifier::classify(
