@@ -111,7 +111,7 @@ bool linear_classifier::set_label(const string& label) {
   check_touchable(label);
 
   bool result = storage_->set_label(label);
-  result = labels_.get_model()->set(label) && result;
+  result = labels_.get_model()->add(label) && result;
   if (unlearner_ && result) {
     result = unlearner_->touch(label);
   }

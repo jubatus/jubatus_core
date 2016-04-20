@@ -30,7 +30,7 @@ labels::labels() {
 labels::~labels() {
 }
 
-bool labels::set(const std::string& label) {
+bool labels::add(const std::string& label) {
   {
     util::concurrent::scoped_rlock lock(mutex_);
     if (master_.find(label) != master_.end()) {

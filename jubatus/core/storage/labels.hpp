@@ -39,7 +39,7 @@ class labels {
   labels();
   ~labels();
 
-  bool set(const std::string& label);
+  bool add(const std::string& label);
   data_t get() const;
 
   void increment(const std::string& label);
