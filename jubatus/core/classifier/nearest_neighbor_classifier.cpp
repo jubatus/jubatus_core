@@ -63,7 +63,7 @@ nearest_neighbor_classifier::nearest_neighbor_classifier(
   dynamic_cast<framework::mixable_versioned_table*>
       (nearest_neighbor_engine_->get_mixable())->set_update_callback(
           util::lang::bind(
-              &nearest_neighbor_classifier::regenerate_labels, this));
+              &nearest_neighbor_classifier::regenerate_label_counter, this));
 }
 
 void nearest_neighbor_classifier::train(
@@ -244,7 +244,7 @@ void nearest_neighbor_classifier::decrement_label_counter(
   }
 }
 
-void nearest_neighbor_classifier::regenerate_labels() {
+void nearest_neighbor_classifier::regenerate_label_counter() {
   shared_ptr<const storage::column_table> table =
       nearest_neighbor_engine_->get_const_table();
 
