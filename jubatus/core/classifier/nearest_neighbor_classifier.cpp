@@ -44,7 +44,7 @@ class nearest_neighbor_classifier::unlearning_callback {
 
   void operator()(const std::string& id) {
     classifier_->unlearn_id(id);
-    classifier_->unlearn_label(get_label_from_id(id));
+    classifier_->decrement_label_counter(get_label_from_id(id));
   }
 
  private:
@@ -235,7 +235,8 @@ void nearest_neighbor_classifier::unlearn_id(const std::string& id) {
   nearest_neighbor_engine_->get_table()->delete_row(id);
 }
 
-void nearest_neighbor_classifier::unlearn_label(const std::string& label) {
+void nearest_neighbor_classifier::decrement_label_counter(
+    const std::string& label) {
   util::concurrent::scoped_lock lk(label_mutex_);
   labels_[label] -= 1;
   if (labels_[label] <= 0) {
