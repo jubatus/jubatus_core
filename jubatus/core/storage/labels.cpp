@@ -16,6 +16,7 @@
 
 #include "labels.hpp"
 
+#include <algorithm>
 #include <string>
 
 #include "jubatus/util/concurrent/lock.h"
@@ -64,6 +65,14 @@ void labels::increment(const std::string& label) {
   diff_[label] += 1;
 }
 
+void labels::decrement(const std::string& label) {
+  util::concurrent::scoped_wlock lock(mutex_);
+  diff_[label] -= 1;
+  if (diff_[label] <= 0) {
+    diff_.erase(label);
+  }
+}
+
 bool labels::erase(const std::string label) {
   util::concurrent::scoped_wlock lock(mutex_);
   bool result = diff_.erase(label);
@@ -74,6 +83,12 @@ bool labels::erase(const std::string label) {
 void labels::clear() {
   util::concurrent::scoped_wlock lock(mutex_);
   data_t().swap(diff_);
+  data_t().swap(master_);
+}
+
+void labels::swap(data_t& labels) {
+  util::concurrent::scoped_wlock lock(mutex_);
+  labels.swap(diff_);
   data_t().swap(master_);
 }
 

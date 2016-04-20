@@ -64,6 +64,23 @@ TEST(labels, trivial) {
   EXPECT_EQ(1u, labels.get().count("foo"));
   EXPECT_EQ(1ull, labels.get()["foo"]);
 
+  labels.decrement("hoge");
+  EXPECT_EQ(3u, labels.get().size());
+  EXPECT_EQ(1u, labels.get().count("hoge"));
+  EXPECT_EQ(1ull, labels.get()["hoge"]);
+  EXPECT_EQ(1u, labels.get().count("fuga"));
+  EXPECT_EQ(1ull, labels.get()["fuga"]);
+  EXPECT_EQ(1u, labels.get().count("foo"));
+  EXPECT_EQ(1ull, labels.get()["foo"]);
+
+  labels.decrement("fuga");
+  EXPECT_EQ(2u, labels.get().size());
+  EXPECT_EQ(1u, labels.get().count("hoge"));
+  EXPECT_EQ(1ull, labels.get()["hoge"]);
+  EXPECT_EQ(0u, labels.get().count("fuga"));
+  EXPECT_EQ(1u, labels.get().count("foo"));
+  EXPECT_EQ(1ull, labels.get()["foo"]);
+
   labels.clear();
   EXPECT_EQ(0u, labels.get().size());
 }
@@ -102,6 +119,31 @@ TEST(labels, pack_unpack) {
   EXPECT_EQ(0ull, l2.get()["hoge"]);
   EXPECT_EQ(1u, l2.get().count("fuga"));
   EXPECT_EQ(2ull, l2.get()["fuga"]);
+}
+
+TEST(labels, swap) {
+  labels labels;
+
+  labels.increment("hoge");
+
+  labels::data_t data;
+  data["fuga"] = 1;
+  data["foo"] = 2;
+
+  labels.swap(data);
+
+  EXPECT_EQ(2u, labels.get().size());
+  EXPECT_EQ(0u, labels.get().count("hoge"));
+  EXPECT_EQ(1u, labels.get().count("fuga"));
+  EXPECT_EQ(1ull, labels.get()["fuga"]);
+  EXPECT_EQ(1u, labels.get().count("foo"));
+  EXPECT_EQ(2ull, labels.get()["foo"]);
+
+  EXPECT_EQ(1u, data.size());
+  EXPECT_EQ(0u, data.count("fuga"));
+  EXPECT_EQ(0u, data.count("foo"));
+  EXPECT_EQ(1u, data.count("hoge"));
+  EXPECT_EQ(1ull, data["hoge"]);
 }
 
 TEST(labels, get_diff_and_merge_and_put_diff) {

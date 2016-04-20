@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_STORAGE_LABELS_HPP_
 
 #include <stdint.h>
+#include <algorithm>
 #include <string>
 #include <msgpack.hpp>
 
@@ -42,9 +43,12 @@ class labels {
   data_t get() const;
 
   void increment(const std::string& label);
+  void decrement(const std::string& label);
   bool erase(const std::string label);
 
   void clear();
+
+  void swap(data_t& labels);
 
   void get_diff(data_t& diff) const;
   bool put_diff(const data_t& mixed_diff);
