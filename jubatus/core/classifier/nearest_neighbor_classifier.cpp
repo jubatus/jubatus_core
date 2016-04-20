@@ -83,9 +83,7 @@ void nearest_neighbor_classifier::train(
   }
   nearest_neighbor_engine_->set_row(id, fv);
   set_label(label);
-
-  util::concurrent::scoped_lock lk(label_mutex_);
-  labels_[label] += 1;
+  labels_.increment(label);
 }
 
 void nearest_neighbor_classifier::set_label_unlearner(
@@ -117,15 +115,14 @@ void nearest_neighbor_classifier::classify_with_scores(
     const common::sfv_t& fv, classify_result& scores) const {
   std::vector<std::pair<std::string, float> > ids;
   nearest_neighbor_engine_->neighbor_row(fv, ids, k_);
+  labels_t labels = labels_.get();
 
   std::map<std::string, float> m;
-  {
-    util::concurrent::scoped_lock lk(label_mutex_);
-    for (labels_t::const_iterator iter = labels_.begin();
-         iter != labels_.end(); ++iter) {
-      m.insert(std::make_pair(iter->first, 0));
-    }
+  for (labels_t::const_iterator iter = labels.begin();
+       iter != labels.end(); ++iter) {
+    m.insert(std::make_pair(iter->first, 0));
   }
+
   for (size_t i = 0; i < ids.size(); ++i) {
     std::string label = get_label_from_id(ids[i].first);
     m[label] += std::exp(-alpha_ * ids[i].second);
@@ -140,11 +137,8 @@ void nearest_neighbor_classifier::classify_with_scores(
 }
 
 bool nearest_neighbor_classifier::delete_label(const std::string& label) {
-  {
-    util::concurrent::scoped_lock lk(label_mutex_);
-    if (labels_.erase(label) == 0) {
-      return false;
-    }
+  if (!labels_.erase(label)) {
+    return false;
   }
 
   shared_ptr<storage::column_table> table =
@@ -172,28 +166,18 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
 
 void nearest_neighbor_classifier::clear() {
   nearest_neighbor_engine_->clear();
-  {
-    util::concurrent::scoped_lock lk(label_mutex_);
-    labels_.clear();
-  }
+  labels_.clear();
   if (unlearner_) {
     unlearner_->clear();
   }
 }
 
 labels_t nearest_neighbor_classifier::get_labels() const {
-  util::concurrent::scoped_lock lk(label_mutex_);
-  return labels_;
+  return labels_.get();
 }
 
 bool nearest_neighbor_classifier::set_label(const std::string& label) {
-  util::concurrent::scoped_lock lk(label_mutex_);
-  if (labels_.find(label) == labels_.end()) {
-    labels_[label] = 0;
-    return true;
-  } else {
-    return false;
-  }
+  return labels_.add(label);
 }
 
 std::string nearest_neighbor_classifier::name() const {
@@ -208,9 +192,7 @@ void nearest_neighbor_classifier::get_status(
 void nearest_neighbor_classifier::pack(framework::packer& pk) const {
   pk.pack_array(2);
   nearest_neighbor_engine_->pack(pk);
-
-  util::concurrent::scoped_lock lk(label_mutex_);
-  pk.pack(labels_);
+  labels_.pack(pk);
 }
 
 void nearest_neighbor_classifier::unpack(msgpack::object o) {
@@ -218,8 +200,7 @@ void nearest_neighbor_classifier::unpack(msgpack::object o) {
     throw msgpack::type_error();
   }
   nearest_neighbor_engine_->unpack(o.via.array.ptr[0]);
-  util::concurrent::scoped_lock lk(label_mutex_);
-  o.via.array.ptr[1].convert(&labels_);
+  labels_.unpack(o.via.array.ptr[1]);
 }
 
 std::vector<framework::mixable*> nearest_neighbor_classifier::get_mixables() {
@@ -234,24 +215,18 @@ void nearest_neighbor_classifier::unlearn_id(const std::string& id) {
 
 void nearest_neighbor_classifier::decrement_label_counter(
     const std::string& label) {
-  util::concurrent::scoped_lock lk(label_mutex_);
-  labels_[label] -= 1;
-  if (labels_[label] <= 0) {
-    labels_.erase(label);
-  }
+  labels_.decrement(label);
 }
 
 void nearest_neighbor_classifier::regenerate_label_counter() {
   labels_t new_labels;
 
-  {
-    // Copy keyset of labels_ to new labels.
-    // labels_ contains labels that registered by set_label.
-    util::concurrent::scoped_lock lk(label_mutex_);
-    for (labels_t::const_iterator iter = labels_.begin();
-         iter != labels_.end(); ++iter) {
-      new_labels[iter->first] = 0;
-    }
+  // Copy keyset of labels_ to new labels.
+  // labels_ contains labels that registered by set_label.
+  labels_t labels_on_model = labels_.get();
+  for (labels_t::const_iterator iter = labels_on_model.begin();
+       iter != labels_on_model.end(); ++iter) {
+    new_labels[iter->first] = 0;
   }
 
   {

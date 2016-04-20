@@ -29,6 +29,7 @@
 
 #include "../common/type.hpp"
 #include "../nearest_neighbor/nearest_neighbor_base.hpp"
+#include "../storage/labels.hpp"
 #include "../unlearner/unlearner_base.hpp"
 #include "classifier_type.hpp"
 #include "classifier_base.hpp"
@@ -72,14 +73,13 @@ class nearest_neighbor_classifier : public classifier_base {
   jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
       nearest_neighbor_engine_;
   // A map from label to number of records that belongs to the label.
-  labels_t labels_;
+  storage::labels labels_;
   size_t k_;
   float alpha_;
   jubatus::util::concurrent::mutex unlearner_mutex_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   jubatus::util::concurrent::mutex rand_mutex_;
   jubatus::util::math::random::mtrand rand_;
-  mutable jubatus::util::concurrent::mutex label_mutex_;
 
   class unlearning_callback;
   void unlearn_id(const std::string& id);
