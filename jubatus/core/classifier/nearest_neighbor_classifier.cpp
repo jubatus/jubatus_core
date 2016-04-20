@@ -245,18 +245,28 @@ void nearest_neighbor_classifier::decrement_label_counter(
 }
 
 void nearest_neighbor_classifier::regenerate_label_counter() {
-  shared_ptr<const storage::column_table> table =
-      nearest_neighbor_engine_->get_const_table();
-  util::concurrent::scoped_rlock table_lk(table->get_mutex());
-
   labels_t labels;
-  for (size_t i = 0, n = table->size(); i < n; ++i) {
-    std::string id = table->get_key(i);
-    std::string label = get_label_from_id(id);
-    labels[label] += 1;
+
+  {
+    shared_ptr<const storage::column_table> table =
+        nearest_neighbor_engine_->get_const_table();
+    util::concurrent::scoped_rlock table_lk(table->get_mutex());
+
+    for (size_t i = 0, n = table->size(); i < n; ++i) {
+      std::string id = table->get_key(i);
+      std::string label = get_label_from_id(id);
+      labels[label] += 1;
+    }
   }
 
   util::concurrent::scoped_lock lk(label_mutex_);
+  for (labels_t::const_iterator iter = labels_.begin();
+       iter != labels_.end(); ++iter) {
+    if (labels.find(iter->first) == labels.end()) {
+      // labels registered by set_label are exist
+      labels[iter->first] = iter->second;
+    }
+  }
   labels_.swap(labels);
 }
 
