@@ -247,6 +247,7 @@ void nearest_neighbor_classifier::decrement_label_counter(
 void nearest_neighbor_classifier::regenerate_label_counter() {
   shared_ptr<const storage::column_table> table =
       nearest_neighbor_engine_->get_const_table();
+  util::concurrent::scoped_rlock table_lk(table->get_mutex());
 
   labels_t labels;
   for (size_t i = 0, n = table->size(); i < n; ++i) {
