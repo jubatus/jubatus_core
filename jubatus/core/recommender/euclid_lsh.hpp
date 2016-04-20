@@ -22,11 +22,14 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/data/optional.h"
 #include "jubatus/util/concurrent/lock.h"
 #include "jubatus/util/concurrent/mutex.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/text/json.h"
 #include "recommender_base.hpp"
+#include "../unlearner/unlearner_base.hpp"
+#include "../common/jsonconfig.hpp"
 
 namespace jubatus {
 namespace core {
@@ -66,6 +69,9 @@ class euclid_lsh : public recommender_base {
     int32_t seed;
     bool retain_projection;
 
+    util::data::optional<std::string> unlearner;
+    util::data::optional<core::common::jsonconfig::config> unlearner_parameter;
+
     template<typename Ar>
     void serialize(Ar& ar) {
       ar
@@ -74,7 +80,9 @@ class euclid_lsh : public recommender_base {
           & JUBA_MEMBER(bin_width)
           & JUBA_MEMBER(probe_num)
           & JUBA_MEMBER(seed)
-          & JUBA_MEMBER(retain_projection);
+          & JUBA_MEMBER(retain_projection)
+          & JUBA_MEMBER(unlearner)
+          & JUBA_MEMBER(unlearner_parameter);
     }
   };
 
@@ -102,6 +110,7 @@ class euclid_lsh : public recommender_base {
 
   virtual void clear();
   virtual void clear_row(const std::string& id);
+  virtual void remove_row(const std::string& id);
   virtual void update_row(const std::string& id, const sfv_diff_t& diff);
   virtual void get_all_row_ids(std::vector<std::string>& ids) const;
 
@@ -127,6 +136,9 @@ class euclid_lsh : public recommender_base {
       projection_cache_;
   mutable jubatus::util::concurrent::mutex cache_lock_;
   bool retain_projection_;
+
+  jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
+      unlearner_;
 };
 
 }  // namespace recommender

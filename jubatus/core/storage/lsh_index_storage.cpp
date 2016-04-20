@@ -182,7 +182,7 @@ void lsh_index_storage::remove_row(const string& row) {
   }
 
   // Otherwise, keep the row with empty entry until next MIX.
-  master_table_diff_.insert(make_pair(row, lsh_entry()));
+  master_table_diff_[row] = lsh_entry();
   lsh_entry& entry = entry_it->second;
   put_empty_entry(row_id, entry);
 
@@ -205,15 +205,20 @@ void lsh_index_storage::get_all_row_ids(vector<string>& ids) const {
   // equivalent to id_set.reserve(size_upper_bound) in C++11
   id_set.rehash(std::ceil(size_upper_bound / id_set.max_load_factor()));
 
-  for (lsh_master_table_t::const_iterator it = master_table_.begin();
-      it != master_table_.end(); ++it) {
+  // Collect rows from diff table.
+  for (lsh_master_table_t::const_iterator it = master_table_diff_.begin();
+      it != master_table_diff_.end(); ++it) {
+    // Exclude removed (empty) rows in diff table.
     if (!it->second.lsh_hash.empty()) {
       id_set.insert(it->first);
     }
   }
-  for (lsh_master_table_t::const_iterator it = master_table_diff_.begin();
-      it != master_table_diff_.end(); ++it) {
-    if (!it->second.lsh_hash.empty()) {
+
+  // Collect rows from master table.
+  for (lsh_master_table_t::const_iterator it = master_table_.begin();
+      it != master_table_.end(); ++it) {
+    // Exclude rows overwritten in diff table.
+    if (master_table_diff_.find(it->first) == master_table_diff_.end()) {
       id_set.insert(it->first);
     }
   }
@@ -301,15 +306,53 @@ bool lsh_index_storage::put_diff(
   for (lsh_master_table_t::const_iterator it = diff.begin(); it != diff.end();
       ++it) {
     if (it->second.lsh_hash.empty()) {
+      // empty lsh_hash was propagated from other nodes. This indicates
+      // that the row should be removed globally from the master table.
+      if (unlearner_) {
+        unlearner_->remove(it->first);
+      }
       remove_model_row(it->first);
       master_table_.erase(it->first);
     } else {
+      if (unlearner_) {
+        if (unlearner_->can_touch(it->first)) {
+          unlearner_->touch(it->first);
+        } else {
+          continue;  // drop untouchable value
+        }
+      }
       remove_model_row(it->first);
       set_mixed_row(it->first, it->second);
     }
   }
 
+  // Find rows that were removed by unlearner or remove_row between
+  // get_diff and put_diff
+  std::vector<std::string> removed_rows;
+  for (lsh_master_table_t::const_iterator it = master_table_diff_.begin();
+      it != master_table_diff_.end(); ++it) {
+    if (it->second.lsh_hash.empty()) {
+      lsh_master_table_t::const_iterator pos;
+      pos = diff.find(it->first);
+      if (pos == diff.end() || !pos->second.lsh_hash.empty()) {
+        removed_rows.push_back(it->first);
+      }
+    }
+  }
+
   master_table_diff_.clear();
+
+  // Keep empty rows in the diff table until next MIX to
+  // propagate the removal of this data to other nodes.
+  for (size_t i = 0; i < removed_rows.size(); ++i) {
+    master_table_diff_.insert(make_pair(removed_rows[i], lsh_entry()));
+    lsh_master_table_t::iterator it = master_table_.find(removed_rows[i]);
+    if (it != master_table_.end()) {
+      const uint64_t row_id = key_manager_.get_id_const(removed_rows[i]);
+      lsh_entry& entry = it->second;
+      put_empty_entry(row_id, entry);
+    }
+  }
 
   // lsh_table_diff_ is actually not MIXed, but must be cleared as well as diff
   // of usual model.
