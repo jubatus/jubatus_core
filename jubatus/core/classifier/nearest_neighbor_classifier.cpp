@@ -24,6 +24,7 @@
 #include "../framework/mixable_versioned_table.hpp"
 #include "../storage/column_table.hpp"
 #include "jubatus/util/concurrent/lock.h"
+#include "nearest_neighbor_classifier_util.hpp"
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::data::unordered_set;
@@ -32,32 +33,6 @@ using jubatus::util::concurrent::scoped_lock;
 namespace jubatus {
 namespace core {
 namespace classifier {
-
-namespace {
-std::string make_id_from_label(const std::string& label,
-                               jubatus::util::math::random::mtrand& rand) {
-  const size_t n = 8;
-  std::string result = label;
-  result.reserve(label.size() + 1 + n);
-  result.push_back('_');
-  for (size_t i = 0; i < n; ++i) {
-    int r = rand.next_int(26 * 2 + 10);
-    if (r < 26) {
-      result.push_back('a' + r);
-    } else if (r < 26 * 2) {
-      result.push_back('A' + (r - 26));
-    } else {
-      result.push_back('0' + (r - 26 * 2));
-    }
-  }
-  return result;
-}
-
-std::string get_label_from_id(const std::string& id) {
-  size_t pos = id.find_last_of("_");
-  return id.substr(0, pos);
-}
-}  // namespace
 
 class nearest_neighbor_classifier::unlearning_callback {
  public:

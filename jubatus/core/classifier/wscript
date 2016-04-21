@@ -15,6 +15,10 @@ def build(bld):
       'normal_herd.cpp',
       'nearest_neighbor_classifier.cpp',
       'classifier_factory.cpp',
+      'inverted_index_classifier.cpp',
+      'cosine_similarity_classifier.cpp',
+      'euclidean_distance_classifier.cpp',
+      'nearest_neighbor_classifier_util.cpp'
       ]
   headers = [
       'classifier_base.hpp',
@@ -31,6 +35,10 @@ def build(bld):
       'passive_aggressive_2.hpp',
       'perceptron.hpp',
       'nearest_neighbor_classifier.hpp',
+      'inverted_index_classifier.cpp',
+      'cosine_similarity_classifier.hpp',
+      'euclidean_distance_classifier.hpp',
+      'nearest_neighbor_classifier_util.hpp'
       ]
   use = ['jubatus_util']
 

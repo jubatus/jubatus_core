@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2011 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2016 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,19 +14,26 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_CLASSIFIER_CLASSIFIER_HPP_
-#define JUBATUS_CORE_CLASSIFIER_CLASSIFIER_HPP_
+#ifndef JUBATUS_CORE_CLASSIFIER_NEAREST_NEIGHBOR_CLASSIFIER_UTIL_HPP_
+#define JUBATUS_CORE_CLASSIFIER_NEAREST_NEIGHBOR_CLASSIFIER_UTIL_HPP_
 
-#include "classifier_base.hpp"
-#include "perceptron.hpp"
-#include "passive_aggressive.hpp"
-#include "passive_aggressive_1.hpp"
-#include "passive_aggressive_2.hpp"
-#include "confidence_weighted.hpp"
-#include "arow.hpp"
-#include "normal_herd.hpp"
-#include "nearest_neighbor_classifier.hpp"
-#include "cosine_similarity_classifier.hpp"
-#include "euclidean_distance_classifier.hpp"
+#include <string>
+#include "jubatus/util/math/random.h"
 
-#endif  // JUBATUS_CORE_CLASSIFIER_CLASSIFIER_HPP_
+using jubatus::util::math::random::mtrand;
+
+namespace jubatus {
+namespace core {
+namespace classifier {
+
+std::string make_id_from_label(
+    const std::string& label,
+    mtrand& rand);
+
+std::string get_label_from_id(const std::string& id);
+
+}  // namespace nearest_neighbor
+}  // namespace core
+}  // namespace jubatus
+
+#endif  // JUBATUS_CORE_CLASSIFIER_NEAREST_NEIGHBOR_CLASSIFIER_UTIL_HPP_
