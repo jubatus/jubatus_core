@@ -40,8 +40,10 @@ void euclidean_distance_classifier::classify_with_scores(
     const common::sfv_t& fv,
     classify_result& scores) const {
   std::vector<std::pair<std::string, float> > ids;
-  mixable_storage_->get_model()->calc_euclid_scores(fv, ids, k_);
-
+  {
+    util::concurrent::scoped_rlock lk(storage_mutex_);
+    mixable_storage_->get_model()->calc_euclid_scores(fv, ids, k_);
+  }
   std::map<std::string, float> m;
   {
     util::concurrent::scoped_lock lk(label_mutex_);

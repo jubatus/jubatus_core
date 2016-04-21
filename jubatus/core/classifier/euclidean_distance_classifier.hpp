@@ -23,6 +23,7 @@
 namespace jubatus {
 namespace core {
 namespace classifier {
+
 class euclidean_distance_classifier : public inverted_index_classifier {
  public:
   euclidean_distance_classifier(

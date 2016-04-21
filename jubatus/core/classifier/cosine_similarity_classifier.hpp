@@ -23,6 +23,7 @@
 namespace jubatus {
 namespace core {
 namespace classifier {
+
 class cosine_similarity_classifier : public inverted_index_classifier {
  public:
   cosine_similarity_classifier(

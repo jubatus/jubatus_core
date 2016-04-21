@@ -27,6 +27,7 @@
 #include "jubatus/util/data/unordered_set.h"
 #include "jubatus/util/concurrent/lock.h"
 #include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/concurrent/rwmutex.h"
 
 #include "../common/type.hpp"
 #include "../framework/packer.hpp"
@@ -71,6 +72,7 @@ class inverted_index_classifier : public classifier_base {
   jubatus::util::data::unordered_set<std::string> labels_;
   size_t k_;
   float alpha_;
+  mutable jubatus::util::concurrent::rw_mutex storage_mutex_;
   jubatus::util::concurrent::mutex rand_mutex_;
   jubatus::util::math::random::mtrand rand_;
   mutable jubatus::util::concurrent::mutex label_mutex_;

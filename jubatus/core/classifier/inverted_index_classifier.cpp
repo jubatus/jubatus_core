@@ -20,6 +20,7 @@
 #include <vector>
 #include <map>
 #include "jubatus/util/concurrent/lock.h"
+#include "jubatus/util/concurrent/rwmutex.h"
 #include "nearest_neighbor_classifier_util.hpp"
 
 using jubatus::util::lang::shared_ptr;
@@ -58,9 +59,12 @@ void inverted_index_classifier::train(
     util::concurrent::scoped_lock lk(rand_mutex_);
     id = make_id_from_label(label, rand_);
   }
-  storage::inverted_index_storage& inv = *mixable_storage_->get_model();
-  for (size_t i = 0; i < fv.size(); ++i) {
-    inv.set(fv[i].first, id, fv[i].second);
+  {
+    util::concurrent::scoped_wlock lk(storage_mutex_);
+    storage::inverted_index_storage& inv = *mixable_storage_->get_model();
+    for (size_t i = 0; i < fv.size(); ++i) {
+      inv.set(fv[i].first, id, fv[i].second);
+    }
   }
   set_label(label);
 }
@@ -98,7 +102,10 @@ void inverted_index_classifier::get_status(
 
 void inverted_index_classifier::pack(framework::packer& pk) const {
   pk.pack_array(2);
-  mixable_storage_->get_model()->pack(pk);
+  {
+    util::concurrent::scoped_rlock lk(storage_mutex_);
+    mixable_storage_->get_model()->pack(pk);
+  }
   util::concurrent::scoped_lock lk(label_mutex_);
   pk.pack_array(labels_.size());
   for (unordered_set<std::string>::const_iterator iter = labels_.begin();
@@ -111,8 +118,10 @@ void inverted_index_classifier::unpack(msgpack::object o) {
   if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
     throw msgpack::type_error();
   }
-  mixable_storage_->get_model()->unpack(o.via.array.ptr[0]);
-
+  {
+    util::concurrent::scoped_wlock lk(storage_mutex_);
+    mixable_storage_->get_model()->unpack(o.via.array.ptr[0]);
+  }
   msgpack::object labels = o.via.array.ptr[1];
   if (labels.type != msgpack::type::ARRAY) {
     throw msgpack::type_error();
@@ -128,7 +137,10 @@ void inverted_index_classifier::unpack(msgpack::object o) {
 }
 
 void inverted_index_classifier::clear() {
-  mixable_storage_->get_model()->clear();
+  {
+    util::concurrent::scoped_wlock lk(storage_mutex_);
+    mixable_storage_->get_model()->clear();
+  }
   {
     util::concurrent::scoped_lock lk(label_mutex_);
     labels_.clear();
