@@ -43,7 +43,10 @@ inline std::string to_string(const error_errno& info) {
   char buf[1024];
 #if defined(__linux__)
   std::string msg(strerror_r(info.value(), buf, sizeof(buf)));
-#elif defined(__sparcv8) || defined(__sparcv9) || defined(__APPLE__) || defined(__FreeBSD__)
+#elif defined(__sparcv8) || \
+      defined(__sparcv9) || \
+      defined(__APPLE__) || \
+      defined(__FreeBSD__)
   strerror_r(info.value(), buf, sizeof(buf));
   std::string msg(buf);
 #else
