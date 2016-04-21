@@ -248,6 +248,17 @@ void nearest_neighbor_classifier::regenerate_label_counter() {
   labels_t new_labels;
 
   {
+    // Copy keyset of labels_ to new labels.
+    // labels_ contains labels that registered by set_label.
+    util::concurrent::scoped_lock lk(label_mutex_);
+    for (labels_t::const_iterator iter = labels_.begin();
+         iter != labels_.end(); ++iter) {
+      new_labels[iter->first] = 0;
+    }
+  }
+
+  {
+    // Count id for each label
     shared_ptr<const storage::column_table> table =
         nearest_neighbor_engine_->get_const_table();
     util::concurrent::scoped_rlock table_lk(table->get_mutex());
@@ -259,14 +270,6 @@ void nearest_neighbor_classifier::regenerate_label_counter() {
     }
   }
 
-  util::concurrent::scoped_lock lk(label_mutex_);
-  for (labels_t::const_iterator iter = labels_.begin();
-       iter != labels_.end(); ++iter) {
-    if (labels.find(iter->first) == labels.end()) {
-      // labels registered by set_label are exist
-      new_labels[iter->first] = iter->second;
-    }
-  }
   labels_.swap(new_labels);
 }
 
