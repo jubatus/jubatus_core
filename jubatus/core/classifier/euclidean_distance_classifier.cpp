@@ -22,6 +22,7 @@
 
 #include "jubatus/util/concurrent/lock.h"
 #include "nearest_neighbor_classifier_util.hpp"
+#include "classifier_type.hpp"
 
 using jubatus::util::lang::shared_ptr;
 using jubatus::util::concurrent::scoped_lock;
