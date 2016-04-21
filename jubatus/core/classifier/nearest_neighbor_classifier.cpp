@@ -115,7 +115,7 @@ void nearest_neighbor_classifier::classify_with_scores(
     const common::sfv_t& fv, classify_result& scores) const {
   std::vector<std::pair<std::string, float> > ids;
   nearest_neighbor_engine_->neighbor_row(fv, ids, k_);
-  labels_t labels = labels_.get();
+  labels_t labels = labels_.get_labels();
 
   std::map<std::string, float> m;
   for (labels_t::const_iterator iter = labels.begin();
@@ -173,7 +173,7 @@ void nearest_neighbor_classifier::clear() {
 }
 
 labels_t nearest_neighbor_classifier::get_labels() const {
-  return labels_.get();
+  return labels_.get_labels();
 }
 
 bool nearest_neighbor_classifier::set_label(const std::string& label) {
@@ -223,7 +223,7 @@ void nearest_neighbor_classifier::regenerate_label_counter() {
 
   // Copy keyset of labels_ to new labels.
   // labels_ contains labels that registered by set_label.
-  labels_t labels_on_model = labels_.get();
+  labels_t labels_on_model = labels_.get_labels();
   for (labels_t::const_iterator iter = labels_on_model.begin();
        iter != labels_on_model.end(); ++iter) {
     new_labels[iter->first] = 0;

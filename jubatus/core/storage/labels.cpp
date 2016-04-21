@@ -48,7 +48,7 @@ bool labels::add(const std::string& label) {
   return true;
 }
 
-labels::data_t labels::get() const {
+labels::data_t labels::get_labels() const {
   util::concurrent::scoped_rlock lock(mutex_);
 
   data_t result(master_);

@@ -44,7 +44,7 @@ void cosine_similarity_classifier::classify_with_scores(
     mixable_storage_->get_model()->calc_scores(fv, ids, k_);
   }
 
-  labels_t labels = labels_.get_model()->get();
+  labels_t labels = labels_.get_model()->get_labels();
   std::map<std::string, float> m;
   for (labels_t::const_iterator iter = labels.begin();
        iter != labels.end(); ++iter) {

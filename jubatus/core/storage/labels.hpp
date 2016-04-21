@@ -40,7 +40,7 @@ class labels {
   ~labels();
 
   bool add(const std::string& label);
-  data_t get() const;
+  data_t get_labels() const;
 
   void increment(const std::string& label);
   void decrement(const std::string& label);

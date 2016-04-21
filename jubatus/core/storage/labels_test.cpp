@@ -30,59 +30,59 @@ namespace storage {
 TEST(labels, trivial) {
   labels labels;
 
-  EXPECT_EQ(0u, labels.get().size());
+  EXPECT_EQ(0u, labels.get_labels().size());
 
   EXPECT_FALSE(labels.erase("hoge"));
-  EXPECT_EQ(0u, labels.get().size());
+  EXPECT_EQ(0u, labels.get_labels().size());
 
   EXPECT_TRUE(labels.add("hoge"));
-  EXPECT_EQ(1u, labels.get().size());
-  EXPECT_EQ(1u, labels.get().count("hoge"));
-  EXPECT_EQ(0ull, labels.get()["hoge"]);
+  EXPECT_EQ(1u, labels.get_labels().size());
+  EXPECT_EQ(1u, labels.get_labels().count("hoge"));
+  EXPECT_EQ(0ull, labels.get_labels()["hoge"]);
 
   EXPECT_TRUE(labels.erase("hoge"));
-  EXPECT_EQ(0u, labels.get().size());
+  EXPECT_EQ(0u, labels.get_labels().size());
 
   labels.increment("hoge");
-  EXPECT_EQ(1u, labels.get().size());
-  EXPECT_EQ(1u, labels.get().count("hoge"));
-  EXPECT_EQ(1ull, labels.get()["hoge"]);
+  EXPECT_EQ(1u, labels.get_labels().size());
+  EXPECT_EQ(1u, labels.get_labels().count("hoge"));
+  EXPECT_EQ(1ull, labels.get_labels()["hoge"]);
 
   labels.increment("hoge");
-  EXPECT_EQ(1u, labels.get().size());
-  EXPECT_EQ(1u, labels.get().count("hoge"));
-  EXPECT_EQ(2ull, labels.get()["hoge"]);
+  EXPECT_EQ(1u, labels.get_labels().size());
+  EXPECT_EQ(1u, labels.get_labels().count("hoge"));
+  EXPECT_EQ(2ull, labels.get_labels()["hoge"]);
 
   labels.add("fuga");
   labels.increment("fuga");
   labels.increment("foo");
-  EXPECT_EQ(3u, labels.get().size());
-  EXPECT_EQ(1u, labels.get().count("hoge"));
-  EXPECT_EQ(2ull, labels.get()["hoge"]);
-  EXPECT_EQ(1u, labels.get().count("fuga"));
-  EXPECT_EQ(1ull, labels.get()["fuga"]);
-  EXPECT_EQ(1u, labels.get().count("foo"));
-  EXPECT_EQ(1ull, labels.get()["foo"]);
+  EXPECT_EQ(3u, labels.get_labels().size());
+  EXPECT_EQ(1u, labels.get_labels().count("hoge"));
+  EXPECT_EQ(2ull, labels.get_labels()["hoge"]);
+  EXPECT_EQ(1u, labels.get_labels().count("fuga"));
+  EXPECT_EQ(1ull, labels.get_labels()["fuga"]);
+  EXPECT_EQ(1u, labels.get_labels().count("foo"));
+  EXPECT_EQ(1ull, labels.get_labels()["foo"]);
 
   labels.decrement("hoge");
-  EXPECT_EQ(3u, labels.get().size());
-  EXPECT_EQ(1u, labels.get().count("hoge"));
-  EXPECT_EQ(1ull, labels.get()["hoge"]);
-  EXPECT_EQ(1u, labels.get().count("fuga"));
-  EXPECT_EQ(1ull, labels.get()["fuga"]);
-  EXPECT_EQ(1u, labels.get().count("foo"));
-  EXPECT_EQ(1ull, labels.get()["foo"]);
+  EXPECT_EQ(3u, labels.get_labels().size());
+  EXPECT_EQ(1u, labels.get_labels().count("hoge"));
+  EXPECT_EQ(1ull, labels.get_labels()["hoge"]);
+  EXPECT_EQ(1u, labels.get_labels().count("fuga"));
+  EXPECT_EQ(1ull, labels.get_labels()["fuga"]);
+  EXPECT_EQ(1u, labels.get_labels().count("foo"));
+  EXPECT_EQ(1ull, labels.get_labels()["foo"]);
 
   labels.decrement("fuga");
-  EXPECT_EQ(2u, labels.get().size());
-  EXPECT_EQ(1u, labels.get().count("hoge"));
-  EXPECT_EQ(1ull, labels.get()["hoge"]);
-  EXPECT_EQ(0u, labels.get().count("fuga"));
-  EXPECT_EQ(1u, labels.get().count("foo"));
-  EXPECT_EQ(1ull, labels.get()["foo"]);
+  EXPECT_EQ(2u, labels.get_labels().size());
+  EXPECT_EQ(1u, labels.get_labels().count("hoge"));
+  EXPECT_EQ(1ull, labels.get_labels()["hoge"]);
+  EXPECT_EQ(0u, labels.get_labels().count("fuga"));
+  EXPECT_EQ(1u, labels.get_labels().count("foo"));
+  EXPECT_EQ(1ull, labels.get_labels()["foo"]);
 
   labels.clear();
-  EXPECT_EQ(0u, labels.get().size());
+  EXPECT_EQ(0u, labels.get_labels().size());
 }
 
 TEST(labels, duplicate) {
@@ -90,7 +90,7 @@ TEST(labels, duplicate) {
 
   EXPECT_TRUE(labels.add("hoge"));
   EXPECT_FALSE(labels.add("hoge"));
-  EXPECT_EQ(1u, labels.get().size());
+  EXPECT_EQ(1u, labels.get_labels().size());
 }
 
 TEST(labels, pack_unpack) {
@@ -114,11 +114,11 @@ TEST(labels, pack_unpack) {
     l2.unpack(unpacked.get());
   }
 
-  EXPECT_EQ(2u, l2.get().size());
-  EXPECT_EQ(1u, l2.get().count("hoge"));
-  EXPECT_EQ(0ull, l2.get()["hoge"]);
-  EXPECT_EQ(1u, l2.get().count("fuga"));
-  EXPECT_EQ(2ull, l2.get()["fuga"]);
+  EXPECT_EQ(2u, l2.get_labels().size());
+  EXPECT_EQ(1u, l2.get_labels().count("hoge"));
+  EXPECT_EQ(0ull, l2.get_labels()["hoge"]);
+  EXPECT_EQ(1u, l2.get_labels().count("fuga"));
+  EXPECT_EQ(2ull, l2.get_labels()["fuga"]);
 }
 
 TEST(labels, swap) {
@@ -132,12 +132,12 @@ TEST(labels, swap) {
 
   labels.swap(data);
 
-  EXPECT_EQ(2u, labels.get().size());
-  EXPECT_EQ(0u, labels.get().count("hoge"));
-  EXPECT_EQ(1u, labels.get().count("fuga"));
-  EXPECT_EQ(1ull, labels.get()["fuga"]);
-  EXPECT_EQ(1u, labels.get().count("foo"));
-  EXPECT_EQ(2ull, labels.get()["foo"]);
+  EXPECT_EQ(2u, labels.get_labels().size());
+  EXPECT_EQ(0u, labels.get_labels().count("hoge"));
+  EXPECT_EQ(1u, labels.get_labels().count("fuga"));
+  EXPECT_EQ(1ull, labels.get_labels()["fuga"]);
+  EXPECT_EQ(1u, labels.get_labels().count("foo"));
+  EXPECT_EQ(2ull, labels.get_labels()["foo"]);
 
   EXPECT_EQ(1u, data.size());
   EXPECT_EQ(0u, data.count("fuga"));
@@ -185,23 +185,23 @@ TEST(labels, get_diff_and_merge_and_put_diff) {
   l2.put_diff(mixed);
   l3.put_diff(mixed);
 
-  EXPECT_EQ(4u, l1.get().size());
-  EXPECT_EQ(1ull, l1.get()["hoge"]);
-  EXPECT_EQ(2ull, l1.get()["fuga"]);
-  EXPECT_EQ(1ull, l1.get()["foo"]);
-  EXPECT_EQ(1ull, l1.get()["bar"]);
+  EXPECT_EQ(4u, l1.get_labels().size());
+  EXPECT_EQ(1ull, l1.get_labels()["hoge"]);
+  EXPECT_EQ(2ull, l1.get_labels()["fuga"]);
+  EXPECT_EQ(1ull, l1.get_labels()["foo"]);
+  EXPECT_EQ(1ull, l1.get_labels()["bar"]);
 
-  EXPECT_EQ(4u, l2.get().size());
-  EXPECT_EQ(1ull, l2.get()["hoge"]);
-  EXPECT_EQ(2ull, l2.get()["fuga"]);
-  EXPECT_EQ(1ull, l2.get()["foo"]);
-  EXPECT_EQ(1ull, l2.get()["bar"]);
+  EXPECT_EQ(4u, l2.get_labels().size());
+  EXPECT_EQ(1ull, l2.get_labels()["hoge"]);
+  EXPECT_EQ(2ull, l2.get_labels()["fuga"]);
+  EXPECT_EQ(1ull, l2.get_labels()["foo"]);
+  EXPECT_EQ(1ull, l2.get_labels()["bar"]);
 
-  EXPECT_EQ(4u, l3.get().size());
-  EXPECT_EQ(1ull, l3.get()["hoge"]);
-  EXPECT_EQ(2ull, l3.get()["fuga"]);
-  EXPECT_EQ(1ull, l3.get()["foo"]);
-  EXPECT_EQ(1ull, l3.get()["bar"]);
+  EXPECT_EQ(4u, l3.get_labels().size());
+  EXPECT_EQ(1ull, l3.get_labels()["hoge"]);
+  EXPECT_EQ(2ull, l3.get_labels()["fuga"]);
+  EXPECT_EQ(1ull, l3.get_labels()["foo"]);
+  EXPECT_EQ(1ull, l3.get_labels()["bar"]);
 }
 
 }  // namespace storage

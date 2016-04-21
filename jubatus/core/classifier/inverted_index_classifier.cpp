@@ -80,7 +80,7 @@ bool inverted_index_classifier::delete_label(const std::string& label) {
 }
 
 labels_t inverted_index_classifier::get_labels() const {
-  return labels_.get_model()->get();
+  return labels_.get_model()->get_labels();
 }
 
 bool inverted_index_classifier::set_label(const std::string& label) {

@@ -104,7 +104,7 @@ void linear_classifier::clear() {
 }
 
 labels_t linear_classifier::get_labels() const {
-  return labels_.get_model()->get();
+  return labels_.get_model()->get_labels();
 }
 
 bool linear_classifier::set_label(const string& label) {
