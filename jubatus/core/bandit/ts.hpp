@@ -67,4 +67,4 @@ class ts : public bandit_base {
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_BANDIT_EXP3_HPP_
+#endif  // JUBATUS_CORE_BANDIT_TS_HPP_
