@@ -24,7 +24,6 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/math/random.h"
-#include "jubatus/util/data/unordered_set.h"
 #include "jubatus/util/concurrent/lock.h"
 #include "jubatus/util/concurrent/mutex.h"
 #include "jubatus/util/concurrent/rwmutex.h"
@@ -33,6 +32,7 @@
 #include "../framework/packer.hpp"
 #include "../framework/mixable.hpp"
 #include "../unlearner/unlearner_base.hpp"
+#include "../storage/labels.hpp"
 #include "../storage/inverted_index_storage.hpp"
 #include "classifier_type.hpp"
 #include "classifier_base.hpp"
@@ -53,7 +53,7 @@ class inverted_index_classifier : public classifier_base {
       label_unlearner);
 
   bool delete_label(const std::string& label);
-  std::vector<std::string> get_labels() const;
+  labels_t get_labels() const;
   bool set_label(const std::string& label);
 
   std::string name() const;
@@ -64,18 +64,18 @@ class inverted_index_classifier : public classifier_base {
   void unpack(msgpack::object o);
   void clear();
 
-  framework::mixable* get_mixable();
+  std::vector<framework::mixable*> get_mixables();
 
  protected:
   jubatus::util::lang::shared_ptr<storage::mixable_inverted_index_storage>
       mixable_storage_;
-  jubatus::util::data::unordered_set<std::string> labels_;
+  // A map from label to number of records that belongs to the label.
+  storage::mixable_labels labels_;
   size_t k_;
   float alpha_;
   mutable jubatus::util::concurrent::rw_mutex storage_mutex_;
   jubatus::util::concurrent::mutex rand_mutex_;
   jubatus::util::math::random::mtrand rand_;
-  mutable jubatus::util::concurrent::mutex label_mutex_;
 };
 
 }  // namespace classifier
