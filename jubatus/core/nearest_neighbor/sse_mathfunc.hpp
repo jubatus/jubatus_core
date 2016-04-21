@@ -40,6 +40,7 @@
 
 #ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_SSE_MATHFUNC_HPP_
 #define JUBATUS_CORE_NEAREST_NEIGHBOR_SSE_MATHFUNC_HPP_
+
 #if defined(__SSE2__) || defined(JUBATUS_USE_FMV)
 
 #if defined(JUBATUS_USE_FMV)
@@ -214,4 +215,5 @@ void sincos_ps(__m128 x, __m128 *s, __m128 *c) {
 }
 
 #endif  // #if defined(__SSE2__) || defined(JUBATUS_USE_FMV)
-#endif  // #ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_SSE_MATHFUNC_HPP_
+
+#endif  // JUBATUS_CORE_NEAREST_NEIGHBOR_SSE_MATHFUNC_HPP_

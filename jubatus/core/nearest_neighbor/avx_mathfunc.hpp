@@ -42,6 +42,7 @@
 
 #ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_AVX_MATHFUNC_HPP_
 #define JUBATUS_CORE_NEAREST_NEIGHBOR_AVX_MATHFUNC_HPP_
+
 #ifdef JUBATUS_USE_FMV
 
 #include <immintrin.h>
@@ -209,4 +210,5 @@ static inline void sincos256_ps(__m256 x, __m256 *s, __m256 *c) {
 }
 
 #endif  // #ifdef  JUBATUS_USE_FMV
-#endif  // #ifndef JUBATUS_CORE_NEAREST_NEIGHBOR_AVX_MATHFUNC_HPP_
+
+#endif  // JUBATUS_CORE_NEAREST_NEIGHBOR_AVX_MATHFUNC_HPP_
