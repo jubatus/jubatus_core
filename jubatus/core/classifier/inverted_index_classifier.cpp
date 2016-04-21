@@ -24,19 +24,18 @@
 #include "nearest_neighbor_classifier_util.hpp"
 
 using jubatus::util::lang::shared_ptr;
-using jubatus::util::data::unordered_set;
 using jubatus::util::concurrent::scoped_lock;
-
 
 namespace jubatus {
 namespace core {
 namespace classifier {
 
-
 inverted_index_classifier::inverted_index_classifier(
     size_t k,
     float alpha) :
-  mixable_storage_(), k_(k), alpha_(alpha) {
+  mixable_storage_(),
+  labels_(core::storage::mixable_labels::model_ptr(
+        new core::storage::labels())), k_(k), alpha_(alpha) {
   if (!(alpha >= 0)) {
     throw JUBATUS_EXCEPTION(common::invalid_parameter(
         "local_sensitivity should >= 0"));
@@ -67,6 +66,7 @@ void inverted_index_classifier::train(
     }
   }
   set_label(label);
+  labels_.get_model()->increment(label);
 }
 
 void inverted_index_classifier::set_label_unlearner(
@@ -75,25 +75,16 @@ void inverted_index_classifier::set_label_unlearner(
   // not implemented
 }
 
-
-
 bool inverted_index_classifier::delete_label(const std::string& label) {
   return false;
 }
 
-std::vector<std::string> inverted_index_classifier::get_labels() const {
-  util::concurrent::scoped_lock lk(label_mutex_);
-  std::vector<std::string> result;
-  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
-       iter != labels_.end(); ++iter) {
-    result.push_back(*iter);
-  }
-  return result;
+labels_t inverted_index_classifier::get_labels() const {
+  return labels_.get_model()->get_labels();
 }
 
 bool inverted_index_classifier::set_label(const std::string& label) {
-  util::concurrent::scoped_lock lk(label_mutex_);
-  return labels_.insert(label).second;
+  return labels_.get_model()->add(label);
 }
 
 void inverted_index_classifier::get_status(
@@ -106,12 +97,7 @@ void inverted_index_classifier::pack(framework::packer& pk) const {
     util::concurrent::scoped_rlock lk(storage_mutex_);
     mixable_storage_->get_model()->pack(pk);
   }
-  util::concurrent::scoped_lock lk(label_mutex_);
-  pk.pack_array(labels_.size());
-  for (unordered_set<std::string>::const_iterator iter = labels_.begin();
-       iter != labels_.end(); ++iter) {
-    pk.pack(*iter);
-  }
+  labels_.get_model()->pack(pk);
 }
 
 void inverted_index_classifier::unpack(msgpack::object o) {
@@ -122,18 +108,7 @@ void inverted_index_classifier::unpack(msgpack::object o) {
     util::concurrent::scoped_wlock lk(storage_mutex_);
     mixable_storage_->get_model()->unpack(o.via.array.ptr[0]);
   }
-  msgpack::object labels = o.via.array.ptr[1];
-  if (labels.type != msgpack::type::ARRAY) {
-    throw msgpack::type_error();
-  }
-  for (size_t i = 0; i < labels.via.array.size; ++i) {
-    std::string label;
-    labels.via.array.ptr[i].convert(&label);
-    {
-      util::concurrent::scoped_lock lk(label_mutex_);
-      labels_.insert(label);
-    }
-  }
+  labels_.get_model()->unpack(o.via.array.ptr[1]);
 }
 
 void inverted_index_classifier::clear() {
@@ -141,18 +116,18 @@ void inverted_index_classifier::clear() {
     util::concurrent::scoped_wlock lk(storage_mutex_);
     mixable_storage_->get_model()->clear();
   }
-  {
-    util::concurrent::scoped_lock lk(label_mutex_);
-    labels_.clear();
-  }
+  labels_.get_model()->clear();
 }
 
 std::string inverted_index_classifier::name() const {
   return "inverted_index_classifier";
 }
 
-framework::mixable* inverted_index_classifier::get_mixable() {
-  return mixable_storage_.get();
+std::vector<framework::mixable*> inverted_index_classifier::get_mixables() {
+  std::vector<framework::mixable*> mixables;
+  mixables.push_back(mixable_storage_.get());
+  mixables.push_back(&labels_);
+  return mixables;
 }
 
 }  // namespace classifier

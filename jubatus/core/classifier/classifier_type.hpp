@@ -22,6 +22,7 @@
 #include <vector>
 #include <string>
 
+#include "jubatus/util/data/unordered_map.h"
 #include "classifier_config.hpp"
 
 namespace jubatus {
@@ -39,6 +40,7 @@ struct classify_result_elem {
 };
 
 typedef std::vector<classify_result_elem> classify_result;
+typedef jubatus::util::data::unordered_map<std::string, uint64_t> labels_t;
 
 }  // namespace classifier
 }  // namespace core

@@ -50,7 +50,7 @@ class classifier_base {
           label_unlearner) = 0;
 
   virtual bool delete_label(const std::string& label) = 0;
-  virtual std::vector<std::string> get_labels() const = 0;
+  virtual labels_t get_labels() const = 0;
   virtual bool set_label(const std::string& label) = 0;
 
   virtual std::string name() const = 0;
@@ -61,7 +61,7 @@ class classifier_base {
   virtual void unpack(msgpack::object o) = 0;
   virtual void clear() = 0;
 
-  virtual framework::mixable* get_mixable() = 0;
+  virtual std::vector<framework::mixable*> get_mixables() = 0;
 };
 
 }  // namespace classifier

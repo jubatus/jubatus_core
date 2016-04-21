@@ -61,7 +61,7 @@ class classifier : public driver_base {
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
 
-  std::vector<std::string> get_labels() const;
+  jubatus::core::classifier::labels_t get_labels() const;
   bool set_label(const std::string& label);
 
  private:

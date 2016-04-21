@@ -21,9 +21,9 @@
 
 #include "cosine_similarity_classifier.hpp"
 #include "nearest_neighbor_classifier_util.hpp"
+#include "classifier_type.hpp"
 
 using jubatus::util::lang::shared_ptr;
-using jubatus::util::data::unordered_set;
 using jubatus::util::concurrent::scoped_lock;
 
 namespace jubatus {
@@ -43,14 +43,14 @@ void cosine_similarity_classifier::classify_with_scores(
     util::concurrent::scoped_rlock lk(storage_mutex_);
     mixable_storage_->get_model()->calc_scores(fv, ids, k_);
   }
+
+  labels_t labels = labels_.get_model()->get_labels();
   std::map<std::string, float> m;
-  {
-    util::concurrent::scoped_lock lk(label_mutex_);
-    for (unordered_set<std::string>::const_iterator iter = labels_.begin();
-         iter != labels_.end(); ++iter) {
-      m.insert(std::make_pair(*iter, 0));
-    }
+  for (labels_t::const_iterator iter = labels.begin();
+       iter != labels.end(); ++iter) {
+    m.insert(std::make_pair(iter->first, 0));
   }
+
   for (size_t i = 0; i < ids.size(); ++i) {
     std::string label = get_label_from_id(ids[i].first);
     m[label] += std::exp(-alpha_ * (1 - ids[i].second));
