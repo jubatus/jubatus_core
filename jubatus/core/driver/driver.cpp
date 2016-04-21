@@ -171,6 +171,7 @@ bool driver_base::mixable_holder::put_diff(const diff_object& obj) {
       continue;
     }
     success = mixable->put_diff(diff_obj->diffs_[i]) && success;
+    mixable->updated();
   }
 
   return success;
@@ -222,6 +223,7 @@ void driver_base::mixable_holder::push(const msgpack::object& o) {
       continue;
     }
     mixable->push(o.via.array.ptr[obj_index]);
+    mixable->updated();
     obj_index++;
   }
 }

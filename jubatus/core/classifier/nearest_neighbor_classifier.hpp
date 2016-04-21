@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #include "jubatus/util/math/random.h"
-#include "jubatus/util/data/unordered_set.h"
+#include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/concurrent/lock.h"
 #include "jubatus/util/concurrent/mutex.h"
 
@@ -71,7 +71,9 @@ class nearest_neighbor_classifier : public classifier_base {
  private:
   jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
       nearest_neighbor_engine_;
-  jubatus::util::data::unordered_set<std::string> labels_;
+  typedef jubatus::util::data::unordered_map<std::string, size_t> labels_t;
+  // A map from label to number of records that belongs to the label.
+  labels_t labels_;
   size_t k_;
   float alpha_;
   jubatus::util::concurrent::mutex unlearner_mutex_;
@@ -82,6 +84,8 @@ class nearest_neighbor_classifier : public classifier_base {
 
   class unlearning_callback;
   void unlearn_id(const std::string& id);
+  void decrement_label_counter(const std::string& label);
+  void regenerate_label_counter();
 };
 
 }  // namespace classifier

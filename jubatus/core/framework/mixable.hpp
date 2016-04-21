@@ -20,6 +20,7 @@
 #include <set>
 #include <string>
 
+#include "jubatus/util/lang/function.h"
 #include "../common/version.hpp"
 
 namespace jubatus {
@@ -28,14 +29,24 @@ namespace framework {
 
 class mixable {
  public:
+  typedef jubatus::util::lang::function<void ()> update_callback_t;
   mixable();
   explicit mixable(const std::string& name);
   virtual std::set<std::string> mixables() const;
   virtual ~mixable();
 
+  void set_update_callback(const update_callback_t& callback) {
+    update_callback_ = callback;
+  }
+
+  virtual void updated() const;
+
   virtual storage::version get_version() const;
  protected:
   std::set<std::string> mixables_;
+
+ private:
+  update_callback_t update_callback_;
 };
 
 }  // namespace framework
