@@ -175,4 +175,4 @@ namespace default_thread_pool {
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // #ifndef JUBATUS_CORE_COMMON_THREAD_POOL_HPP_
+#endif  // JUBATUS_CORE_COMMON_THREAD_POOL_HPP_
