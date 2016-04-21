@@ -28,19 +28,21 @@
 #include "../common/version.hpp"
 #include "../framework/mixable_helper.hpp"
 
+using jubatus::util::data::unordered_map;
+
 namespace jubatus {
 namespace core {
 namespace storage {
 
 class labels {
  public:
-  typedef jubatus::util::data::unordered_map<std::string, uint64_t> data_t;
+  typedef unordered_map<std::string, uint64_t> data_t;
 
   labels();
   ~labels();
 
   bool add(const std::string& label);
-  data_t get_labels() const;
+  unordered_map<std::string, uint64_t> get_labels() const;
 
   void increment(const std::string& label);
   void decrement(const std::string& label);
