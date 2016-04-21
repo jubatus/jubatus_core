@@ -73,7 +73,7 @@ void labels::decrement(const std::string& label) {
   }
 }
 
-bool labels::erase(const std::string label) {
+bool labels::erase(const std::string& label) {
   util::concurrent::scoped_wlock lock(mutex_);
   bool result = diff_.erase(label);
   result |= master_.erase(label);

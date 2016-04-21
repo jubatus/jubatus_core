@@ -44,7 +44,7 @@ class labels {
 
   void increment(const std::string& label);
   void decrement(const std::string& label);
-  bool erase(const std::string label);
+  bool erase(const std::string& label);
 
   void clear();
 
