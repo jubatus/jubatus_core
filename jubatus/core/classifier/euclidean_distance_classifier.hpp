@@ -39,4 +39,4 @@ class euclidean_distance_classifier : public inverted_index_classifier {
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_CLASSIFIER_EUCLIDEAN_DISTANCE_CLASSIFEIR_HPP_
+#endif  // JUBATUS_CORE_CLASSIFIER_EUCLIDEAN_DISTANCE_CLASSIFIER_HPP_
