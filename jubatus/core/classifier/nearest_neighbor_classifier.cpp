@@ -245,7 +245,7 @@ void nearest_neighbor_classifier::decrement_label_counter(
 }
 
 void nearest_neighbor_classifier::regenerate_label_counter() {
-  labels_t labels;
+  labels_t new_labels;
 
   {
     shared_ptr<const storage::column_table> table =
@@ -255,7 +255,7 @@ void nearest_neighbor_classifier::regenerate_label_counter() {
     for (size_t i = 0, n = table->size(); i < n; ++i) {
       std::string id = table->get_key(i);
       std::string label = get_label_from_id(id);
-      labels[label] += 1;
+      new_labels[label] += 1;
     }
   }
 
@@ -264,10 +264,10 @@ void nearest_neighbor_classifier::regenerate_label_counter() {
        iter != labels_.end(); ++iter) {
     if (labels.find(iter->first) == labels.end()) {
       // labels registered by set_label are exist
-      labels[iter->first] = iter->second;
+      new_labels[iter->first] = iter->second;
     }
   }
-  labels_.swap(labels);
+  labels_.swap(new_labels);
 }
 
 }  // namespace classifier
