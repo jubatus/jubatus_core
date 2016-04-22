@@ -35,6 +35,9 @@
 #include "../lang/function.h"
 #include "../lang/scoped_ptr.h"
 #include "../lang/noncopyable.h"
+#if defined(__FreeBSD__)
+#include <sys/types.h>
+#endif
 
 namespace jubatus {
 namespace util {
