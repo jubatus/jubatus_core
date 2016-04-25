@@ -1,3 +1,22 @@
+Release 0.3.0 - 2016/04/25
+--------------------------
+
+* Improvements
+    * nearest_neighbor: support multi-threaded nearest neighbor search (#260)
+    * nearest_neighbor: improve random projection hash calculation performance (#246)
+    * nearest_neighbor and recommender: improve bit_vector hamming distance calculation performance (#250)
+    * recommender: add new recommender method (cosine/euclidean) (#234, #276)
+    * bandit: add new bandit method (Thompson sampling) (#238)
+    * classifier: improve get_labels API to return number of trained instances (#204, #272)
+    * recommender: support unlearning in euclid_lsh algorithm (#189, #264)
+    * Improve Travis CI test matrix (#263, #269)
+    * Improve compatibility with FreeBSD 9 (#259)
+
+* Bug fixes
+    * recommender: remove unnecessary hash calculation in LSH/MinHash algorithm (#249, #273)
+    * classifier: fix get_labels API does not return mixed labels in NN algorithm (#210, #271)
+    * classifier: fix rows added via MIX does not trigger unlearner (#270)
+
 Release 0.2.9 - 2016/03/28
 --------------------------
 
