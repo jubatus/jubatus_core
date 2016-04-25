@@ -29,6 +29,7 @@
 #include "../common/key_manager.hpp"
 #include "../common/unordered_map.hpp"
 #include "../framework/mixable_helper.hpp"
+#include "../unlearner/unlearner_base.hpp"
 
 namespace jubatus {
 namespace core {
@@ -54,6 +55,11 @@ class lsh_index_storage {
   lsh_index_storage(size_t lsh_num, size_t table_num, uint32_t seed);
   lsh_index_storage(size_t table_num, const std::vector<float>& shift);
   virtual ~lsh_index_storage();
+
+  void set_unlearner(
+      util::lang::shared_ptr<unlearner::unlearner_base> unlearner) {
+    unlearner_ = unlearner;
+  }
 
   // hash is a randomly-projected and scaled hash values without shifting
   void set_row(
@@ -130,6 +136,8 @@ class lsh_index_storage {
   std::vector<float> shift_;
   uint64_t table_num_;
   common::key_manager key_manager_;
+
+  util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
 };
 
 typedef framework::linear_mixable_helper<lsh_index_storage, lsh_master_table_t>

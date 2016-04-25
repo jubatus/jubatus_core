@@ -137,7 +137,7 @@ TYPED_TEST_P(light_lof_test, get_all_row_ids) {
 
 TYPED_TEST_P(light_lof_test, calc_anomaly_score_on_gaussian_random_samples) {
   const vector<common::sfv_t> random_points =
-      draw_2d_points_from_gaussian(100, 3, 1, 1, 0.5, this->mtr_);
+      draw_2d_points_from_gaussian(90, 3, 1, 1, 0.5, this->mtr_);
   for (size_t i = 0; i < random_points.size(); ++i) {
     this->light_lof_->set_row(lexical_cast<string>(i), random_points[i]);
   }

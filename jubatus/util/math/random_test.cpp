@@ -214,3 +214,16 @@ TEST(random, sampling_without_replacement) {
     }
   }
 }
+
+
+TEST(random, sfmt607_test) {
+  // Test vectors from SFMT official implementation (v1.4.1)
+  jubatus::util::math::random::sfmt607 r(1234);
+  uint32_t expected_values[] = {
+    1196421539, 2865311212, 3866479472, 2692900087, 3838928621,
+    3188765817, 2751632982, 3712143069,  549918413, 2026167923
+  };
+  for (int i = 0; i < 10; ++i) {
+    EXPECT_EQ(expected_values[i], r.next());
+  }
+}

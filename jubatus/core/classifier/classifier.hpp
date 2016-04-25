@@ -26,5 +26,7 @@
 #include "arow.hpp"
 #include "normal_herd.hpp"
 #include "nearest_neighbor_classifier.hpp"
+#include "cosine_similarity_classifier.hpp"
+#include "euclidean_distance_classifier.hpp"
 
 #endif  // JUBATUS_CORE_CLASSIFIER_CLASSIFIER_HPP_

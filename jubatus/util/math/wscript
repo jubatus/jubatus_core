@@ -8,6 +8,7 @@ def build(bld):
       'random.h',
       'random/license.h',
       'random/mersenne_twister.h',
+      'random/sfmt.h',
       'vector.h',
       'fft.h',
       ], relative_trick = True)

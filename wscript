@@ -5,7 +5,7 @@ from functools import partial
 import os
 import sys
 
-VERSION = '0.2.9'
+VERSION = '0.3.0'
 ABI_VERSION = VERSION
 APPNAME = 'jubatus_core'
 
@@ -83,6 +83,22 @@ def configure(conf):
   conf.env.USE_EIGEN = not Options.options.disable_eigen
   if conf.env.USE_EIGEN:
     conf.define('JUBATUS_USE_EIGEN', 1)
+
+  func_multiver_test_code = '''#include <immintrin.h>
+__attribute__((target("default"))) void test() {}
+__attribute__((target("sse2"))) void test() { __m128i x; _mm_xor_si128(x,x); }
+__attribute__((target("avx2"))) void test() { __m256i x; _mm256_xor_si256(x,x); }
+int main() { test(); }
+'''
+  func_multiver_enabled = conf.check_cxx(
+    fragment=func_multiver_test_code,
+    msg='Checking for function multiversioning',
+    execute=True,
+    mandatory=False,
+    define_name='JUBATUS_USE_FMV')
+  if not func_multiver_enabled:
+    sse2_test_code = '#ifdef __SSE2__\nint main() {}\n#else\n#error\n#endif'
+    conf.check_cxx(fragment=sse2_test_code, msg='Checking for sse2', mandatory=False)
 
   conf.recurse(subdirs)
 

@@ -36,6 +36,12 @@ std::set<std::string> mixable::mixables() const {
   return mixables_;
 }
 
+void mixable::updated() const {
+  if (update_callback_) {
+    update_callback_();
+  }
+}
+
 storage::version mixable::get_version() const {
   return storage::version();
 }

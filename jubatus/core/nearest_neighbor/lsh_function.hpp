@@ -28,9 +28,10 @@ namespace nearest_neighbor {
 
 std::vector<float> random_projection(
     const common::sfv_t& sfv,
-    uint32_t hash_num);
+    uint32_t hash_num, uint32_t threads);
 storage::bit_vector binarize(const std::vector<float>& proj);
-storage::bit_vector cosine_lsh(const common::sfv_t& sfv, uint32_t hash_num);
+storage::bit_vector cosine_lsh(
+    const common::sfv_t& sfv, uint32_t hash_num, uint32_t threads);
 
 }  // namespace nearest_neighbor
 }  // namespace core

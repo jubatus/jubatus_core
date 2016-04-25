@@ -40,7 +40,9 @@ namespace core {
 namespace classifier {
 
 linear_classifier::linear_classifier(storage_ptr storage)
-  : storage_(storage), mixable_storage_(storage_) {
+  : storage_(storage), mixable_storage_(storage_),
+    labels_(core::storage::mixable_labels::model_ptr(
+        new core::storage::labels())) {
 }
 
 linear_classifier::~linear_classifier() {
@@ -95,19 +97,21 @@ string linear_classifier::classify(const common::sfv_t& fv) const {
 
 void linear_classifier::clear() {
   storage_->clear();
+  labels_.get_model()->clear();
   if (unlearner_) {
     unlearner_->clear();
   }
 }
 
-vector<string> linear_classifier::get_labels() const {
-  return storage_->get_labels();
+labels_t linear_classifier::get_labels() const {
+  return labels_.get_model()->get_labels();
 }
 
 bool linear_classifier::set_label(const string& label) {
   check_touchable(label);
 
   bool result = storage_->set_label(label);
+  result = labels_.get_model()->add(label) && result;
   if (unlearner_ && result) {
     result = unlearner_->touch(label);
   }
@@ -208,14 +212,23 @@ float linear_classifier::squared_norm(const common::sfv_t& fv) {
 }
 
 void linear_classifier::pack(framework::packer& pk) const {
+  pk.pack_array(2);
   storage_->pack(pk);
+  labels_.get_model()->pack(pk);
 }
 void linear_classifier::unpack(msgpack::object o) {
-  storage_->unpack(o);
+  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+  storage_->unpack(o.via.array.ptr[0]);
+  labels_.get_model()->unpack(o.via.array.ptr[1]);
 }
 
-framework::mixable* linear_classifier::get_mixable() {
-  return &mixable_storage_;
+std::vector<framework::mixable*> linear_classifier::get_mixables() {
+  std::vector<framework::mixable*> mixables;
+  mixables.push_back(&mixable_storage_);
+  mixables.push_back(&labels_);
+  return mixables;
 }
 
 void linear_classifier::touch(const std::string& label) {
@@ -237,6 +250,7 @@ void linear_classifier::check_touchable(const std::string& label) {
 bool linear_classifier::delete_label(const std::string& label) {
   // Remove the label from the model.
   bool result = storage_->delete_label(label);
+  result = labels_.get_model()->erase(label) && result;
 
   if (unlearner_ && result) {
     // Notify unlearner that the label was removed.
@@ -253,7 +267,9 @@ bool linear_classifier::unlearn_label(const std::string& label) {
   // this method must be called via touch() function.
   // touch() must be done with holding lock
   // so this function must not get lock
-  return storage_->delete_label_nolock(label);
+  bool result = storage_->delete_label_nolock(label);
+  result = labels_.get_model()->erase(label) && result;
+  return result;
 }
 
 }  // namespace classifier

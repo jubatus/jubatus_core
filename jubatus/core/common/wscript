@@ -9,6 +9,7 @@ def build(bld):
   source = [
       'exception.cpp',
       'key_manager.cpp',
+      'thread_pool.cpp',
       'vector_util.cpp',
       'version.cpp',
       'jsonconfig/config.cpp',
@@ -25,6 +26,7 @@ def build(bld):
       'hash.hpp',
       'jsonconfig.hpp',
       'key_manager.hpp',
+      'thread_pool.hpp',
       'type.hpp',
       'unordered_map.hpp',
       'vector_util.hpp',

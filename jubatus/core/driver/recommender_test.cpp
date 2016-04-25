@@ -224,19 +224,30 @@ create_recommender_configs_with_unlearner() {
   configs.push_back(
       make_pair("minhash", common::jsonconfig::config(js_minhash)));
 
+  // euclid_lsh
+  json js_euclid_lsh(js.clone());
+  js_euclid_lsh["hash_num"] = to_json(64);
+  js_euclid_lsh["table_num"] = to_json(4);
+  js_euclid_lsh["seed"] = to_json(1091);
+  js_euclid_lsh["probe_num"] = to_json(64);
+  js_euclid_lsh["bin_width"] = to_json(100);
+  js_euclid_lsh["retain_projection"] = to_json(false);
+  configs.push_back(
+      make_pair("euclid_lsh", common::jsonconfig::config(js_euclid_lsh)));
+
   // TODO(@rimms): Add NN-based algorithm
 
   return configs;
 }
 
 TEST_P(recommender_with_unlearning_test, update_row) {
-  recommender_->update_row("id1", create_datum_str("a", "a b c"));
-  recommender_->update_row("id2", create_datum_str("a", "d e f"));
-  recommender_->update_row("id3", create_datum_str("a", "e f g"));
-  recommender_->update_row("id4", create_datum_str("a", "f g h"));
-  recommender_->update_row("id5", create_datum_str("a", "h i j"));
-  recommender_->update_row("id6", create_datum_str("a", "i j a"));
-  recommender_->update_row("id7", create_datum_str("a", "j a b"));
+  recommender_->update_row("id1", create_datum_str("a", "b c"));
+  recommender_->update_row("id2", create_datum_str("a", "c d"));
+  recommender_->update_row("id3", create_datum_str("a", "d e"));
+  recommender_->update_row("id4", create_datum_str("a", "e f"));
+  recommender_->update_row("id5", create_datum_str("a", "f g"));
+  recommender_->update_row("id6", create_datum_str("a", "g h"));
+  recommender_->update_row("id7", create_datum_str("a", "h i"));
 
   vector<pair<string, float> > ret =
     recommender_->similar_row_from_id("id6", MAX_SIZE + 1);
@@ -244,14 +255,14 @@ TEST_P(recommender_with_unlearning_test, update_row) {
 }
 
 TEST_P(recommender_with_unlearning_test, clear_row) {
-  recommender_->update_row("id1", create_datum_str("a", "a b c"));
-  recommender_->update_row("id2", create_datum_str("a", "d e f"));
-  recommender_->update_row("id3", create_datum_str("a", "e f g"));
+  recommender_->update_row("id1", create_datum_str("a", "b c"));
+  recommender_->update_row("id2", create_datum_str("a", "c d"));
+  recommender_->update_row("id3", create_datum_str("a", "d e"));
   recommender_->clear_row("id1");
-  recommender_->update_row("id4", create_datum_str("a", "f g h"));
-  recommender_->update_row("id5", create_datum_str("a", "h i j"));
-  recommender_->update_row("id6", create_datum_str("a", "i j a"));
-  recommender_->update_row("id7", create_datum_str("a", "j a b"));
+  recommender_->update_row("id4", create_datum_str("a", "e f"));
+  recommender_->update_row("id5", create_datum_str("a", "f g"));
+  recommender_->update_row("id6", create_datum_str("a", "g h"));
+  recommender_->update_row("id7", create_datum_str("a", "h i"));
 
   vector<pair<string, float> > ret =
     recommender_->similar_row_from_id("id6", MAX_SIZE + 1);

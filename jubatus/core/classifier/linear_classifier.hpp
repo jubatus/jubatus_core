@@ -26,6 +26,7 @@
 
 #include "../common/type.hpp"
 #include "../framework/linear_function_mixer.hpp"
+#include "../storage/labels.hpp"
 #include "../storage/storage_base.hpp"
 #include "../unlearner/unlearner_base.hpp"
 #include "classifier_type.hpp"
@@ -57,7 +58,7 @@ class linear_classifier : public classifier_base {
   bool unlearn_label(const std::string& label);
   void clear();
 
-  std::vector<std::string> get_labels() const;
+  labels_t get_labels() const;
   bool set_label(const std::string& label);
 
   virtual std::string name() const = 0;
@@ -70,7 +71,7 @@ class linear_classifier : public classifier_base {
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
 
-  framework::mixable* get_mixable();
+  std::vector<framework::mixable*> get_mixables();
 
  protected:
   void update_weight(
@@ -99,6 +100,7 @@ class linear_classifier : public classifier_base {
   storage_ptr storage_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   framework::linear_function_mixer mixable_storage_;
+  storage::mixable_labels labels_;
 };
 
 }  // namespace classifier

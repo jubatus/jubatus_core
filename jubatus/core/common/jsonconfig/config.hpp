@@ -134,6 +134,11 @@ class config {
     jubatus::util::text::json::json::const_iterator it_;
   };
 
+  template<typename Ar>
+  void serialize(Ar& ar) {
+    ar & JUBA_MEMBER(json_);
+  }
+
  private:
   jubatus::util::text::json::json json_;
   std::string path_;

@@ -79,14 +79,26 @@ class recommender_base : public framework::model {
     return jubatus::util::lang::shared_ptr<unlearner::unlearner_base>();
   }
 
+  /**
+   * Find similar rows from ID (larger score means higher similarity).
+   * For methods that support calculating similarity between IDs must override
+   * this method (see #249).
+   */
   virtual void similar_row(
       const std::string& id,
       std::vector<std::pair<std::string, float> >& ids,
       size_t ret_num) const;
+
+  /**
+   * Find neighbor rows from ID (smaller score means higher similarity).
+   * For methods that support calculating similarity between IDs must override
+   * this method (see #249).
+   */
   virtual void neighbor_row(
       const std::string& id,
       std::vector<std::pair<std::string, float> >& ids,
       size_t ret_num) const;
+
   void complete_row(const std::string& id, common::sfv_t& ret) const;
   void complete_row(const common::sfv_t& query, common::sfv_t& ret) const;
   void decode_row(const std::string& id, common::sfv_t& ret) const;

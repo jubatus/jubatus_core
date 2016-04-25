@@ -54,6 +54,10 @@ class bit_index_storage : public framework::model {
       const bit_vector& bv,
       std::vector<std::pair<std::string, float> >& ids,
       uint64_t ret_num) const;
+  void similar_row(
+      const std::string& id,
+      std::vector<std::pair<std::string, float> >& ids,
+      uint64_t ret_num) const;
   std::string name() const;
   storage::version get_version() const {
     return storage::version();
