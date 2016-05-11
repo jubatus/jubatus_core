@@ -94,6 +94,10 @@ void euclid_lsh::neighbor_row(
     const common::sfv_t& query,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
+
+  /* table lock acquired; all subsequent table operations must be nolock */
+
   neighbor_row_from_hash(
       cosine_lsh(query, hash_num_, threads_),
       l2norm(query),
@@ -105,6 +109,10 @@ void euclid_lsh::neighbor_row(
     const std::string& query_id,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
+
+  /* table lock acquired; all subsequent table operations must be nolock */
+
   const pair<bool, uint64_t> maybe_index =
       get_const_table()->exact_match(query_id);
   if (!maybe_index.first) {
@@ -161,6 +169,8 @@ void euclid_lsh::neighbor_row_from_hash(
     float norm,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  // This function is not thread safe.
+  // Take lock out of this function.
   jubatus::util::lang::shared_ptr<const column_table> table =
     get_const_table();
   const_bit_vector_column& bv_col = lsh_column();
