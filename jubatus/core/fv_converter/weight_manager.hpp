@@ -30,6 +30,7 @@
 #include "../common/type.hpp"
 #include "../common/version.hpp"
 #include "keyword_weights.hpp"
+#include "datum_to_fv_converter.hpp"
 
 namespace jubatus {
 namespace core {
@@ -52,8 +53,18 @@ class weight_manager : public framework::model {
  public:
   weight_manager();
 
-  void update_weight(const common::sfv_t& fv);
-  void get_weight(common::sfv_t& fv) const;
+  void increment_document_count();
+  void update_weight(
+      const std::string& key,
+      const std::string& type_name,
+      const splitter_weight_type& weight_type,
+      const counter<std::string>& count);
+  void add_string_features(
+      const std::string& key,
+      const std::string& type_name,
+      const splitter_weight_type& weight_type,
+      const counter<std::string>& count,
+      common::sfv_t& ret_fv) const;
 
   void add_weight(const std::string& key, float weight);
 
@@ -133,7 +144,14 @@ class weight_manager : public framework::model {
         master_weights_.get_user_weight(key);
   }
 
-  double get_global_weight(const std::string& key) const;
+  double get_sample_weight(
+      frequency_weight_type type,
+      double tf) const;
+
+  double get_global_weight(
+      term_weight_type type,
+      const std::string& fv_name,
+      const std::string& weight_name) const;
 
   mutable util::concurrent::mutex mutex_;
   storage::version version_;

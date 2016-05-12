@@ -67,31 +67,8 @@ typedef jubatus::util::lang::shared_ptr<num_filter> num_filter_ptr;
 
 splitter_weight_type make_weight_type(
     const string& sample, const string& global) {
-  frequency_weight_type sample_type;
-  if (sample == "bin") {
-    sample_type = FREQ_BINARY;
-  } else if (sample == "tf") {
-    sample_type = TERM_FREQUENCY;
-  } else if (sample == "log_tf") {
-    sample_type = LOG_TERM_FREQUENCY;
-  } else {
-    throw JUBATUS_EXCEPTION(
-        converter_exception("unknown sample_weight: [" +
-                            sample + "] in string_rules"));
-  }
-
-  term_weight_type global_type;
-  if (global == "bin") {
-    global_type = TERM_BINARY;
-  } else if (global == "idf") {
-    global_type = IDF;
-  } else if (global == "weight") {
-    global_type = WITH_WEIGHT_FILE;
-  } else {
-    throw JUBATUS_EXCEPTION(
-        converter_exception("unknown global_weight: [" +
-                            global + "] in string_rules"));
-  }
+  frequency_weight_type sample_type = get_frequency_weight_type(sample);
+  term_weight_type global_type = get_term_weight_type(global);
   return splitter_weight_type(sample_type, global_type);
 }
 

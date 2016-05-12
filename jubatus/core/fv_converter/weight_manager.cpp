@@ -19,7 +19,9 @@
 #include <cmath>
 #include <string>
 #include <utility>
+#include <vector>
 #include <map>
+
 #include "../common/type.hpp"
 #include "datum_to_fv_converter.hpp"
 #include "jubatus/util/concurrent/lock.h"
@@ -29,16 +31,6 @@ using jubatus::util::concurrent::scoped_lock;
 namespace jubatus {
 namespace core {
 namespace fv_converter {
-
-namespace {
-
-struct is_zero {
-  bool operator()(const std::pair<std::string, float>& p) {
-    return p.second == 0;
-  }
-};
-
-}  // namespace
 
 versioned_weight_diff::versioned_weight_diff() {
 }
@@ -69,41 +61,116 @@ weight_manager::weight_manager()
       master_weights_() {
 }
 
-void weight_manager::update_weight(const common::sfv_t& fv) {
-  scoped_lock lk(mutex_);
-  diff_weights_.update_document_frequency(fv);
+/**
+ * Increments the document count.
+ * Must be called each time Datum is processed.
+ */
+void weight_manager::increment_document_count() {
+  scoped_lock lk(mutex_);  // to modify weights
+  diff_weights_.increment_document_count();
 }
 
-void weight_manager::get_weight(common::sfv_t& fv) const {
-  scoped_lock lk(mutex_);
-  for (common::sfv_t::iterator it = fv.begin(); it != fv.end(); ++it) {
-    double global_weight = get_global_weight(it->first);
-    it->second = static_cast<float>(it->second * global_weight);
+/**
+ * Updates the weight.
+ */
+void weight_manager::update_weight(
+    const std::string& key,
+    const std::string& type_name,
+    const splitter_weight_type& weight_type,
+    const counter<std::string>& count) {
+  std::vector<std::string> keys;
+  keys.reserve(count.size());
+  for (counter<std::string>::const_iterator it = count.begin();
+       it != count.end(); ++it) {
+    keys.push_back(make_string_feature_name(
+        key,
+        it->first,
+        type_name,
+        weight_type.freq_weight_type_,
+        weight_type.term_weight_type_));
   }
-  fv.erase(remove_if(fv.begin(), fv.end(), is_zero()), fv.end());
+
+  scoped_lock lk(mutex_);  // to modify weights
+  diff_weights_.increment_document_frequency(keys);
 }
 
-double weight_manager::get_global_weight(const std::string& key) const {
-  size_t p = key.find_last_of('/');
-  if (p == std::string::npos) {
-    return 1.0;
+/**
+ * Returns sample-weighted term frequency.
+ */
+double weight_manager::get_sample_weight(
+    frequency_weight_type type,
+    double tf) const {
+  switch (type) {
+    case FREQ_BINARY:
+      return 1.0;
+    case TERM_FREQUENCY:
+      return tf;
+    case LOG_TERM_FREQUENCY:
+      return std::log(1. + tf);
+    default:
+      return 1.0;
   }
-  std::string type = key.substr(p + 1);
-  if (type == "bin") {
-    return 1.0;
-  } else if (type == "idf") {
-    double doc_count = get_document_count();
-    double doc_freq = get_document_frequency(key);
-    return std::log((doc_count + 1) / (doc_freq + 1));
-  } else if (type == "weight") {
-    p = key.find_last_of('#');
-    if (p == std::string::npos) {
-      return 0;
-    } else {
-      return get_user_weight(key.substr(0, p));
+}
+
+/**
+ * Returns global-weighted value.
+ * This function is thread-unsafe.  Mutex lock must be taken outside.
+ */
+double weight_manager::get_global_weight(
+    term_weight_type type,
+    const std::string& fv_name,
+    const std::string& weight_name) const {
+  double doc_count = get_document_count();
+  double doc_freq = get_document_frequency(fv_name);
+
+  switch (type) {
+    case TERM_BINARY:
+      return 1.0;
+    case IDF:
+      return std::log((doc_count + 1) / (doc_freq + 1));
+    case WITH_WEIGHT_FILE:
+      return get_user_weight(weight_name);
+    default:
+      return 1.0;
+  }
+}
+
+/**
+ * Add string features to the Sparse Feature Vector.
+ */
+void weight_manager::add_string_features(
+    const std::string& key,
+    const std::string& type_name,
+    const splitter_weight_type& weight_type,
+    const counter<std::string>& count,
+    common::sfv_t& ret_fv) const {
+  scoped_lock lk(mutex_);
+
+  for (counter<std::string>::const_iterator it = count.begin();
+       it != count.end(); ++it) {
+    const std::string& value = it->first;
+    const double tf = it->second;
+    std::string f = make_string_feature_name(
+        key,
+        value,
+        type_name,
+        weight_type.freq_weight_type_,
+        weight_type.term_weight_type_);
+    std::string weight_name = make_weight_name(key, value, type_name);
+
+    double sample_weight = get_sample_weight(
+        weight_type.freq_weight_type_,
+        tf);
+
+    double global_weight = get_global_weight(
+        weight_type.term_weight_type_,
+        f,
+        weight_name);
+
+    float v = static_cast<float>(sample_weight * global_weight);
+    if (v != 0.0) {
+      ret_fv.push_back(std::make_pair(f, v));
     }
-  } else {
-    return 1;
   }
 }
 
