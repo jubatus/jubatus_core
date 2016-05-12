@@ -35,6 +35,7 @@ class keyword_weights {
 
   void increment_document_count();
   void increment_document_frequency(const std::vector<std::string> keys);
+  void increment_key_frequency(const std::string& key, size_t length);
 
   size_t get_document_frequency(const std::string& key) const {
     return document_frequencies_[key];
@@ -42,6 +43,14 @@ class keyword_weights {
 
   uint64_t get_document_count() const {
     return document_count_;
+  }
+
+  size_t get_key_frequency(const std::string& key) const {
+    return key_frequencies_[key];
+  }
+
+  size_t get_key_total_length(const std::string& key) const {
+    return key_total_length_[key];
   }
 
   void add_weight(const std::string& key, float weight);
@@ -52,7 +61,12 @@ class keyword_weights {
 
   void clear();
 
-  MSGPACK_DEFINE(document_count_, document_frequencies_, weights_);
+  MSGPACK_DEFINE(
+      document_count_,
+      document_frequencies_,
+      key_frequencies_,
+      key_total_length_,
+      weights_);
 
   std::string to_string() const;
 
@@ -65,6 +79,10 @@ class keyword_weights {
 
   uint64_t document_count_;
   counter<std::string> document_frequencies_;
+
+  counter<std::string> key_frequencies_;
+  counter<std::string> key_total_length_;
+
   typedef jubatus::util::data::unordered_map<std::string, float> weight_t;
   weight_t weights_;
 };

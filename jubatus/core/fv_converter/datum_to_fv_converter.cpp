@@ -696,6 +696,8 @@ frequency_weight_type get_frequency_weight_type(const std::string& name) {
     return TERM_FREQUENCY;
   } else if (name == "log_tf") {
     return LOG_TERM_FREQUENCY;
+  } else if (name == "bm25") {
+    return FREQ_BM25;
   } else {
     throw JUBATUS_EXCEPTION(
         converter_exception("unknown sample_weight: [" + name + "]"));
@@ -710,6 +712,8 @@ std::string get_frequency_weight_name(frequency_weight_type type) {
       return "tf";
     case LOG_TERM_FREQUENCY:
       return "log_tf";
+    case FREQ_BM25:
+      return "bm25";
     default:  // this shouldn't happen
       throw JUBATUS_EXCEPTION(converter_exception(
           "unknown frequency_weight_type: [" +
@@ -722,6 +726,8 @@ term_weight_type get_term_weight_type(const std::string& name) {
     return TERM_BINARY;
   } else if (name == "idf") {
     return IDF;
+  } else if (name == "bm25") {
+    return TERM_BM25;
   } else if (name == "weight") {
     return WITH_WEIGHT_FILE;
   } else {
@@ -736,6 +742,8 @@ std::string get_term_weight_name(term_weight_type type) {
       return "bin";
     case IDF:
       return "idf";
+    case TERM_BM25:
+      return "bm25";
     case WITH_WEIGHT_FILE:
       return "weight";
     default:  // this shouldn't happen

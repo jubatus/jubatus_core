@@ -40,7 +40,8 @@ namespace fv_converter {
 enum frequency_weight_type {
   FREQ_BINARY,
   TERM_FREQUENCY,
-  LOG_TERM_FREQUENCY
+  LOG_TERM_FREQUENCY,
+  FREQ_BM25
 };
 
 /**
@@ -49,6 +50,7 @@ enum frequency_weight_type {
 enum term_weight_type {
   TERM_BINARY,
   IDF,
+  TERM_BM25,
   WITH_WEIGHT_FILE
 };
 

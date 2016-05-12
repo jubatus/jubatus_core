@@ -80,6 +80,7 @@ void weight_manager::update_weight(
     const counter<std::string>& count) {
   std::vector<std::string> keys;
   keys.reserve(count.size());
+  size_t length = 0;
   for (counter<std::string>::const_iterator it = count.begin();
        it != count.end(); ++it) {
     keys.push_back(make_string_feature_name(
@@ -88,10 +89,13 @@ void weight_manager::update_weight(
         type_name,
         weight_type.freq_weight_type_,
         weight_type.term_weight_type_));
+    length += it->second;
   }
 
   scoped_lock lk(mutex_);  // to modify weights
   diff_weights_.increment_document_frequency(keys);
+  diff_weights_.increment_key_frequency(
+      make_weight_name(key, "", type_name), length);
 }
 
 /**
@@ -99,7 +103,10 @@ void weight_manager::update_weight(
  */
 double weight_manager::get_sample_weight(
     frequency_weight_type type,
-    double tf) const {
+    const std::string& key,
+    const std::string& type_name,
+    double tf,
+    size_t length) const {
   switch (type) {
     case FREQ_BINARY:
       return 1.0;
@@ -107,6 +114,16 @@ double weight_manager::get_sample_weight(
       return tf;
     case LOG_TERM_FREQUENCY:
       return std::log(1. + tf);
+    case FREQ_BM25: {
+      double average_length = get_average_key_length(key, type_name);
+      if (average_length == 0.0) {
+        average_length = length;
+      }
+      return (tf * (BM25_K1 + 1)) /
+             (tf + BM25_K1 *
+             (1 - BM25_B + BM25_B *
+             (static_cast<double>(length) / average_length)));
+    }
     default:
       return 1.0;
   }
@@ -128,6 +145,8 @@ double weight_manager::get_global_weight(
       return 1.0;
     case IDF:
       return std::log((doc_count + 1) / (doc_freq + 1));
+    case TERM_BM25:
+      return std::log((doc_count - doc_freq + 0.5) / (doc_freq + 0.5));
     case WITH_WEIGHT_FILE:
       return get_user_weight(weight_name);
     default:
@@ -146,6 +165,8 @@ void weight_manager::add_string_features(
     common::sfv_t& ret_fv) const {
   scoped_lock lk(mutex_);
 
+  size_t length = count.sum();
+
   for (counter<std::string>::const_iterator it = count.begin();
        it != count.end(); ++it) {
     const std::string& value = it->first;
@@ -160,7 +181,10 @@ void weight_manager::add_string_features(
 
     double sample_weight = get_sample_weight(
         weight_type.freq_weight_type_,
-        tf);
+        key,
+        type_name,
+        tf,
+        length);
 
     double global_weight = get_global_weight(
         weight_type.term_weight_type_,

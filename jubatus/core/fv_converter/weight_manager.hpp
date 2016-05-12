@@ -36,6 +36,9 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
+const double BM25_K1 = 1.2;
+const double BM25_B = 0.75;
+
 struct versioned_weight_diff {
   versioned_weight_diff();
   explicit versioned_weight_diff(const fv_converter::keyword_weights& w);
@@ -139,6 +142,23 @@ class weight_manager : public framework::model {
         master_weights_.get_document_frequency(key);
   }
 
+  double get_average_key_length(
+       const std::string& key,
+      const std::string& type_name) const {
+    const std::string& weight_name = make_weight_name(key, "", type_name);
+
+    size_t frequency = diff_weights_.get_key_frequency(weight_name) +
+                       master_weights_.get_key_frequency(weight_name);
+    if (frequency == 0) {
+      return 0;
+    }
+
+    size_t total_length = diff_weights_.get_key_total_length(weight_name) +
+                          master_weights_.get_key_total_length(weight_name);
+
+    return lexical_cast<double>(total_length) / frequency;
+  }
+
   double get_user_weight(const std::string& key) const {
     return diff_weights_.get_user_weight(key) +
         master_weights_.get_user_weight(key);
@@ -146,7 +166,10 @@ class weight_manager : public framework::model {
 
   double get_sample_weight(
       frequency_weight_type type,
-      double tf) const;
+      const std::string& key,
+      const std::string& type_name,
+      double tf,
+      size_t length) const;
 
   double get_global_weight(
       term_weight_type type,
