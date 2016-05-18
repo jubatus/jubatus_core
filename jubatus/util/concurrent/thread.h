@@ -32,12 +32,10 @@
 #ifndef JUBATUS_UTIL_CONCURRENT_THREAD_H_
 #define JUBATUS_UTIL_CONCURRENT_THREAD_H_
 
+#include <stdint.h>
 #include "../lang/function.h"
 #include "../lang/scoped_ptr.h"
 #include "../lang/noncopyable.h"
-#if defined(__FreeBSD__)
-#include <sys/types.h>
-#endif
 
 namespace jubatus {
 namespace util {
