@@ -256,8 +256,18 @@ bool lof_storage::put_diff(const lof_table_t& mixed_diff) {
   for (lof_table_t::const_iterator it = mixed_diff.begin();
        it != mixed_diff.end(); ++it) {
     if (is_removed(it->second)) {
+      if (unlearner_) {
+        unlearner_->remove(it->first);
+      }
       lof_table_.erase(it->first);
     } else {
+      if (unlearner_) {
+        if (unlearner_->can_touch(it->first)) {
+          unlearner_->touch(it->first);
+        } else {
+          continue;  // drop untouchable value
+        }
+      }
       lof_table_[it->first] = it->second;
     }
   }

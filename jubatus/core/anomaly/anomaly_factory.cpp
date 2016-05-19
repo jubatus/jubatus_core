@@ -40,16 +40,22 @@ namespace core {
 namespace anomaly {
 
 namespace {
+
 struct lof_config : public lof_storage::config {
   std::string method;
   jubatus::core::common::jsonconfig::config parameter;
+  jubatus::util::data::optional<std::string> unlearner;
+  jubatus::util::data::optional<jubatus::core::common::jsonconfig::config>
+      unlearner_parameter;
 
   template <typename Ar>
   void serialize(Ar& ar) {
     lof_storage::config::serialize(ar);
     ar
         & JUBA_MEMBER(method)
-        & JUBA_MEMBER(parameter);
+        & JUBA_MEMBER(parameter)
+        & JUBA_MEMBER(unlearner)
+        & JUBA_MEMBER(unlearner_parameter);
   }
 };
 
@@ -70,6 +76,7 @@ struct light_lof_config : public light_lof::config {
         & JUBA_MEMBER(unlearner_parameter);
   }
 };
+
 }  // namespace
 
 shared_ptr<anomaly_base> anomaly_factory::create_anomaly(
@@ -78,6 +85,25 @@ shared_ptr<anomaly_base> anomaly_factory::create_anomaly(
     const string& id) {
   if (name == "lof") {
     lof_config conf = config_cast_check<lof_config>(param);
+
+    if (conf.unlearner) {
+      if (!conf.unlearner_parameter) {
+        throw JUBATUS_EXCEPTION(
+            common::config_exception()
+            << common::exception::error_message(
+              "unlearner is set but unlearner_parameter is not found"));
+      }
+      jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner(
+          unlearner::create_unlearner(
+              *conf.unlearner,
+              *conf.unlearner_parameter));
+      return shared_ptr<anomaly_base>(new lof(
+          conf,
+          recommender::recommender_factory::create_recommender(
+              conf.method,
+              conf.parameter, id),
+          unlearner));
+    }
 
     return shared_ptr<anomaly_base>(new lof(
         conf,
