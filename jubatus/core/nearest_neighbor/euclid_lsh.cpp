@@ -114,7 +114,7 @@ void euclid_lsh::neighbor_row(
   /* table lock acquired; all subsequent table operations must be nolock */
 
   const pair<bool, uint64_t> maybe_index =
-      get_const_table()->exact_match(query_id);
+      get_const_table()->exact_match_nolock(query_id);
   if (!maybe_index.first) {
     ids.clear();
     return;
