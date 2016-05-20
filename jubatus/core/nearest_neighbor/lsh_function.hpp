@@ -21,17 +21,34 @@
 #include <vector>
 #include "../common/type.hpp"
 #include "../storage/bit_vector.hpp"
+#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/data/lru.h"
+#include "jubatus/util/lang/scoped_ptr.h"
 
 namespace jubatus {
 namespace core {
 namespace nearest_neighbor {
 
+class random_projection_cache {
+ public:
+  explicit random_projection_cache(int size) : lru(size), lock() {}
+  ~random_projection_cache() {}
+  jubatus::util::data::lru<uint32_t, std::vector<float> > lru;
+  jubatus::util::concurrent::mutex lock;
+};
+typedef jubatus::util::lang::scoped_ptr<random_projection_cache> cache_t;
+
 std::vector<float> random_projection(
     const common::sfv_t& sfv,
-    uint32_t hash_num, uint32_t threads);
+    uint32_t hash_num,
+    uint32_t threads,
+    cache_t& cache);
 storage::bit_vector binarize(const std::vector<float>& proj);
 storage::bit_vector cosine_lsh(
-    const common::sfv_t& sfv, uint32_t hash_num, uint32_t threads);
+    const common::sfv_t& sfv,
+    uint32_t hash_num,
+    uint32_t threads,
+    cache_t& cache);
 
 }  // namespace nearest_neighbor
 }  // namespace core
