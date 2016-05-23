@@ -76,9 +76,9 @@ TEST_F(weight_test, simple) {
   fv = weight_->calc_weight(d1);
   ASSERT_EQ(2, fv.size());
   EXPECT_EQ("key1$a1@space#tf/idf", fv[0].first);
-  EXPECT_FLOAT_EQ(std::log((2.0 + 1.0) / (1.0 + 1.0)), fv[0].second);
+  EXPECT_FLOAT_EQ(std::log((2.0 + 1) / (1.0 + 1)), fv[0].second);
   EXPECT_EQ("key1$b1@space#tf/idf", fv[1].first);
-  EXPECT_FLOAT_EQ(2.0 * std::log((2.0 + 1.0) / (1.0 + 1.0)), fv[1].second);
+  EXPECT_FLOAT_EQ(2.0 * std::log((2.0 + 1) / (1.0 + 1)), fv[1].second);
 }
 
 }  // driver namespace
