@@ -17,6 +17,7 @@
 #include "weight.hpp"
 
 #include <string>
+#include <map>
 
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../common/vector_util.hpp"
