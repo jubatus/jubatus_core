@@ -166,9 +166,15 @@ static heap_t ranking_hamming_bit_vectors_worker(
   for (size_t i = off; i < end; ++i) {
     const size_t hamm_dist =
       bv->calc_hamming_distance_unsafe(bv_col->get_data_at_unsafe(i));
-    const float theta = hamm_dist * M_PI / denom;
-    const float score =
-      (*norm_col)[i] * ((*norm_col)[i] - 2 * norm * std::cos(theta));
+    const float norm_i = (*norm_col)[i];
+    float score;
+    if (hamm_dist == 0) {
+      score = std::fabs(norm - norm_i);
+    } else {
+      const float theta = hamm_dist * M_PI / denom;
+      score = std::sqrt(
+          norm * norm + norm_i * norm_i - 2 * norm * norm_i * std::cos(theta));
+    }
     heap.push(make_pair(score, i));
   }
   return heap;
@@ -198,10 +204,8 @@ void euclid_lsh::neighbor_row_from_hash(
   heap.get_sorted(sorted);
 
   ids.clear();
-  const float squared_norm = norm * norm;
   for (size_t i = 0; i < sorted.size(); ++i) {
-    ids.push_back(make_pair(table->get_key(sorted[i].second),
-                            std::sqrt(squared_norm + sorted[i].first)));
+    ids.push_back(make_pair(table->get_key(sorted[i].second), sorted[i].first));
   }
 }
 
