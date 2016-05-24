@@ -98,7 +98,6 @@ std::vector<recommender_parameter> generate_parameters() {
     js["bin_width"] = to_json(1.0);
     js["probe_num"] = to_json(1);
     js["seed"] = to_json(0);
-    js["retain_projection"] = to_json(false);
     ret.push_back(make_pair("euclid_lsh", common::jsonconfig::config(js)));
   }
 

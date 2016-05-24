@@ -50,6 +50,18 @@ storage::bit_vector cosine_lsh(
     uint32_t threads,
     cache_t& cache);
 
+template<typename T>
+void init_cache_from_config(cache_t& cache, const T& config) {
+  if (config.bool_test()) {
+    if (!(0 <= *config)) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter("0 <= cache_size"));
+    }
+    if (*config > 0) {
+      cache.reset(new random_projection_cache(*config));
+    }
+  }
+}
+
 }  // namespace nearest_neighbor
 }  // namespace core
 }  // namespace jubatus
