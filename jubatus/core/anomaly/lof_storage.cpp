@@ -271,7 +271,25 @@ bool lof_storage::put_diff(const lof_table_t& mixed_diff) {
       lof_table_[it->first] = it->second;
     }
   }
+
+  // Create a set of removed (unlearned) rows since get_diff.
+  unordered_set<std::string> removed_ids;
+  for (lof_table_t::const_iterator it = lof_table_diff_.begin();
+      it != lof_table_diff_.end(); ++it) {
+    if (is_removed(it->second)) {
+      removed_ids.insert(it->first);
+    }
+  }
+
   lof_table_diff_.clear();
+
+  // Keep removed rows in the diff area until next MIX to
+  // propagate the removal of this data to other nodes.
+  for (unordered_set<std::string>::const_iterator it = removed_ids.begin();
+      it != removed_ids.end(); ++it) {
+    mark_removed(lof_table_diff_[*it]);
+  }
+
   return true;
 }
 
