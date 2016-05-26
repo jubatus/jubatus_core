@@ -299,6 +299,28 @@ TEST_P(lof_storage_mix_test, consistency) {
   }
 }
 
+TEST_P(lof_storage_mix_test, remove_between_mix) {
+  const common::sfv_t mu0 = make_dense_sfv("1 1");
+
+  update("0", mu0, 2.0);
+  update("1", mu0, 2.0);
+
+  lof_table_t diff;
+
+  single_storage_->get_diff(diff);
+  remove("1");
+  single_storage_->put_diff(diff);
+
+  EXPECT_TRUE(single_storage_->has_row("0"));
+  EXPECT_TRUE(single_storage_->has_row("1"));
+
+  single_storage_->get_diff(diff);
+  single_storage_->put_diff(diff);
+
+  EXPECT_TRUE(single_storage_->has_row("0"));
+  EXPECT_FALSE(single_storage_->has_row("1"));
+}
+
 TEST_P(lof_storage_mix_test, mix_after_remove) {
   static const size_t num_sample = 100;
   static const float deviation = 2;
