@@ -19,10 +19,10 @@
 
 #include <stdint.h>
 #include <vector>
+#include "../common/lru.hpp"
 #include "../common/type.hpp"
 #include "../storage/bit_vector.hpp"
 #include "jubatus/util/concurrent/mutex.h"
-#include "jubatus/util/data/lru.h"
 #include "jubatus/util/lang/scoped_ptr.h"
 
 namespace jubatus {
@@ -33,7 +33,7 @@ class random_projection_cache {
  public:
   explicit random_projection_cache(int size) : lru(size), lock() {}
   ~random_projection_cache() {}
-  jubatus::util::data::lru<uint32_t, std::vector<float> > lru;
+  common::lru<uint32_t, std::vector<float> > lru;
   jubatus::util::concurrent::mutex lock;
 };
 typedef jubatus::util::lang::scoped_ptr<random_projection_cache> cache_t;
