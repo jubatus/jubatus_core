@@ -277,7 +277,15 @@ bool lof_storage::put_diff(const lof_table_t& mixed_diff) {
   for (lof_table_t::const_iterator it = lof_table_diff_.begin();
       it != lof_table_diff_.end(); ++it) {
     if (is_removed(it->second)) {
-      removed_ids.insert(it->first);
+      // The row is locally marked as removed.  We should check if others
+      // knows about it; if the diff does not contain the information that
+      // the row is removed, the row is removed after `get_diff` (including
+      // rows unlearned during `put_diff` (above code)).
+      lof_table_t::const_iterator pos = mixed_diff.find(it->first);
+      if (pos == mixed_diff.end() || !is_removed(pos->second)) {
+        removed_ids.insert(it->first);
+        std::cout << it->first << std::endl;
+      }
     }
   }
 
