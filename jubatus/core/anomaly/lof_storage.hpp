@@ -33,6 +33,7 @@
 #include "../common/type.hpp"
 #include "../common/unordered_map.hpp"
 #include "../framework/mixable_helper.hpp"
+#include "../unlearner/unlearner_base.hpp"
 
 namespace jubatus {
 namespace core {
@@ -117,6 +118,11 @@ class lof_storage {
 
   bool has_row(const std::string& row) const;
 
+  void set_unlearner(
+      util::lang::shared_ptr<unlearner::unlearner_base> unlearner) {
+    unlearner_ = unlearner;
+  }
+
   // just for test
   void set_nn_engine(
       jubatus::util::lang::shared_ptr<core::recommender::recommender_base>
@@ -174,6 +180,8 @@ class lof_storage {
 
   jubatus::util::lang::shared_ptr<core::recommender::recommender_base>
     nn_engine_;
+  jubatus::util::lang::shared_ptr<core::unlearner::unlearner_base>
+    unlearner_;
 };
 
 typedef framework::linear_mixable_helper<lof_storage, lof_table_t>

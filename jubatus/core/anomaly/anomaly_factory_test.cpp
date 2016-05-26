@@ -65,7 +65,6 @@ TEST(anomaly_factory, create_light_lof_with_unlearner) {
 }
 
 TEST(anomaly_factory, create_lof_with_unlearner) {
-  // LOF does not support unleaner
   json js(new json_object);
   js["method"] = to_json(std::string("lsh"));
   js["parameter"] = json(new json_object);
@@ -76,8 +75,7 @@ TEST(anomaly_factory, create_lof_with_unlearner) {
   js["unlearner_parameter"] = new json_object;
   js["unlearner_parameter"]["max_size"] = to_json(1);
   common::jsonconfig::config conf(js);
-  EXPECT_THROW(anomaly_factory::create_anomaly("lof", conf, "id"),
-               common::jsonconfig::cast_check_error);
+  EXPECT_NO_THROW(anomaly_factory::create_anomaly("lof", conf, "id"));
 }
 
 
