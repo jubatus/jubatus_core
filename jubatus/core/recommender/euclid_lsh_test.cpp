@@ -73,7 +73,6 @@ TEST(euclid_lsh, complete_row) {
   config.bin_width = 10;
   config.probe_num = 0;
   config.seed = 1091;
-  config.retain_projection = false;
 
   euclid_lsh r(config);
   r.update_row("1", make_dense_sfv("1 1 0 1"));

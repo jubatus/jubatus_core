@@ -91,7 +91,9 @@ class inverted_index_storage {
 
  private:
   static float calc_l2norm(const common::sfv_t& sfv);
+  static float calc_squared_l2norm(const common::sfv_t& sfv);
   float calc_columnl2norm(uint64_t column_id) const;
+  float calc_column_squared_l2norm(uint64_t column_id) const;
   float get_from_tbl(
       const std::string& row,
       uint64_t column_id,

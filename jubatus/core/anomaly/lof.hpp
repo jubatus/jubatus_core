@@ -23,6 +23,7 @@
 #include "jubatus/util/lang/shared_ptr.h"
 
 #include "../recommender/recommender_base.hpp"
+#include "../unlearner/unlearner_base.hpp"
 #include "anomaly_base.hpp"
 #include "lof_storage.hpp"
 
@@ -32,10 +33,15 @@ namespace anomaly {
 
 class lof : public anomaly_base {
  public:
-  explicit lof(
+  lof(
       const lof_storage::config& config,
       jubatus::util::lang::shared_ptr<core::recommender::recommender_base>
           nn_engine);
+  lof(
+      const lof_storage::config& config,
+      jubatus::util::lang::shared_ptr<core::recommender::recommender_base>
+          nn_engine,
+      jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner);
   ~lof();
 
   // return anomaly score of query
@@ -47,6 +53,7 @@ class lof : public anomaly_base {
 
   void clear();
   void clear_row(const std::string& id);
+  void remove_row(const std::string& id);
   bool update_row(const std::string& id, const sfv_diff_t& diff);
   bool set_row(const std::string& id, const common::sfv_t& sfv);
 
@@ -64,6 +71,7 @@ class lof : public anomaly_base {
  private:
   jubatus::util::lang::shared_ptr<mixable_lof_storage> mixable_storage_;
   jubatus::util::lang::shared_ptr<recommender::recommender_base> nn_engine_;
+  jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
 };
 
 }  //  namespace anomaly

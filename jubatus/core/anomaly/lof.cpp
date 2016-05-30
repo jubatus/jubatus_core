@@ -21,9 +21,9 @@
 #include <string>
 #include <vector>
 
-#include "../common/hash.hpp"
-#include "../storage/lsh_util.hpp"
-#include "../storage/lsh_vector.hpp"
+#include "jubatus/util/lang/bind.h"
+
+#include "../unlearner/unlearner_base.hpp"
 
 using jubatus::core::anomaly::lof;
 using jubatus::util::data::unordered_map;
@@ -81,6 +81,33 @@ lof::lof(
   mixable_storage_.reset(new mixable_lof_storage(p));
 }
 
+lof::lof(
+    const lof_storage::config& config,
+    jubatus::util::lang::shared_ptr<recommender::recommender_base> nn_engine,
+    jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner)
+    : mixable_storage_(),
+      nn_engine_(nn_engine),
+      unlearner_(unlearner) {
+
+  if (!(2 <= config.nearest_neighbor_num)) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("2 <= nearest_neighbor_num"));
+  }
+
+  if (!(config.nearest_neighbor_num
+      <= config.reverse_nearest_neighbor_num)) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter(
+            "nearest_neighbor_num <= reverse_nearest_neighbor_num"));
+  }
+
+  mixable_lof_storage::model_ptr p(new lof_storage(config, nn_engine));
+  mixable_storage_.reset(new mixable_lof_storage(p));
+  mixable_storage_->get_model()->set_unlearner(unlearner_);
+  unlearner_->set_callback(
+      util::lang::bind(&lof::remove_row, this, util::lang::_1));
+}
+
 lof::~lof() {
 }
 
@@ -110,19 +137,38 @@ float lof::calc_anomaly_score(
 
 void lof::clear() {
   mixable_storage_->get_model()->clear();
+  if (unlearner_) {
+    unlearner_->clear();
+  }
 }
 
 void lof::clear_row(const string& id) {
+  remove_row(id);
+  if (unlearner_) {
+    unlearner_->remove(id);
+  }
+}
+
+void lof::remove_row(const string& id) {
   mixable_storage_->get_model()->remove_row(id);
 }
 
 bool lof::update_row(const string& id, const sfv_diff_t& diff) {
-  return mixable_storage_->get_model()->update_row(id, diff);
+  if (unlearner_ && !unlearner_->can_touch(id)) {
+    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+        "cannot add new row as number of sticky rows reached "
+        "the maximum size of unlearner: " + id));
+  }
+  bool updated = mixable_storage_->get_model()->update_row(id, diff);
+  if (unlearner_ && updated) {
+    unlearner_->touch(id);
+  }
+  return updated;
 }
 
 bool lof::set_row(const string& id, const common::sfv_t& sfv) {
-  mixable_storage_->get_model()->remove_row(id);
-  return mixable_storage_->get_model()->update_row(id, sfv);
+  remove_row(id);
+  return update_row(id, sfv);
 }
 
 void lof::get_all_row_ids(vector<string>& ids) const {

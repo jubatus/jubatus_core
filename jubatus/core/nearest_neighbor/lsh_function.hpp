@@ -19,19 +19,48 @@
 
 #include <stdint.h>
 #include <vector>
+#include "../common/lru.hpp"
 #include "../common/type.hpp"
 #include "../storage/bit_vector.hpp"
+#include "jubatus/util/concurrent/mutex.h"
+#include "jubatus/util/lang/scoped_ptr.h"
 
 namespace jubatus {
 namespace core {
 namespace nearest_neighbor {
 
+class random_projection_cache {
+ public:
+  explicit random_projection_cache(int size) : lru(size), lock() {}
+  ~random_projection_cache() {}
+  common::lru<uint32_t, std::vector<float> > lru;
+  jubatus::util::concurrent::mutex lock;
+};
+typedef jubatus::util::lang::scoped_ptr<random_projection_cache> cache_t;
+
 std::vector<float> random_projection(
     const common::sfv_t& sfv,
-    uint32_t hash_num, uint32_t threads);
+    uint32_t hash_num,
+    uint32_t threads,
+    cache_t& cache);
 storage::bit_vector binarize(const std::vector<float>& proj);
 storage::bit_vector cosine_lsh(
-    const common::sfv_t& sfv, uint32_t hash_num, uint32_t threads);
+    const common::sfv_t& sfv,
+    uint32_t hash_num,
+    uint32_t threads,
+    cache_t& cache);
+
+template<typename T>
+void init_cache_from_config(cache_t& cache, const T& config) {
+  if (config.bool_test()) {
+    if (!(0 <= *config)) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter("0 <= cache_size"));
+    }
+    if (*config > 0) {
+      cache.reset(new random_projection_cache(*config));
+    }
+  }
+}
 
 }  // namespace nearest_neighbor
 }  // namespace core

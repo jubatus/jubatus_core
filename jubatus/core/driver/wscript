@@ -18,6 +18,7 @@ def build(bld):
       'clustering.cpp',
       'burst.cpp',
       'bandit.cpp',
+      'weight.cpp',
       ]
   headers = [
       'driver.hpp',
@@ -31,6 +32,7 @@ def build(bld):
       'clustering.hpp',
       'burst.hpp',
       'bandit.hpp',
+      'weight.hpp',
       ]
   use = ['jubatus_util', 'MSGPACK']
 
@@ -59,6 +61,7 @@ def build(bld):
     'clustering_test',
     'burst_test',
     'bandit_test',
+    'weight_test',
     ]
 
   for t in tests:

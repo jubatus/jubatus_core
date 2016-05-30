@@ -46,7 +46,7 @@ lsh::lsh(
 }
 
 storage::bit_vector lsh::hash(const common::sfv_t& sfv) const {
-  return cosine_lsh(sfv, bitnum(), threads_);
+  return cosine_lsh(sfv, bitnum(), threads_, cache_);
 }
 
 void lsh::set_config(const config& conf) {
@@ -55,6 +55,7 @@ void lsh::set_config(const config& conf) {
         common::invalid_parameter("1 <= hash_num"));
   }
   threads_ = read_threads_config(conf.threads);
+  init_cache_from_config(cache_, conf.cache_size);
 }
 
 }  // namespace nearest_neighbor

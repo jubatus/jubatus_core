@@ -87,15 +87,19 @@ void euclid_lsh::set_row(const string& id, const common::sfv_t& sfv) {
   // TODO(beam2d): support nested algorithm, e.g. when used by lof and then we
   // cannot suppose that the first two columns are assigned to euclid_lsh.
   get_table()->add(id, owner(my_id_),
-                   cosine_lsh(sfv, hash_num_, threads_), l2norm(sfv));
+                   cosine_lsh(sfv, hash_num_, threads_, cache_), l2norm(sfv));
 }
 
 void euclid_lsh::neighbor_row(
     const common::sfv_t& query,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
+
+  /* table lock acquired; all subsequent table operations must be nolock */
+
   neighbor_row_from_hash(
-      cosine_lsh(query, hash_num_, threads_),
+      cosine_lsh(query, hash_num_, threads_, cache_),
       l2norm(query),
       ids,
       ret_num);
@@ -105,8 +109,12 @@ void euclid_lsh::neighbor_row(
     const std::string& query_id,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
+
+  /* table lock acquired; all subsequent table operations must be nolock */
+
   const pair<bool, uint64_t> maybe_index =
-      get_const_table()->exact_match(query_id);
+      get_const_table()->exact_match_nolock(query_id);
   if (!maybe_index.first) {
     ids.clear();
     return;
@@ -124,6 +132,7 @@ void euclid_lsh::set_config(const config& conf) {
   }
   hash_num_ = conf.hash_num;
   threads_ = read_threads_config(conf.threads);
+  init_cache_from_config(cache_, conf.cache_size);
 }
 
 void euclid_lsh::fill_schema(vector<column_type>& schema) {
@@ -148,9 +157,15 @@ static heap_t ranking_hamming_bit_vectors_worker(
   for (size_t i = off; i < end; ++i) {
     const size_t hamm_dist =
       bv->calc_hamming_distance_unsafe(bv_col->get_data_at_unsafe(i));
-    const float theta = hamm_dist * M_PI / denom;
-    const float score =
-      (*norm_col)[i] * ((*norm_col)[i] - 2 * norm * std::cos(theta));
+    const float norm_i = (*norm_col)[i];
+    float score;
+    if (hamm_dist == 0) {
+      score = std::fabs(norm - norm_i);
+    } else {
+      const float theta = hamm_dist * M_PI / denom;
+      score = std::sqrt(
+          norm * norm + norm_i * norm_i - 2 * norm * norm_i * std::cos(theta));
+    }
     heap.push(make_pair(score, i));
   }
   return heap;
@@ -161,6 +176,8 @@ void euclid_lsh::neighbor_row_from_hash(
     float norm,
     vector<pair<string, float> >& ids,
     uint64_t ret_num) const {
+  // This function is not thread safe.
+  // Take lock out of this function.
   jubatus::util::lang::shared_ptr<const column_table> table =
     get_const_table();
   const_bit_vector_column& bv_col = lsh_column();
@@ -178,10 +195,8 @@ void euclid_lsh::neighbor_row_from_hash(
   heap.get_sorted(sorted);
 
   ids.clear();
-  const float squared_norm = norm * norm;
   for (size_t i = 0; i < sorted.size(); ++i) {
-    ids.push_back(make_pair(table->get_key(sorted[i].second),
-                            std::sqrt(squared_norm + sorted[i].first)));
+    ids.push_back(make_pair(table->get_key(sorted[i].second), sorted[i].first));
   }
 }
 

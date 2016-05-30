@@ -256,12 +256,48 @@ bool lof_storage::put_diff(const lof_table_t& mixed_diff) {
   for (lof_table_t::const_iterator it = mixed_diff.begin();
        it != mixed_diff.end(); ++it) {
     if (is_removed(it->second)) {
+      if (unlearner_) {
+        unlearner_->remove(it->first);
+      }
       lof_table_.erase(it->first);
     } else {
+      if (unlearner_) {
+        if (unlearner_->can_touch(it->first)) {
+          unlearner_->touch(it->first);
+        } else {
+          continue;  // drop untouchable value
+        }
+      }
       lof_table_[it->first] = it->second;
     }
   }
+
+  // Create a set of removed (unlearned) rows since get_diff.
+  unordered_set<std::string> removed_ids;
+  for (lof_table_t::const_iterator it = lof_table_diff_.begin();
+      it != lof_table_diff_.end(); ++it) {
+    if (is_removed(it->second)) {
+      // The row is locally marked as removed.  We should check if others
+      // knows about it; if the diff does not contain the information that
+      // the row is removed, the row is removed after `get_diff` (including
+      // rows unlearned during `put_diff` (above code)).
+      lof_table_t::const_iterator pos = mixed_diff.find(it->first);
+      if (pos == mixed_diff.end() || !is_removed(pos->second)) {
+        removed_ids.insert(it->first);
+        std::cout << it->first << std::endl;
+      }
+    }
+  }
+
   lof_table_diff_.clear();
+
+  // Keep removed rows in the diff area until next MIX to
+  // propagate the removal of this data to other nodes.
+  for (unordered_set<std::string>::const_iterator it = removed_ids.begin();
+      it != removed_ids.end(); ++it) {
+    mark_removed(lof_table_diff_[*it]);
+  }
+
   return true;
 }
 
