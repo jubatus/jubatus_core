@@ -16,6 +16,9 @@
 
 #include <cmath>
 #include <utility>
+#include <string>
+#include <vector>
+
 #include <gtest/gtest.h>
 #include "../common/type.hpp"
 #include "keyword_weights.hpp"
@@ -27,13 +30,14 @@ namespace fv_converter {
 TEST(keyword_weights, trivial) {
   keyword_weights m, m2;
   {
-    common::sfv_t fv;
+    std::vector<std::string> keys;
 
-    m.update_document_frequency(fv);
+    m.increment_document_count();
 
-    fv.push_back(std::make_pair("key1", 1.0));
-    fv.push_back(std::make_pair("key2", 1.0));
-    m.update_document_frequency(fv);
+    keys.push_back("key1");
+    keys.push_back("key2");
+    m.increment_document_count();
+    m.increment_document_frequency(keys);
 
     m.add_weight("key3", 2.0);
 
@@ -43,12 +47,13 @@ TEST(keyword_weights, trivial) {
   }
 
   {
-    common::sfv_t fv;
-    m2.update_document_frequency(fv);
+    std::vector<std::string> keys;
+    m2.increment_document_count();
 
-    fv.push_back(std::make_pair("key1", 1.0));
-    fv.push_back(std::make_pair("key2", 1.0));
-    m2.update_document_frequency(fv);
+    keys.push_back("key1");
+    keys.push_back("key2");
+    m2.increment_document_count();
+    m2.increment_document_frequency(keys);
 
     m2.add_weight("key3", 3.0);
 

@@ -19,6 +19,8 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <vector>
+
 #include "jubatus/util/lang/cast.h"
 #include "../common/type.hpp"
 #include "datum_to_fv_converter.hpp"
@@ -49,10 +51,15 @@ keyword_weights::keyword_weights()
       weights_() {
 }
 
-void keyword_weights::update_document_frequency(const sfv_t& fv) {
+void keyword_weights::increment_document_count() {
   ++document_count_;
-  for (sfv_t::const_iterator it = fv.begin(); it != fv.end(); ++it) {
-    ++document_frequencies_[it->first];
+}
+
+void keyword_weights::increment_document_frequency(
+    const std::vector<std::string> keys) {
+  for (std::vector<std::string>::const_iterator it = keys.begin();
+       it != keys.end(); ++it) {
+    ++document_frequencies_[*it];
   }
 }
 

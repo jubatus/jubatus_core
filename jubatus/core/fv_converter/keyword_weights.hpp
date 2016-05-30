@@ -19,6 +19,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
 #include "../common/type.hpp"
@@ -32,7 +33,8 @@ class keyword_weights {
  public:
   keyword_weights();
 
-  void update_document_frequency(const common::sfv_t& fv);
+  void increment_document_count();
+  void increment_document_frequency(const std::vector<std::string> keys);
 
   size_t get_document_frequency(const std::string& key) const {
     return document_frequencies_[key];

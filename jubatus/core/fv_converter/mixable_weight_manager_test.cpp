@@ -18,6 +18,7 @@
 #include <fstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
 #include "jubatus/util/lang/shared_ptr.h"
@@ -39,35 +40,50 @@ class versioned_weight_diff_test : public ::testing::Test {
  public:
   void SetUp() {
     {
-      common::sfv_t fv;
-      fv.push_back(make_pair("a", 1));
-      kw1.update_document_frequency(fv);
+      std::vector<std::string> keys;
+      keys.push_back("a");
+      kw1.increment_document_count();
+      kw1.increment_document_frequency(keys);
     }
     {
-      common::sfv_t fv;
-      fv.push_back(make_pair("b", 1));
-      kw1.update_document_frequency(fv);
-      kw1.update_document_frequency(fv);
+      std::vector<std::string> keys;
+      keys.push_back("b");
+      kw1.increment_document_count();
+      kw1.increment_document_frequency(keys);
+      kw1.increment_document_count();
+      kw1.increment_document_frequency(keys);
     }
     {
-      common::sfv_t fv;
-      fv.push_back(make_pair("b", 1));
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
+      std::vector<std::string> keys;
+      keys.push_back("b");
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
     }
     {
-      common::sfv_t fv;
-      fv.push_back(make_pair("c", 1));
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
+      std::vector<std::string> keys;
+      keys.push_back("c");
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
+      kw2.increment_document_count();
+      kw2.increment_document_frequency(keys);
     }
   }
   void TearDown() {
@@ -132,10 +148,12 @@ class mixable_weight_manager_test : public ::testing::Test {
     shared_ptr<weight_manager> m(new weight_manager);
 
     {
-      common::sfv_t fv;
-      fv.push_back(make_pair("a", 1));
-      fv.push_back(make_pair("b", 1));
-      m->update_weight(fv);
+      counter<std::string> counter;
+      counter["K"] = 1;
+
+      m->increment_document_count();
+      m->update_weight("a", "T", tf_bin, counter);
+      m->update_weight("b", "T", tf_bin, counter);
     }
 
     mw.reset(new mixable_weight_manager(m));
@@ -143,7 +161,11 @@ class mixable_weight_manager_test : public ::testing::Test {
   void TearDown() {
     mw.reset();
   }
+
+  mixable_weight_manager_test() : tf_bin(TERM_FREQUENCY, TERM_BINARY) {}
+
   shared_ptr<mixable_weight_manager> mw;
+  splitter_weight_type tf_bin;
 };
 
 TEST_F(mixable_weight_manager_test, fixture) {
@@ -155,17 +177,18 @@ TEST_F(mixable_weight_manager_test, get_diff) {
   mw->get_model()->get_diff(got);
   ASSERT_EQ(0U, got.version_.get_number());
   ASSERT_EQ(1U, got.weights_.get_document_count());
-  ASSERT_EQ(1U, got.weights_.get_document_frequency("a"));
-  ASSERT_EQ(1U, got.weights_.get_document_frequency("b"));
+  ASSERT_EQ(1U, got.weights_.get_document_frequency("a$K@T#tf/bin"));
+  ASSERT_EQ(1U, got.weights_.get_document_frequency("b$K@T#tf/bin"));
 }
 
 TEST_F(mixable_weight_manager_test, put_diff) {
   keyword_weights w;
   {
-    common::sfv_t fv;
-    fv.push_back(make_pair("a", 1));
-    fv.push_back(make_pair("b", 1));
-    w.update_document_frequency(fv);
+    std::vector<std::string> keys;
+    keys.push_back("a$K@T#tf/bin");
+    keys.push_back("b$K@T#tf/bin");
+    w.increment_document_count();
+    w.increment_document_frequency(keys);
   }
 
   versioned_weight_diff appender(w);
@@ -175,18 +198,20 @@ TEST_F(mixable_weight_manager_test, put_diff) {
   ASSERT_EQ(1U, got.version_.get_number());  // should be incremented
 
   ASSERT_EQ(0U, got.weights_.get_document_count());
-  ASSERT_EQ(0U, got.weights_.get_document_frequency("a"));
-  ASSERT_EQ(0U, got.weights_.get_document_frequency("b"));
+  ASSERT_EQ(0U, got.weights_.get_document_frequency("a$K@T#tf/bin"));
+  ASSERT_EQ(0U, got.weights_.get_document_frequency("b$K@T#tf/bin"));
 
   common::sfv_t result;
-  result.push_back(make_pair("a", 2));
-  result.push_back(make_pair("b", 3));
+  counter<std::string> counter;
+  counter["K"] = 2;
+  mw->get_model()->add_string_features("a", "T", tf_bin, counter, result);
+  counter["K"] = 3;
+  mw->get_model()->add_string_features("b", "T", tf_bin, counter, result);
 
-  mw->get_model()->get_weight(result);
   ASSERT_EQ(2U, result.size());
-  ASSERT_EQ("a", result[0].first);
+  ASSERT_EQ("a$K@T#tf/bin", result[0].first);
   ASSERT_EQ(2, result[0].second);
-  ASSERT_EQ("b", result[1].first);
+  ASSERT_EQ("b$K@T#tf/bin", result[1].first);
   ASSERT_EQ(3, result[1].second);
 }
 
