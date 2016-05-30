@@ -1,3 +1,21 @@
+Release 0.3.1 - 2016/05/30
+--------------------------
+
+* New feature
+    * weight: driver that returns raw results of fv_converter (#288)
+
+* Improvements
+    * nearest_neighbor: improve performance by using LRU caching (#247)
+    * nearest_neighbor: improve distance calculation precision in euclid_lsh (#253, #289)
+    * recommender: support multi-threaded nearest neighbor search (#265)
+    * recommender: improve distance calculation precision in inverted_index and inverted_index_euclid (#251, #290)
+    * anomaly: support unlearning in lof algorithm (#231, #292)
+    * Improve performance of LRU library (#266)
+    * Improve compatibility with FreeBSD 10 (#280)
+
+* Bug fixes
+    * nearest_neighbor: fix thread safetiness issue in euclid_lsh (#283, #285)
+
 Release 0.3.0 - 2016/04/25
 --------------------------
 
