@@ -32,14 +32,26 @@ class keyword_weights {
  public:
   keyword_weights();
 
-  void update_document_frequency(const common::sfv_t& fv);
+  void update_document_frequency(
+      const common::sfv_t& fv,
+      bool use_group_frequency);
 
-  size_t get_document_frequency(const std::string& key) const {
+  inline size_t get_document_frequency(const std::string& key) const {
     return document_frequencies_[key];
   }
 
-  uint64_t get_document_count() const {
+  inline uint64_t get_document_count() const {
     return document_count_;
+  }
+
+  inline double get_group_frequency(
+      const std::string& group_key) const {
+    return group_frequencies_[group_key];
+  }
+
+  inline double get_group_total_length(
+      const std::string& group_key) const {
+    return group_total_lengths_[group_key];
   }
 
   void add_weight(const std::string& key, float weight);
@@ -50,7 +62,12 @@ class keyword_weights {
 
   void clear();
 
-  MSGPACK_DEFINE(document_count_, document_frequencies_, weights_);
+  MSGPACK_DEFINE(
+      document_count_,
+      document_frequencies_,
+      group_frequencies_,
+      group_total_lengths_,
+      weights_);
 
   std::string to_string() const;
 
@@ -61,8 +78,19 @@ class keyword_weights {
  private:
   double get_global_weight(const std::string& key) const;
 
+  // Number of documents (datum, feature vector) processed.
   uint64_t document_count_;
+
+  // Number of times each feature vector is observed.
   counter<std::string> document_frequencies_;
+
+  // Number of times each feature group is observed.
+  // (see also `key_name_utils.hpp`)
+  counter<std::string> group_frequencies_;
+
+  // Total value of each feature group.
+  counter<std::string> group_total_lengths_;
+
   typedef jubatus::util::data::unordered_map<std::string, float> weight_t;
   weight_t weights_;
 };

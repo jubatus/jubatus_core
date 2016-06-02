@@ -29,11 +29,11 @@ TEST(keyword_weights, trivial) {
   {
     common::sfv_t fv;
 
-    m.update_document_frequency(fv);
+    m.update_document_frequency(fv, false);
 
     fv.push_back(std::make_pair("key1", 1.0));
     fv.push_back(std::make_pair("key2", 1.0));
-    m.update_document_frequency(fv);
+    m.update_document_frequency(fv, false);
 
     m.add_weight("key3", 2.0);
 
@@ -44,11 +44,11 @@ TEST(keyword_weights, trivial) {
 
   {
     common::sfv_t fv;
-    m2.update_document_frequency(fv);
+    m2.update_document_frequency(fv, false);
 
     fv.push_back(std::make_pair("key1", 1.0));
     fv.push_back(std::make_pair("key2", 1.0));
-    m2.update_document_frequency(fv);
+    m2.update_document_frequency(fv, false);
 
     m2.add_weight("key3", 3.0);
 
