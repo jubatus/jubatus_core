@@ -30,10 +30,14 @@
 #include "../common/type.hpp"
 #include "../common/version.hpp"
 #include "keyword_weights.hpp"
+#include "datum_to_fv_converter.hpp"
 
 namespace jubatus {
 namespace core {
 namespace fv_converter {
+
+const double BM25_K1 = 1.2;
+const double BM25_B = 0.75;
 
 struct versioned_weight_diff {
   versioned_weight_diff();
@@ -52,8 +56,18 @@ class weight_manager : public framework::model {
  public:
   weight_manager();
 
-  void update_weight(const common::sfv_t& fv);
-  void get_weight(common::sfv_t& fv) const;
+  void increment_document_count();
+  void update_weight(
+      const std::string& key,
+      const std::string& type_name,
+      const splitter_weight_type& weight_type,
+      const counter<std::string>& count);
+  void add_string_features(
+      const std::string& key,
+      const std::string& type_name,
+      const splitter_weight_type& weight_type,
+      const counter<std::string>& count,
+      common::sfv_t& ret_fv) const;
 
   void add_weight(const std::string& key, float weight);
 
@@ -128,12 +142,39 @@ class weight_manager : public framework::model {
         master_weights_.get_document_frequency(key);
   }
 
+  double get_average_key_length(
+       const std::string& key,
+      const std::string& type_name) const {
+    const std::string& weight_name = make_weight_name(key, "", type_name);
+
+    size_t frequency = diff_weights_.get_key_frequency(weight_name) +
+                       master_weights_.get_key_frequency(weight_name);
+    if (frequency == 0) {
+      return 0;
+    }
+
+    size_t total_length = diff_weights_.get_key_total_length(weight_name) +
+                          master_weights_.get_key_total_length(weight_name);
+
+    return lexical_cast<double>(total_length) / frequency;
+  }
+
   double get_user_weight(const std::string& key) const {
     return diff_weights_.get_user_weight(key) +
         master_weights_.get_user_weight(key);
   }
 
-  double get_global_weight(const std::string& key) const;
+  double get_sample_weight(
+      frequency_weight_type type,
+      const std::string& key,
+      const std::string& type_name,
+      double tf,
+      size_t length) const;
+
+  double get_global_weight(
+      term_weight_type type,
+      const std::string& fv_name,
+      const std::string& weight_name) const;
 
   mutable util::concurrent::mutex mutex_;
   storage::version version_;

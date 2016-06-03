@@ -40,6 +40,14 @@ class counter {
     return data_.count(key) != 0;
   }
 
+  double sum() const {
+    double sum = 0.0;
+    for (const_iterator it = data_.begin(); it != data_.end(); ++it) {
+      sum = it->second;
+    }
+    return sum;
+  }
+
   double operator[](const T& key) const {
     const_iterator it = data_.find(key);
     if (it == data_.end()) {

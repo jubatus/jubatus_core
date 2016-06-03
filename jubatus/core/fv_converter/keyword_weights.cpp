@@ -19,6 +19,8 @@
 #include <string>
 #include <sstream>
 #include <utility>
+#include <vector>
+
 #include "jubatus/util/lang/cast.h"
 #include "../common/type.hpp"
 #include "datum_to_fv_converter.hpp"
@@ -49,11 +51,23 @@ keyword_weights::keyword_weights()
       weights_() {
 }
 
-void keyword_weights::update_document_frequency(const sfv_t& fv) {
+void keyword_weights::increment_document_count() {
   ++document_count_;
-  for (sfv_t::const_iterator it = fv.begin(); it != fv.end(); ++it) {
-    ++document_frequencies_[it->first];
+}
+
+void keyword_weights::increment_document_frequency(
+    const std::vector<std::string> keys) {
+  for (std::vector<std::string>::const_iterator it = keys.begin();
+       it != keys.end(); ++it) {
+    ++document_frequencies_[*it];
   }
+}
+
+void keyword_weights::increment_key_frequency(
+    const std::string& key,
+    size_t length) {
+  ++key_frequencies_[key];
+  key_total_length_[key] += length;
 }
 
 void keyword_weights::add_weight(const string& key, float weight) {
@@ -72,6 +86,8 @@ float keyword_weights::get_user_weight(const string& key) const {
 void keyword_weights::merge(const keyword_weights& w) {
   document_count_ += w.document_count_;
   document_frequencies_.add(w.document_frequencies_);
+  key_frequencies_.add(w.key_frequencies_);
+  key_total_length_.add(w.key_total_length_);
   weight_t weights(w.weights_);
   weights.insert(weights_.begin(), weights_.end());
   weights_.swap(weights);
@@ -80,6 +96,8 @@ void keyword_weights::merge(const keyword_weights& w) {
 void keyword_weights::clear() {
   document_count_ = 0;
   document_frequencies_.clear();
+  key_frequencies_.clear();
+  key_total_length_.clear();
   weight_t().swap(weights_);
 }
 
@@ -106,6 +124,12 @@ void keyword_weights::get_status(
   status[prefix + "_num_document_frequencies"] =
     jubatus::util::lang::lexical_cast<std::string>(
         document_frequencies_.size());
+  status[prefix + "_num_key_frequencies"] =
+    jubatus::util::lang::lexical_cast<std::string>(
+        key_frequencies_.size());
+  status[prefix + "_num_key_total_length"] =
+    jubatus::util::lang::lexical_cast<std::string>(
+        key_total_length_.size());
   status[prefix + "_num_weights"] =
     jubatus::util::lang::lexical_cast<std::string>(weights_.size());
 }

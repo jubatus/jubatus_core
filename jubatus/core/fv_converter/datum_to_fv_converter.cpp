@@ -43,6 +43,16 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
+namespace {
+
+struct is_zero {
+  bool operator()(const std::pair<std::string, float>& p) {
+    return p.second == 0;
+  }
+};
+
+}  // namespace
+
 /// impl
 
 class datum_to_fv_converter_impl {
@@ -240,59 +250,74 @@ class datum_to_fv_converter_impl {
     }
   }
 
+  /**
+   * Converts the given Datum to Sparse Feature Vector.
+   * This is a `const` function that does not update weight_manager.
+   */
   void convert(const datum& datum, common::sfv_t& ret_fv) const {
     common::sfv_t fv;
-    convert_unweighted(datum, fv);
-    jubatus::util::lang::shared_ptr<weight_manager> weights =
-        mixable_weights_->get_model();
-    if (weights) {
-      weights->get_weight(fv);
-    }
 
-    convert_combinations(fv);
+    // Filter and convert string values (do not update weight).
+    std::vector<std::pair<std::string, std::string> >
+        string_records(datum.string_values_);
+    std::vector<std::pair<std::string, std::string> > filtered_string_records;
+    filter_strings(datum.string_values_, filtered_string_records);
+    string_records.insert(
+        string_records.end(),
+        filtered_string_records.begin(),
+        filtered_string_records.end());
+    convert_strings(string_records, fv);
 
-    if (hasher_) {
-      hasher_->hash_feature_keys(fv);
-    }
+    // Conversion process other than string values.
+    convert_common(datum, fv);
 
     fv.swap(ret_fv);
   }
 
+  /**
+   * Converts the given Datum to Sparse Feature Vector.
+   * This is a `non-const` function that updates weight_manager.
+   */
   void convert_and_update_weight(const datum& datum, common::sfv_t& ret_fv) {
     common::sfv_t fv;
-    convert_unweighted(datum, fv);
-    jubatus::util::lang::shared_ptr<weight_manager> weights =
-        mixable_weights_->get_model();
-    if (weights) {
-      weights->update_weight(fv);
-      weights->get_weight(fv);
-    }
 
-    convert_combinations(fv);
+    // Filter and convert string values (updates weight).
+    std::vector<std::pair<std::string, std::string> >
+        string_records(datum.string_values_);
+    std::vector<std::pair<std::string, std::string> > filtered_string_records;
+    filter_strings(datum.string_values_, filtered_string_records);
+    string_records.insert(
+        string_records.end(),
+        filtered_string_records.begin(),
+        filtered_string_records.end());
+    convert_strings_and_update_weight(string_records, fv);
 
-    if (hasher_) {
-      hasher_->hash_feature_keys(fv);
-    }
+    // Conversion process other than string values.
+    convert_common(datum, fv);
 
     fv.swap(ret_fv);
   }
 
-  void convert_unweighted(const datum& datum, common::sfv_t& ret_fv) const {
-    common::sfv_t fv;
-
-    std::vector<std::pair<std::string, std::string> > filtered_strings;
-    filter_strings(datum.string_values_, filtered_strings);
-    convert_strings(datum.string_values_, fv);
-    convert_strings(filtered_strings, fv);
-
+  void convert_common(const datum& datum, common::sfv_t& fv) const {
+    // Filter & Convert Numeric Values
     std::vector<std::pair<std::string, double> > filtered_nums;
     filter_nums(datum.num_values_, filtered_nums);
     convert_nums(datum.num_values_, fv);
     convert_nums(filtered_nums, fv);
 
+    // Convert Binary Values
     convert_binaries(datum.binary_values_, fv);
 
-    fv.swap(ret_fv);
+    // Remove dimension whose value is 0.
+    fv.erase(remove_if(fv.begin(), fv.end(), is_zero()), fv.end());
+
+    // Compute Combinations
+    convert_combinations(fv);
+
+    // Hash Feature Vector Keys
+    if (hasher_) {
+      hasher_->hash_feature_keys(fv);
+    }
   }
 
   void revert_feature(
@@ -373,8 +398,36 @@ class datum_to_fv_converter_impl {
   void convert_strings(
       const datum::sv_t& string_values,
       common::sfv_t& ret_fv) const {
+    jubatus::util::lang::shared_ptr<weight_manager> weights =
+        mixable_weights_->get_model();
+
     for (size_t i = 0; i < string_rules_.size(); ++i) {
-      convert_strings(string_rules_[i], string_values, ret_fv);
+      const string_feature_rule& splitter = string_rules_[i];
+
+      for (size_t j = 0; j < string_values.size(); ++j) {
+        const std::string& key = string_values[j].first;
+        const std::string& value = string_values[j].second;
+
+        if (!splitter.matcher_->match(key)) {
+          continue;
+        }
+
+        // Extract features from string (using splitter) and count its term
+        // frequency (TF).
+        counter<std::string> count;
+        count_words(splitter, value, count);
+
+        for (size_t k = 0; k < splitter.weights_.size(); ++k) {
+          // Extracted features are weighted by (sample_weight * global_weight)
+          // and added to the resulting feature vector (ret_fv).
+          weights->add_string_features(
+              key,
+              splitter.name_,
+              splitter.weights_[k],
+              count,
+              ret_fv);
+        }
+      }
     }
   }
 
@@ -387,18 +440,48 @@ class datum_to_fv_converter_impl {
     return false;
   }
 
-  void convert_strings(
-      const string_feature_rule& splitter,
+  void convert_strings_and_update_weight(
       const datum::sv_t& string_values,
-      common::sfv_t& ret_fv) const {
-    for (size_t j = 0; j < string_values.size(); ++j) {
-      const std::string& key = string_values[j].first;
-      const std::string& value = string_values[j].second;
-      counter<std::string> counter;
-      count_words(splitter, key, value, counter);
-      for (size_t i = 0; i < splitter.weights_.size(); ++i) {
-        make_string_features(
-            key, splitter.name_, splitter.weights_[i], counter, ret_fv);
+      common::sfv_t& ret_fv) {
+    jubatus::util::lang::shared_ptr<weight_manager> weights =
+        mixable_weights_->get_model();
+
+    // Increment document count (number of datum processed).
+    weights->increment_document_count();
+
+    for (size_t i = 0; i < string_rules_.size(); ++i) {
+      const string_feature_rule& splitter = string_rules_[i];
+
+      for (size_t j = 0; j < string_values.size(); ++j) {
+        const std::string& key = string_values[j].first;
+        const std::string& value = string_values[j].second;
+
+        if (!splitter.matcher_->match(key)) {
+          continue;
+        }
+
+        // Extract features from string (using splitter) and count its term
+        // frequency (TF).
+        counter<std::string> count;
+        count_words(splitter, value, count);
+
+        for (size_t k = 0; k < splitter.weights_.size(); ++k) {
+          // Update the weights.
+          weights->update_weight(
+              key,
+              splitter.name_,
+              splitter.weights_[k],
+              count);
+
+          // Extracted features are weighted by (sample_weight * global_weight)
+          // and added to the resulting feature vector (ret_fv).
+          weights->add_string_features(
+              key,
+              splitter.name_,
+              splitter.weights_[k],
+              count,
+              ret_fv);
+        }
       }
     }
   }
@@ -419,111 +502,27 @@ class datum_to_fv_converter_impl {
       const std::string& key = binary_values[j].first;
       const std::string& value = binary_values[j].second;
       if (feature.matcher_->match(key)) {
-        check_key(key);
-        feature.feature_func_->add_feature(key, value, ret_fv);
+        feature.feature_func_->add_feature(
+            make_binary_feature_name(key, feature.name_),
+            value,
+            ret_fv);
       }
     }
   }
 
-  static std::string make_feature(
-      const std::string& key,
-      const std::string& value,
-      const std::string& splitter,
-      const std::string& sample_weight,
-      const std::string& global_weight) {
-    check_key(key);
-    return key + "$" + value + "@" + splitter + "#" + sample_weight + "/" +
-        global_weight;
-  }
-
-  static std::string make_feature_key(
-      const std::string& key,
-      const std::string& value,
-      const std::string& splitter) {
-    check_key(key);
-    return key + "$" + value + "@" + splitter;
-  }
-
-  static void check_key(const std::string& key) {
-    if (key.find('$') != std::string::npos) {
-      throw JUBATUS_EXCEPTION(
-          converter_exception("feature key cannot contain '$': " + key));
-    }
-  }
-
+  /**
+   * Split the string `value` using the `splitter` feature extractor and
+   * compute the term frequency.
+   */
   void count_words(
       const string_feature_rule& splitter,
-      const std::string& key,
       const std::string& value,
       counter<std::string>& counter) const {
-    if (splitter.matcher_->match(key)) {
-      std::vector<string_feature_element> elements;
-      splitter.splitter_->extract(value, elements);
+    std::vector<string_feature_element> elements;
+    splitter.splitter_->extract(value, elements);
 
-      for (size_t i = 0; i < elements.size(); i++) {
-        counter[elements[i].value] += elements[i].score;
-      }
-    }
-  }
-
-  double get_sample_weight(
-      frequency_weight_type type,
-      double tf,
-      std::string& name) const {
-    switch (type) {
-      case FREQ_BINARY:
-        name = "bin";
-        return 1.0;
-
-      case TERM_FREQUENCY:
-        name = "tf";
-        return tf;
-
-      case LOG_TERM_FREQUENCY:
-        name = "log_tf";
-        return std::log(1. + tf);
-
-      default:
-        return 0;
-    }
-  }
-
-  std::string get_global_weight_name(term_weight_type type) const {
-    switch (type) {
-      case TERM_BINARY:
-        return "bin";
-      case IDF:
-        return "idf";
-      case WITH_WEIGHT_FILE:
-        return "weight";
-      default:
-        throw JUBATUS_EXCEPTION(
-          jubatus::core::common::exception::runtime_error(
-            "unknown global weight type"));
-    }
-  }
-
-  void make_string_features(
-      const std::string& key,
-      const std::string& splitter_name,
-      const splitter_weight_type& weight_type,
-      const counter<std::string>& count,
-      common::sfv_t& ret_fv) const {
-    for (counter<std::string>::const_iterator it = count.begin();
-         it != count.end(); ++it) {
-      std::string sample_weight_name;
-      double sample_weight = get_sample_weight(
-          weight_type.freq_weight_type_, it->second, sample_weight_name);
-
-      std::string global_weight_name = get_global_weight_name(
-          weight_type.term_weight_type_);
-      float v = static_cast<float>(sample_weight);
-      if (v != 0.0) {
-        std::string f = make_feature(
-            key, it->first, splitter_name, sample_weight_name,
-            global_weight_name);
-        ret_fv.push_back(std::make_pair(f, v));
-      }
+    for (size_t i = 0; i < elements.size(); i++) {
+      counter[elements[i].value] += elements[i].score;
     }
   }
 
@@ -542,9 +541,10 @@ class datum_to_fv_converter_impl {
     for (size_t i = 0; i < num_rules_.size(); ++i) {
       const num_feature_rule& r = num_rules_[i];
       if (r.matcher_->match(key)) {
-        check_key(key);
-        std::string k = key + "@" + r.name_;
-        r.feature_func_->add_feature(k, value, ret_fv);
+        r.feature_func_->add_feature(
+            make_num_feature_name(key, r.name_),
+            value,
+            ret_fv);
       }
     }
   }
@@ -687,6 +687,114 @@ void datum_to_fv_converter::set_weight_manager(
 
 void datum_to_fv_converter::clear_weights() {
   pimpl_->clear_weights();
+}
+
+frequency_weight_type get_frequency_weight_type(const std::string& name) {
+  if (name == "bin") {
+    return FREQ_BINARY;
+  } else if (name == "tf") {
+    return TERM_FREQUENCY;
+  } else if (name == "log_tf") {
+    return LOG_TERM_FREQUENCY;
+  } else if (name == "bm25") {
+    return FREQ_BM25;
+  } else {
+    throw JUBATUS_EXCEPTION(
+        converter_exception("unknown sample_weight: [" + name + "]"));
+  }
+}
+
+std::string get_frequency_weight_name(frequency_weight_type type) {
+  switch (type) {
+    case FREQ_BINARY:
+      return "bin";
+    case TERM_FREQUENCY:
+      return "tf";
+    case LOG_TERM_FREQUENCY:
+      return "log_tf";
+    case FREQ_BM25:
+      return "bm25";
+    default:  // this shouldn't happen
+      throw JUBATUS_EXCEPTION(converter_exception(
+          "unknown frequency_weight_type: [" +
+          lexical_cast<std::string>(type) + "]"));
+  }
+}
+
+term_weight_type get_term_weight_type(const std::string& name) {
+  if (name == "bin") {
+    return TERM_BINARY;
+  } else if (name == "idf") {
+    return IDF;
+  } else if (name == "bm25") {
+    return TERM_BM25;
+  } else if (name == "weight") {
+    return WITH_WEIGHT_FILE;
+  } else {
+    throw JUBATUS_EXCEPTION(
+        converter_exception("unknown global_weight: [" + name + "]"));
+  }
+}
+
+std::string get_term_weight_name(term_weight_type type) {
+  switch (type) {
+    case TERM_BINARY:
+      return "bin";
+    case IDF:
+      return "idf";
+    case TERM_BM25:
+      return "bm25";
+    case WITH_WEIGHT_FILE:
+      return "weight";
+    default:  // this shouldn't happen
+      throw JUBATUS_EXCEPTION(converter_exception(
+          "unknown term_weight_type: [" +
+          lexical_cast<std::string>(type) + "]"));
+  }
+}
+
+/**
+ * Checks if the datum key has a valid name.
+ */
+void check_key(const std::string& key) {
+  if (key.find('$') != std::string::npos) {
+    throw JUBATUS_EXCEPTION(
+        converter_exception("feature key cannot contain '$': " + key));
+  }
+}
+
+std::string make_string_feature_name(
+    const std::string& key,
+    const std::string& value,
+    const std::string& type,
+    frequency_weight_type sample_weight,
+    term_weight_type global_weight) {
+  check_key(key);
+  return key + "$" + value + "@" + type + "#" +
+         get_frequency_weight_name(sample_weight) + "/" +
+         get_term_weight_name(global_weight);
+}
+
+std::string make_num_feature_name(
+    const std::string& key,
+    const std::string& type) {
+  check_key(key);
+  return key + "@" + type;
+}
+
+std::string make_binary_feature_name(
+    const std::string& key,
+    const std::string& type) {
+  check_key(key);
+  return key;
+}
+
+std::string make_weight_name(
+    const std::string& key,
+    const std::string& value,
+    const std::string& type) {
+  check_key(key);
+  return key + "$" + value + "@" + type;
 }
 
 }  // namespace fv_converter

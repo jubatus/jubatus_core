@@ -23,25 +23,60 @@
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/lang/scoped_ptr.h"
+#include "jubatus/util/lang/cast.h"
 #include "../common/type.hpp"
 #include "../framework/mixable.hpp"
+#include "exception.hpp"
+
+using jubatus::util::lang::lexical_cast;
 
 namespace jubatus {
 namespace core {
 namespace fv_converter {
 
+/**
+ * sample_weight
+ */
 enum frequency_weight_type {
   FREQ_BINARY,
   TERM_FREQUENCY,
-  LOG_TERM_FREQUENCY
+  LOG_TERM_FREQUENCY,
+  FREQ_BM25
 };
 
+/**
+ * global_weight
+ */
 enum term_weight_type {
   TERM_BINARY,
   IDF,
+  TERM_BM25,
   WITH_WEIGHT_FILE
 };
 
+/**
+ * Converts sample_weight name to enum.
+ */
+frequency_weight_type get_frequency_weight_type(const std::string& name);
+
+/**
+ * Converts sample_weight enum to name.
+ */
+std::string get_frequency_weight_name(frequency_weight_type type);
+
+/**
+ * Converts global_weight name to enum.
+ */
+term_weight_type get_term_weight_type(const std::string& name);
+
+/**
+ * Converts global_weight enum to name.
+ */
+std::string get_term_weight_name(term_weight_type type);
+
+/**
+ * A pair of sample_weight and global_weight configuration.
+ */
 struct splitter_weight_type {
   frequency_weight_type freq_weight_type_;
   term_weight_type term_weight_type_;
@@ -53,6 +88,38 @@ struct splitter_weight_type {
         term_weight_type_(term_weight_type) {
   }
 };
+
+/**
+ * Creates a key name of Sparse Feature Vector for string features.
+ */
+std::string make_string_feature_name(
+    const std::string& key,
+    const std::string& value,
+    const std::string& type,
+    frequency_weight_type sample_weight,
+    term_weight_type global_weight);
+
+/**
+ * Creates a key name of Sparse Feature Vector for numeric features.
+ */
+std::string make_num_feature_name(
+    const std::string& key,
+    const std::string& type);
+
+/**
+ * Creates a key name of Sparse Feature Vector for binary features.
+ */
+std::string make_binary_feature_name(
+    const std::string& key,
+    const std::string& type);
+
+/**
+ * Creates a key name of user defined weight.
+ */
+std::string make_weight_name(
+    const std::string& key,
+    const std::string& value,
+    const std::string& type);
 
 struct datum;
 class datum_to_fv_converter_impl;
