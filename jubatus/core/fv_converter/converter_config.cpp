@@ -85,6 +85,8 @@ splitter_weight_type make_weight_type(
     global_type = TERM_BINARY;
   } else if (global == "idf") {
     global_type = IDF;
+  } else if (global == "bm25") {
+    global_type = BM25;
   } else if (global == "weight") {
     global_type = WITH_WEIGHT_FILE;
   } else {

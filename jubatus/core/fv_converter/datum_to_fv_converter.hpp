@@ -39,6 +39,7 @@ enum frequency_weight_type {
 enum term_weight_type {
   TERM_BINARY,
   IDF,
+  BM25,
   WITH_WEIGHT_FILE
 };
 

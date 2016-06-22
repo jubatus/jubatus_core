@@ -35,6 +35,9 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
+const double BM25_k1 = 1.2;
+const double BM25_b = 0.75;
+
 struct versioned_weight_diff {
   versioned_weight_diff();
   explicit versioned_weight_diff(const fv_converter::keyword_weights& w);
@@ -52,7 +55,10 @@ class weight_manager : public framework::model {
  public:
   weight_manager();
 
-  void update_weight(const common::sfv_t& fv);
+  void update_weight(
+      const common::sfv_t& fv,
+      bool contains_idf,
+      bool contains_bm25);
   void get_weight(common::sfv_t& fv) const;
 
   void add_weight(const std::string& key, float weight);
@@ -133,7 +139,29 @@ class weight_manager : public framework::model {
         master_weights_.get_user_weight(key);
   }
 
-  double get_global_weight(const std::string& key) const;
+  double get_average_group_length(const std::string& group_key) const {
+    double freq = diff_weights_.get_group_frequency(group_key) +
+                  master_weights_.get_group_frequency(group_key);
+    if (freq == 0) {
+      return 0;
+    }
+
+    return (diff_weights_.get_group_total_length(group_key) +
+            master_weights_.get_group_total_length(group_key)) / freq;
+  }
+
+  double get_global_weight_idf(
+      const std::string& key,
+      double sample_weight) const;
+
+  double get_global_weight_bm25(
+      const std::string& key,
+      double sample_weight,
+      const counter<std::string>& group_lengths) const;
+
+  double get_global_weight_user(
+      const std::string& key,
+      double sample_weight) const;
 
   mutable util::concurrent::mutex mutex_;
   storage::version version_;
