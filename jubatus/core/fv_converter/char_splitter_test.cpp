@@ -22,102 +22,106 @@
 
 namespace jubatus {
 namespace core {
-    namespace fv_converter {
-    
-    std::vector<std::pair<size_t, size_t> > make_pairs(int*xs) {
-        std::vector<std::pair<size_t, size_t> > v;
-        for (int* x  = xs; *x != -1; x += 2) {
-            v.push_back(std::make_pair(x[0], x[1]));
-        }
-        return v;
+namespace fv_converter {
+
+namespace {
+
+std::vector<std::pair<size_t, size_t> > make_pairs(int*xs) {
+    std::vector<std::pair<size_t, size_t> > v;
+    for (int* x  = xs; *x != -1; x += 2) {
+        v.push_back(std::make_pair(x[0], x[1]));
     }
-        
-    namespace {
-        class char_splitter_test : public ::testing::Test {
-        };
-    }// namespace
-        
-    TEST_F(char_splitter_test, empty) {
-        std::string separators="";
-        char_splitter splitter = char_splitter(separators);
-        
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split("" , bs);
-            ASSERT_EQ(0u , bs.size() );
-        }
-        
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split("STRING" , bs);
-            int exp[] = {0,6,-1};
-            ASSERT_EQ(make_pairs(exp) , bs );
-        }
-    }
-    
-    TEST_F(char_splitter_test, with_one_charactor) {
-        std::string separators=",";
-        char_splitter splitter = char_splitter(separators);
-    
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split("HELLO,WORLD" , bs);
-            int exp[] = {0,5,6,5,-1};
-            ASSERT_EQ(make_pairs(exp) , bs );
-        }
-        
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split(",,aaa" , bs);
-            int exp[] = {2,3,-1};
-            ASSERT_EQ(make_pairs(exp) , bs );
-        }
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split(",," , bs);
-            int exp[] = {-1};
-            ASSERT_EQ(make_pairs(exp) , bs );
-        }
-   
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split("" , bs);
-            int exp[] = {-1};
-            ASSERT_EQ(make_pairs(exp) , bs );
-        }
-        
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split("日本語,English" , bs);
-            int exp[] = {0,9,10,7,-1};
-            ASSERT_EQ(make_pairs(exp) , bs );
-        }
+    return v;
+}
+
+class char_splitter_test : public ::testing::Test {
+};
+
+}  // namespace
+
+TEST_F(char_splitter_test, empty) {
+    std::string separators = "";
+    char_splitter splitter = char_splitter(separators);
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("" , bs);
+        ASSERT_EQ(0u , bs.size());
     }
 
-        
-    TEST_F(char_splitter_test, with_two_charactors) {
-        std::string separators=" ,";
-        char_splitter splitter = char_splitter(separators);
-        
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split("HELLO,WORLD. Good morning." , bs);
-            int exp[] = {0,5,6,6,13,4,18,8,-1};
-            ASSERT_EQ(make_pairs(exp) , bs );
-        }
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("STRING", bs);
+        int exp[] = {0, 6, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
     }
-    
-    TEST_F(char_splitter_test, with_abc) {
-        std::string separators="abc";
-        char_splitter splitter = char_splitter(separators);
-        
-        {
-            std::vector<std::pair<size_t, size_t> > bs;
-            splitter.split("zzzabxxccyyy" , bs);
-            int exp[] = {0,3,5,2,9,3,-1};
-            ASSERT_EQ(make_pairs(exp) , bs );
-        }
+}
+
+TEST_F(char_splitter_test, with_one_charactor) {
+    std::string separators = ",";
+    char_splitter splitter = char_splitter(separators);
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("HELLO,WORLD" , bs);
+        int exp[] = {0, 5, 6, 5, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
     }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split(",,aaa", bs);
+        int exp[] = {2, 3, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split(",,", bs);
+        int exp[] = {-1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("", bs);
+        int exp[] = {-1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("日本語,English" , bs);
+        int exp[] = {0, 9, 10, 7, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+}
+
+
+TEST_F(char_splitter_test, with_two_charactors) {
+    std::string separators = " ,";
+    char_splitter splitter = char_splitter(separators);
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("HELLO,WORLD. Good morning.", bs);
+        int exp[] = {0, 5, 6, 6, 13, 4, 18, 8, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+}
+
+TEST_F(char_splitter_test, with_abc) {
+    std::string separators = "abc";
+    char_splitter splitter = char_splitter(separators);
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("zzzabxxccyyy", bs);
+        int exp[] = {0, 3, 5, 2, 9, 3, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus

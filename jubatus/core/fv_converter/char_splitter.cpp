@@ -24,10 +24,6 @@ namespace jubatus {
 namespace core {
 namespace fv_converter {
 
-namespace {
-
-}  // namespace
-    
 void char_splitter::split(
     const std::string& string,
     std::vector<std::pair<size_t, size_t> >& ret_boundaries) const {

@@ -126,7 +126,7 @@ def build(bld):
       'feature_hasher_test.cpp',
       'except_match_test.cpp',
       'mixable_weight_manager_test.cpp',
-	  'char_splitter_test.cpp',
+      'char_splitter_test.cpp',
   ]
 
   # Note: these headers are intentionally not installed.

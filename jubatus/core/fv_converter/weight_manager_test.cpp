@@ -40,12 +40,12 @@ TEST(weight_manager, trivial) {
     m.get_weight(fv);
     ASSERT_EQ(0, fv.size());
 
-    fv.push_back(std::make_pair("/title$this@space#bin/bin", 1.0));      // fv[0]
-    fv.push_back(std::make_pair("/title$this@space#bin/idf", 1.0));      // fv[1]
-    fv.push_back(std::make_pair("/age@bin", 1.0));                       // fv[2]
-    fv.push_back(std::make_pair("/address$tokyo@str#bin/weight", 1.0));  // fv[3]
-    fv.push_back(std::make_pair("/profile$hello@space#tf/bm25", 5.0));   // fv[4]
-    fv.push_back(std::make_pair("/profile$world@space#tf/bm25", 4.0));   // fv[5]
+    fv.push_back(std::make_pair("/title$this@space#bin/bin", 1.0));
+    fv.push_back(std::make_pair("/title$this@space#bin/idf", 1.0));
+    fv.push_back(std::make_pair("/age@bin", 1.0));
+    fv.push_back(std::make_pair("/address$tokyo@str#bin/weight", 1.0));
+    fv.push_back(std::make_pair("/profile$hello@space#tf/bm25", 5.0));
+    fv.push_back(std::make_pair("/profile$world@space#tf/bm25", 4.0));
     m.update_weight(fv, true, true);  // |D| = 3
     m.get_weight(fv);
 

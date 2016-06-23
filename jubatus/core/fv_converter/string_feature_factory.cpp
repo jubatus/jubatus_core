@@ -72,19 +72,19 @@ int get_int_with_default(
   }
 }
 
-shared_ptr<regexp_splitter >create_regexp(
+shared_ptr<regexp_splitter> create_regexp(
     const std::map<std::string, std::string>& args) {
   std::string pattern = get(args, "pattern");
   int group = get_int_with_default(args, "group", 0);
   return shared_ptr<regexp_splitter>(new regexp_splitter(pattern, group));
 }
 
-shared_ptr<char_splitter >create_char_splitter(
+shared_ptr<char_splitter> create_char_splitter(
     const std::map<std::string, std::string>& args) {
-    std::string separators = get(args, "separators");
-    return shared_ptr<char_splitter>(new char_splitter(separators));
+  std::string separators = get(args, "separators");
+  return shared_ptr<char_splitter>(new char_splitter(separators));
 }
-    
+
 }  // namespace
 
 shared_ptr<string_feature> string_feature_factory::create(

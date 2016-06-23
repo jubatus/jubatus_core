@@ -28,15 +28,15 @@ namespace fv_converter {
 
 class char_splitter : public word_splitter {
  public:
- char_splitter(std::string& separator) {
-     separator_ = separator;
- }
+  explicit char_splitter(const std::string& separator)
+  : separator_(separator) {}
+
   void split(
       const std::string& string,
       std::vector<std::pair<size_t, size_t> >& ret_boundaries) const;
- private:
-    std::string separator_;
 
+ private:
+  const std::string separator_;
 };
 
 }  // namespace fv_converter

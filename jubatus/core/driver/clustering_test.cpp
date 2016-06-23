@@ -149,7 +149,9 @@ TEST_P(clustering_test, clear) {
 
   clustering_->clear();
 
-  ASSERT_THROW(clustering_->get_core_members(), core::clustering::not_performed);
+  ASSERT_THROW(
+      clustering_->get_core_members(),
+      core::clustering::not_performed);
   ASSERT_EQ(0u, clustering_->get_revision());
 }
 
