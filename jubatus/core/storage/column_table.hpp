@@ -385,7 +385,28 @@ class column_table {
 
   void unpack(msgpack::object o) {
     jubatus::util::concurrent::scoped_wlock lk(table_lock_);
-    o.convert(this);
+
+    // inline expansion and memory optimization: o.convert(this);
+    if (o.type != msgpack::type::ARRAY || o.via.array.size != 6) {
+      throw msgpack::type_error();
+    }
+    msgpack::object *ptr = o.via.array.ptr;
+
+    // unpack num of tuples at first
+    ptr[1].convert(&tuples_);
+
+    // reserve vector/unordered_map memory
+    keys_.clear();
+    versions_.clear();
+    index_.clear();
+    keys_.reserve(tuples_);
+    versions_.reserve(tuples_);
+    index_.reserve(tuples_);
+    ptr[0].convert(&keys_);
+    ptr[2].convert(&versions_);
+    ptr[3].convert(&columns_);
+    ptr[4].convert(&clock_);
+    ptr[5].convert(&index_);
   }
 
  private:
