@@ -56,6 +56,7 @@ def build(bld):
     'keyword_weights.cpp',
     'feature_hasher.cpp',
     'word_splitter.cpp',
+    'char_splitter.cpp',
     ]
   headers = [
       'binary_feature_factory.hpp',
@@ -100,6 +101,7 @@ def build(bld):
       'weight_manager.hpp',
       'without_split.hpp',
       'word_splitter.hpp',
+      'char_splitter.hpp',
   ]
   test_source = [
       'json_converter_test.cpp',
@@ -124,6 +126,7 @@ def build(bld):
       'feature_hasher_test.cpp',
       'except_match_test.cpp',
       'mixable_weight_manager_test.cpp',
+	  'char_splitter_test.cpp',
   ]
 
   # Note: these headers are intentionally not installed.
