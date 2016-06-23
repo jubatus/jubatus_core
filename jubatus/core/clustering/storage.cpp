@@ -96,7 +96,7 @@ void storage::unpack(msgpack::object o) {
 }
 
 void storage::clear() {
-  // TODO(gintenlabo): consider revisions
+  revision_ = 0;
   clear_impl_();
   dispatch(REVISION_CHANGE, get_all());
 }
