@@ -8,10 +8,12 @@ See http://jubat.us/ for details of Jubatus.
 How to install
 -----------
 
-We officially support Ubuntu Server 12.04 LTS (x86_64) and Red Hat Enterprise Linux 6.2 or later (x86_64).
+We officially support Red Hat Enterprise Linux (RHEL) 6.2 or later (64-bit) and Ubuntu Server 12.04 LTS / 14.04 LTS (64-bit).
+On supported systems, you can install all components of Jubatus using binary packages.
 
 If you have already installed Jubatus 0.6.0 or later, you can already use jubatus_core.
 `QuickStart <http://jubat.us/en/quickstart.html>`_ describes how to install Jubatus.
+
 If you do not want to install whole Jubatus, you can install jubatus_core only.
 Before installation, you should install msgpack and oniguruma (oniguruma is optional).
 Then type as following:
