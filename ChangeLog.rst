@@ -1,3 +1,14 @@
+Release 0.3.2 - 2016/06/27
+--------------------------
+
+* Improvements
+    * Implement Okapi BM25 global weighting to fv_converter (#284, #295)
+    * Implement split string feature extractor to fv_converter (#255, #294)
+    * Update README.rst (#297)
+
+* Bug fixes
+    * clustering: fix clear RPC to reset revision number (#164, #296)
+
 Release 0.3.1 - 2016/05/30
 --------------------------
 
