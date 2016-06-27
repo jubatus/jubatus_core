@@ -14,6 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include <iostream>
 #include <cmath>
 #include <utility>
 #include <gtest/gtest.h>
@@ -30,27 +31,54 @@ TEST(weight_manager, trivial) {
   {
     common::sfv_t fv;
     m.add_weight("/address$tokyo@str", 1.5);
-    m.update_weight(fv);
+
+    m.update_weight(fv, true, true);  // |D| = 1
     m.get_weight(fv);
+    ASSERT_EQ(0, fv.size());
+
+    m.update_weight(fv, true, true);  // |D| = 2
+    m.get_weight(fv);
+    ASSERT_EQ(0, fv.size());
 
     fv.push_back(std::make_pair("/title$this@space#bin/bin", 1.0));
-    // df = 1, |D| = 2
     fv.push_back(std::make_pair("/title$this@space#bin/idf", 1.0));
     fv.push_back(std::make_pair("/age@bin", 1.0));
     fv.push_back(std::make_pair("/address$tokyo@str#bin/weight", 1.0));
-    m.update_weight(fv);
+    fv.push_back(std::make_pair("/profile$hello@space#tf/bm25", 5.0));
+    fv.push_back(std::make_pair("/profile$world@space#tf/bm25", 4.0));
+    m.update_weight(fv, true, true);  // |D| = 3
     m.get_weight(fv);
 
-    ASSERT_EQ(4u, fv.size());
+    ASSERT_EQ(6u, fv.size());
+
+    // String features without weighting
     EXPECT_FLOAT_EQ(1.0, fv[0].second);
-    EXPECT_FLOAT_EQ(1.0 * std::log((2.0 + 1) / (1.0 + 1)), fv[1].second);
+
+    // String features weighted by bin-idf
+    EXPECT_FLOAT_EQ(1.0 * std::log((3.0 + 1) / (1.0 + 1)), fv[1].second);
+
+    // Non-string features
     EXPECT_FLOAT_EQ(1.0, fv[2].second);
+
+    // String features weighted by bin-weight
     EXPECT_FLOAT_EQ(1.5, fv[3].second);
+
+    // String features weighted by tf-bm25
+    EXPECT_FLOAT_EQ(
+        std::log((3.0 - 1.0 + 0.5) / (1.0 + 0.5)) *
+        ((/* tf = */ 5.0 * (1.2 + 1)) /
+        (/* tf = */ 5.0 + 1.2 * (1 - 0.75 + 0.75 *
+        (9.0 / 9.0)))), fv[4].second);
+    EXPECT_FLOAT_EQ(
+        std::log((3.0 - 1.0 + 0.5) / (1.0 + 0.5)) *
+        ((/* tf = */ 4.0 * (1.2 + 1)) /
+        (/* tf = */ 4.0 + 1.2 * (1 - 0.75 + 0.75 *
+        (9.0 / 9.0)))), fv[5].second);
   }
 
   versioned_weight_diff w;
   m.get_diff(w);
-  EXPECT_EQ(2u, w.weights_.get_document_count());
+  EXPECT_EQ(3u, w.weights_.get_document_count());
   EXPECT_EQ(1u, w.weights_.get_document_frequency("/title$this@space#bin/idf"));
   EXPECT_EQ(1.5, w.weights_.get_user_weight("/address$tokyo@str"));
 
@@ -58,8 +86,8 @@ TEST(weight_manager, trivial) {
     common::sfv_t fv;
     fv.push_back(std::make_pair("/title$this@space#bin/idf", 1.0));
 
-    // df = 2, |D| = 3
-    w.weights_.update_document_frequency(fv);
+    // df = 2, |D| = 4
+    w.weights_.update_document_frequency(fv, false);
     w.weights_.add_weight("/title$hoge@str", 2.0);
 
     m.put_diff(w);
@@ -67,11 +95,11 @@ TEST(weight_manager, trivial) {
     m.get_diff(w);
     EXPECT_EQ(0u, w.weights_.get_document_count());
 
-    // df = 3, |D| = 4
-    m.update_weight(fv);
+    // df = 3, |D| = 5
+    m.update_weight(fv, true, false);
     m.get_weight(fv);
     EXPECT_EQ(1u, fv.size());
-    EXPECT_FLOAT_EQ(1.0 * std::log((4.0 + 1) / (3.0 + 1)), fv[0].second);
+    EXPECT_FLOAT_EQ(1.0 * std::log((5.0 + 1) / (3.0 + 1)), fv[0].second);
   }
 }
 

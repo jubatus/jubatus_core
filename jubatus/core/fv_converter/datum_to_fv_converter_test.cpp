@@ -39,6 +39,7 @@
 #include "weight_manager.hpp"
 #include "without_split.hpp"
 
+using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
 
 namespace jubatus {
@@ -47,6 +48,37 @@ namespace fv_converter {
 
 TEST(datum_to_fv_converter, trivial) {
   datum_to_fv_converter conv;
+}
+
+// export GTEST_ALSO_RUN_DISABLED_TESTS=1 to run this
+TEST(datum_to_fv_converter, DISABLED_benchmark) {
+  size_t key_count = 100;  // number of keys in Datum
+  size_t bench_count = 1000;  // number of `convert_and_update_weight` calls
+  term_weight_type global_weight = TERM_BINARY;  // type of global_weight
+
+  const std::string& sentence = "あいうえおかきくけこ"
+                                "さしすせそたちつてと"
+                                "なにぬねのはひふへほ"
+                                "ABCD";  // 100 bytes
+
+  shared_ptr<key_matcher> match(new match_all());
+  shared_ptr<word_splitter> s(new character_ngram(3));
+  std::vector<splitter_weight_type> p;
+  p.push_back(splitter_weight_type(FREQ_BINARY, global_weight));
+
+  datum_to_fv_converter conv;
+  conv.register_string_rule("trigram", match, s, p);
+
+  datum datum;
+  for (size_t i = 0; i < key_count; ++i) {
+    datum.string_values_.push_back(std::make_pair(
+        std::string("text") + lexical_cast<std::string>(i), sentence));
+  }
+
+  for (size_t i = 0; i < bench_count; ++i) {
+    std::vector<std::pair<std::string, float> > feature;
+    conv.convert_and_update_weight(datum, feature);
+  }
 }
 
 TEST(datum_to_fv_converter, num_feature) {

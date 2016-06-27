@@ -158,6 +158,8 @@ class datum_to_fv_converter_impl {
   std::vector<num_filter_rule> num_filter_rules_;
   std::vector<string_feature_rule> string_rules_;
   std::vector<num_feature_rule> num_rules_;
+  bool contains_idf_;
+  bool contains_bm25_;
 
   jubatus::util::lang::shared_ptr<mixable_weight_manager> mixable_weights_;
 
@@ -165,7 +167,9 @@ class datum_to_fv_converter_impl {
 
  public:
   datum_to_fv_converter_impl()
-    : mixable_weights_(
+    : contains_idf_(false),
+      contains_bm25_(false),
+      mixable_weights_(
         new mixable_weight_manager(
             jubatus::util::lang::shared_ptr<weight_manager>(
                 new weight_manager))) {
@@ -174,7 +178,11 @@ class datum_to_fv_converter_impl {
   void clear_rules() {
     string_filter_rules_.clear();
     num_filter_rules_.clear();
+
     string_rules_.clear();
+    contains_idf_ = false;
+    contains_bm25_ = false;
+
     num_rules_.clear();
     binary_rules_.clear();
     combination_rules_.clear();
@@ -201,8 +209,10 @@ class datum_to_fv_converter_impl {
       jubatus::util::lang::shared_ptr<key_matcher> matcher,
       jubatus::util::lang::shared_ptr<string_feature> splitter,
       const std::vector<splitter_weight_type>& weights) {
+    contains_idf_ |= contains_term_weight_type(weights, IDF);
+    contains_bm25_ |= contains_term_weight_type(weights, BM25);
     string_rules_.push_back(
-       string_feature_rule(name, matcher, splitter, weights));
+        string_feature_rule(name, matcher, splitter, weights));
   }
 
   void register_num_rule(
@@ -264,7 +274,7 @@ class datum_to_fv_converter_impl {
     jubatus::util::lang::shared_ptr<weight_manager> weights =
         mixable_weights_->get_model();
     if (weights) {
-      weights->update_weight(fv);
+      weights->update_weight(fv, contains_idf_, contains_bm25_);
       weights->get_weight(fv);
     }
 
@@ -378,15 +388,6 @@ class datum_to_fv_converter_impl {
     }
   }
 
-  bool contains_idf(const string_feature_rule& s) const {
-    for (size_t i = 0; i < s.weights_.size(); ++i) {
-      if (s.weights_[i].term_weight_type_ == IDF) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   void convert_strings(
       const string_feature_rule& splitter,
       const datum::sv_t& string_values,
@@ -494,6 +495,8 @@ class datum_to_fv_converter_impl {
         return "bin";
       case IDF:
         return "idf";
+      case BM25:
+        return "bm25";
       case WITH_WEIGHT_FILE:
         return "weight";
       default:
@@ -501,6 +504,17 @@ class datum_to_fv_converter_impl {
           jubatus::core::common::exception::runtime_error(
             "unknown global weight type"));
     }
+  }
+
+  bool contains_term_weight_type(
+      const std::vector<splitter_weight_type>& weights,
+      term_weight_type t) const {
+    for (size_t i = 0; i < weights.size(); ++i) {
+      if (weights[i].term_weight_type_ == t) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void make_string_features(

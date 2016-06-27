@@ -23,6 +23,7 @@
 #include "../common/type.hpp"
 #include "datum_to_fv_converter.hpp"
 #include "jubatus/util/concurrent/lock.h"
+#include "key_name_utils.hpp"
 
 using jubatus::util::concurrent::scoped_lock;
 
@@ -69,41 +70,89 @@ weight_manager::weight_manager()
       master_weights_() {
 }
 
-void weight_manager::update_weight(const common::sfv_t& fv) {
+void weight_manager::update_weight(
+    const common::sfv_t& fv,
+    bool contains_idf,
+    bool contains_bm25) {
   scoped_lock lk(mutex_);
-  diff_weights_.update_document_frequency(fv);
+  if (contains_idf || contains_bm25) {
+    diff_weights_.update_document_frequency(fv, contains_bm25);
+  }
 }
 
 void weight_manager::get_weight(common::sfv_t& fv) const {
   scoped_lock lk(mutex_);
+  counter<std::string> group_lengths;
   for (common::sfv_t::iterator it = fv.begin(); it != fv.end(); ++it) {
-    double global_weight = get_global_weight(it->first);
-    it->second = static_cast<float>(it->second * global_weight);
+    double weight = it->second;
+    const std::string& global_weight_type =
+        get_global_weight_type_from_key(it->first);
+
+    if (global_weight_type.empty()) {
+      // Non-string features.
+    } else if (global_weight_type == "bin") {
+      // No weighting.
+    } else if (global_weight_type == "idf") {
+      // IDF weighting.
+      weight = get_global_weight_idf(it->first, weight);
+    } else if (global_weight_type == "bm25") {
+      // BM25 weighting.
+
+      // Initialize group lengths for the current feature vector, if not yet.
+      if (group_lengths.size() == 0) {
+        for (common::sfv_t::iterator it2 = fv.begin(); it2 != fv.end(); ++it2) {
+          const std::string& k = get_group_key_from_key(it2->first);
+          if (!k.empty()) {
+            group_lengths[k] += it2->second;
+          }
+        }
+      }
+      weight = get_global_weight_bm25(
+          it->first, weight, group_lengths);
+    } else if (global_weight_type == "weight") {
+      weight = get_global_weight_user(it->first, weight);
+    } else {
+      // Unknown weighting; ignored.
+    }
+
+    it->second = static_cast<float>(weight);
   }
   fv.erase(remove_if(fv.begin(), fv.end(), is_zero()), fv.end());
 }
 
-double weight_manager::get_global_weight(const std::string& key) const {
-  size_t p = key.find_last_of('/');
+double weight_manager::get_global_weight_idf(
+    const std::string& key,
+    double sample_weight) const {
+  double doc_count = get_document_count();
+  double doc_freq = get_document_frequency(key);
+  return std::log((doc_count + 1) / (doc_freq + 1)) * sample_weight;
+}
+
+double weight_manager::get_global_weight_bm25(
+    const std::string& key,
+    double sample_weight,
+    const counter<std::string>& group_lengths) const {
+  const std::string& group_key = get_group_key_from_key(key);
+
+  double doc_count = get_document_count();
+  double doc_freq = get_document_frequency(key);
+  double group_length = group_lengths[group_key];
+  double avg_group_length = get_average_group_length(group_key);
+
+  return std::log((doc_count - doc_freq + 0.5) / (doc_freq + 0.5)) *
+      ((sample_weight * (BM25_k1 + 1)) /
+      (sample_weight + BM25_k1 * (1 - BM25_b + BM25_b *
+      (static_cast<double>(group_length) / avg_group_length))));
+}
+
+double weight_manager::get_global_weight_user(
+    const std::string& key,
+    double sample_weight) const {
+  size_t p = key.find_last_of('#');
   if (p == std::string::npos) {
-    return 1.0;
-  }
-  std::string type = key.substr(p + 1);
-  if (type == "bin") {
-    return 1.0;
-  } else if (type == "idf") {
-    double doc_count = get_document_count();
-    double doc_freq = get_document_frequency(key);
-    return std::log((doc_count + 1) / (doc_freq + 1));
-  } else if (type == "weight") {
-    p = key.find_last_of('#');
-    if (p == std::string::npos) {
-      return 0;
-    } else {
-      return get_user_weight(key.substr(0, p));
-    }
+    return 0;
   } else {
-    return 1;
+    return get_user_weight(key.substr(0, p)) * sample_weight;
   }
 }
 

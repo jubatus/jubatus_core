@@ -41,33 +41,33 @@ class versioned_weight_diff_test : public ::testing::Test {
     {
       common::sfv_t fv;
       fv.push_back(make_pair("a", 1));
-      kw1.update_document_frequency(fv);
+      kw1.update_document_frequency(fv, false);
     }
     {
       common::sfv_t fv;
       fv.push_back(make_pair("b", 1));
-      kw1.update_document_frequency(fv);
-      kw1.update_document_frequency(fv);
+      kw1.update_document_frequency(fv, false);
+      kw1.update_document_frequency(fv, false);
     }
     {
       common::sfv_t fv;
       fv.push_back(make_pair("b", 1));
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
     }
     {
       common::sfv_t fv;
       fv.push_back(make_pair("c", 1));
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
-      kw2.update_document_frequency(fv);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
+      kw2.update_document_frequency(fv, false);
     }
   }
   void TearDown() {
@@ -135,7 +135,7 @@ class mixable_weight_manager_test : public ::testing::Test {
       common::sfv_t fv;
       fv.push_back(make_pair("a", 1));
       fv.push_back(make_pair("b", 1));
-      m->update_weight(fv);
+      m->update_weight(fv, true, false);
     }
 
     mw.reset(new mixable_weight_manager(m));
@@ -165,7 +165,7 @@ TEST_F(mixable_weight_manager_test, put_diff) {
     common::sfv_t fv;
     fv.push_back(make_pair("a", 1));
     fv.push_back(make_pair("b", 1));
-    w.update_document_frequency(fv);
+    w.update_document_frequency(fv, false);
   }
 
   versioned_weight_diff appender(w);

@@ -22,6 +22,8 @@
 #include "regexp_splitter.hpp"
 #include "exception.hpp"
 #include "util.hpp"
+#include "char_splitter.hpp"
+
 
 using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
@@ -70,11 +72,17 @@ int get_int_with_default(
   }
 }
 
-shared_ptr<regexp_splitter >create_regexp(
+shared_ptr<regexp_splitter> create_regexp(
     const std::map<std::string, std::string>& args) {
   std::string pattern = get(args, "pattern");
   int group = get_int_with_default(args, "group", 0);
   return shared_ptr<regexp_splitter>(new regexp_splitter(pattern, group));
+}
+
+shared_ptr<char_splitter> create_char_splitter(
+    const std::map<std::string, std::string>& args) {
+  std::string separators = get(args, "separators");
+  return shared_ptr<char_splitter>(new char_splitter(separators));
 }
 
 }  // namespace
@@ -87,6 +95,8 @@ shared_ptr<string_feature> string_feature_factory::create(
     return create_character_ngram(params);
   } else if (name == "regexp") {
     return create_regexp(params);
+  } else if (name == "split") {
+      return create_char_splitter(params);
   } else if (ext_ && (p = ext_(name, params))) {
     return shared_ptr<string_feature>(p);
   } else {

@@ -139,6 +139,22 @@ TEST_P(clustering_test, save_load) {
   clustering_->unpack(unpacked.get());
 }
 
+TEST_P(clustering_test, clear) {
+  const int num = conf_.bucket_size * 10;
+  for (int i = 0; i < num; ++i) {
+    vector<datum> datums;
+    datums.push_back(single_datum("a", 1));
+    clustering_->push(datums);
+  }
+
+  clustering_->clear();
+
+  ASSERT_THROW(
+      clustering_->get_core_members(),
+      core::clustering::not_performed);
+  ASSERT_EQ(0u, clustering_->get_revision());
+}
+
 TEST_P(clustering_test, get_k_center) {
   jubatus::util::math::random::mtrand r(0);
 
