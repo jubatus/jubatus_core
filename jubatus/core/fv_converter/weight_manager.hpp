@@ -152,6 +152,7 @@ class weight_manager : public framework::model {
 
   double get_global_weight_idf(
       const std::string& key,
+      double inflate_idf,
       double sample_weight) const;
 
   double get_global_weight_bm25(

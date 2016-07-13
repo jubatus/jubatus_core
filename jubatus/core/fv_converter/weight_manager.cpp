@@ -94,7 +94,10 @@ void weight_manager::get_weight(common::sfv_t& fv) const {
       // No weighting.
     } else if (global_weight_type == "idf") {
       // IDF weighting.
-      weight = get_global_weight_idf(it->first, weight);
+      weight = get_global_weight_idf(it->first, 0.0, weight);
+    } else if (global_weight_type == "idf1") {
+      // IDF + 1.0 weighting.
+      weight = get_global_weight_idf(it->first, 1.0, weight);
     } else if (global_weight_type == "bm25") {
       // BM25 weighting.
 
@@ -122,10 +125,11 @@ void weight_manager::get_weight(common::sfv_t& fv) const {
 
 double weight_manager::get_global_weight_idf(
     const std::string& key,
+    double inflate_idf,
     double sample_weight) const {
   double doc_count = get_document_count();
   double doc_freq = get_document_frequency(key);
-  return std::log((doc_count + 1) / (doc_freq + 1)) * sample_weight;
+  return (std::log((doc_count + 1) / (doc_freq + 1)) + inflate_idf) * sample_weight;
 }
 
 double weight_manager::get_global_weight_bm25(
