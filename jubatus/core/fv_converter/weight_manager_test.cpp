@@ -46,10 +46,11 @@ TEST(weight_manager, trivial) {
     fv.push_back(std::make_pair("/address$tokyo@str#bin/weight", 1.0));
     fv.push_back(std::make_pair("/profile$hello@space#tf/bm25", 5.0));
     fv.push_back(std::make_pair("/profile$world@space#tf/bm25", 4.0));
+    fv.push_back(std::make_pair("/title$this@space#bin/idf1", 1.0));
     m.update_weight(fv, true, true);  // |D| = 3
     m.get_weight(fv);
 
-    ASSERT_EQ(6u, fv.size());
+    ASSERT_EQ(7u, fv.size());
 
     // String features without weighting
     EXPECT_FLOAT_EQ(1.0, fv[0].second);
@@ -74,6 +75,9 @@ TEST(weight_manager, trivial) {
         ((/* tf = */ 4.0 * (1.2 + 1)) /
         (/* tf = */ 4.0 + 1.2 * (1 - 0.75 + 0.75 *
         (9.0 / 9.0)))), fv[5].second);
+
+    // String features weighted by bin-idf1
+    EXPECT_FLOAT_EQ(1.0 * (std::log((3.0 + 1) / (1.0 + 1)) + 1.0), fv[6].second);
   }
 
   versioned_weight_diff w;
