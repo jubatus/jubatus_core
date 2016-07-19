@@ -20,23 +20,43 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <iostream>
 #include "word_splitter.hpp"
 
 namespace jubatus {
 namespace core {
 namespace fv_converter {
+char * subStr(const std::string& cStr, int iStart, int iLength);
+int cntByte(unsigned char cChar);
+size_t find_first_not_of(const std::string& target, std::vector<std::string> separators, size_t pos);
+
+size_t find_first_of(const std::string& target, std::vector<std::string> separators, size_t pos);
 
 class char_splitter : public word_splitter {
  public:
   explicit char_splitter(const std::string& separator)
-  : separator_(separator) {}
+  : separator_(separator) {
+    int i=0,iCnt=0;
+    while (separator[i] != '\0') {
+        int cnt = cntByte(separator[i]);
+        char* str = subStr(separator,iCnt , 1);
+        separators_.push_back(str);
+
+        iCnt++;
+        i+= cnt;
+    }
+
+  }
 
   void split(
       const std::string& string,
       std::vector<std::pair<size_t, size_t> >& ret_boundaries) const;
 
- private:
-  const std::string separator_;
+private:
+
+    const std::string separator_;
+
+    std::vector<std::string> separators_;
 };
 
 }  // namespace fv_converter
