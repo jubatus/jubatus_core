@@ -122,6 +122,88 @@ TEST_F(char_splitter_test, with_abc) {
     }
 }
 
+
+TEST_F(char_splitter_test, with_multibyte) {
+std::string separators = "：m";
+char_splitter splitter = char_splitter(separators);
+
+    {
+    std::vector<std::pair<size_t, size_t> > bs;
+    splitter.split("zzzabxx：ccyyy", bs);
+    int exp[] = {0, 7, 10, 5, -1};
+    ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("年齢：ゼロ", bs);
+        int exp[] = {0, 6, 9, 6, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+    std::vector<std::pair<size_t, size_t> > bs;
+    splitter.split("日本語：English", bs);
+    int exp[] = {0, 9, 12, 7, -1};
+    ASSERT_EQ(make_pairs(exp), bs);
+    }
+}
+
+TEST_F(char_splitter_test, with_multibyte_multiseparators) {
+    std::string separators = "、。";
+    char_splitter splitter = char_splitter(separators);
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("日本語文章です。こんにちは、世界。", bs);
+        int exp[] = {0, 21, 24, 15,42,6, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("全半角混じりの文章です。123ＡＢＣ", bs);
+        int exp[] = {0, 33, 36, 12, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+}
+
+TEST_F(char_splitter_test, test_substr) {
+    ASSERT_EQ("ab" , (std::string)jubatus::core::fv_converter::subStr("abcdef" , 0 , 2));
+}
+
+TEST_F(char_splitter_test, test_find_first_not) {
+    std::string separators = "、。";
+    char_splitter splitter = char_splitter(separators);
+
+    std::vector<std::string> vec_separators;
+    vec_separators.push_back("、");
+    vec_separators.push_back("。");
+    size_t pos = jubatus::core::fv_converter::find_first_not_of("。あいうえお、",vec_separators,0);
+    ASSERT_EQ(3 , pos);
+
+    pos = jubatus::core::fv_converter::find_first_not_of("。、",vec_separators,0);
+    ASSERT_EQ(std::string::npos, pos);
+}
+
+TEST_F(char_splitter_test, test_find_first) {
+    std::string separators = "、。";
+    char_splitter splitter = char_splitter(separators);
+
+    std::vector<std::string> vec_separators;
+    vec_separators.push_back("、");
+    vec_separators.push_back("。");
+    size_t pos = jubatus::core::fv_converter::find_first_of("あ。いうえお、",vec_separators,0);
+    ASSERT_EQ(3 , pos);
+
+    pos = jubatus::core::fv_converter::find_first_of("ab。いうえお、",vec_separators,0);
+    ASSERT_EQ(2 , pos);
+
+    pos = jubatus::core::fv_converter::find_first_of("あいおうえお",vec_separators,0);
+    ASSERT_EQ(std::string::npos , pos);
+
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus
