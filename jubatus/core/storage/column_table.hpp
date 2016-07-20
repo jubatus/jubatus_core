@@ -355,6 +355,10 @@ class column_table {
 
   bool delete_row(const std::string& target) {
     jubatus::util::concurrent::scoped_wlock lk(table_lock_);
+    return delete_row_nolock(target);
+  }
+
+  bool delete_row_nolock(const std::string& target) {
     index_table::const_iterator it = index_.find(target);
     if (it == index_.end()) {
       return false;
@@ -365,6 +369,10 @@ class column_table {
 
   bool delete_row(uint64_t index) {
     jubatus::util::concurrent::scoped_wlock lk(table_lock_);
+    return delete_row(index);
+  }
+
+  bool delete_row_nolock(uint64_t index) {
     if (size() <= index) {
       return false;
     }
