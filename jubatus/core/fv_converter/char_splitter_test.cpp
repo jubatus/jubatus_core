@@ -124,14 +124,14 @@ TEST_F(char_splitter_test, with_abc) {
 
 
 TEST_F(char_splitter_test, with_multibyte) {
-std::string separators = "：m";
-char_splitter splitter = char_splitter(separators);
+    std::string separators = "：m";
+    char_splitter splitter = char_splitter(separators);
 
     {
-    std::vector<std::pair<size_t, size_t> > bs;
-    splitter.split("zzzabxx：ccyyy", bs);
-    int exp[] = {0, 7, 10, 5, -1};
-    ASSERT_EQ(make_pairs(exp), bs);
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("zzzabxx：ccyyy", bs);
+        int exp[] = {0, 7, 10, 5, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
     }
 
     {
@@ -142,10 +142,10 @@ char_splitter splitter = char_splitter(separators);
     }
 
     {
-    std::vector<std::pair<size_t, size_t> > bs;
-    splitter.split("日本語：English", bs);
-    int exp[] = {0, 9, 12, 7, -1};
-    ASSERT_EQ(make_pairs(exp), bs);
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("日本語：English", bs);
+        int exp[] = {0, 9, 12, 7, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
     }
 }
 
