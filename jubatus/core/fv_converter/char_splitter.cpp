@@ -31,12 +31,12 @@ void char_splitter::split(
 
   size_t last = 0;
   while (true) {
-    size_t begin = string.find_first_not_of(separator_, last);
+    size_t begin = find_first_not_of(string,separators_, last);
     if (begin == std::string::npos) {
       break;
     }
 
-    size_t end = string.find_first_of(separator_, begin);
+    size_t end = find_first_of(string,separators_, begin);
     if (end == std::string::npos) {
       size_t len = string.size() - begin;
       bounds.push_back(std::make_pair(begin, len));
@@ -50,6 +50,113 @@ void char_splitter::split(
 
   bounds.swap(ret_boundaries);
 }
+
+int cntByte(unsigned char cChar)
+{
+  int iByte;
+
+  if ((cChar >= 0x00) && (cChar <= 0x7f)) {
+    iByte = 1;
+  } else if ((cChar >= 0xc2) && (cChar <= 0xdf)) {
+    iByte = 2;
+  } else if ((cChar >= 0xe0) && (cChar <= 0xef)) {
+    iByte = 3;
+  } else if ((cChar >= 0xf0) && (cChar <= 0xf7)) {
+    iByte = 4;
+  } else if ((cChar >= 0xf8) && (cChar <= 0xfb)) {
+    iByte = 5;
+  } else if ((cChar >= 0xfc) && (cChar <= 0xfd)) {
+    iByte = 6;
+  } else {
+    iByte = 0;
+  }
+
+  return iByte;
+}
+
+char* subStr(const std::string& cStr, int iStart, int iLength)
+{
+  static char cRes[1024];
+  char* pRes = cRes;
+  int i = 0, iPos = 0;
+  int iByte;
+
+  while (cStr[i] != '\0') {
+    iByte = cntByte(cStr[i]);
+    if (iStart <= iPos && iPos < iStart + iLength) {
+      memcpy(pRes, &cStr[i], iByte);
+      pRes += iByte;
+    }
+    i += iByte;
+    iPos++;
+  }
+  *pRes = '\0';
+
+  return cRes;
+}
+
+size_t  find_first_not_of(const std::string& target , std::vector<std::string> separators, size_t pos) {
+  int i=pos,iPos = 0;
+  int iByte;
+  bool isSameString;
+
+  while(target[i] != '\0') {
+    iByte = cntByte(target[i]);
+    char cRes[1024];
+    char* pRes = cRes;
+
+    memcpy(pRes, &target[i], iByte);
+    pRes += iByte;
+    *pRes = '\0';
+
+    isSameString = false;
+    for (std::string separator : separators) {
+      if(strcmp(separator.c_str() , cRes) == 0){
+        isSameString = true;
+        break;
+      }
+    }
+    if(!isSameString) {
+      return i;
+    }
+
+    i += iByte;
+    iPos++;
+  }
+  return std::string::npos;
+}
+
+size_t  find_first_of(const std::string& target , std::vector<std::string> separators, size_t pos) {
+  int i=pos,iPos = 0;
+  int iByte;
+  bool isSameString;
+
+  while(target[i] != '\0') {
+    iByte = cntByte(target[i]);
+    char cRes[1024];
+    char* pRes = cRes;
+
+    memcpy(pRes, &target[i], iByte);
+    pRes += iByte;
+    *pRes = '\0';
+
+    isSameString = false;
+    for (std::string separator : separators) {
+      if(strcmp(separator.c_str() , cRes) == 0){
+        isSameString = true;
+        break;
+      }
+    }
+    if(isSameString) {
+      return i;
+    }
+
+    i += iByte;
+    iPos++;
+  }
+  return std::string::npos;
+}
+
 
 }  // namespace fv_converter
 }  // namespace core
