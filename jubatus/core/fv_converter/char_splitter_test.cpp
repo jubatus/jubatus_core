@@ -156,7 +156,7 @@ TEST_F(char_splitter_test, with_multibyte_multiseparators) {
     {
         std::vector<std::pair<size_t, size_t> > bs;
         splitter.split("日本語文章です。こんにちは、世界。", bs);
-        int exp[] = {0, 21, 24, 15,42,6, -1};
+        int exp[] = {0, 21, 24, 15, 42, 6, -1};
         ASSERT_EQ(make_pairs(exp), bs);
     }
 
