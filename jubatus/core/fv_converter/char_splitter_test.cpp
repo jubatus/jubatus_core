@@ -168,42 +168,6 @@ TEST_F(char_splitter_test, with_multibyte_multiseparators) {
     }
 }
 
-TEST_F(char_splitter_test, test_substr) {
-    ASSERT_EQ("ab" , (std::string)jubatus::core::fv_converter::subStr("abcdef" , 0 , 2));
-}
-
-TEST_F(char_splitter_test, test_find_first_not) {
-    std::string separators = "、。";
-    char_splitter splitter = char_splitter(separators);
-
-    std::vector<std::string> vec_separators;
-    vec_separators.push_back("、");
-    vec_separators.push_back("。");
-    size_t pos = jubatus::core::fv_converter::find_first_not_of("。あいうえお、",vec_separators,0);
-    ASSERT_EQ(3 , pos);
-
-    pos = jubatus::core::fv_converter::find_first_not_of("。、",vec_separators,0);
-    ASSERT_EQ(std::string::npos, pos);
-}
-
-TEST_F(char_splitter_test, test_find_first) {
-    std::string separators = "、。";
-    char_splitter splitter = char_splitter(separators);
-
-    std::vector<std::string> vec_separators;
-    vec_separators.push_back("、");
-    vec_separators.push_back("。");
-    size_t pos = jubatus::core::fv_converter::find_first_of("あ。いうえお、",vec_separators,0);
-    ASSERT_EQ(3 , pos);
-
-    pos = jubatus::core::fv_converter::find_first_of("ab。いうえお、",vec_separators,0);
-    ASSERT_EQ(2 , pos);
-
-    pos = jubatus::core::fv_converter::find_first_of("あいおうえお",vec_separators,0);
-    ASSERT_EQ(std::string::npos , pos);
-
-}
-
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus
