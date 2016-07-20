@@ -129,7 +129,8 @@ double weight_manager::get_global_weight_idf(
     double sample_weight) const {
   double doc_count = get_document_count();
   double doc_freq = get_document_frequency(key);
-  return (std::log((doc_count + 1) / (doc_freq + 1)) + inflate_idf) * sample_weight;
+  return (std::log((doc_count + 1) / (doc_freq + 1)) + inflate_idf)
+         * sample_weight;
 }
 
 double weight_manager::get_global_weight_bm25(

@@ -77,7 +77,8 @@ TEST(weight_manager, trivial) {
         (9.0 / 9.0)))), fv[5].second);
 
     // String features weighted by bin-idf1
-    EXPECT_FLOAT_EQ(1.0 * (std::log((3.0 + 1) / (1.0 + 1)) + 1.0), fv[6].second);
+    EXPECT_FLOAT_EQ(
+        1.0 * (std::log((3.0 + 1) / (1.0 + 1)) + 1.0), fv[6].second);
   }
 
   versioned_weight_diff w;
