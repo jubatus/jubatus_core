@@ -189,14 +189,16 @@ void euclid_lsh::neighbor_row_from_hash(
       &ranking_hamming_bit_vectors_worker, &bv, &bv_col, &norm_col,
       denom, norm, ret_num,
       jubatus::util::lang::_1, jubatus::util::lang::_2);
-  ranking_hamming_bit_vectors_internal(f, table->size(), threads_, heap);
+  ranking_hamming_bit_vectors_internal(
+      f, table->size_nolock(), threads_, heap);
 
   vector<pair<float, size_t> > sorted;
   heap.get_sorted(sorted);
 
   ids.clear();
   for (size_t i = 0; i < sorted.size(); ++i) {
-    ids.push_back(make_pair(table->get_key(sorted[i].second), sorted[i].first));
+    ids.push_back(make_pair(
+      table->get_key_nolock(sorted[i].second), sorted[i].first));
   }
 }
 
