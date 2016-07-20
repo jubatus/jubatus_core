@@ -75,13 +75,21 @@ void nearest_neighbor_classifier::train(
   }
   if (unlearner_) {
     util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
+
+    // acquire the lock outside of touch() function
+    shared_ptr<storage::column_table> table =
+        nearest_neighbor_engine_->get_table();
+    util::concurrent::scoped_wlock lk(table->get_mutex());
+
     if (!unlearner_->touch(id)) {
       throw JUBATUS_EXCEPTION(common::exception::runtime_error(
           "cannot add new ID as number of sticky IDs reached "
           "the maximum size of unlearner: " + id));
     }
   }
-  nearest_neighbor_engine_->set_row(id, fv);
+
+  // unlearner is not called in set_row
+  nearest_neighbor_engine_->set_row(id, fv);  // lock acquired inside
   set_label(label);
   labels_.increment(label);
 }
@@ -114,8 +122,10 @@ std::string nearest_neighbor_classifier::classify(
 void nearest_neighbor_classifier::classify_with_scores(
     const common::sfv_t& fv, classify_result& scores) const {
   std::vector<std::pair<std::string, float> > ids;
+
+  // lock acquired inside
   nearest_neighbor_engine_->neighbor_row(fv, ids, k_);
-  labels_t labels = labels_.get_labels();
+  const labels_t labels = labels_.get_labels();
 
   std::map<std::string, float> m;
   for (labels_t::const_iterator iter = labels.begin();
@@ -144,9 +154,11 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
   shared_ptr<storage::column_table> table =
       nearest_neighbor_engine_->get_table();
 
+  util::concurrent::scoped_wlock lk(table->get_mutex());
+
   std::vector<std::string> ids_to_be_deleted;
-  for (size_t i = 0, n = table->size(); i < n; ++i) {
-    std::string id = table->get_key(i);
+  for (size_t i = 0, n = table->size_nolock(); i < n; ++i) {
+    std::string id = table->get_key_nolock(i);
     std::string l = get_label_from_id(id);
     if (l == label) {
       ids_to_be_deleted.push_back(id);
@@ -155,7 +167,7 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
 
   for (size_t i = 0, n = ids_to_be_deleted.size(); i < n; ++i) {
     const std::string& id = ids_to_be_deleted[i];
-    table->delete_row(id);
+    table->delete_row_nolock(id);
     if (unlearner_) {
       unlearner_->remove(id);
     }
@@ -165,7 +177,7 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
 }
 
 void nearest_neighbor_classifier::clear() {
-  nearest_neighbor_engine_->clear();
+  nearest_neighbor_engine_->clear();  // lock acquired inside
   labels_.clear();
   if (unlearner_) {
     unlearner_->clear();
@@ -210,7 +222,10 @@ std::vector<framework::mixable*> nearest_neighbor_classifier::get_mixables() {
 }
 
 void nearest_neighbor_classifier::unlearn_id(const std::string& id) {
-  nearest_neighbor_engine_->get_table()->delete_row(id);
+  // This method must be called via touch() function.
+  // touch() must be done with holding lock
+  // so this function must not get lock
+  nearest_neighbor_engine_->get_table()->delete_row_nolock(id);
 }
 
 void nearest_neighbor_classifier::decrement_label_counter(
@@ -223,7 +238,7 @@ void nearest_neighbor_classifier::regenerate_label_counter() {
 
   // Copy keyset of labels_ to new labels.
   // labels_ contains labels that registered by set_label.
-  labels_t labels_on_model = labels_.get_labels();
+  const labels_t labels_on_model = labels_.get_labels();
   for (labels_t::const_iterator iter = labels_on_model.begin();
        iter != labels_on_model.end(); ++iter) {
     new_labels[iter->first] = 0;
@@ -235,8 +250,8 @@ void nearest_neighbor_classifier::regenerate_label_counter() {
         nearest_neighbor_engine_->get_const_table();
     util::concurrent::scoped_rlock table_lk(table->get_mutex());
 
-    for (size_t i = 0, n = table->size(); i < n; ++i) {
-      std::string id = table->get_key(i);
+    for (size_t i = 0, n = table->size_nolock(); i < n; ++i) {
+      std::string id = table->get_key_nolock(i);
       std::string label = get_label_from_id(id);
       new_labels[label] += 1;
     }
