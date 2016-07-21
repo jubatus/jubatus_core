@@ -45,8 +45,7 @@ void char_splitter::split(
     size_t begin_bytes = ustring_to_string(target.substr(0, begin)).size();
     size_t end = target.find_first_of(separator_, begin);
     if (end == std::string::npos) {
-      size_t len = string.size() - begin;
-      size_t len_bytes = ustring_to_string(target.substr(begin, len)).size();
+      size_t len_bytes = ustring_to_string(target.substr(begin)).size();
       bounds.push_back(std::make_pair(begin_bytes, len_bytes));
       break;
     } else {
