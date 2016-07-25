@@ -210,6 +210,7 @@ class datum_to_fv_converter_impl {
       jubatus::util::lang::shared_ptr<string_feature> splitter,
       const std::vector<splitter_weight_type>& weights) {
     contains_idf_ |= contains_term_weight_type(weights, IDF);
+    contains_idf_ |= contains_term_weight_type(weights, IDF_ONE);
     contains_bm25_ |= contains_term_weight_type(weights, BM25);
     string_rules_.push_back(
         string_feature_rule(name, matcher, splitter, weights));
@@ -495,6 +496,8 @@ class datum_to_fv_converter_impl {
         return "bin";
       case IDF:
         return "idf";
+      case IDF_ONE:
+        return "idf1";
       case BM25:
         return "bm25";
       case WITH_WEIGHT_FILE:

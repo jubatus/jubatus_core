@@ -122,6 +122,52 @@ TEST_F(char_splitter_test, with_abc) {
     }
 }
 
+
+TEST_F(char_splitter_test, with_multibyte) {
+    std::string separators = "：m";
+    char_splitter splitter = char_splitter(separators);
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("zzzabxx：ccyyy", bs);
+        int exp[] = {0, 7, 10, 5, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("年齢：ゼロ", bs);
+        int exp[] = {0, 6, 9, 6, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("日本語：English", bs);
+        int exp[] = {0, 9, 12, 7, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+}
+
+TEST_F(char_splitter_test, with_multibyte_multiseparators) {
+    std::string separators = "、。";
+    char_splitter splitter = char_splitter(separators);
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("日本語文章です。こんにちは、世界。", bs);
+        int exp[] = {0, 21, 24, 15, 42, 6, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+
+    {
+        std::vector<std::pair<size_t, size_t> > bs;
+        splitter.split("全半角混じりの文章です。123ＡＢＣ", bs);
+        int exp[] = {0, 33, 36, 12, -1};
+        ASSERT_EQ(make_pairs(exp), bs);
+    }
+}
+
 }  // namespace fv_converter
 }  // namespace core
 }  // namespace jubatus

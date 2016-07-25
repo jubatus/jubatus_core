@@ -20,6 +20,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "jubatus/util/data/string/ustring.h"
+
 #include "word_splitter.hpp"
 
 namespace jubatus {
@@ -29,14 +32,14 @@ namespace fv_converter {
 class char_splitter : public word_splitter {
  public:
   explicit char_splitter(const std::string& separator)
-  : separator_(separator) {}
+  : separator_(jubatus::util::data::string::string_to_ustring(separator)) {}
 
   void split(
       const std::string& string,
       std::vector<std::pair<size_t, size_t> >& ret_boundaries) const;
 
  private:
-  const std::string separator_;
+  const jubatus::util::data::string::ustring separator_;
 };
 
 }  // namespace fv_converter
