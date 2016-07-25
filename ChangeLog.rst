@@ -1,3 +1,13 @@
+Release 0.3.3 - 2016/07/25
+--------------------------
+
+* Improvements
+    * Support UTF-8 strings in char_splitter (#299, #304)
+    * Implement IDF-1 global weighting to fv_converter (#209, #300)
+
+* Bug fixes
+    * nearest_neighbor: fix deadlock issue (#302)
+
 Release 0.3.2 - 2016/06/27
 --------------------------
 
