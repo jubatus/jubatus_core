@@ -22,6 +22,7 @@
 #include <vector>
 #include <msgpack.hpp>
 #include "jubatus/util/data/unordered_map.h"
+#include "jubatus/util/data/unordered_set.h"
 #include "jubatus/util/lang/function.h"
 #include "jubatus/util/lang/bind.h"
 #include "storage_type.hpp"
@@ -74,6 +75,11 @@ class inverted_index_storage {
       std::vector<std::pair<std::string, float> >& scores,
       size_t ret_num) const;
 
+  void calc_euclid_scores_ignore_orthogonal(
+      const common::sfv_t& sfv,
+      std::vector<std::pair<std::string, float> >& scores,
+      size_t ret_num) const;
+
   void get_diff(diff_type& diff_str) const;
   bool put_diff(const diff_type& mixed_diff);
   void mix(const diff_type& lhs_str, diff_type& rhs_str) const;
@@ -104,6 +110,12 @@ class inverted_index_storage {
       const std::string& row,
       float val,
       std::vector<float>& scores) const;
+
+  void add_inp_scores(
+      const std::string& row,
+      float val,
+      std::vector<float>& scores,
+      util::data::unordered_set<int>& score_index_set) const;
 
   tbl_t inv_;
   tbl_t inv_diff_;
