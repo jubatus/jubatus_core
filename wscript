@@ -72,6 +72,13 @@ def configure(conf):
     must be recompiled with this option.
     """
     # conf.define('_GLIBCXX_DEBUG', 1)
+
+    """
+    The following flag enables sanity check to detect double acquision of a read lock of pthread_rwlock
+    in the same thread.  More precisely, it raises assertion if the thread that already owns read lock
+    tries to take a read/write lock.
+    """
+    conf.define('JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK', 1)
   else:
     # Disable standard assertions
     conf.define('NDEBUG', 1)

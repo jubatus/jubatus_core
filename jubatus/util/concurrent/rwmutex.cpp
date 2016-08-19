@@ -33,6 +33,12 @@
 
 #include <pthread.h>
 
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+#include <assert.h>
+#include <set>
+#endif
+
+#include "thread.h"
 #include "internal.h"
 #include "../system/time_util.h"
 
@@ -59,6 +65,10 @@ public:
 private:
   pthread_rwlock_t lk;
   bool valid;
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  std::set<thread::tid_t> readers;
+  pthread_rwlock_t readers_lk;
+#endif
 };
 
 rw_mutex::impl::impl()
@@ -73,6 +83,9 @@ rw_mutex::impl::impl()
 #endif
   int res=pthread_rwlock_init(&lk,&attr);
   if (res==0) valid=true;
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  assert(pthread_rwlock_init(&readers_lk,NULL)==0);
+#endif
 }
 
 rw_mutex::impl::~impl()
@@ -82,25 +95,48 @@ rw_mutex::impl::~impl()
     // it may fail by EBUSY...
     // DO NOT DO THAT
     (void)pthread_rwlock_destroy(&lk);
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+    (void)pthread_rwlock_destroy(&readers_lk);
+#endif
   }
 }
 
 bool rw_mutex::impl::read_lock()
 {
   if (!valid) return false;
-  return pthread_rwlock_rdlock(&lk)==0;
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  assert(pthread_rwlock_wrlock(&readers_lk)==0);
+  assert(readers.count(thread::id())==0);
+#endif
+  bool result = pthread_rwlock_rdlock(&lk)==0;
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  if (result) readers.insert(thread::id());
+  assert(pthread_rwlock_unlock(&readers_lk)==0);
+#endif
+  return result;
 }
 
 bool rw_mutex::impl::read_lock(double sec)
 {
 #ifdef __linux__
   if (!valid) return false;
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  assert(pthread_rwlock_wrlock(&readers_lk)==0);
+  assert(readers.count(thread::id())==0);
+#endif
 
-  if (sec<1e-9)
-    return pthread_rwlock_tryrdlock(&lk);
-
-  timespec end=to_timespec(get_clock_time()+sec);
-  return pthread_rwlock_timedrdlock(&lk, &end)==0;
+  bool result;
+  if (sec<1e-9) {
+    result = pthread_rwlock_tryrdlock(&lk);
+  } else {
+    timespec end=to_timespec(get_clock_time()+sec);
+    result = pthread_rwlock_timedrdlock(&lk, &end)==0;
+  }
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  if (result) readers.insert(thread::id());
+  assert(pthread_rwlock_unlock(&readers_lk)==0);
+#endif
+  return result;
 #else
   return false;
 #endif
@@ -109,6 +145,11 @@ bool rw_mutex::impl::read_lock(double sec)
 bool rw_mutex::impl::write_lock()
 {
   if (!valid) return false;
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  assert(pthread_rwlock_rdlock(&readers_lk)==0);
+  assert(readers.count(thread::id())==0);
+  assert(pthread_rwlock_unlock(&readers_lk)==0);
+#endif
   return pthread_rwlock_wrlock(&lk)==0;
 }
 
@@ -116,6 +157,11 @@ bool rw_mutex::impl::write_lock(double sec)
 {
 #if defined(__linux__) || defined(__sparcv8) || defined(__sparcv9)
   if (!valid) return false;
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  assert(pthread_rwlock_rdlock(&readers_lk)==0);
+  assert(readers.count(thread::id())==0);
+  assert(pthread_rwlock_unlock(&readers_lk)==0);
+#endif
 
   if (sec<1e-9)
     return pthread_rwlock_trywrlock(&lk)==0;
@@ -131,7 +177,15 @@ bool rw_mutex::impl::write_lock(double sec)
 bool rw_mutex::impl::unlock()
 {
   if (!valid) return false;
-  return pthread_rwlock_unlock(&lk)==0;
+  bool result = pthread_rwlock_unlock(&lk)==0;
+#ifdef JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK
+  if (result) {
+    assert(pthread_rwlock_wrlock(&readers_lk)==0);
+    readers.erase(thread::id());
+    assert(pthread_rwlock_unlock(&readers_lk)==0);
+  }
+#endif
+  return result;
 }
 
 rw_mutex::rw_mutex()
