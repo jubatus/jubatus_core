@@ -45,4 +45,5 @@ def build(bld):
       'minhash_test.cpp',
       'lsh_test.cpp',
       'recommender_factory_test.cpp',
+      'inverted_index_euclid_test.cpp'
       ])
