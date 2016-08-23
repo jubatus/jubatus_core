@@ -436,8 +436,8 @@ void inverted_index_storage::calc_euclid_scores_ignore_orthogonal(
 
   float squared_query_norm = calc_squared_l2norm(query);
 
-  for (unordered_set<int>::const_iterator it = i_scores_index_set.begin(); 
-       it != i_scores_index_set.end(); 
+  for (unordered_set<int>::const_iterator it = i_scores_index_set.begin();
+       it != i_scores_index_set.end();
        ++it) {
     float squared_norm = calc_column_squared_l2norm(*(it));
 
@@ -460,8 +460,8 @@ void inverted_index_storage::calc_euclid_scores_ignore_orthogonal(
 
   for (size_t i = 0; i < sorted_scores.size() && i < ret_num; ++i) {
     scores.push_back(
-		     make_pair(column2id_.get_key(sorted_scores[i].second),
-			       sorted_scores[i].first));
+        make_pair(column2id_.get_key(sorted_scores[i].second),
+        sorted_scores[i].first));
   }
 }
 
@@ -538,7 +538,7 @@ void inverted_index_storage::add_inp_scores(
   if (it_diff != inv_diff_.end()) {
     const row_t& row_v = it_diff->second;
     for (row_t::const_iterator row_it = row_v.begin(); row_it != row_v.end();
-	 ++row_it) {
+         ++row_it) {
       scores[row_it->first] += row_it->second * val;
       // records the row index when dot product is calculated
       scores_index_set.insert(row_it->first);
@@ -550,18 +550,18 @@ void inverted_index_storage::add_inp_scores(
     const row_t& row_v = it->second;
     if (it_diff == inv_diff_.end()) {
       for (row_t::const_iterator row_it = row_v.begin(); row_it != row_v.end();
-	   ++row_it) {
+           ++row_it) {
         scores[row_it->first] += row_it->second * val;
-	// records the row index when dot product is calculated
-	scores_index_set.insert(row_it->first);
+        // records the row index when dot product is calculated
+        scores_index_set.insert(row_it->first);
       }
     } else {
       const row_t& row_diff_v = it_diff->second;
       for (row_t::const_iterator row_it = row_v.begin(); row_it != row_v.end();
-	   ++row_it) {
+           ++row_it) {
         if (row_diff_v.find(row_it->first) == row_diff_v.end()) {
           scores[row_it->first] += row_it->second * val;
-	  scores_index_set.insert(row_it->first);
+          scores_index_set.insert(row_it->first);
         }
       }
     }
