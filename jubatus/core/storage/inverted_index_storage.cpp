@@ -439,12 +439,6 @@ void inverted_index_storage::calc_euclid_scores_ignore_orthogonal(
   for (unordered_set<int>::const_iterator it = i_scores_index_set.begin(); 
        it != i_scores_index_set.end(); 
        ++it) {
-    float score = i_scores[*(it)];
-    if (score == 0.f) {
-      // ignore vectors if dot product is zero
-      continue;
-    }
-
     float squared_norm = calc_column_squared_l2norm(*(it));
 
     if (squared_norm == 0.f) {
