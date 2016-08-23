@@ -319,6 +319,9 @@ inline exception_thrower_ptr get_current_exception() {
 }  // namespace exception
 
 class config_exception : public exception::jubaexception<config_exception> {
+  const char* what() const throw () {
+    return "invalid configuration";
+  }
 };
 
 class storage_not_set : public exception::jubaexception<storage_not_set> {
