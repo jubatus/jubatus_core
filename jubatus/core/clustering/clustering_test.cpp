@@ -66,7 +66,7 @@ TEST_P(clustering_test, config_validation) {
   if (param["result"] == "true") {
     ASSERT_NO_THROW(clustering k(n, m, c));
   } else {
-    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+    ASSERT_THROW(clustering k(n, m, c), common::unsupported_method);
     return;
   }
 
@@ -78,21 +78,36 @@ TEST_P(clustering_test, config_validation) {
   c.k = 2;
   ASSERT_NO_THROW(clustering k(n, m, c));
 
-  // 2 <= bucket_size
+  // simple storage's condition 1 <= bucket_size
+  // other storages's condition 1 <=
+  //       bucket_size && compressed_bucket_size < bucket_size
   c.compressed_bucket_size = 2;
   c.bicriteria_base_size = 1;
-  c.bucket_size = 1;
+  c.bucket_size = 0;
   ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
-  // this case not will be passed;
+  c.bucket_size = 1;
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   // (1 <= bicriteria_base_size < compressed_bucket_size < bucket_size)
-  // c.bucket_size = 2;
-  // ASSERT_NO_THROW(clustering k(n, m, c));
+  c.bucket_size = 2;
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.bucket_size = 3;
   ASSERT_NO_THROW(clustering k(n, m, c));
 
   // 2 <= bucket_length
   c.bucket_length = 1;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.bucket_length = 2;
   ASSERT_NO_THROW(clustering k(n, m, c));
   c.bucket_length = 3;
@@ -102,11 +117,24 @@ TEST_P(clustering_test, config_validation) {
   c.bucket_size = 4;
   c.compressed_bucket_size = 3;
   c.bicriteria_base_size = 0;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.bicriteria_base_size = 3;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+    if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.bicriteria_base_size = 4;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  c.bicriteria_base_size = 3;
+    if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.bicriteria_base_size = 1;
   ASSERT_NO_THROW(clustering k(n, m, c));
   c.bicriteria_base_size = 2;
@@ -114,17 +142,33 @@ TEST_P(clustering_test, config_validation) {
 
   // compressed_bucket_size < bucket_size
   c.compressed_bucket_size = 4;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.compressed_bucket_size = 5;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.compressed_bucket_size = 3;
   ASSERT_NO_THROW(clustering k(n, m, c));
 
   // 0.0 <= forgetting_factor
   c.forgetting_factor = std::numeric_limits<double>::quiet_NaN();
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.forgetting_factor = -1.0;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.forgetting_factor = 0.0;
   ASSERT_NO_THROW(clustering k(n, m, c));
   c.forgetting_factor = 1.0;
@@ -132,9 +176,17 @@ TEST_P(clustering_test, config_validation) {
 
   // 0.0 <= forgetting_threshold <= 1.0
   c.forgetting_threshold = std::numeric_limits<double>::quiet_NaN();
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.forgetting_threshold = -1.0;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
   c.forgetting_threshold = 0.0;
   ASSERT_NO_THROW(clustering k(n, m, c));
   c.forgetting_threshold = 0.5;
@@ -142,7 +194,11 @@ TEST_P(clustering_test, config_validation) {
   c.forgetting_threshold = 1.0;
   ASSERT_NO_THROW(clustering k(n, m, c));
   c.forgetting_threshold = 2.0;
-  ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  if (c.compressor_method == "simple") {
+    ASSERT_NO_THROW(clustering k(n, m, c));
+  } else {
+    ASSERT_THROW(clustering k(n, m, c), common::invalid_parameter);
+  }
 }
 
 
