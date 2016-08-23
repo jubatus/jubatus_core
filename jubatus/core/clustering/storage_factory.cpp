@@ -1,4 +1,4 @@
-// Jubatus: Online machine learning framework for distributed environment
+83;40100;0c// Jubatus: Online machine learning framework for distributed environment
 // Copyright (C) 2013 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
@@ -29,27 +29,43 @@ namespace clustering {
 
 jubatus::util::lang::shared_ptr<storage> storage_factory::create(
     const std::string& name,
+    const std::string& method,
     const clustering_config& config) {
   typedef jubatus::util::lang::shared_ptr<storage> ptr;
   ptr ret;
-  if (config.compressor_method == "compressive_kmeans") {
-    compressive_storage *s = new compressive_storage(name, config);
-    s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
-                          new compressor::kmeans_compressor(config)));
-    ret.reset(s);
+  
+  if (method == "kmeans") {
+    if (config.compressor_method == "simple") {
+      simple_storage *s = new simple_storage(name, config);
+      ret.reset(s);
+    } else if (config.compressor_method == "compressive_kmeans") {
+      compressive_storage *s = new compressive_storage(name, config);
+      s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
+          new compressor::kmeans_compressor(config)));
+      ret.reset(s);
+    } 
+    else {
+      throw JUBATUS_EXCEPTION(
+          common::unsupported_method(config.compressor_method));
+    }
+  } else if (method == "gmm") {
+    if (config.compressor_method == "simple") {
+        simple_storage *s = new simple_storage(name, config);
+        ret.reset(s);
 #ifdef JUBATUS_USE_EIGEN
-  } else if (config.compressor_method == "compressive_gmm") {
-    compressive_storage *s = new compressive_storage(name, config);
-    s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
-                          new compressor::gmm_compressor(config)));
-    ret.reset(s);
+    } else if (config.compressor_method == "compressive_gmm") {
+      compressive_storage *s = new compressive_storage(name, config);
+      s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
+          new compressor::gmm_compressor(config)));
+      ret.reset(s);
 #endif
-  } else if (config.compressor_method == "simple") {
-    simple_storage *s = new simple_storage(name, config);
-    ret.reset(s);
+    } else {
+      throw JUBATUS_EXCEPTION(
+          common::unsupported_method(config.compressor_method));
+    }
   } else {
     throw JUBATUS_EXCEPTION(
-        common::unsupported_method(config.compressor_method));
+          common::unsupported_method(method));
   }
   return ret;
 }
