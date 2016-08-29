@@ -35,10 +35,33 @@ namespace core {
 namespace common {
 namespace exception {
 
-typedef error_info<struct error_at_file_, std::string> error_at_file;
-typedef error_info<struct error_at_func_, std::string> error_at_func;
-typedef error_info<struct error_at_line_, int> error_at_line;
-typedef error_info<struct error_errno_, int> error_errno;
+DEFINE_ERROR_TAG(error_at_file, "Source", std::string)
+DEFINE_ERROR_TAG(error_at_func, "Function", std::string)
+DEFINE_ERROR_TAG(error_at_line, "Line", int)
+DEFINE_ERROR_TAG(error_errno, "Error", int)
+DEFINE_ERROR_TAG(error_file_name, "File", std::string)
+DEFINE_ERROR_TAG(error_api_func, "API", std::string)
+DEFINE_ERROR_TAG(error_message, "Message", std::string)
+DEFINE_ERROR_TAG(error_splitter, "Splitter", void)
+
+template<>
+class error_info<error_tag_error_splitter, void> : public error_info_base {
+ public:
+  bool splitter() const {
+    return true;
+  }
+
+  std::string tag() const {
+    return "Splitter";
+  }
+
+  std::string as_string() const {
+    // USE splitter or tag_typeid_name
+    return "-splitter-";
+  }
+};
+
+
 inline std::string to_string(const error_errno& info) {
   char buf[1024];
 #if defined(__linux__)
@@ -56,12 +79,6 @@ inline std::string to_string(const error_errno& info) {
     jubatus::util::lang::lexical_cast<std::string>(info.value()) + ")";
   return msg;
 }
-
-typedef error_info<struct error_file_name_, std::string> error_file_name;
-typedef error_info<struct error_api_func_, std::string> error_api_func;
-typedef error_info<struct error_message_, std::string> error_message;
-
-typedef error_info<struct error_splitter_, void> error_splitter;
 
 struct exception_thrower_binder_type {
 };
@@ -302,6 +319,9 @@ inline exception_thrower_ptr get_current_exception() {
 }  // namespace exception
 
 class config_exception : public exception::jubaexception<config_exception> {
+  const char* what() const throw () {
+    return "invalid configuration";
+  }
 };
 
 class storage_not_set : public exception::jubaexception<storage_not_set> {

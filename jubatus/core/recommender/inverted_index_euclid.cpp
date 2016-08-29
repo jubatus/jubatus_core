@@ -22,19 +22,47 @@
 #include <utility>
 #include <vector>
 
+#include "jubatus/util/lang/shared_ptr.h"
+#include "jubatus/core/unlearner/unlearner_factory.hpp"
+#include "../common/exception.hpp"
+#include "../common/jsonconfig.hpp"
+
 namespace jubatus {
 namespace core {
 namespace recommender {
 
-inverted_index_euclid::inverted_index_euclid() {
+inverted_index_euclid::inverted_index_euclid() : ignore_orthogonal_(false) {
 }
 
 inverted_index_euclid::~inverted_index_euclid() {
 }
 
-inverted_index_euclid::inverted_index_euclid(
-      jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner)
-  : inverted_index(unlearner) {
+inverted_index_euclid::inverted_index_euclid(const config& config) {
+  if (config.ignore_orthogonal) {
+    ignore_orthogonal_ = *config.ignore_orthogonal;
+  } else {
+    ignore_orthogonal_ = false;
+  }
+
+  if (config.unlearner) {
+    if (!config.unlearner_parameter) {
+      throw JUBATUS_EXCEPTION(
+        common::config_exception() << common::exception::error_message(
+            "unlearner is set but unlearner_parameter is not found"));
+        }
+    unlearner_ = core::unlearner::create_unlearner(*config.unlearner,
+        core::common::jsonconfig::config(*config.unlearner_parameter));
+    mixable_storage_->get_model()->set_unlearner(unlearner_);
+    unlearner_->set_callback(
+     bind(&inverted_index::remove_row, this, _1));
+
+  } else {
+    if (config.unlearner_parameter) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+          "unlearner_parameter is set but unlearner is not found"));
+    }
+  }
 }
 
 void inverted_index_euclid::similar_row(
@@ -45,7 +73,12 @@ void inverted_index_euclid::similar_row(
   if (ret_num == 0) {
     return;
   }
-  mixable_storage_->get_model()->calc_euclid_scores(query, ids, ret_num);
+  if (ignore_orthogonal_) {
+    mixable_storage_->get_model()->
+        calc_euclid_scores_ignore_orthogonal(query, ids, ret_num);
+  } else {
+    mixable_storage_->get_model()->calc_euclid_scores(query, ids, ret_num);
+  }
 }
 
 /**

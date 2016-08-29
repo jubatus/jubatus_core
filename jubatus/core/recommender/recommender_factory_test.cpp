@@ -82,6 +82,24 @@ std::vector<recommender_parameter> generate_parameters() {
     }
   }
 
+  {  // inverted index euclid
+    json js(new json_object);
+    ret.push_back(
+        recommender_parameter(
+          "inverted_index_euclid",
+          common::jsonconfig::config(js)));
+    {  // unlearn
+      json js_unlearn(js.clone());
+      js_unlearn["unlearner"] = to_json(std::string("lru"));
+      js_unlearn["unlearner_parameter"] = new json_object;
+      js_unlearn["unlearner_parameter"]["max_size"] = to_json(1);
+      ret.push_back(
+          recommender_parameter(
+              "inverted_index_euclid",
+              common::jsonconfig::config(js_unlearn)));
+    }
+  }
+
   {  // minhash / lsh
     json js(new json_object);
     json js_unlearn(js.clone());

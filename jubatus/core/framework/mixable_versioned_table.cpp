@@ -96,6 +96,10 @@ bool mixable_versioned_table::put_diff(const framework::diff_object& ptr) {
         core::common::exception::runtime_error("bad diff_object"));
   }
 
+  if (diff_obj->objs.empty()) {
+    return true;
+  }
+
   msgpack::object obj;
   obj.type = msgpack::type::ARRAY;
   obj.via.array.ptr = &diff_obj->objs[0];

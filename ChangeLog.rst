@@ -1,3 +1,15 @@
+Release 0.3.4 - 2016/08/29
+--------------------------
+
+* Improvements
+    * recommender: add ``ignore_orthogonal`` option to inverted_index_euclid (#305, #309)
+    * Exception error messages are now displayed in clean format (#313)
+    * Remove Glibc C++ debug flag in debug mode (#306)
+
+* Bug fixes
+    * classifier: fix deadlock in nearest_neighbor-based classifier (#303)
+    * Fix out-of-bound index access while MIXing column table (#307, #310)
+
 Release 0.3.3 - 2016/07/25
 --------------------------
 

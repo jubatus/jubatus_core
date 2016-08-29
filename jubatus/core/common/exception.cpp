@@ -31,11 +31,10 @@ error_info_list_t jubatus_exception::error_info() const {
 std::string jubatus_exception::diagnostic_information(bool display_what) const {
   std::ostringstream tmp;
 
-  tmp << "Dynamic exception type: ";
   tmp << jubatus::util::lang::demangle(typeid(*this).name());
 
   if (display_what && strcmp(what(), "")) {
-    tmp << "::what: " << what();
+    tmp << ": " << what();
   }
 
   tmp << '\n';
@@ -47,7 +46,7 @@ std::string jubatus_exception::diagnostic_information(bool display_what) const {
       frame++;
       continue;
     }
-    tmp << "    #" << frame << " [" << (*it)->tag_typeid_name() << "] = "
+    tmp << "    (#" << frame << ") " << (*it)->tag() << ": "
         << (*it)->as_string() << '\n';
   }
   return tmp.str();

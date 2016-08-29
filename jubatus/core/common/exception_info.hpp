@@ -29,13 +29,20 @@ namespace core {
 namespace common {
 namespace exception {
 
+#define DEFINE_ERROR_TAG(tagName, tagText, argType)             \
+  struct error_tag_##tagName {                                  \
+    const std::string name() { return tagText; }                \
+  };                                                            \
+  typedef jubatus::core::common::exception::error_info          \
+      <error_tag_##tagName, argType > tagName;
+
 class error_info_base {
  public:
   virtual bool splitter() const {
     return false;
   }
 
-  virtual std::string tag_typeid_name() const = 0;
+  virtual std::string tag() const = 0;
   virtual std::string as_string() const = 0;
 
   virtual ~error_info_base() throw () {
@@ -50,24 +57,6 @@ inline std::string to_string(const error_info<Tag, V>& info) {
   return jubatus::util::lang::lexical_cast<std::string, V>(info.value());
 }
 
-template<>
-class error_info<struct error_splitter_, void> : public error_info_base {
- public:
-  bool splitter() const {
-    return true;
-  }
-
-  std::string tag_typeid_name() const {
-    return jubatus::util::lang::demangle(
-        typeid(struct error_splitter_*).name());
-  }
-
-  std::string as_string() const {
-    // USE splitter or tag_typeid_name
-    return "-splitter-";
-  }
-};
-
 template<class Tag, class V>
 class error_info : public error_info_base {
  public:
@@ -75,7 +64,7 @@ class error_info : public error_info_base {
   explicit error_info(value_type v);
   ~error_info() throw ();
 
-  std::string tag_typeid_name() const;
+  std::string tag() const;
   std::string as_string() const;
 
   value_type value() const {
@@ -96,8 +85,8 @@ inline error_info<Tag, V>::~error_info() throw () {
 }
 
 template<class Tag, class V>
-inline std::string error_info<Tag, V>::tag_typeid_name() const {
-  return jubatus::util::lang::demangle(typeid(Tag*).name());
+inline std::string error_info<Tag, V>::tag() const {
+  return Tag().name();
 }
 
 template<class Tag, class V>

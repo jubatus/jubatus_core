@@ -36,7 +36,9 @@ namespace jubatus {
 namespace core {
 namespace common {
 namespace exception {
-typedef error_info<struct test_my_tag_, int> test_my_tag;
+
+DEFINE_ERROR_TAG(test_my_tag, "TestTag", int)
+
 inline string to_string(const test_my_tag& info) {
   return jubatus::util::lang::lexical_cast<string>(info.value() * 2);
 }

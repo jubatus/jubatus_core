@@ -21,6 +21,9 @@
 #include <utility>
 #include <vector>
 #include "inverted_index.hpp"
+#include "jubatus/util/data/optional.h"
+#include "jubatus/util/data/serialization.h"
+#include "../common/jsonconfig.hpp"
 
 namespace jubatus {
 namespace core {
@@ -28,10 +31,24 @@ namespace recommender {
 
 class inverted_index_euclid : public inverted_index {
  public:
+  struct config {
+    jubatus::util::data::optional<bool> ignore_orthogonal;
+    jubatus::util::data::optional<std::string> unlearner;
+    jubatus::util::data::optional<core::common::jsonconfig::config>
+        unlearner_parameter;
+
+    template<typename Ar>
+    void serialize(Ar& ar) {
+      ar
+        & JUBA_MEMBER(ignore_orthogonal)
+        & JUBA_MEMBER(unlearner)
+        & JUBA_MEMBER(unlearner_parameter);
+    }
+  };
+
   inverted_index_euclid();
   ~inverted_index_euclid();
-  explicit inverted_index_euclid(
-      jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner);
+  explicit inverted_index_euclid(const config& config);
 
   void similar_row(
       const common::sfv_t& query,
@@ -43,6 +60,9 @@ class inverted_index_euclid : public inverted_index {
       size_t ret_num) const;
 
   std::string type() const;
+
+ private:
+  bool ignore_orthogonal_;
 };
 
 }  // namespace recommender
