@@ -115,6 +115,12 @@ float inverted_index_storage::get_from_tbl(
   }
 }
 
+/**
+ * Remove the record specified by row and column.
+ * If you remove the entire column, you need to first remove all records that
+ * belongs to the column via ``remove`` method, then use ``mark_column_removed``
+ * method to notify that the column was removed.
+ */
 void inverted_index_storage::remove(
     const std::string& row,
     const std::string& column) {
@@ -147,6 +153,25 @@ void inverted_index_storage::remove(
         }
       }
     }
+  }
+}
+
+/**
+ * This method notifies the storage that all records that belongs to the column
+ * was removed.  The caller is responsible to remove them before calling this
+ * method.
+ */
+void inverted_index_storage::mark_column_removed(const std::string& column) {
+  uint64_t column_id = column2id_.get_id_const(column);
+
+  if (column_id == common::key_manager::NOTFOUND) {
+    return;
+  }
+
+  if (column2norm_.count(column_id) == 0) {
+    column2norm_diff_.erase(column_id);
+  } else {
+    column2norm_diff_[column_id] = 0;
   }
 }
 

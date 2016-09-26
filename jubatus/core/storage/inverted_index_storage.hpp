@@ -61,7 +61,7 @@ class inverted_index_storage {
   void set(const std::string& row, const std::string& column, float val);
   float get(const std::string& row, const std::string& column) const;
   void remove(const std::string& row, const std::string& column);
-  void remove_row(const std::string& row);
+  void mark_column_removed(const std::string& column);
   void clear();
   void get_all_column_ids(std::vector<std::string>& ids) const;
 

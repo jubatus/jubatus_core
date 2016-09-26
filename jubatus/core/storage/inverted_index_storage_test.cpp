@@ -153,6 +153,7 @@ TEST(inverted_index_storage, column_operations) {
   EXPECT_EQ(3u, ids.size());
 
   s1.remove("c1", "r1");
+  s1.mark_column_removed("r1");
   s1.get_all_column_ids(ids);
   EXPECT_EQ(2u, ids.size());
 
