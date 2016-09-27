@@ -37,7 +37,6 @@ namespace core {
 namespace driver {
 
 regression::regression(
-    shared_ptr<storage::storage_base> model_storage,
     shared_ptr<core::regression::regression_base> regression_method,
     shared_ptr<fv_converter::datum_to_fv_converter> converter)
     : converter_(converter)
