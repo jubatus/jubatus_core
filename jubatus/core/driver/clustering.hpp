@@ -46,15 +46,18 @@ class clustering : public driver_base {
           converter);
   virtual ~clustering();
 
-  void push(const std::vector<fv_converter::datum>& points);
+  void push(const std::vector<core::clustering::indexed_point>& points);
 
   fv_converter::datum get_nearest_center(
       const fv_converter::datum& point) const;
   core::clustering::cluster_unit get_nearest_members(
     const fv_converter::datum& point) const;
+  core::clustering::index_cluster_unit get_nearest_members_light(
+      const fv_converter::datum& point) const;
 
   std::vector<fv_converter::datum> get_k_center() const;
   core::clustering::cluster_set get_core_members() const;
+  core::clustering::index_cluster_set get_core_members_light() const;
 
   size_t get_revision() const;
   void pack(framework::packer& pk) const;
@@ -71,13 +74,21 @@ class clustering : public driver_base {
   fv_converter::datum to_datum(const common::sfv_t& src) const;
   core::clustering::weighted_point to_weighted_point(
       const fv_converter::datum& src);
+  core::clustering::weighted_point to_weighted_indexed_point(
+      const core::clustering::indexed_point& src);
   std::pair<double, fv_converter::datum>
   to_weighted_datum(const core::clustering::weighted_point& src) const;
+  std::pair<double, std::string>
+  to_weighted_index(const core::clustering::weighted_point& src) const;
   std::vector<fv_converter::datum> to_datum_vector(
       const std::vector<common::sfv_t>& src) const;
   std::vector<core::clustering::weighted_point> to_weighted_point_vector(
       const std::vector<fv_converter::datum>& src);
+  std::vector<core::clustering::weighted_point> to_weighted_indexed_point_vector(
+      const std::vector<core::clustering::indexed_point>& src);
   core::clustering::cluster_unit to_weighted_datum_vector(
+      const std::vector<core::clustering::weighted_point>& src) const;
+  core::clustering::index_cluster_unit to_weighted_index_vector(
       const std::vector<core::clustering::weighted_point>& src) const;
 
   jubatus::util::lang::shared_ptr<fv_converter::datum_to_fv_converter>

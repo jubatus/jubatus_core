@@ -53,8 +53,8 @@ clustering::clustering(
 clustering::~clustering() {
 }
 
-void clustering::push(const vector<datum>& points) {
-  clustering_->push(to_weighted_point_vector(points));
+void clustering::push(const vector<core::clustering::indexed_point>& points) {
+  clustering_->push(to_weighted_indexed_point_vector(points));
 }
 
 datum clustering::get_nearest_center(
@@ -66,6 +66,12 @@ datum clustering::get_nearest_center(
 core::clustering::cluster_unit
     clustering::get_nearest_members(const datum& point) const {
   return to_weighted_datum_vector(
+      clustering_->get_nearest_members(to_sfv_const(point)));
+}
+
+core::clustering::index_cluster_unit
+clustering::get_nearest_members_light(const datum& point) const {
+  return to_weighted_index_vector(
       clustering_->get_nearest_members(to_sfv_const(point)));
 }
 
@@ -91,6 +97,24 @@ clustering::get_core_members() const {
   return ret;
 }
 
+core::clustering::index_cluster_set
+clustering::get_core_members_light() const {
+  vector<vector<core::clustering::weighted_point> > src =
+      clustering_->get_core_members();
+
+  core::clustering::index_cluster_set ret;
+  ret.reserve(src.size());
+  std::transform(
+      src.begin(),
+      src.end(),
+      std::back_inserter(ret),
+      jubatus::util::lang::bind(
+          &clustering::to_weighted_index_vector,
+          this, jubatus::util::lang::_1));
+
+  return ret;
+}
+
 size_t clustering::get_revision() const {
   return clustering_->get_revision();
 }
@@ -108,6 +132,7 @@ common::sfv_t clustering::to_sfv(const datum& dat) {
   return ret;
 }
 
+
 common::sfv_t clustering::to_sfv_const(const datum& dat) const {
   common::sfv_t ret;
   converter_->convert(dat, ret);
@@ -121,6 +146,17 @@ datum clustering::to_datum(const common::sfv_t& src) const {
   return ret;
 }
 
+
+pair<double, datum> clustering::to_weighted_datum(
+  const core::clustering::weighted_point& src) const {
+  return std::make_pair(src.weight, src.original);
+}
+
+pair<double, std::string> clustering::to_weighted_index(
+    const core::clustering::weighted_point& src) const {
+  return std::make_pair(src.weight, src.id);
+}
+
 core::clustering::weighted_point clustering::to_weighted_point(
     const datum& src) {
   core::clustering::weighted_point ret;
@@ -130,9 +166,14 @@ core::clustering::weighted_point clustering::to_weighted_point(
   return ret;
 }
 
-pair<double, datum> clustering::to_weighted_datum(
-  const core::clustering::weighted_point& src) const {
-  return std::make_pair(src.weight, src.original);
+core::clustering::weighted_point clustering::to_weighted_indexed_point(
+    const core::clustering::indexed_point& src) {
+  core::clustering::weighted_point ret;
+  ret.id = src.id;
+  ret.data = to_sfv(src.point);
+  ret.weight = 1;
+  ret.original = src.point;
+  return ret;
 }
 
 vector<datum> clustering::to_datum_vector(
@@ -150,8 +191,8 @@ vector<datum> clustering::to_datum_vector(
 }
 
 vector<core::clustering::weighted_point>
-  clustering::to_weighted_point_vector(
-  const vector<datum>& src) {
+clustering::to_weighted_point_vector(
+    const vector<datum>& src) {
   vector<core::clustering::weighted_point> ret;
   ret.reserve(src.size());
   std::transform(
@@ -164,8 +205,23 @@ vector<core::clustering::weighted_point>
   return ret;
 }
 
+vector<core::clustering::weighted_point>
+  clustering::to_weighted_indexed_point_vector(
+      const vector<core::clustering::indexed_point>& src) {
+  vector<core::clustering::weighted_point> ret;
+  ret.reserve(src.size());
+  std::transform(
+      src.begin(),
+      src.end(),
+      std::back_inserter(ret),
+      jubatus::util::lang::bind(
+          &clustering::to_weighted_indexed_point,
+          this, jubatus::util::lang::_1));
+  return ret;
+}
+
 core::clustering::cluster_unit
-  clustering::to_weighted_datum_vector(
+clustering::to_weighted_datum_vector(
     const vector<core::clustering::weighted_point>& src) const {
   core::clustering::cluster_unit ret;
   ret.reserve(src.size());
@@ -176,6 +232,22 @@ core::clustering::cluster_unit
       jubatus::util::lang::bind(
           &clustering::to_weighted_datum,
           this, jubatus::util::lang::_1));
+  return ret;
+}
+
+core::clustering::index_cluster_unit
+clustering::to_weighted_index_vector(
+    const vector<core::clustering::weighted_point>& src) const {
+  core::clustering::index_cluster_unit ret;
+  ret.reserve(src.size());
+  std::transform(
+      src.begin(),
+      src.end(),
+      std::back_inserter(ret),
+      jubatus::util::lang::bind(
+          &clustering::to_weighted_index,
+          this, jubatus::util::lang::_1));
+
   return ret;
 }
 
