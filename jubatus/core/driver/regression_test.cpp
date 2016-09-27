@@ -56,7 +56,6 @@ class regression_test : public ::testing::Test {
         new core::regression::passive_aggressive(config, storage));
     regression_.reset(
       new core::driver::regression(
-        storage,
         method,
         make_fv_converter()));
   }

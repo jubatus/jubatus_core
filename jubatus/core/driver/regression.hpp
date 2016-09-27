@@ -41,8 +41,6 @@ class regression : public driver_base {
  public:
   typedef core::regression::regression_base regression_base;
   regression(
-      jubatus::util::lang::shared_ptr<storage::storage_base>
-          model_storage,
       jubatus::util::lang::shared_ptr<regression_base>
           regression_method,
       jubatus::util::lang::shared_ptr<fv_converter::datum_to_fv_converter>
