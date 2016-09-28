@@ -14,7 +14,6 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include <map>
 #include <vector>
 #include <string>
 #include <gtest/gtest.h>
@@ -29,45 +28,21 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-namespace {
-
-class make_case_type {
- public:
-  make_case_type& operator()(const string& key, const string& value) {
-    cases_.insert(make_pair(key, value));
-    return *this;
-  }
-
-  std::map<string, string> operator()() {
-    std::map<string, string> ret;
-    ret.swap(cases_);
-    return ret;
-  }
-
- private:
-  std::map<string, string> cases_;
-} make_case;
-
-}  // namespace
-
 class storage_test
-    : public testing::TestWithParam<std::map<std::string, std::string> > {
+    : public testing::TestWithParam<std::string> {
  protected:
   typedef jubatus::util::lang::shared_ptr<storage> storage_ptr;
   std::string name;
-  std::string method;
   clustering_config conf;
 
   void SetUp() {
     name = "test";
-    std::map<std::string, std::string> param = GetParam();
-    method = param["method"];
-    conf.compressor_method = param["compressor_method"];
+    conf.compressor_method = GetParam();
   }
 };
 
 TEST_P(storage_test, pack_unpack) {
-  storage_ptr s = storage_factory::create(name, method, conf);
+  storage_ptr s = storage_factory::create(name, conf);
   ASSERT_TRUE(s != NULL);
   for (size_t i = 0; i < 10; ++i) {
     s->add(get_point(3));
@@ -83,7 +58,7 @@ TEST_P(storage_test, pack_unpack) {
   }
 
   // unpack
-  storage_ptr s2 = storage_factory::create(name, method, conf);
+  storage_ptr s2 = storage_factory::create(name, conf);
   ASSERT_TRUE(s2 != NULL);
   {
     msgpack::unpacked unpacked;
@@ -105,27 +80,12 @@ TEST_P(storage_test, pack_unpack) {
   }
 }
 
-const std::map<std::string, std::string> test_cases[] = {
+INSTANTIATE_TEST_CASE_P(storage_test_instance, storage_test,
+    testing::Values("compressive_kmeans",
 #ifdef JUBATUS_USE_EIGEN
-  make_case("method", "gmm")
-    ("compressor_method", "compressive_gmm")
-    ("result", "true")(),
-  make_case("method", "gmm")
-    ("compressor_method", "simple")
-    ("result", "true")(),
+      "compressive_gmm",
 #endif
-  make_case("method", "kmeans")
-    ("compressor_method", "compressive_kmeans")
-    ("result", "true")(),
-  make_case("method", "kmeans")
-    ("compressor_method", "simple")
-    ("result", "true")()
-};
-
-INSTANTIATE_TEST_CASE_P(
-    storage_test_instance,
-    storage_test,
-    ::testing::ValuesIn(test_cases));
+      "simple"));
 
 }  // namespace clustering
 }  // namespace core
