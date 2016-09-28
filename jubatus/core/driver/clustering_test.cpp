@@ -541,10 +541,10 @@ TEST_P(clustering_test, empty_mix) {
 vector<pair<string, string> > parameter_list() {
   vector<pair<string, string> > ret;
   ret.push_back(make_pair("simple", "kmeans"));
-  ret.push_back(make_pair("compressive_kmeans", "kmeans"));
+  ret.push_back(make_pair("compressive", "kmeans"));
 #ifdef JUBATUS_USE_EIGEN
   ret.push_back(make_pair("simple", "gmm"));
-  ret.push_back(make_pair("compressive_gmm", "gmm"));
+  ret.push_back(make_pair("compressive", "gmm"));
 #endif
   return ret;
 }

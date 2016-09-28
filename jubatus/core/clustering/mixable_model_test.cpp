@@ -31,7 +31,7 @@ class mixable_model_test : public ::testing::Test {
   mixable_model_test() : name_("name") {
     clustering_config cfg;
     cfg.k = 3;
-    cfg.compressor_method = "compressive_kmeans";
+    cfg.compressor_method = "compressive";
     cfg.bucket_size = 10000;
     cfg.compressed_bucket_size = 400;
 
