@@ -29,42 +29,27 @@ namespace clustering {
 
 jubatus::util::lang::shared_ptr<storage> storage_factory::create(
     const std::string& name,
-    const std::string& method,
     const clustering_config& config) {
   typedef jubatus::util::lang::shared_ptr<storage> ptr;
   ptr ret;
-
-  if (method == "kmeans") {
-    if (config.compressor_method == "simple") {
-      simple_storage *s = new simple_storage(name, config);
-      ret.reset(s);
-    } else if (config.compressor_method == "compressive_kmeans") {
-      compressive_storage *s = new compressive_storage(name, config);
-      s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
-          new compressor::kmeans_compressor(config)));
-      ret.reset(s);
-    } else {
-      throw JUBATUS_EXCEPTION(
-          common::unsupported_method(config.compressor_method));
-    }
-  } else if (method == "gmm") {
-    if (config.compressor_method == "simple") {
-        simple_storage *s = new simple_storage(name, config);
-        ret.reset(s);
+  if (config.compressor_method == "compressive_kmeans") {
+    compressive_storage *s = new compressive_storage(name, config);
+    s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
+                          new compressor::kmeans_compressor(config)));
+    ret.reset(s);
 #ifdef JUBATUS_USE_EIGEN
-    } else if (config.compressor_method == "compressive_gmm") {
-      compressive_storage *s = new compressive_storage(name, config);
-      s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
-          new compressor::gmm_compressor(config)));
-      ret.reset(s);
+  } else if (config.compressor_method == "compressive_gmm") {
+    compressive_storage *s = new compressive_storage(name, config);
+    s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
+                          new compressor::gmm_compressor(config)));
+    ret.reset(s);
 #endif
-    } else {
-      throw JUBATUS_EXCEPTION(
-          common::unsupported_method(config.compressor_method));
-    }
+  } else if (config.compressor_method == "simple") {
+    simple_storage *s = new simple_storage(name, config);
+    ret.reset(s);
   } else {
-      throw JUBATUS_EXCEPTION(
-          common::unsupported_method(method));
+    throw JUBATUS_EXCEPTION(
+        common::unsupported_method(config.compressor_method));
   }
   return ret;
 }

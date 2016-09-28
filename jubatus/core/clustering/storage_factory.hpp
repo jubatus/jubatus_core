@@ -30,7 +30,6 @@ class storage_factory {
  public:
   static jubatus::util::lang::shared_ptr<storage> create(
       const std::string& name,
-      const std::string& method,
       const clustering_config& config);
 };
 
