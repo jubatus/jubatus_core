@@ -43,55 +43,39 @@ clustering::clustering(
       method_(method),
       storage_() {
 
-  // TODO(@rimms): move to factory
-  if (method =="gmm" &&
-      cfg.compressor_method == "compressive_kmeans") {
-    throw JUBATUS_EXCEPTION(common::invalid_parameter(
-        "method = gmm, compressor_method != compressive_kmeans"));
-  }
-
-  // TODO(@rimms): move to factory
-  if (method =="kmeans" &&
-      cfg.compressor_method == "compressive_gmm") {
-    throw JUBATUS_EXCEPTION(common::invalid_parameter(
-        "method = kmeans, compressor_method != compressive_gmm"));
-  }
-
   if (!(1 <= cfg.k)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("1 <= k"));
   }
 
-  if (!(2 <= cfg.bucket_size)) {
+  if (!(1 <= cfg.bucket_size)) {
     throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("2 <= bucket_size"));
+        common::invalid_parameter("1 <= bucket_size"));
   }
 
-  if (!(2 <= cfg.bucket_length)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("2 <= bucket_length"));
-  }
-
-  if (!(1 <= cfg.bicriteria_base_size &&
-      cfg.bicriteria_base_size < cfg.compressed_bucket_size)) {
-    throw JUBATUS_EXCEPTION(common::invalid_parameter(
-        "1 <= bicriteria_base_size < compressed_bucket_size"));
-  }
-
-  if (!(cfg.compressed_bucket_size < cfg.bucket_size)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("compressed_bucket_size < bucket_size"));
-  }
-
-  if (!(0.0 <= cfg.forgetting_factor)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("0.0 <= forgetting_factor"));
-  }
-
-  if (!(0.0 <= cfg.forgetting_threshold &&
-      cfg.forgetting_threshold <= 1.0)) {
-    throw JUBATUS_EXCEPTION(common::invalid_parameter(
-        "0.0 <= forgetting_threshold <= 1.0"));
+  if (cfg.compressor_method != "simple") {
+    if (!(2 <= cfg.bucket_length)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("2 <= bucket_length"));
+    }
+    if (!(1 <= cfg.bicriteria_base_size &&
+          cfg.bicriteria_base_size < cfg.compressed_bucket_size)) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+          "1 <= bicriteria_base_size < compressed_bucket_size"));
+    }
+    if (!(cfg.compressed_bucket_size < cfg.bucket_size)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("compressed_bucket_size < bucket_size"));
+    }
+    if (!(0.0 <= cfg.forgetting_factor)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("0.0 <= forgetting_factor"));
+    }
+    if (!(0.0 <= cfg.forgetting_threshold &&
+          cfg.forgetting_threshold <= 1.0)) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+          "0.0 <= forgetting_threshold <= 1.0"));
+    }
   }
 
   init();
@@ -101,9 +85,9 @@ clustering::~clustering() {
 }
 
 void clustering::init() {
-  set_storage(storage_factory::create(name_, config_));
   set_clustering_method(
       clustering_method_factory::create(method_, config_));
+  set_storage(storage_factory::create(name_, method_, config_));
 }
 
 void clustering::set_storage(shared_ptr<storage> storage) {
