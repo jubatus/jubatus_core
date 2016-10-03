@@ -19,6 +19,7 @@
 #include <string>
 #include "../common/exception.hpp"
 #include "kmeans_clustering_method.hpp"
+#include "dbscan_clustering_method.hpp"
 #ifdef JUBATUS_USE_EIGEN
 #include "gmm_clustering_method.hpp"
 #endif
@@ -37,6 +38,9 @@ shared_ptr<clustering_method> clustering_method_factory::create(
   if (method == "kmeans") {
     return shared_ptr<clustering_method>(
         new kmeans_clustering_method(config.k, config.seed));
+  } else if (method == "dbscan") {
+    return shared_ptr<clustering_method>(
+        new dbscan_clustering_method(config.eps, config.min_core_point));
 #ifdef JUBATUS_USE_EIGEN
   } else if (method == "gmm") {
     return shared_ptr<clustering_method>(

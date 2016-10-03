@@ -78,6 +78,7 @@ TEST_P(clustering_test, config_validation) {
   c.k = 2;
   ASSERT_NO_THROW(clustering k(n, m, c));
 
+
   // simple storage's condition 1 <= bucket_size
   // other storages's condition 1 <=
   //       bucket_size && compressed_bucket_size < bucket_size
@@ -201,7 +202,51 @@ TEST_P(clustering_test, config_validation) {
   }
 }
 
+class clustering_test_nocenter
+    : public ::testing::TestWithParam<map<string, string> > {
 
+ protected:
+  string result_;
+  string name_;
+  string method_;
+  clustering_config conf_;
+
+  void SetUp() {
+    name_ = "clustering";
+    map<string, string> param = GetParam();
+    method_ = param["method"];
+    conf_.compressor_method = param["compressor_method"];
+    result_ = param["result"];
+  }
+};
+
+TEST_P(clustering_test_nocenter, config_validation_nocenter) {
+  if (method_ == "dbscan") {
+    conf_.eps= 1.0;
+    conf_.min_core_point = 1;
+
+    if (result_ == "true") {
+      ASSERT_NO_THROW(clustering k(name_, method_, conf_));
+      // 0.0 < eps
+      conf_.eps = 0.0;
+      ASSERT_THROW(clustering k(name_, method_, conf_),
+                   common::invalid_parameter);
+      conf_.eps = 1.0;
+      ASSERT_NO_THROW(clustering k(name_, method_, conf_));
+
+      // 1 <= min_core_point
+      conf_.min_core_point = 0;
+      ASSERT_THROW(clustering k(name_, method_, conf_),
+                   common::invalid_parameter);
+      conf_.min_core_point = 1;
+      ASSERT_NO_THROW(clustering k(name_, method_, conf_));
+    } else {
+      ASSERT_THROW(clustering k(name_, method_, conf_),
+                   common::unsupported_method);
+      return;
+    }
+  }
+}
 
 const map<string, string> test_cases[] = {
 #ifdef JUBATUS_USE_EIGEN
@@ -223,13 +268,27 @@ const map<string, string> test_cases[] = {
     ("result", "false")(),
   make_case("method", "kmeans")
     ("compressor_method", "simple")
-    ("result", "true")()
+    ("result", "true")(),
+};
+
+const map<string, string> test_cases_nocenter[] = {
+  make_case("method", "dbscan")
+  ("compressor_method", "simple")
+  ("result", "true")(),
+  make_case("method", "dbscan")
+  ("compressor_method", "compressive")
+  ("result", "false")()
 };
 
 INSTANTIATE_TEST_CASE_P(
     clustering_tests,
     clustering_test,
     ::testing::ValuesIn(test_cases));
+
+INSTANTIATE_TEST_CASE_P(
+    clustering_test_nocenters,
+    clustering_test_nocenter,
+    ::testing::ValuesIn(test_cases_nocenter));
 
 }  // namespace clustering
 }  // namespace core
