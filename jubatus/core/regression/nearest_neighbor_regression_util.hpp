@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2012 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2016 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,19 +14,23 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_REGRESSION_REGRESSION_HPP_
-#define JUBATUS_CORE_REGRESSION_REGRESSION_HPP_
+#ifndef JUBATUS_CORE_REGRESSION_NEAREST_NEIGHBOR_REGRESSION_UTIL_HPP_
+#define JUBATUS_CORE_REGRESSION_NEAREST_NEIGHBOR_REGRESSION_UTIL_HPP_
 
-#include "regression_base.hpp"
-#include "passive_aggressive.hpp"
-#include "passive_aggressive_1.hpp"
-#include "passive_aggressive_2.hpp"
-#include "perceptron.hpp"
-#include "confidence_weighted.hpp"
-#include "arow.hpp"
-#include "normal_herd.hpp"
-#include "nearest_neighbor_regression.hpp"
-#include "cosine_similarity_regression.hpp"
-#include "euclidean_distance_regression.hpp"
+#include <string>
+#include "jubatus/util/math/random.h"
 
-#endif  // JUBATUS_CORE_REGRESSION_REGRESSION_HPP_
+using jubatus::util::math::random::mtrand;
+
+namespace jubatus {
+namespace core {
+namespace regression {
+
+std::string make_id(
+    mtrand& rand);
+
+}  // namespace nearest_neighbor
+}  // namespace core
+}  // namespace jubatus
+
+#endif  // JUBATUS_CORE_REGRESSION_NEAREST_NEIGHBOR_REGRESSION_UTIL_HPP_

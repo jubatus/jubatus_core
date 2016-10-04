@@ -1,5 +1,6 @@
+
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2012 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2016 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,19 +15,30 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_REGRESSION_REGRESSION_HPP_
-#define JUBATUS_CORE_REGRESSION_REGRESSION_HPP_
+#include "nearest_neighbor_regression_util.hpp"
+#include <string>
 
-#include "regression_base.hpp"
-#include "passive_aggressive.hpp"
-#include "passive_aggressive_1.hpp"
-#include "passive_aggressive_2.hpp"
-#include "perceptron.hpp"
-#include "confidence_weighted.hpp"
-#include "arow.hpp"
-#include "normal_herd.hpp"
-#include "nearest_neighbor_regression.hpp"
-#include "cosine_similarity_regression.hpp"
-#include "euclidean_distance_regression.hpp"
+namespace jubatus {
+namespace core {
+namespace regression {
 
-#endif  // JUBATUS_CORE_REGRESSION_REGRESSION_HPP_
+std::string make_id(
+     jubatus::util::math::random::mtrand& rand) {
+  const size_t n = 8;
+  std::string result;
+  result.reserve(1 + n);
+  for (size_t i = 0; i < n; ++i) {
+    int r = rand.next_int(26 * 2 + 10);
+    if (r < 26) {
+      result.push_back('a' + r);
+    } else if (r < 26 * 2) {
+      result.push_back('A' + (r - 26));
+    } else {
+      result.push_back('0' + (r - 26 * 2));
+    }
+  }
+  return result;
+}
+}  // namespace regression
+}  // namespace core
+}  // namespace jubatus

@@ -14,7 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#include "passive_aggressive.hpp"
+#include "passive_aggressive_2.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -24,7 +24,7 @@ namespace jubatus {
 namespace core {
 namespace regression {
 
-passive_aggressive::passive_aggressive(
+passive_aggressive_2::passive_aggressive_2(
     const config& config,
     storage_ptr storage)
     : linear_regression(storage),
@@ -33,13 +33,18 @@ passive_aggressive::passive_aggressive(
       sq_sum_(0.f),
       count_(0.f) {
 
+  if (!(0.f < config.regularization_weight)) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("0.0 < regularization_weight"));
+  }
+
   if (!(0.f <= config.sensitivity)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0.0 <= sensitivity"));
   }
 }
 
-passive_aggressive::passive_aggressive(storage_ptr storage)
+passive_aggressive_2::passive_aggressive_2(storage_ptr storage)
     : linear_regression(storage),
       sum_(0.f),
       sq_sum_(0.f),
@@ -54,7 +59,7 @@ static float squared_norm(const common::sfv_t& fv) {
   return norm;
 }
 
-void passive_aggressive::train(const common::sfv_t& fv, float value) {
+void passive_aggressive_2::train(const common::sfv_t& fv, float value) {
   sum_ += value;
   sq_sum_ += value * value;
   count_ += 1;
@@ -67,14 +72,15 @@ void passive_aggressive::train(const common::sfv_t& fv, float value) {
   float loss = sign_error * error - config_.sensitivity * std_dev;
 
   if (loss > 0.f) {
-    float coeff = sign_error * loss / squared_norm(fv);
+    float C = config_.regularization_weight;
+    float coeff = sign_error *  loss / (squared_norm(fv) + 1 / 2 * C);
     if (!std::isinf(coeff)) {
       update(fv, coeff);
     }
   }
 }
 
-void passive_aggressive::clear() {
+void passive_aggressive_2::clear() {
   linear_regression::clear();
   sum_ = 0.f;
   sq_sum_ = 0.f;

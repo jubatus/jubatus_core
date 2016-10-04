@@ -19,7 +19,7 @@
 #include <map>
 #include <string>
 #include <utility>
-
+#include <vector>
 #include "../fv_converter/datum.hpp"
 #include "../fv_converter/datum_to_fv_converter.hpp"
 #include "../fv_converter/converter_config.hpp"
@@ -41,9 +41,11 @@ regression::regression(
     shared_ptr<fv_converter::datum_to_fv_converter> converter)
     : converter_(converter)
     , regression_(regression_method)
-    , mixable_regression_model_(regression_method->get_storage())
     , wm_(mixable_weight_manager::model_ptr(new weight_manager)) {
-  register_mixable(&mixable_regression_model_);
+  std::vector<framework::mixable*> mixables = regression_->get_mixables();
+  for (size_t i = 0; i < mixables.size(); i++) {
+    register_mixable(mixables[i]);
+  }
   register_mixable(&wm_);
 
   converter_->set_weight_manager(wm_.get_model());
@@ -77,7 +79,7 @@ void regression::clear() {
 
 void regression::pack(framework::packer& pk) const {
   pk.pack_array(2);
-  regression_->get_storage()->pack(pk);
+  regression_->pack(pk);
   wm_.get_model()->pack(pk);
 }
 
@@ -89,7 +91,7 @@ void regression::unpack(msgpack::object o) {
   // clear before load
   regression_->clear();
   converter_->clear_weights();
-  regression_->get_storage()->unpack(o.via.array.ptr[0]);
+  regression_->unpack(o.via.array.ptr[0]);
   wm_.get_model()->unpack(o.via.array.ptr[1]);
 }
 

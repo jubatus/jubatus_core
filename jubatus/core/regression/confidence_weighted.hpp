@@ -1,5 +1,5 @@
 // Jubatus: Online machine learning framework for distributed environment
-// Copyright (C) 2012 Preferred Networks and Nippon Telegraph and Telephone Corporation.
+// Copyright (C) 2016 Preferred Networks and Nippon Telegraph and Telephone Corporation.
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,8 +14,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_HPP_
-#define JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_HPP_
+#ifndef JUBATUS_CORE_REGRESSION_CONFIDENCE_WEIGHTED_HPP_
+#define JUBATUS_CORE_REGRESSION_CONFIDENCE_WEIGHTED_HPP_
 
 #include <limits>
 #include "jubatus/util/data/serialization.h"
@@ -25,38 +25,39 @@ namespace jubatus {
 namespace core {
 namespace regression {
 
-class passive_aggressive : public linear_regression {
+class confidence_weighted : public linear_regression {
  public:
   struct config {
     config()
-        : sensitivity(0.1f) {
+        : regularization_weight(std::numeric_limits<float>::max()),
+          sensitivity(0.1f) {
     }
+    float regularization_weight;
     float sensitivity;
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_NAMED_MEMBER("sensitivity", sensitivity);
+      ar & JUBA_NAMED_MEMBER("regularization_weight", regularization_weight)
+         & JUBA_NAMED_MEMBER("sensitivity", sensitivity);
     }
   };
 
-  passive_aggressive(
+  confidence_weighted(
       const config& config,
       storage_ptr storage);
-  explicit passive_aggressive(storage_ptr storage);
+  explicit confidence_weighted(storage_ptr storage);
 
   void train(const common::sfv_t& fv, float value);
+  void update(const common::sfv_t& sfv, float step_width, float sign_error);
 
   void clear();
 
  private:
   config config_;
-  float sum_;
-  float sq_sum_;
-  float count_;
 };
 
 }  // namespace regression
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_HPP_
+#endif  // JUBATUS_CORE_REGRESSION_CONFIDENCE_WEIGHTED_HPP_
