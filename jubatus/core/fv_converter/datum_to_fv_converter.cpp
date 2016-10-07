@@ -422,7 +422,8 @@ class datum_to_fv_converter_impl {
       const std::string& value = binary_values[j].second;
       if (feature.matcher_->match(key)) {
         check_key(key);
-        feature.feature_func_->add_feature(key, value, ret_fv);
+        std::string k = key + "@" + feature.name_;
+        feature.feature_func_->add_feature(k, value, ret_fv);
       }
     }
   }
