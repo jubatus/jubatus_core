@@ -171,7 +171,9 @@ void inverted_index_storage::mark_column_removed(const std::string& column) {
   if (column2norm_.count(column_id) == 0) {
     column2norm_diff_.erase(column_id);
   } else {
-    column2norm_diff_[column_id] = 0;
+    // To erase the column on next MIX (``put_diff``), "cancel" the diff value
+    // with the master value.
+    column2norm_diff_[column_id] = - column2norm_[column_id];
   }
 }
 
@@ -306,7 +308,7 @@ bool inverted_index_storage::put_diff(
       if (target != update_list.end() && target->second) {
         // unlearner admit to update
         column2norm_[column_index] += it->second;
-        if (column2norm_[column_index] == 0.f) {
+        if (column2norm_[column_index] <= 0.f) {
           column2norm_.erase(column_index);
         }
       } else {
@@ -318,7 +320,7 @@ bool inverted_index_storage::put_diff(
          it != mixed_diff.column2norm.end(); ++it) {
       uint64_t column_index = column2id_.get_id(it->first);
       column2norm_[column_index] += it->second;
-      if (column2norm_[column_index] == 0.f) {
+      if (column2norm_[column_index] <= 0.f) {
         column2norm_.erase(column_index);
       }
     }
