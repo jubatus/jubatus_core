@@ -117,11 +117,54 @@ class inverted_index_storage {
       std::vector<float>& scores,
       util::data::unordered_set<int>& score_index_set) const;
 
+  /**
+   * inv_ / inv_diff_ is a master / diff table of the inverted index.
+   * It is a data structure like ``map<string, list<int, float>>``, where
+   * the ``string`` is a row ID, ``int`` is a local column ID and
+   * ``float`` value is the weight.
+   */
   tbl_t inv_;
   tbl_t inv_diff_;
+
+  /**
+   * column2norm_ is a master table of norm index.  The key of this table
+   * is a local column ID.
+   *
+   * In standalone mode, the colum2norm_ is always empty.
+   *
+   * In distributed mode, the column2norm_ holds the norm of the column
+   * at the point of last MIX.  The values are updated on put_diff.
+   * If the value became zero or negative on put_diff, it means that the
+   * column was removed from the model (in whole cluster).
+   */
   imap_float_t column2norm_;
+
+  /**
+   * column2norm_diff_ is a diff table of norm index.  The key of this table
+   * is a local column ID.
+   *
+   * In standalone mode, the column2norm_diff_ holds the norm of the column.
+   * The value is always positive.  If the value became zero, it means that
+   * the column was removed from the model.
+   *
+   * In distributed mode, the column2norm_diff_ holds the difference of norm
+   * of the column since last MIX.  The value may be any real number.  If
+   * the value is zero, it means that there are no changes to the norm of the
+   * column since last MIX; note that the column itself may be changed.
+   *
+   * The values are updated on every record updates, and be cleared on put_diff
+   * in distributed mode.
+   */
   imap_float_t column2norm_diff_;
+
+  /**
+   * column2id_ holds the mapping of global column IDs and local column IDs.
+   * Global column ID is a string value specified by user.  Local column ID
+   * is an internally-assigned uint64_t value.  Local column IDs are used
+   * as an key (index) of other tables.
+   */
   common::key_manager column2id_;
+
   util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
 };
 
