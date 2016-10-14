@@ -36,7 +36,7 @@ class model_test : public ::testing::Test {
 
   model_test() {
     config_.k = 3;
-    config_.compressor_method = "compressive_kmeans";
+    config_.compressor_method = "compressive";
     config_.bucket_size = 10000;
     config_.compressed_bucket_size = 100;
     config_.forgetting_threshold = 0.05;

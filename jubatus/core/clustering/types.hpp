@@ -34,18 +34,30 @@ namespace clustering {
 typedef double cluster_weight;
 typedef std::vector<std::pair<cluster_weight,
             jubatus::core::fv_converter::datum> > cluster_unit;
+typedef std::vector<std::pair<cluster_weight,
+                              std::string> > index_cluster_unit;
 typedef std::vector<cluster_unit> cluster_set;
+typedef std::vector<index_cluster_unit> index_cluster_set;
 
 struct weighted_point {
  public:
-  MSGPACK_DEFINE(weight, data, original);
+  MSGPACK_DEFINE(id, weight, data, original);
+  std::string id;
   double weight;
   common::sfv_t data;
   fv_converter::datum original;
 };
 
+struct indexed_point {
+ public:
+  MSGPACK_DEFINE(id, point);
+  std::string id;
+  fv_converter::datum point;
+};
+
 inline void swap(weighted_point& p1, weighted_point& p2) {
   using std::swap;
+  swap(p1.id, p2.id);
   swap(p1.weight, p2.weight);
   swap(p1.data, p2.data);
   swap(p1.original.string_values_, p2.original.string_values_);

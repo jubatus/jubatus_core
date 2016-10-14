@@ -108,14 +108,14 @@ TEST_P(storage_test, pack_unpack) {
 const std::map<std::string, std::string> test_cases[] = {
 #ifdef JUBATUS_USE_EIGEN
   make_case("method", "gmm")
-    ("compressor_method", "compressive_gmm")
+    ("compressor_method", "compressive")
     ("result", "true")(),
   make_case("method", "gmm")
     ("compressor_method", "simple")
     ("result", "true")(),
 #endif
   make_case("method", "kmeans")
-    ("compressor_method", "compressive_kmeans")
+    ("compressor_method", "compressive")
     ("result", "true")(),
   make_case("method", "kmeans")
     ("compressor_method", "simple")

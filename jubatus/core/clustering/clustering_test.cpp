@@ -209,14 +209,14 @@ const map<string, string> test_cases[] = {
     ("compressor_method", "compressive_kmeans")
     ("result", "false")(),
   make_case("method", "gmm")
-    ("compressor_method", "compressive_gmm")
+    ("compressor_method", "compressive")
     ("result", "true")(),
   make_case("method", "gmm")
     ("compressor_method", "simple")
     ("result", "true")(),
 #endif
   make_case("method", "kmeans")
-    ("compressor_method", "compressive_kmeans")
+    ("compressor_method", "compressive")
     ("result", "true")(),
   make_case("method", "kmeans")
     ("compressor_method", "compressive_gmm")
