@@ -115,6 +115,12 @@ float inverted_index_storage::get_from_tbl(
   }
 }
 
+/**
+ * Remove the record specified by row and column.
+ * If you remove the entire column, you need to first remove all records that
+ * belongs to the column via ``remove`` method, then use ``mark_column_removed``
+ * method to notify that the column was removed.
+ */
 void inverted_index_storage::remove(
     const std::string& row,
     const std::string& column) {
@@ -147,6 +153,27 @@ void inverted_index_storage::remove(
         }
       }
     }
+  }
+}
+
+/**
+ * This method notifies the storage that all records that belongs to the column
+ * was removed.  The caller is responsible to remove them before calling this
+ * method.
+ */
+void inverted_index_storage::mark_column_removed(const std::string& column) {
+  uint64_t column_id = column2id_.get_id_const(column);
+
+  if (column_id == common::key_manager::NOTFOUND) {
+    return;
+  }
+
+  if (column2norm_.count(column_id) == 0) {
+    column2norm_diff_.erase(column_id);
+  } else {
+    // To erase the column on next MIX (``put_diff``), "cancel" the diff value
+    // with the master value.
+    column2norm_diff_[column_id] = - column2norm_[column_id];
   }
 }
 
@@ -281,7 +308,7 @@ bool inverted_index_storage::put_diff(
       if (target != update_list.end() && target->second) {
         // unlearner admit to update
         column2norm_[column_index] += it->second;
-        if (column2norm_[column_index] == 0.f) {
+        if (column2norm_[column_index] <= 0.f) {
           column2norm_.erase(column_index);
         }
       } else {
@@ -293,7 +320,7 @@ bool inverted_index_storage::put_diff(
          it != mixed_diff.column2norm.end(); ++it) {
       uint64_t column_index = column2id_.get_id(it->first);
       column2norm_[column_index] += it->second;
-      if (column2norm_[column_index] == 0.f) {
+      if (column2norm_[column_index] <= 0.f) {
         column2norm_.erase(column_index);
       }
     }
