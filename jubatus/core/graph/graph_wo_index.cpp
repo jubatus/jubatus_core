@@ -707,6 +707,33 @@ void graph_wo_index::remove_by_swap(
   }
 }
 
+uint64_t graph_wo_index::find_max_int_id() const {
+  uint64_t max_id = 0;
+
+  for (node_info_map::const_iterator it = local_nodes_.begin();
+      it != local_nodes_.end(); ++it) {
+    if (max_id < it->first) {
+      max_id = it->first;
+    }
+  }
+
+  for (edge_info_map::const_iterator it = local_edges_.begin();
+      it != local_edges_.end(); ++it) {
+    if (max_id < it->first) {
+      max_id = it->first;
+    }
+  }
+
+  for (jubatus::util::data::unordered_map<node_id_t, uint8_t>::const_iterator
+      it = global_nodes_.begin(); it != global_nodes_.end(); ++it) {
+    if (max_id < it->first) {
+      max_id = it->first;
+    }
+  }
+
+  return max_id;
+}
+
 }  // namespace graph
 }  // namespace core
 }  // namespace jubatus

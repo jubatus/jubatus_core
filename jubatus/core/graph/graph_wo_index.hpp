@@ -119,6 +119,8 @@ class graph_wo_index
     return storage::version();
   }
 
+  uint64_t find_max_int_id() const;
+
   void pack(framework::packer& packer) const;
   void unpack(msgpack::object o);
 
