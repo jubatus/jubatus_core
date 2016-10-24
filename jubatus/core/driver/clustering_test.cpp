@@ -27,14 +27,15 @@
 #include "jubatus/util/lang/shared_ptr.h"
 #include "jubatus/util/math/random.h"
 #include "jubatus/util/lang/cast.h"
-#include "../clustering/clustering_config.hpp"
 #include "../clustering/clustering.hpp"
 #include "../clustering/types.hpp"
 #include "../clustering/kmeans_clustering_method.hpp"
 #include "../clustering/gmm_clustering_method.hpp"
+#include "../clustering/clustering_factory.hpp"
 #include "../framework/stream_writer.hpp"
 #include "test_util.hpp"
 #include "../fv_converter/datum.hpp"
+#include "../common/jsonconfig.hpp"
 
 using std::vector;
 using std::string;
@@ -47,29 +48,144 @@ using jubatus::util::lang::lexical_cast;
 using jubatus::core::fv_converter::datum;
 using jubatus::core::fv_converter::datum_to_fv_converter;
 using jubatus::core::clustering::clustering_method;
-using jubatus::core::clustering::clustering_config;
+using jubatus::util::text::json::json;
+using jubatus::util::text::json::json_object;
+using jubatus::util::text::json::to_json;
 
 namespace jubatus {
 namespace core {
 namespace driver {
 
+struct clustering_config {
+  clustering_config()
+    : k(2),
+      bucket_size(10000),
+      bucket_length(2),
+      bicriteria_base_size(10),
+      compressed_bucket_size(200),
+      forgetting_factor(2.0),
+      forgetting_threshold(0.05),
+      seed(0),
+      eps(2.0),
+      min_core_point(1) {
+
+  }
+
+  int k;
+  
+  int bucket_size;
+  int bucket_length;
+  int bicriteria_base_size;
+  int compressed_bucket_size;
+  double forgetting_factor;
+  double forgetting_threshold;
+  int64_t seed;
+  double eps;
+  int min_core_point;
+};
+
+common::jsonconfig::config make_simple_config() {
+  json js(new json_object);
+  js = new json_object;
+  js["bucket_size"] = to_json(200);
+  common::jsonconfig::config conf(js);
+  return conf;
+}
+
+common::jsonconfig::config make_simple_config_idf() {
+  json js(new json_object);
+  js = new json_object;
+  js["bucket_size"] = to_json(50);
+  common::jsonconfig::config conf(js);
+  return conf;
+}
+
+common::jsonconfig::config make_compressive_config() {
+    json js(new json_object);
+    js = new json_object;
+    js["bucket_size"] = to_json(200);
+    js["bucket_length"] = to_json(2);
+    js["compressed_bucket_size"] = to_json(20);
+    js["bicriteria_base_size"] = to_json(2);
+    js["forgetting_factor"] = to_json(0.0);
+    js["forgetting_threshold"] = to_json(0.5);
+    js["seed"] = to_json(0);
+    common::jsonconfig::config conf(js);
+    return conf;
+}
+
+common::jsonconfig::config make_compressive_config_idf() {
+    json js(new json_object);
+    js = new json_object;
+    js["bucket_size"] = to_json(50);
+    js["bucket_length"] = to_json(2);
+    js["compressed_bucket_size"] = to_json(10);
+    js["bicriteria_base_size"] = to_json(5);
+    js["forgetting_factor"] = to_json(0.0);
+    js["forgetting_threshold"] = to_json(0.5);
+    js["seed"] = to_json(0);
+    common::jsonconfig::config conf(js);
+    return conf;
+}
+
+common::jsonconfig::config make_kmeans_config() {
+  json js(new json_object);
+  js["k"] = to_json(2);
+  js["seed"] = to_json(0);
+  common::jsonconfig::config conf(js);
+  return conf;
+}
+
+common::jsonconfig::config make_gmm_config() {
+  json js(new json_object);
+  js["k"] = to_json(2);
+  js["seed"] = to_json(0);
+  common::jsonconfig::config conf(js);
+  return conf;
+}
+
+common::jsonconfig::config make_dbscan_config() {
+  json js(new json_object);
+  js["eps"] = to_json(100.0);
+  js["min_core_point"] = to_json(2);
+  common::jsonconfig::config conf(js);
+  return conf;
+}
+
+
 class clustering_test
     : public ::testing::TestWithParam<pair<string, string> > {
+
  protected:
   shared_ptr<driver::clustering> create_driver() const {
+    common::jsonconfig::config config;
+    common::jsonconfig::config compressor_config;
     pair<string, string> param = GetParam();
-    return shared_ptr<driver::clustering>(
-        new driver::clustering(
-            shared_ptr<core::clustering::clustering>(
-                new core::clustering::clustering("dummy",
-                                                 param.second,
-                                                 conf_)),
-            make_fv_converter()));
+    if (param.first == "simple") {
+      compressor_config = make_simple_config();
+    } else {
+      compressor_config = make_compressive_config();
+    }
+
+    if (param.second == "kmeans") {
+      config = make_kmeans_config();
+    } else if (param.second == "gmm") {
+      config = make_gmm_config();
+    } else {
+      config = make_dbscan_config();
+    }
+    return shared_ptr<driver::clustering>(new driver::clustering(
+               core::clustering::clustering_factory::create(
+                                                            "dummy",
+                                                            param.second,
+                                                            param.first,
+                                                            config,
+                                                            compressor_config),
+               make_fv_converter()));
   }
   void SetUp() {
     pair<string, string> param = GetParam();
     conf_.k = 2;
-    conf_.compressor_method = param.first;
     conf_.bucket_size = 200;
     conf_.compressed_bucket_size = conf_.bucket_size / 10;
     conf_.bicriteria_base_size = conf_.bucket_size / 100;
@@ -85,8 +201,9 @@ class clustering_test
     clustering_.reset();
   }
   shared_ptr<driver::clustering> clustering_;
-  clustering_config conf_;
+  string compressor_method_;
   string method_;
+  clustering_config conf_;
 };
 
 namespace {  // testing util
@@ -242,7 +359,7 @@ TEST_P(clustering_test, get_k_center) {
 }
 
 TEST_P(clustering_test, integer_center) {
-  if (method_ == "dbscan") {  //  dbscan does not have center. so pass this test
+  if (method_ == "dbscan") {  // dbscan does not have center. so pass this test
     return;
   }
 
@@ -260,16 +377,6 @@ TEST_P(clustering_test, integer_center) {
   const std::vector<fv_converter::datum> centers = clustering_->get_k_center();
 
   ASSERT_EQ(std::size_t(conf_.k), centers.size());
-  //  debug out
-  //  for (size_t i = 0; i < centers.size(); ++i) {
-  //   std::cout << i << " :[";
-  //   for (size_t j = 0; j < centers[i].num_values_.size(); ++j) {
-  //     std::cout
-  //       << centers[i].num_values_[j].first << " => "
-  //       << centers[i].num_values_[j].second << ", ";
-  //   }
-  //   std::cout << "]" << std::endl;;
-  // }
 }
 
 struct check_points {
@@ -298,7 +405,6 @@ struct check_point_compare {
 
 TEST_P(clustering_test, get_nearest_members) {
   jubatus::util::math::random::mtrand r(0);
-
   set<check_points, check_point_compare> points;
 
   for (int i = 0; i < conf_.bucket_size * 2 + 1; ++i) {
@@ -604,20 +710,34 @@ class clustering_with_idf_test
  protected:
   shared_ptr<driver::clustering> create_driver() const {
     pair<string, string> param = GetParam();
-    clustering_config conf;
-    conf.compressor_method = param.first;
-    return shared_ptr<driver::clustering>(
-        new driver::clustering(
-            shared_ptr<core::clustering::clustering>(
-                new core::clustering::clustering("dummy",
-                                                 param.second,
-                                                 conf)),
-            make_tf_idf_fv_converter()));
+    common::jsonconfig::config config;
+    common::jsonconfig::config compressor_config;
+    if (param.first == "simple") {
+      compressor_config = make_simple_config_idf();
+    } else {
+      compressor_config = make_compressive_config_idf();
+    }
+
+    if (param.second == "kmeans") {
+      config = make_kmeans_config();
+    } else if (param.second == "gmm") {
+      config = make_gmm_config();
+    } else {
+      config = make_dbscan_config();
+    }
+    return shared_ptr<driver::clustering>(new driver::clustering(
+               core::clustering::clustering_factory::create(
+                                                            "dummy",
+                                                            param.second,
+                                                            param.first,
+                                                            config,
+                                                            compressor_config),
+               make_tf_idf_fv_converter()));
   }
+
   void SetUp() {
     pair<string, string> param = GetParam();
     clustering_config conf;
-    conf.compressor_method = param.first;
     conf.bucket_size = 50;
     conf.bicriteria_base_size = 5;
     conf.compressed_bucket_size = 10;

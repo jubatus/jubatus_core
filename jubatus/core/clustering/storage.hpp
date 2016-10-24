@@ -23,7 +23,6 @@
 #include <msgpack.hpp>
 #include "../framework/mixable_helper.hpp"
 #include "../common/version.hpp"
-#include "clustering_config.hpp"
 #include "types.hpp"
 #include "event_dispatcher.hpp"
 
@@ -38,7 +37,7 @@ enum storage_event_type {
 
 class storage : public event_dispatcher<storage_event_type, wplist> {
  public:
-  storage(const std::string& name, const clustering_config& config);
+  explicit storage(const std::string& name);
   virtual ~storage() {}
 
   void get_diff(diff_t& d) const;
@@ -61,7 +60,7 @@ class storage : public event_dispatcher<storage_event_type, wplist> {
   void unpack(msgpack::object o);
   void clear();
 
-  MSGPACK_DEFINE(revision_, config_, common_);
+  MSGPACK_DEFINE(revision_, common_);
 
  protected:
   void increment_revision();
@@ -71,7 +70,6 @@ class storage : public event_dispatcher<storage_event_type, wplist> {
 
   size_t revision_;
   std::string name_;
-  clustering_config config_;
 
   std::vector<std::pair<std::string, wplist> > common_;
 };

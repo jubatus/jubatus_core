@@ -26,8 +26,8 @@ namespace compressor {
 
 class gmm_compressor : public kmeans_compressor {
  public:
-  explicit gmm_compressor(const clustering_config& cfg)
-      : kmeans_compressor(cfg) {}
+  explicit gmm_compressor(const int seed)
+      : kmeans_compressor(seed) {}
 
  public:
   double get_probability(

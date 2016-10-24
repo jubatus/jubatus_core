@@ -30,6 +30,10 @@ namespace clustering {
 
 gmm_clustering_method::gmm_clustering_method(size_t k, uint32_t seed)
     : k_(k), seed_(seed), kcenters_(), mapper_(), gmm_(seed) {
+  if (!(1 <= k)) {
+    throw JUBATUS_EXCEPTION(
+                            common::invalid_parameter("1 <= k"));
+  }
 }
 
 gmm_clustering_method::~gmm_clustering_method() {

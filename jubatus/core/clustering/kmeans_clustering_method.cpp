@@ -16,7 +16,6 @@
 
 #include "kmeans_clustering_method.hpp"
 
-#include <iostream>
 #include <utility>
 #include <vector>
 #include "../common/exception.hpp"
@@ -34,6 +33,10 @@ kmeans_clustering_method::kmeans_clustering_method(size_t k, uint32_t seed)
     : k_(k),
       seed_(seed),
       rand_(seed) {
+  if (!(1 <= k)) {
+    throw JUBATUS_EXCEPTION(
+                            common::invalid_parameter("1 <= k"));
+  }
 }
 
 kmeans_clustering_method::~kmeans_clustering_method() {

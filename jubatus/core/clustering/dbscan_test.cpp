@@ -155,22 +155,7 @@ TEST_F(dbscan_test, batch) {
   do_batch();
 
   std::vector<int> point_states = dbscan_->get_point_states();
-  // std::cout << "poinst states:" << point_states.size() << " [";
-  // for (std::vector<int>::iterator it = point_states.begin();
-  //      it != point_states.end(); ++it) {
-  //   std::cout << *it << " ";
-  // }
-  // std::cout << "]" << std::endl;
-
   std::vector<wplist> clusters = dbscan_->get_clusters();
-  // for (std::vector<wplist>::iterator it = clusters.begin();
-  //      it != clusters.end(); ++it) {
-    // std::cout << "[ ";
-    // for (wplist::iterator wit = (*it).begin(); wit != (*it).end(); ++wit) {
-    //   std::cout << (*wit).id << " ";
-    // }
-    // std::cout << "]" << std::endl;
-  // }
 
   ASSERT_EQ(lexical_cast<size_t>(2), clusters.size());
   ASSERT_EQ(lexical_cast<size_t>(4), clusters[0].size());
@@ -187,7 +172,6 @@ TEST_F(dbscan_test, devide_two_cluster) {
     std::cout << *it << " ";
   }
   std::cout << "]" << std::endl;
-
   std::vector<wplist> clusters = dbscan_->get_clusters();
   for (std::vector<wplist>::iterator it = clusters.begin();
        it != clusters.end(); ++it) {

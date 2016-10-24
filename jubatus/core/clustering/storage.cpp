@@ -25,10 +25,9 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-storage::storage(const std::string& name, const clustering_config& config)
+storage::storage(const std::string& name)
     : revision_(0),
-      name_(name),
-      config_(config) {
+      name_(name) {
 }
 
 wplist storage::get_all() const {

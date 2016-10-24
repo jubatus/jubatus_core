@@ -29,10 +29,19 @@ namespace core {
 namespace clustering {
 
 dbscan_clustering_method::dbscan_clustering_method(
-    double eps, size_t min_core_point)
+    double eps,
+    size_t min_core_point)
     : eps_(eps),
       min_core_point_(min_core_point),
       dbscan_(eps, min_core_point) {
+  if (!(0 < eps)) {
+    throw JUBATUS_EXCEPTION(
+                common::invalid_parameter("0 < eps"));
+  }
+  if (!(1 <= min_core_point)) {
+    throw JUBATUS_EXCEPTION(
+                common::invalid_parameter("0 < min_core_point"));
+  }
 }
 
 dbscan_clustering_method::~dbscan_clustering_method() {

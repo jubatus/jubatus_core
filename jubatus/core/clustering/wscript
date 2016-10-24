@@ -19,9 +19,9 @@ def build(bld):
     'discrete_distribution.cpp',
     'util.cpp',
     'dbscan.cpp',
+    'clustering_factory.cpp'
   ]
   headers = [
-    'clustering_config.hpp',
     'clustering.hpp',
     'clustering_method_factory.hpp',
     'clustering_method.hpp',
@@ -43,6 +43,7 @@ def build(bld):
     'types.hpp',
     'util.hpp',
     'dbscan.hpp',
+    'clustering_factory.hpp'
   ]
   if bld.env.USE_EIGEN:
     source += [
@@ -66,6 +67,8 @@ def build(bld):
     'storage_test.cpp',
     'util_test.cpp',
     'dbscan_test.cpp'
+    'dbscan_test.cpp',
+    'clustering_factory_test.cpp'
   ]
   if bld.env.USE_EIGEN:
     test_cases += [

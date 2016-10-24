@@ -23,10 +23,11 @@
 #include <vector>
 #include "jubatus/util/lang/function.h"
 #include "jubatus/util/lang/bind.h"
-
 #include "../common/jsonconfig.hpp"
 #include "clustering_method_factory.hpp"
 #include "storage_factory.hpp"
+#include "../framework/mixable.hpp"
+#include "storage.hpp"
 
 using jubatus::util::lang::shared_ptr;
 
@@ -35,71 +36,13 @@ namespace core {
 namespace clustering {
 
 clustering::clustering(
-    const std::string& name,
-    const std::string& method,
-    const clustering_config& cfg)
-    : config_(cfg),
-      name_(name),
-      method_(method),
-      storage_() {
-
-  if (method_ == "kmeans" || method_ == "gmm") {
-    if (!(1 <= cfg.k)) {
-      throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("1 <= k"));
-    }
-
-    if (!(1 <= cfg.bucket_size)) {
-      throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("1 <= bucket_size"));
-    }
-  } else if (method_ == "dbscan") {
-    if (!(0.0 < cfg.eps)) {
-      throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("0.0 < eps"));
-    }
-
-    if (!(1 <= cfg.min_core_point)) {
-      throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("1 <= min_core_point"));
-    }
-  }
-
-  if (cfg.compressor_method != "simple") {
-    if (!(2 <= cfg.bucket_length)) {
-      throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("2 <= bucket_length"));
-    }
-    if (!(1 <= cfg.bicriteria_base_size &&
-          cfg.bicriteria_base_size < cfg.compressed_bucket_size)) {
-      throw JUBATUS_EXCEPTION(common::invalid_parameter(
-          "1 <= bicriteria_base_size < compressed_bucket_size"));
-    }
-    if (!(cfg.compressed_bucket_size < cfg.bucket_size)) {
-      throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("compressed_bucket_size < bucket_size"));
-    }
-    if (!(0.0 <= cfg.forgetting_factor)) {
-      throw JUBATUS_EXCEPTION(
-          common::invalid_parameter("0.0 <= forgetting_factor"));
-    }
-    if (!(0.0 <= cfg.forgetting_threshold &&
-          cfg.forgetting_threshold <= 1.0)) {
-      throw JUBATUS_EXCEPTION(common::invalid_parameter(
-          "0.0 <= forgetting_threshold <= 1.0"));
-    }
-  }
-
-  init();
+    shared_ptr<clustering_method> clustering_method,
+    shared_ptr<storage> storage) {
+  set_clustering_method(clustering_method);
+  set_storage(storage);
 }
 
 clustering::~clustering() {
-}
-
-void clustering::init() {
-  set_clustering_method(
-      clustering_method_factory::create(method_, config_));
-  set_storage(storage_factory::create(name_, method_, config_));
 }
 
 void clustering::set_storage(shared_ptr<storage> storage) {
