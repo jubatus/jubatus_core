@@ -16,6 +16,7 @@
 
 #include "clustering.hpp"
 
+#include <string>
 #include <algorithm>
 #include <utility>
 #include <vector>

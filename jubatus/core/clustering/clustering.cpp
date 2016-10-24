@@ -43,14 +43,26 @@ clustering::clustering(
       method_(method),
       storage_() {
 
-  if (!(1 <= cfg.k)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("1 <= k"));
-  }
+  if (method_ == "kmeans" || method_ == "gmm") {
+    if (!(1 <= cfg.k)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("1 <= k"));
+    }
 
-  if (!(1 <= cfg.bucket_size)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("1 <= bucket_size"));
+    if (!(1 <= cfg.bucket_size)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("1 <= bucket_size"));
+    }
+  } else if (method_ == "dbscan") {
+    if (!(0.0 < cfg.eps)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("0.0 < eps"));
+    }
+
+    if (!(1 <= cfg.min_core_point)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("1 <= min_core_point"));
+    }
   }
 
   if (cfg.compressor_method != "simple") {

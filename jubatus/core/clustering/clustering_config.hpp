@@ -36,7 +36,9 @@ struct clustering_config {
         compressed_bucket_size(200),
         forgetting_factor(2.0),
         forgetting_threshold(0.05),
-        seed(0) {
+        eps(2.0),
+        seed(0),
+        min_core_point(1) {
   }
 
   int k;
@@ -49,7 +51,9 @@ struct clustering_config {
   int compressed_bucket_size;
   double forgetting_factor;
   double forgetting_threshold;
+  double eps;
   int64_t seed;
+  int min_core_point;
 
   MSGPACK_DEFINE(
       k,
@@ -60,7 +64,9 @@ struct clustering_config {
       compressed_bucket_size,
       forgetting_factor,
       forgetting_threshold,
-      seed);
+      eps,
+      seed,
+      min_core_point);
 
   template<typename Ar>
   void serialize(Ar& ar) {
@@ -72,7 +78,9 @@ struct clustering_config {
         & JUBA_MEMBER(compressed_bucket_size)
         & JUBA_MEMBER(forgetting_factor)
         & JUBA_MEMBER(forgetting_threshold)
-        & JUBA_MEMBER(seed);
+        & JUBA_MEMBER(eps)
+        & JUBA_MEMBER(seed)
+        & JUBA_MEMBER(min_core_point);
   }
 };
 

@@ -53,6 +53,12 @@ struct indexed_point {
   MSGPACK_DEFINE(id, point);
   std::string id;
   fv_converter::datum point;
+  indexed_point() {
+  }
+  indexed_point(const std::string& id,
+      const jubatus::core::fv_converter::datum& point)
+    : id(id), point(point) {
+  }
 };
 
 inline void swap(weighted_point& p1, weighted_point& p2) {

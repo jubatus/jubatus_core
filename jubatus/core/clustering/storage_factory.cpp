@@ -47,11 +47,20 @@ jubatus::util::lang::shared_ptr<storage> storage_factory::create(
       throw JUBATUS_EXCEPTION(
           common::unsupported_method(config.compressor_method));
     }
+  } else if (method == "dbscan") {
+    if (config.compressor_method == "simple") {
+      simple_storage *s = new simple_storage(name, config);
+      ret.reset(s);
+    } else {
+      throw JUBATUS_EXCEPTION(
+          common::unsupported_method(config.compressor_method));
+    }
+#ifdef JUBATUS_USE_EIGEN
   } else if (method == "gmm") {
     if (config.compressor_method == "simple") {
         simple_storage *s = new simple_storage(name, config);
         ret.reset(s);
-#ifdef JUBATUS_USE_EIGEN
+
     } else if (config.compressor_method == "compressive") {
       compressive_storage *s = new compressive_storage(name, config);
       s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(

@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_DRIVER_CLUSTERING_HPP_
 #define JUBATUS_CORE_DRIVER_CLUSTERING_HPP_
 
+#include <string>
 #include <utility>
 #include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
@@ -84,7 +85,8 @@ class clustering : public driver_base {
       const std::vector<common::sfv_t>& src) const;
   std::vector<core::clustering::weighted_point> to_weighted_point_vector(
       const std::vector<fv_converter::datum>& src);
-  std::vector<core::clustering::weighted_point> to_weighted_indexed_point_vector(
+  std::vector<core::clustering::weighted_point>
+  to_weighted_indexed_point_vector(
       const std::vector<core::clustering::indexed_point>& src);
   core::clustering::cluster_unit to_weighted_datum_vector(
       const std::vector<core::clustering::weighted_point>& src) const;
