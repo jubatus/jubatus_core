@@ -18,7 +18,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
 #include <gtest/gtest.h>
 
 #include "../storage/local_storage.hpp"
@@ -27,7 +26,11 @@
 #include "../fv_converter/datum.hpp"
 #include "../fv_converter/converter_config.hpp"
 #include "../framework/stream_writer.hpp"
+#include "../common/jsonconfig.hpp"
 #include "regression.hpp"
+#include "jubatus/util/text/json.h"
+#include "../storage/column_table.hpp"
+#include "../nearest_neighbor/nearest_neighbor_factory.hpp"
 
 #include "test_util.hpp"
 
@@ -40,6 +43,10 @@ using std::endl;
 using jubatus::util::lang::lexical_cast;
 using jubatus::util::lang::shared_ptr;
 using jubatus::core::fv_converter::datum;
+using jubatus::util::text::json::json;
+using jubatus::util::text::json::to_json;
+using jubatus::util::text::json::json_object;
+using jubatus::core::common::jsonconfig::config_cast_check;
 
 namespace jubatus {
 namespace core {
@@ -49,11 +56,11 @@ class regression_test : public ::testing::Test {
  protected:
   void SetUp() {
     shared_ptr<storage::storage_base> storage(new storage::local_storage);
-    core::regression::passive_aggressive::config config;
+    core::regression::passive_aggressive_1::config config;
     config.regularization_weight = std::numeric_limits<float>::max();
     config.sensitivity = 0.1f;
     shared_ptr<core::regression::regression_base> method(
-        new core::regression::passive_aggressive(config, storage));
+        new core::regression::passive_aggressive_1(config, storage));
     regression_.reset(
       new core::driver::regression(
         method,
@@ -83,6 +90,33 @@ void make_random_data(vector<pair<float, datum> >& data, size_t size) {
     pair<float, vector<double> > p = gen_random_data(1.0, 1.0, 10);
     data.push_back(make_pair(p.first, convert_vector(p.second)));
   }
+}
+
+shared_ptr<core::regression::regression_base> make_nn_regression() {
+  json js(new json_object);
+  js["method"] = to_json(std::string("lsh"));
+  js["parameter"] = json(new json_object);
+  js["parameter"]["hash_num"] = to_json(8);
+  js["nearest_neighbor_num"] = to_json(5);
+  common::jsonconfig::config param(js);
+  core::regression::nearest_neighbor_regression::config conf
+    = config_cast_check<core::regression::nearest_neighbor_regression::config>(
+        param);
+  shared_ptr<core::storage::column_table> table(new storage::column_table);
+  shared_ptr<core::nearest_neighbor::nearest_neighbor_base>
+    nearest_neighbor_engine(nearest_neighbor::create_nearest_neighbor(
+       conf.method, conf.parameter, table, ""));
+  shared_ptr<core::regression::regression_base> res(
+       new core::regression::nearest_neighbor_regression(
+           nearest_neighbor_engine,
+           conf.nearest_neighbor_num));
+  return res;
+}
+
+shared_ptr<core::regression::regression_base> make_inverted_index_regression() {
+  shared_ptr<storage::storage_base> storage(new storage::local_storage);
+  return shared_ptr<core::regression::regression_base> (
+      new core::regression::cosine_similarity_regression(10));
 }
 
 void regression_test::my_test() {
@@ -126,6 +160,65 @@ TEST_F(regression_test, pa) {
 
 TEST_F(regression_test, small) {
   cout << "train" << endl;
+  datum d;
+  d.num_values_.push_back(make_pair("f1", 1.0));
+  pair<float, datum> data(10, d);
+  regression_->train(data);
+  // save
+  msgpack::sbuffer save_data;
+  framework::stream_writer<msgpack::sbuffer> st(save_data);
+  framework::jubatus_packer jp(st);
+  framework::packer save_pk(jp);
+  regression_->pack(save_pk);
+
+  regression_->clear();
+
+  // load
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, save_data.data(), save_data.size());
+  regression_->unpack(msg.get());
+
+  cout << "estimate" << endl;
+  float res = regression_->estimate(d);
+  cout << res << endl;
+}
+
+TEST_F(regression_test, nn) {
+  regression_.reset(
+      new core::driver::regression(
+        make_nn_regression(),
+        make_fv_converter()));
+
+  datum d;
+  d.num_values_.push_back(make_pair("f1", 1.0));
+  pair<float, datum> data(10, d);
+  regression_->train(data);
+
+  // save
+  msgpack::sbuffer save_data;
+  framework::stream_writer<msgpack::sbuffer> st(save_data);
+  framework::jubatus_packer jp(st);
+  framework::packer save_pk(jp);
+  regression_->pack(save_pk);
+
+  regression_->clear();
+
+  // load
+  msgpack::unpacked msg;
+  msgpack::unpack(&msg, save_data.data(), save_data.size());
+  regression_->unpack(msg.get());
+
+  cout << "estimate" << endl;
+  float res = regression_->estimate(d);
+  cout << res << endl;
+}
+
+TEST_F(regression_test, inverted_index) {
+  regression_.reset(
+      new core::driver::regression(
+        make_inverted_index_regression(),
+        make_fv_converter()));
+
   datum d;
   d.num_values_.push_back(make_pair("f1", 1.0));
   pair<float, datum> data(10, d);

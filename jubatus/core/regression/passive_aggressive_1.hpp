@@ -14,8 +14,8 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_HPP_
-#define JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_HPP_
+#ifndef JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_1_HPP_
+#define JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_1_HPP_
 
 #include <limits>
 #include "jubatus/util/data/serialization.h"
@@ -25,24 +25,27 @@ namespace jubatus {
 namespace core {
 namespace regression {
 
-class passive_aggressive : public linear_regression {
+class passive_aggressive_1 : public linear_regression {
  public:
   struct config {
     config()
-        : sensitivity(0.1f) {
+        : regularization_weight(std::numeric_limits<float>::max()),
+          sensitivity(0.1f) {
     }
+    float regularization_weight;
     float sensitivity;
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_NAMED_MEMBER("sensitivity", sensitivity);
+      ar & JUBA_NAMED_MEMBER("regularization_weight", regularization_weight)
+         & JUBA_NAMED_MEMBER("sensitivity", sensitivity);
     }
   };
 
-  passive_aggressive(
+  passive_aggressive_1(
       const config& config,
       storage_ptr storage);
-  explicit passive_aggressive(storage_ptr storage);
+  explicit passive_aggressive_1(storage_ptr storage);
 
   void train(const common::sfv_t& fv, float value);
 
@@ -59,4 +62,4 @@ class passive_aggressive : public linear_regression {
 }  // namespace core
 }  // namespace jubatus
 
-#endif  // JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_HPP_
+#endif  // JUBATUS_CORE_REGRESSION_PASSIVE_AGGRESSIVE_1_HPP_

@@ -61,7 +61,6 @@ class regression : public driver_base {
     converter_;
   jubatus::util::lang::shared_ptr<jubatus::core::regression::regression_base>
     regression_;
-  framework::linear_function_mixer mixable_regression_model_;
   fv_converter::mixable_weight_manager wm_;
 };
 
