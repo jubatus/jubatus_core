@@ -18,7 +18,6 @@
 #define JUBATUS_CORE_CLUSTERING_COMPRESSOR_HPP_
 
 #include <msgpack.hpp>
-#include "clustering_config.hpp"
 #include "types.hpp"
 #include "util.hpp"
 
@@ -29,8 +28,7 @@ namespace compressor {
 
 class compressor {
  public:
-  explicit compressor(const clustering_config& cfg)
-     : config_(cfg) {}
+  explicit compressor() {}
   virtual ~compressor() {}
 
   virtual void compress(
@@ -38,10 +36,7 @@ class compressor {
       size_t bsize,
       size_t dstsize,
       wplist& dst) = 0;
-
-  MSGPACK_DEFINE(config_);
- private:
-  clustering_config config_;
+  //  MSGPACK_DEFINE();
 };
 
 }  // namespace compressor

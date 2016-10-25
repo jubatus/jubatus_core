@@ -28,6 +28,24 @@ namespace clustering {
 
 class dbscan_clustering_method : public clustering_method {
  public:
+  struct config {
+    config()
+      : eps(2.0), min_core_point(1) {
+    }
+    double eps;
+    int min_core_point;
+
+    MSGPACK_DEFINE(
+        eps,
+        min_core_point);
+
+    template<typename Ar>
+    void serialize(Ar& ar) {
+      ar & JUBA_MEMBER(eps)
+        & JUBA_MEMBER(min_core_point);
+    }
+  };
+
   dbscan_clustering_method(double eps, size_t min_core_point);
   ~dbscan_clustering_method();
 

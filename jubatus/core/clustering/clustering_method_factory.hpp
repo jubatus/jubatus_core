@@ -22,15 +22,21 @@
 
 namespace jubatus {
 namespace core {
+
+namespace common {
+namespace jsonconfig {
+class config;
+}  // namespace jsonconfig
+}  // namespace common
+
 namespace clustering {
-class clustering_config;
 class clustering_method;
 
 class clustering_method_factory {
  public:
   static jubatus::util::lang::shared_ptr<clustering_method> create(
       const std::string& method,
-      const clustering_config& config);
+      const core::common::jsonconfig::config& config);
 };
 
 }  // namespace clustering

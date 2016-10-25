@@ -83,7 +83,6 @@ wplist dbscan::expand_cluster(const size_t idx, const wplist& points) {
         cluster.push_back(points[*it]);
 
         vector<size_t> expand_core = region_query((*it), points);
-
         for (vector<size_t>::iterator expand_it = expand_core.begin();
             expand_it != expand_core.end(); ++expand_it) {
           if (expand_core.size() >= min_core_point_) {
@@ -109,7 +108,6 @@ wplist dbscan::expand_cluster(const size_t idx, const wplist& points) {
 std::vector<size_t> dbscan::region_query(
     const size_t idx, const wplist& points) const {
   std::vector<size_t> region;
-
   for (wplist::const_iterator it = points.begin(); it != points.end(); ++it) {
     if (dist((*it).data, points[idx].data) < eps_) {
       region.push_back(std::distance(points.begin(), it));

@@ -28,9 +28,52 @@ namespace clustering {
 
 compressive_storage::compressive_storage(
     const std::string& name,
-    const clustering_config& config)
-    : storage(name, config),
-      status_(0) {
+    const int bucket_size,
+    const int bucket_length,
+    const int compressed_bucket_size,
+    const int bicriteria_base_size,
+    const double forgetting_factor,
+    const double forgetting_threshold)
+  : storage(name),
+    bucket_size_(bucket_size),
+    bucket_length_(bucket_length),
+    compressed_bucket_size_(compressed_bucket_size),
+    bicriteria_base_size_(bicriteria_base_size),
+    forgetting_factor_(forgetting_factor),
+    forgetting_threshold_(forgetting_threshold),
+    status_(0) {
+    if (!(1 <= bucket_size)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("1 <= bucket_size"));
+    }
+
+    if (!(2 <= bucket_length)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("2 <= bucket_length"));
+    }
+
+    if (!(1 <= bicriteria_base_size &&
+          bicriteria_base_size <= compressed_bucket_size)) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+          "1 <= bicriteria_base_size <= compressed_bucket_size"));
+    }
+
+    if (!(compressed_bucket_size <= bucket_size)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("compressed_bucket_size <= bucket_size"));
+    }
+
+    if (!(0.0 <= forgetting_factor)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("0.0 <= forgetting_factor"));
+    }
+
+    if (!(0.0 <= forgetting_threshold &&
+          forgetting_threshold <= 1.0)) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+          "0.0 <= forgetting_threshold <= 1.0"));
+    }
+
   mine_.push_back(wplist());
 }
 
@@ -42,10 +85,10 @@ void compressive_storage::set_compressor(
 void compressive_storage::add(const weighted_point& point) {
   wplist& c0 = mine_[0];
   c0.push_back(point);
-  if (c0.size() >= static_cast<size_t>(config_.bucket_size)) {
+  if (c0.size() >= static_cast<size_t>(bucket_size_)) {
     wplist cr;
     compressor_->compress(
-        c0, config_.bicriteria_base_size, config_.compressed_bucket_size, cr);
+        c0, bicriteria_base_size_, compressed_bucket_size_, cr);
     c0.swap(cr);
     status_ += 1;
     carry_up(0);
@@ -64,7 +107,7 @@ wplist compressive_storage::get_mine() const {
 }
 
 void compressive_storage::forget_weight(wplist& points) {
-  double factor = std::exp(-config_.forgetting_factor);
+  double factor = std::exp(-forgetting_factor_);
   typedef wplist::iterator iter;
   for (iter it = points.begin(); it != points.end(); ++it) {
     it->weight *= factor;
@@ -72,8 +115,8 @@ void compressive_storage::forget_weight(wplist& points) {
 }
 
 bool compressive_storage::reach_forgetting_threshold(size_t bucket_number) {
-  double C = config_.forgetting_threshold;
-  double lam = config_.forgetting_factor;
+  double C = forgetting_threshold_;
+  double lam = forgetting_factor_;
   if (std::exp(-lam * bucket_number) < C) {
     return true;
   }
@@ -81,8 +124,8 @@ bool compressive_storage::reach_forgetting_threshold(size_t bucket_number) {
 }
 
 bool compressive_storage::is_next_bucket_full(size_t bucket_number) {
-  return digit(status_ - 1, bucket_number, config_.bucket_length) ==
-      config_.bucket_length - 1;
+  return digit(status_ - 1, bucket_number, bucket_length_) ==
+      bucket_length_ - 1;
 }
 
 void compressive_storage::carry_up(size_t r) {
@@ -105,32 +148,30 @@ void compressive_storage::carry_up(size_t r) {
     mine_[r].clear();
     mine_[r + 1].clear();
     concat(cr, crr);
-    size_t dstsize = (r == 0) ? config_.compressed_bucket_size :
-        2 * r * r * config_.compressed_bucket_size;
-    compressor_->compress(crr, config_.bicriteria_base_size,
+    size_t dstsize = (r == 0) ? compressed_bucket_size_ :
+        2 * r * r * compressed_bucket_size_;
+    compressor_->compress(crr, bicriteria_base_size_,
                           dstsize, mine_[r + 1]);
     carry_up(r + 1);
   }
 }
 
 void compressive_storage::pack_impl_(framework::packer& packer) const {
-  packer.pack_array(4);
+  packer.pack_array(3);
   storage::pack_impl_(packer);
   packer.pack(mine_);
   packer.pack(status_);
-  packer.pack(*compressor_);
 }
 
 void compressive_storage::unpack_impl_(msgpack::object o) {
   std::vector<msgpack::object> mems;
   o.convert(&mems);
-  if (mems.size() != 4) {
+  if (mems.size() != 3) {
     throw msgpack::type_error();
   }
   storage::unpack_impl_(mems[0]);
   mems[1].convert(&mine_);
   mems[2].convert(&status_);
-  mems[3].convert(compressor_.get());
 }
 
 void compressive_storage::clear_impl_() {
