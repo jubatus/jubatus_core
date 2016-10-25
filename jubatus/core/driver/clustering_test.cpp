@@ -68,11 +68,8 @@ struct clustering_config {
       seed(0),
       eps(2.0),
       min_core_point(1) {
-
   }
-
   int k;
-  
   int bucket_size;
   int bucket_length;
   int bicriteria_base_size;
