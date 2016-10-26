@@ -72,6 +72,9 @@ TEST_F(graph_test, simple) {
     p["name"] = "edge_name_hoge";
     graph_->create_edge(eid, nid, nid0, p);
   }
+
+  EXPECT_EQ(2, graph_->find_max_int_id());
+
   {
     msgpack::sbuffer sbuf;
     framework::stream_writer<msgpack::sbuffer> st(sbuf);
