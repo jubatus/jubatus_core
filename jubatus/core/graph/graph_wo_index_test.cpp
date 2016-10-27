@@ -870,6 +870,15 @@ TEST(graph_wo_index, config_validation) {
   ASSERT_NO_THROW(g.reset(new graph_wo_index(c)));
 }
 
+TEST(graph_wo_index, find_max_int_id) {
+  graph_wo_index g;
+  g.create_node(1);
+  g.create_node(2);
+  g.create_edge(3, 1, 2);
+  g.create_global_node(10);
+  EXPECT_EQ(10u, g.find_max_int_id());
+}
+
 }  // namespace graph
 }  // namespace core
 }  // namespace jubatus

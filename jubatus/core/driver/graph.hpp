@@ -74,6 +74,7 @@ class graph : public driver_base {
       jubatus::core::graph::edge_id_t eid) const;
   void update_index();
   void clear();
+  uint64_t find_max_int_id() const;
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
 
