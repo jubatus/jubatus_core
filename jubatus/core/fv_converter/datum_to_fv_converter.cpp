@@ -306,38 +306,6 @@ class datum_to_fv_converter_impl {
     fv.swap(ret_fv);
   }
 
-  void revert_feature(
-      const std::string& feature,
-      std::pair<std::string, std::string>& expect) const {
-    // format of string feature is
-    // "<KEY_NAME>$<VALUE>@<FEATURE_TYPE>#<SAMPLE_WEIGHT>/<GLOBAL_WEIGHT>"
-    size_t sharp = feature.rfind('#');
-    if (sharp == std::string::npos) {
-      throw JUBATUS_EXCEPTION(
-          converter_exception("this feature is not string feature"));
-    }
-    size_t at = feature.rfind('@', sharp);
-    if (at == std::string::npos) {
-      throw JUBATUS_EXCEPTION(
-          converter_exception("this feature is not valid feature"));
-    }
-    size_t dollar = feature.rfind('$', at);
-    if (dollar == std::string::npos) {
-      throw JUBATUS_EXCEPTION(
-          converter_exception("this feature is not valid feature"));
-    }
-    if (feature.substr(at + 1, sharp - at - 1) != "str") {
-      throw JUBATUS_EXCEPTION(
-          converter_exception("this feature is not revertible"));
-    }
-
-    std::string key(feature.substr(0, dollar));
-    std::string value(feature.substr(dollar + 1, at - dollar - 1));
-
-    expect.first.swap(key);
-    expect.second.swap(value);
-  }
-
   void set_hash_max_size(uint64_t hash_max_size) {
     hasher_ = feature_hasher(hash_max_size);
   }
@@ -422,7 +390,8 @@ class datum_to_fv_converter_impl {
       const std::string& value = binary_values[j].second;
       if (feature.matcher_->match(key)) {
         check_key(key);
-        feature.feature_func_->add_feature(key, value, ret_fv);
+        std::string k = key + "@" + feature.name_;
+        feature.feature_func_->add_feature(k, value, ret_fv);
       }
     }
   }
@@ -685,12 +654,6 @@ void datum_to_fv_converter::register_combination_rule(
 
 void datum_to_fv_converter::add_weight(const std::string& key, float weight) {
   pimpl_->add_weight(key, weight);
-}
-
-void datum_to_fv_converter::revert_feature(
-    const std::string& feature,
-    std::pair<std::string, std::string>& expect) const {
-  pimpl_->revert_feature(feature, expect);
 }
 
 void datum_to_fv_converter::set_hash_max_size(uint64_t hash_max_size) {

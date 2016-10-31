@@ -30,8 +30,52 @@ class compressor;
 }  // namespace compressor
 class compressive_storage : public storage {
  public:
+  struct config {
+    config()
+      : bucket_size(10000),
+        bucket_length(2),
+        compressed_bucket_size(200),
+        bicriteria_base_size(10),
+        forgetting_factor(2.0),
+        forgetting_threshold(0.05),
+        seed(0) {
+    }
+    int bucket_size;
+    int bucket_length;
+    int compressed_bucket_size;
+    int bicriteria_base_size;
+    double forgetting_factor;
+    double forgetting_threshold;
+    int seed;
+
+    MSGPACK_DEFINE(bucket_size,
+                   bucket_length,
+                   compressed_bucket_size,
+                   bicriteria_base_size,
+                   forgetting_factor,
+                   forgetting_threshold,
+                   seed);
+
+    template<typename Ar>
+    void serialize(Ar& ar) {
+      ar & JUBA_MEMBER(bucket_size)
+        & JUBA_MEMBER(bucket_length)
+        & JUBA_MEMBER(compressed_bucket_size)
+        & JUBA_MEMBER(bicriteria_base_size)
+        & JUBA_MEMBER(forgetting_factor)
+        & JUBA_MEMBER(forgetting_threshold)
+        & JUBA_MEMBER(seed);
+    }
+  };
+
   compressive_storage(
-      const std::string& name, const clustering_config& config);
+      const std::string& name,
+      const int bucket_size,
+      const int bucket_length,
+      const int compressed_bucket_size,
+      const int bicriteria_base_size,
+      const double forgetting_factor,
+      const double forgetting_threshold);
 
   void add(const weighted_point& point);
   wplist get_mine() const;
@@ -49,8 +93,14 @@ class compressive_storage : public storage {
   void clear_impl_();
 
   std::vector<wplist> mine_;
-  uint64_t status_;
   jubatus::util::lang::shared_ptr<compressor::compressor> compressor_;
+  int bucket_size_;
+  int bucket_length_;
+  int compressed_bucket_size_;
+  int bicriteria_base_size_;
+  double forgetting_factor_;
+  double forgetting_threshold_;
+  uint64_t status_;
 };
 
 }  // namespace clustering

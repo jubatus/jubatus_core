@@ -17,9 +17,14 @@
 #include <string>
 #include <gtest/gtest.h>
 #include "jubatus/util/lang/scoped_ptr.h"
-#include "clustering_config.hpp"
 #include "clustering.hpp"
+#include "clustering_factory.hpp"
 #include "testutil.hpp"
+#include "../common/jsonconfig.hpp"
+
+using jubatus::util::text::json::json;
+using jubatus::util::text::json::json_object;
+using jubatus::util::text::json::to_json;
 
 namespace jubatus {
 namespace core {
@@ -29,17 +34,29 @@ class mixable_model_test : public ::testing::Test {
   protected:
   const std::string name_;
   mixable_model_test() : name_("name") {
-    clustering_config cfg;
-    cfg.k = 3;
-    cfg.compressor_method = "compressive_kmeans";
-    cfg.bucket_size = 10000;
-    cfg.compressed_bucket_size = 400;
+    json js(new json_object);
+    js["parameter"] = new json_object;
+    js["parameter"]["k"] = to_json(3);
+    js["parameter"]["seed"] = to_json(0);
+    js["compressor_parameter"] = new json_object;
+    js["compressor_parameter"]["bucket_size"] = to_json(10000);
+    js["compressor_parameter"]["bucket_length"] = to_json(2);
+    js["compressor_parameter"]["compressed_bucket_size"] = to_json(400);
+    js["compressor_parameter"]["bicriteria_base_size"] = to_json(10);
+    js["compressor_parameter"]["forgetting_factor"] = to_json(2);
+    js["compressor_parameter"]["forgetting_threshold"] = to_json(0.05);
+    js["compressor_parameter"]["seed"] = to_json(0);
+    common::jsonconfig::config conf(js);
 
-    model_.reset(new clustering(name_, "kmeans", cfg));
+    model_ = clustering_factory::create(
+              name_,
+              "kmeans",
+              "compressive",
+              conf["parameter"],
+              conf["compressor_parameter"]);
     storage_ = model_->get_storage();
   }
-
-  jubatus::util::lang::scoped_ptr<clustering> model_;
+  jubatus::util::lang::shared_ptr<clustering> model_;
   jubatus::util::lang::shared_ptr<storage> storage_;
 };
 

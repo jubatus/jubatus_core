@@ -19,12 +19,16 @@
 #include "jubatus/util/lang/scoped_ptr.h"
 #include "../common/type.hpp"
 #include "clustering.hpp"
-#include "clustering_config.hpp"
 #include "types.hpp"
 #include "testutil.hpp"
+#include "../common/jsonconfig.hpp"
+#include "clustering_factory.hpp"
 
 using std::vector;
 using jubatus::core::common::sfv_t;
+using jubatus::util::text::json::json;
+using jubatus::util::text::json::json_object;
+using jubatus::util::text::json::to_json;
 
 namespace jubatus {
 namespace core {
@@ -35,19 +39,28 @@ class model_test : public ::testing::Test {
   static const size_t k_ = 2;
 
   model_test() {
-    config_.k = 3;
-    config_.compressor_method = "compressive_kmeans";
-    config_.bucket_size = 10000;
-    config_.compressed_bucket_size = 100;
-    config_.forgetting_threshold = 0.05;
-    config_.forgetting_factor = 2;
-    config_.bucket_length = 4;
-
-    model_.reset(new clustering("test", "kmeans", config_));
+    json js(new json_object);
+    js["parameter"] = new json_object;
+    js["parameter"]["k"] = to_json(3);
+    js["parameter"]["seed"] = to_json(0);
+    js["compressor_parameter"] = new json_object;
+    js["compressor_parameter"]["bucket_size"] = to_json(10000);
+    js["compressor_parameter"]["bucket_length"] = to_json(4);
+    js["compressor_parameter"]["compressed_bucket_size"] = to_json(100);
+    js["compressor_parameter"]["bicriteria_base_size"] = to_json(10);
+    js["compressor_parameter"]["forgetting_factor"] = to_json(2);
+    js["compressor_parameter"]["forgetting_threshold"] = to_json(0.05);
+    js["compressor_parameter"]["seed"] = to_json(0);
+    common::jsonconfig::config conf(js);
+    model_ = clustering_factory::create(
+                     "test",
+                     "kmeans",
+                     "compressive",
+                     conf["parameter"],
+                     conf["compressor_parameter"]);
   }
 
-  jubatus::util::lang::scoped_ptr<clustering> model_;
-  clustering_config config_;
+  jubatus::util::lang::shared_ptr<clustering> model_;
 };
 
 TEST_F(model_test, initial_centers) {
@@ -66,16 +79,16 @@ TEST_F(model_test, push_small) {
 }
 
 TEST_F(model_test, compression_and_clusteringing) {
-  static const size_t N = config_.bucket_size;
+  static const size_t N = 10000;  // bucket_size;
   static const size_t D = 2;
   std::cout << "total adding points : " << N << std::endl;
   model_->push(get_points(N, D));
   vector<weighted_point> coreset = model_->get_coreset();
   ASSERT_EQ(
-      coreset.size(), static_cast<size_t>(config_.compressed_bucket_size));
+     coreset.size(), static_cast<size_t>(100));  // compressed_bucket_size
 
   vector<common::sfv_t> centers = model_->get_k_center();
-  ASSERT_EQ(centers.size(), static_cast<size_t>(config_.k));
+  ASSERT_EQ(centers.size(), static_cast<size_t>(3));  // k
 
   vector<wplist> core_members = model_->get_core_members();
   ASSERT_GT(core_members.size(), 0ul);
@@ -88,17 +101,17 @@ TEST_F(model_test, compression_and_clusteringing) {
 
 
 TEST_F(model_test, bucket_management_and_forgetting) {
-  static const size_t N = config_.bucket_size * 4;
+  static const size_t N = 40000;  // bucket_size * 4;
   static const size_t D = 2;
   model_->push(get_points(N, D));
   vector<weighted_point> coreset = model_->get_coreset();
   ASSERT_EQ(
-      coreset.size(), static_cast<size_t>(config_.compressed_bucket_size));
+      coreset.size(), static_cast<size_t>(100));  // compressed_bucket_size
 
   model_->push(get_points(N, D));
   coreset = model_->get_coreset();
   ASSERT_EQ(
-      coreset.size(), static_cast<size_t>(config_.compressed_bucket_size));
+      coreset.size(), static_cast<size_t>(100));  // compressed_bucket_size
 }
 
 }  // namespace clustering

@@ -19,18 +19,25 @@
 
 #include <string>
 #include "jubatus/util/lang/shared_ptr.h"
-#include "clustering_config.hpp"
 #include "storage.hpp"
 
 namespace jubatus {
 namespace core {
+namespace common {
+namespace jsonconfig {
+class config;
+}  // namespace jsonconfig
+}  // namespace common
+
 namespace clustering {
 
 class storage_factory {
  public:
   static jubatus::util::lang::shared_ptr<storage> create(
       const std::string& name,
-      const clustering_config& config);
+      const std::string& method,
+      const std::string& compressor_method,
+      const core::common::jsonconfig::config& config);
 };
 
 }  // namespace clustering

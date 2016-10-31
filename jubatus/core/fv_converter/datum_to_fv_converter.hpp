@@ -113,10 +113,6 @@ class datum_to_fv_converter {
 
   void add_weight(const std::string& key, float weight);
 
-  void revert_feature(
-      const std::string& feature,
-      std::pair<std::string, std::string>& expect) const;
-
   void set_hash_max_size(uint64_t hash_max_size);
 
   void set_weight_manager(jubatus::util::lang::shared_ptr<weight_manager> wm);

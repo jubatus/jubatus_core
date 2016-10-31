@@ -304,7 +304,7 @@ TEST(datum_to_fv_converter, register_binary_rule) {
     EXPECT_EQ(1u, feature.size());
 
     std::vector<std::pair<std::string, float> > exp;
-    exp.push_back(std::make_pair("/bin", 4.));
+    exp.push_back(std::make_pair("/bin@len", 4.));
 
     std::sort(feature.begin(), feature.end());
     std::sort(exp.begin(), exp.end());

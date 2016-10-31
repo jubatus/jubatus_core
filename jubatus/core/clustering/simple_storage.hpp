@@ -26,17 +26,29 @@ namespace clustering {
 
 class simple_storage : public storage {
  public:
-  simple_storage(const std::string& name, const clustering_config& config);
+  struct config {
+    config()
+      : bucket_size(10000) {
+    }
+    int bucket_size;
+    MSGPACK_DEFINE(bucket_size);
+    template<typename Ar>
+    void serialize(Ar& ar) {
+      ar & JUBA_MEMBER(bucket_size);
+    }
+  };
+
+  simple_storage(const std::string& name, const int bucket_size);
 
   void add(const weighted_point& point);
   wplist get_mine() const;
 
  private:
+  int bucket_size_;
+  wplist mine_;
   void pack_impl_(framework::packer& packer) const;
   void unpack_impl_(msgpack::object o);
   void clear_impl_();
-
-  wplist mine_;
 };
 
 }  // namespace clustering

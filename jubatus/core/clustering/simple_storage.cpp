@@ -25,14 +25,18 @@ namespace clustering {
 
 simple_storage::simple_storage(
     const std::string& name,
-    const clustering_config& config)
-    : storage(name, config) {
+    const int bucket_size)
+  :  storage(name), bucket_size_(bucket_size) {
+    if (!(2 <= bucket_size)) {
+      throw JUBATUS_EXCEPTION(
+          common::invalid_parameter("2 <= bucket_size"));
+    }
 }
 
 void simple_storage::add(const weighted_point& point) {
   static size_t cnt = 0;
   ++cnt;
-  if (cnt % config_.bucket_size == 0) {
+  if (cnt % bucket_size_ == 0) {
     increment_revision();
   }
   mine_.push_back(point);

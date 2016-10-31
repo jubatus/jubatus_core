@@ -29,7 +29,6 @@
 #include "../common/type.hpp"
 #include "../framework/mixable.hpp"
 #include "clustering_method.hpp"
-#include "clustering_config.hpp"
 #include "storage.hpp"
 #include "types.hpp"
 
@@ -54,9 +53,9 @@ class not_performed : public clustering_error {
 class clustering {
  public:
   clustering(
-      const std::string& name,
-      const std::string& method,
-      const clustering_config& cfg);
+      jubatus::util::lang::shared_ptr<clustering_method> clustering_method,
+      jubatus::util::lang::shared_ptr<storage> storage);
+
   virtual ~clustering();
 
   bool push(const std::vector<weighted_point>& points);
@@ -89,7 +88,6 @@ class clustering {
   void update_clusters(const wplist& points, bool batch);
   wplist get_coreset_mine() const;
 
-  clustering_config config_;
   std::string name_;
   std::string method_;
 

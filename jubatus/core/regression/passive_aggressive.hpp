@@ -19,26 +19,23 @@
 
 #include <limits>
 #include "jubatus/util/data/serialization.h"
-#include "regression_base.hpp"
+#include "linear_regression.hpp"
 
 namespace jubatus {
 namespace core {
 namespace regression {
 
-class passive_aggressive : public regression_base {
+class passive_aggressive : public linear_regression {
  public:
   struct config {
     config()
-        : regularization_weight(std::numeric_limits<float>::max()),
-          sensitivity(0.1f) {
+        : sensitivity(0.1f) {
     }
-    float regularization_weight;
     float sensitivity;
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_NAMED_MEMBER("regularization_weight", regularization_weight)
-         & JUBA_NAMED_MEMBER("sensitivity", sensitivity);
+      ar & JUBA_NAMED_MEMBER("sensitivity", sensitivity);
     }
   };
 

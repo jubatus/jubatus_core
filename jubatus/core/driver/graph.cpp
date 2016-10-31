@@ -165,6 +165,10 @@ void graph::create_edge_here(
   }
 }
 
+uint64_t graph::find_max_int_id() const {
+  return graph_->find_max_int_id();
+}
+
 void graph::pack(framework::packer& pk) const {
   graph_->pack(pk);
 }

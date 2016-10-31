@@ -28,6 +28,24 @@ namespace clustering {
 
 class kmeans_clustering_method : public clustering_method {
  public:
+  struct config {
+    config()
+      : k(2), seed(0) {
+    }
+    int k;
+    int64_t seed;
+
+    MSGPACK_DEFINE(
+        k,
+        seed);
+
+    template<typename Ar>
+    void serialize(Ar& ar) {
+      ar & JUBA_MEMBER(k)
+        & JUBA_MEMBER(seed);
+    }
+  };
+
   explicit kmeans_clustering_method(size_t k, uint32_t seed);
   ~kmeans_clustering_method();
 

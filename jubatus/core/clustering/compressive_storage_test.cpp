@@ -27,8 +27,8 @@ namespace clustering {
 
 class simple_compressor : public compressor::compressor {
  public:
-  explicit simple_compressor(const clustering_config& config)
-      : compressor(config) {
+  explicit simple_compressor()
+      : compressor() {
   }
 
   void compress(
@@ -44,18 +44,24 @@ class simple_compressor : public compressor::compressor {
 };
 
 TEST(compressive_storage, carry_up) {
-  clustering_config config;
-  config.bucket_size = 2;
-  config.compressed_bucket_size = 1;
-  config.bicriteria_base_size = 1;
-  config.bucket_length = 2;
-  config.forgetting_factor = 1.0;
-  config.forgetting_threshold = 0.0;  // don't remove
+  int bucket_size = 2;
+  int bucket_length = 2;
+  int bicriteria_base_size = 1;
+  int compressed_bucket_size = 1;
+  double forgetting_factor = 1.0;
+  double forgetting_threshold = 0.0;  // don't remove
 
-  compressive_storage s("", config);
+  compressive_storage s("",
+                        bucket_size,
+                        bucket_length,
+                        compressed_bucket_size,
+                        bicriteria_base_size,
+                        forgetting_factor,
+                        forgetting_threshold);
   s.set_compressor(
-      shared_ptr<compressor::compressor>(
-          new simple_compressor(config)));
+       shared_ptr<compressor::compressor>(
+           new simple_compressor()));
+
   weighted_point p;
   p.weight = 1.0;
 

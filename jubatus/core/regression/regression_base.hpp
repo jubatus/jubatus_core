@@ -19,6 +19,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../common/type.hpp"
 #include "../framework/linear_function_mixer.hpp"
@@ -34,27 +35,32 @@ namespace regression {
 
 class regression_base {
  public:
-  explicit regression_base(storage_ptr storage);
+  regression_base() {
+  }
+  explicit regression_base(storage_ptr storage) {
+  }
 
   virtual ~regression_base() {
   }
 
   virtual void train(const common::sfv_t& fv, const float value) = 0;
-  float estimate(const common::sfv_t& fv) const;
+  virtual float estimate(const common::sfv_t& fv) const = 0;
 
-  virtual void clear();
+  virtual void clear() = 0;
 
   // TODO(beam2d): Think the objective of this function and where it should be
   // defined. Algorithms have |get_status| tentatively to extract status from
   // storages.
-  virtual void get_status(std::map<std::string, std::string>& status) const;
+  virtual void get_status(std::map<std::string, std::string>& status) const = 0;
+  virtual void pack(framework::packer& pk) const = 0;
+  virtual void unpack(msgpack::object o) = 0;
 
-  storage_ptr get_storage();
-
- protected:
-  void update(const common::sfv_t& fv, float coeff);
-
-  storage_ptr storage_;
+  virtual std::vector<framework::mixable*> get_mixables() = 0;
+  // Currently only nearest neighbor regression uses unlearner.
+  virtual void set_unlearner(
+      jubatus::util::lang::shared_ptr<unlearner::unlearner_base>
+      label_unlearner) {
+  }
 };
 
 }  // namespace regression

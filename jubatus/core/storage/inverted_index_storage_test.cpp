@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include "inverted_index_storage.hpp"
 #include "../framework/stream_writer.hpp"
+#include "jubatus/util/lang/cast.h"
 
 using std::make_pair;
 using std::pair;
@@ -28,6 +29,7 @@ using std::string;
 using std::stringstream;
 using std::sqrt;
 using std::vector;
+using jubatus::util::lang::lexical_cast;
 
 namespace jubatus {
 namespace core {
@@ -153,6 +155,7 @@ TEST(inverted_index_storage, column_operations) {
   EXPECT_EQ(3u, ids.size());
 
   s1.remove("c1", "r1");
+  s1.mark_column_removed("r1");
   s1.get_all_column_ids(ids);
   EXPECT_EQ(2u, ids.size());
 
@@ -211,6 +214,79 @@ TEST(inverted_index_storage, mix) {
   EXPECT_EQ(0.0, s2.get("c2", "r1"));
   EXPECT_EQ(0.0, s2.get("c2", "r2"));
   EXPECT_EQ(1.0, s2.get("c2", "r3"));
+}
+
+TEST(inverted_index_storage, mix_removal) {
+  std::vector<std::string> ids;
+
+  // setup s1
+  inverted_index_storage s1;
+  s1.set("c1", "r1", 0.000001);
+  for (size_t i = 100; i < 1024; ++i) {
+    s1.set("c" + lexical_cast<std::string>(i), "r2", i);
+  }
+  s1.set("c2", "r3", 0.0001);
+
+  // setup s2
+  inverted_index_storage s2;
+  for (size_t i = 100; i < 1024; ++i) {
+    s1.set("c" + lexical_cast<std::string>(i), "r2", i);
+  }
+
+  // setup s3
+  inverted_index_storage s3;
+  s3.set("c1", "r4", 0.0001);
+
+  // MIX
+  inverted_index_storage::diff_type d1, d2, d3;
+  s1.get_diff(d1);
+  s2.get_diff(d2);
+  s3.get_diff(d3);
+  s1.mix(d3, d2);  // d3 --> d2
+  s1.mix(d2, d1);  // d2 --> d1
+  s1.put_diff(d1);
+  s2.put_diff(d1);
+  s3.put_diff(d1);
+
+  // rows must be registered in both storage
+  s1.get_all_column_ids(ids);
+  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+  s2.get_all_column_ids(ids);
+  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+  s3.get_all_column_ids(ids);
+  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+
+  // remove column ``r2``
+  for (size_t i = 100; i < 1024; ++i) {
+    s1.remove("c" + lexical_cast<std::string>(i), "r2");
+    s2.remove("c" + lexical_cast<std::string>(i), "r2");
+  }
+  s1.mark_column_removed("r2");
+  s2.mark_column_removed("r2");
+
+  // rows must not be removed from s1 before MIX
+  s1.get_all_column_ids(ids);
+  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+  s2.get_all_column_ids(ids);
+  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+
+  // MIX
+  s1.get_diff(d1);
+  s2.get_diff(d2);
+  s3.get_diff(d3);
+  s1.mix(d3, d2);  // d3 --> d2
+  s1.mix(d2, d1);  // d2 --> d1
+  s1.put_diff(d1);
+  s2.put_diff(d1);
+  s3.put_diff(d1);
+
+  // rows must be removed from both storage after MIX
+  s1.get_all_column_ids(ids);
+  EXPECT_EQ(3, ids.size());  // r1, r3, r4
+  s2.get_all_column_ids(ids);
+  EXPECT_EQ(3, ids.size());  // r1, r3, r4
+  s3.get_all_column_ids(ids);
+  EXPECT_EQ(3, ids.size());  // r1, r3, r4
 }
 
 TEST(inverted_index_storage, empty) {

@@ -19,5 +19,14 @@
 
 #include "regression_base.hpp"
 #include "passive_aggressive.hpp"
+#include "passive_aggressive_1.hpp"
+#include "passive_aggressive_2.hpp"
+#include "perceptron.hpp"
+#include "confidence_weighted.hpp"
+#include "arow.hpp"
+#include "normal_herd.hpp"
+#include "nearest_neighbor_regression.hpp"
+#include "cosine_similarity_regression.hpp"
+#include "euclidean_distance_regression.hpp"
 
 #endif  // JUBATUS_CORE_REGRESSION_REGRESSION_HPP_

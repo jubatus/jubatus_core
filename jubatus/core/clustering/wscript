@@ -14,12 +14,14 @@ def build(bld):
     'storage_factory.cpp',
     'kmeans_compressor.cpp',
     'kmeans_clustering_method.cpp',
+    'dbscan_clustering_method.cpp',
     'clustering_method_factory.cpp',
     'discrete_distribution.cpp',
-    'util.cpp'
+    'util.cpp',
+    'dbscan.cpp',
+    'clustering_factory.cpp'
   ]
   headers = [
-    'clustering_config.hpp',
     'clustering.hpp',
     'clustering_method_factory.hpp',
     'clustering_method.hpp',
@@ -33,12 +35,15 @@ def build(bld):
     'gmm.hpp',
     'gmm_types.hpp',
     'kmeans_clustering_method.hpp',
+    'dbscan_clustering_method.hpp',
     'kmeans_compressor.hpp',
     'simple_storage.hpp',
     'storage_factory.hpp',
     'storage.hpp',
     'types.hpp',
     'util.hpp',
+    'dbscan.hpp',
+    'clustering_factory.hpp'
   ]
   if bld.env.USE_EIGEN:
     source += [
@@ -61,6 +66,9 @@ def build(bld):
     'model_test.cpp',
     'storage_test.cpp',
     'util_test.cpp',
+    'dbscan_test.cpp'
+    'dbscan_test.cpp',
+    'clustering_factory_test.cpp'
   ]
   if bld.env.USE_EIGEN:
     test_cases += [

@@ -27,16 +27,11 @@ namespace regression {
 passive_aggressive::passive_aggressive(
     const config& config,
     storage_ptr storage)
-    : regression_base(storage),
+    : linear_regression(storage),
       config_(config),
       sum_(0.f),
       sq_sum_(0.f),
       count_(0.f) {
-
-  if (!(0.f < config.regularization_weight)) {
-    throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("0.0 < regularization_weight"));
-  }
 
   if (!(0.f <= config.sensitivity)) {
     throw JUBATUS_EXCEPTION(
@@ -45,7 +40,7 @@ passive_aggressive::passive_aggressive(
 }
 
 passive_aggressive::passive_aggressive(storage_ptr storage)
-    : regression_base(storage),
+    : linear_regression(storage),
       sum_(0.f),
       sq_sum_(0.f),
       count_(0.f) {
@@ -72,8 +67,7 @@ void passive_aggressive::train(const common::sfv_t& fv, float value) {
   float loss = sign_error * error - config_.sensitivity * std_dev;
 
   if (loss > 0.f) {
-    float C = config_.regularization_weight;
-    float coeff = sign_error * std::min(C, loss) / squared_norm(fv);
+    float coeff = sign_error * loss / squared_norm(fv);
     if (!std::isinf(coeff)) {
       update(fv, coeff);
     }
@@ -81,7 +75,7 @@ void passive_aggressive::train(const common::sfv_t& fv, float value) {
 }
 
 void passive_aggressive::clear() {
-  regression_base::clear();
+  linear_regression::clear();
   sum_ = 0.f;
   sq_sum_ = 0.f;
   count_ = 0.f;
