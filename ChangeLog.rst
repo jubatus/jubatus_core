@@ -1,3 +1,22 @@
+Release 1.0.0 - 2016/10/31
+--------------------------
+
+* New Machine Learning Algorithms
+    * clustering: add DBSCAN algorithm (#330, #332)
+    * regression: add ``perceptron``, ``PA``, ``PA2``, ``CW``, ``AROW``, ``NHERD``, ``NN``, ``cosine`` and ``euclidean`` (#327, #328)
+
+* Improvements
+    * clustering: improve APIs to make each Datum distinguishable by user-specified ID (#317, #326)
+    * clustering: improve config format and parameter range checking (#314, #316, #325, #334, #335)
+    * graph: add method to return the largest ID (#333)
+    * classifier and regression: Rename ``diff_size`` to ``num_features_diff`` status key (#336)
+    * Improve binary feature key names to include the rule name (#329)
+    * regression: remove unused argument from driver constructor (#319, #320)
+    * Remove unused revert function (#315, #331)
+
+* Bug fixes
+    * recommender: fix rows not cleared occasionally in ``inverted_index`` and ``inverted_index_euclid`` (#318)
+
 Release 0.3.4 - 2016/08/29
 --------------------------
 
