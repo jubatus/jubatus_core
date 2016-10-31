@@ -43,9 +43,9 @@ class dbscan {
   std::vector<int> point_states_;
   std::vector<wplist> clusters_;
 
-  static const int UNCLASSIFIED = 0;
-  static const int CLASSIFIED = 1;
-  static const int NOISE = -1;
+  static const int UNCLASSIFIED;
+  static const int CLASSIFIED;
+  static const int NOISE;
 };
 
 }  // namespace clustering

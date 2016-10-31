@@ -30,6 +30,10 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
+const int dbscan::UNCLASSIFIED = 0;
+const int dbscan::CLASSIFIED = 1;
+const int dbscan::NOISE = -1;
+
 dbscan::dbscan(double eps, size_t min_core_point)
     : eps_(eps),
       min_core_point_(min_core_point) {
