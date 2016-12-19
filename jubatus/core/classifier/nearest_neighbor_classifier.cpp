@@ -169,6 +169,7 @@ bool nearest_neighbor_classifier::delete_label(const std::string& label) {
     const std::string& id = ids_to_be_deleted[i];
     table->delete_row_nolock(id);
     if (unlearner_) {
+      util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
       unlearner_->remove(id);
     }
   }
@@ -180,6 +181,7 @@ void nearest_neighbor_classifier::clear() {
   nearest_neighbor_engine_->clear();  // lock acquired inside
   labels_.clear();
   if (unlearner_) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     unlearner_->clear();
   }
 }
