@@ -1,5 +1,5 @@
 # -*- python -*-
-import Options
+from waflib import Options
 
 subdirs = "util core"
 

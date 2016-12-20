@@ -1,5 +1,5 @@
 # -*- python -*-
-import Options
+from waflib import Options
 
 def options(opt):
   opt.add_option('--regexp-library',
@@ -162,11 +162,11 @@ def build(bld):
 
   use = ['jubatus_util', 'MSGPACK']
 
-  if bld.env.HAVE_RE2:
+  if 'HAVE_RE2' in bld.env.define_key:
     source += ['re2_match.cpp', 're2_filter.cpp', 're2_splitter.cpp' ]
     test_source += regex_test_source
     use += ['RE2']
-  elif bld.env.HAVE_ONIGURUMA:
+  elif 'HAVE_ONIGURUMA' in bld.env.define_key:
     source += ['onig_match.cpp', 'onig_filter.cpp', 'onig_splitter.cpp']
     test_source += regex_test_source
     use += ['ONIG']
