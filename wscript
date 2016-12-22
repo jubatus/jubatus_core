@@ -90,6 +90,7 @@ def configure(conf):
     conf.env.append_value('CXXFLAGS', '-fprofile-arcs')
     conf.env.append_value('CXXFLAGS', '-ftest-coverage')
     conf.env.append_value('LINKFLAGS', '-lgcov')
+    conf.env.append_value('LINKFLAGS', '--coverage')
 
   sanitizer_names = Options.options.fsanitize
   if len(sanitizer_names) > 0:
