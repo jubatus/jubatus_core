@@ -14,42 +14,34 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_CLUSTERING_DBSCAN_HPP_
-#define JUBATUS_CORE_CLUSTERING_DBSCAN_HPP_
+#include "dynamic_binary_feature.hpp"
 
+#include <map>
+#include <string>
+#include <utility>
 #include <vector>
-#include "types.hpp"
+
+using std::string;
 
 namespace jubatus {
 namespace core {
-namespace clustering {
+namespace fv_converter {
 
-class dbscan {
- public:
-  dbscan(double eps, size_t min_core_point);
+dynamic_binary_feature::dynamic_binary_feature(
+    const string& path,
+    const string& function,
+    const std::map<string, string>& params)
+    : loader_(path),
+      impl_(load_object<binary_feature>(loader_, function, params)) {
+}
 
-  void batch(const wplist& points);
-  std::vector<int> get_point_states() const;
-  std::vector<wplist> get_clusters() const;
-  void set_eps(double eps);
+void dynamic_binary_feature::add_feature(
+    const string& key,
+    const string& value,
+    std::vector<std::pair<string, float> >& ret_fv) const {
+  impl_->add_feature(key, value, ret_fv);
+}
 
- private:
-  wplist expand_cluster(const size_t idx, const wplist& points);
-  std::vector<size_t> region_query(
-      const size_t idx, const wplist& points) const;
-
-  double eps_;
-  size_t min_core_point_;
-  std::vector<int> point_states_;
-  std::vector<wplist> clusters_;
-
-  static const int UNCLASSIFIED;
-  static const int CLASSIFIED;
-  static const int NOISE;
-};
-
-}  // namespace clustering
+}  // namespace fv_converter
 }  // namespace core
-}  // namesapce jubatus
-
-#endif  // JUBATUS_CORE_CLUSTERING_DBSCAN_HPP_
+}  // namespace jubatus

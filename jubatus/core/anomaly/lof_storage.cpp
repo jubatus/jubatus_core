@@ -82,7 +82,8 @@ lof_storage::lof_storage(
     shared_ptr<recommender::recommender_base> nn_engine)
     : neighbor_num_(config.nearest_neighbor_num),
       reverse_nn_num_(config.reverse_nearest_neighbor_num),
-      ignore_kth_same_point_(config.ignore_kth_same_point),
+      ignore_kth_same_point_(
+          config.ignore_kth_same_point && *config.ignore_kth_same_point),
       nn_engine_(nn_engine) {
 }
 

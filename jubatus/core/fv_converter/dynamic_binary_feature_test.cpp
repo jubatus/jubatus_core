@@ -14,42 +14,35 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#ifndef JUBATUS_CORE_CLUSTERING_DBSCAN_HPP_
-#define JUBATUS_CORE_CLUSTERING_DBSCAN_HPP_
-
-#include <vector>
-#include "types.hpp"
+#include <map>
+#include <string>
+#include <gtest/gtest.h>
+#include "jubatus/util/lang/scoped_ptr.h"
+#include "jubatus/core/common/type.hpp"
+#include "dynamic_binary_feature.hpp"
 
 namespace jubatus {
 namespace core {
-namespace clustering {
+namespace fv_converter {
 
-class dbscan {
- public:
-  dbscan(double eps, size_t min_core_point);
+TEST(dynamic_binary_feature, trivial) {
+  std::map<std::string, std::string> params;
 
-  void batch(const wplist& points);
-  std::vector<int> get_point_states() const;
-  std::vector<wplist> get_clusters() const;
-  void set_eps(double eps);
+  {
+    dynamic_binary_feature f(
+        LIBBINARY_FEATURE_SAMPLE,
+        "create",
+        params);
+    jubatus::core::common::sfv_t fv;
+    f.add_feature("/path", "value", fv);
 
- private:
-  wplist expand_cluster(const size_t idx, const wplist& points);
-  std::vector<size_t> region_query(
-      const size_t idx, const wplist& points) const;
+    ASSERT_EQ(1u, fv.size());
+    EXPECT_EQ("/path", fv[0].first);
+    // This plugin returns length of a given value.
+    EXPECT_EQ(5., fv[0].second);
+  }
+}
 
-  double eps_;
-  size_t min_core_point_;
-  std::vector<int> point_states_;
-  std::vector<wplist> clusters_;
-
-  static const int UNCLASSIFIED;
-  static const int CLASSIFIED;
-  static const int NOISE;
-};
-
-}  // namespace clustering
+}  // namespace fv_converter
 }  // namespace core
-}  // namesapce jubatus
-
-#endif  // JUBATUS_CORE_CLUSTERING_DBSCAN_HPP_
+}  // namespace jubatus

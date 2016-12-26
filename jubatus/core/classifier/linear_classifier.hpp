@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "jubatus/util/concurrent/mutex.h"
 
 #include "../common/type.hpp"
 #include "../framework/linear_function_mixer.hpp"
@@ -101,6 +102,7 @@ class linear_classifier : public classifier_base {
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   framework::linear_function_mixer mixable_storage_;
   storage::mixable_labels labels_;
+  mutable jubatus::util::concurrent::mutex unlearner_mutex_;
 };
 
 }  // namespace classifier

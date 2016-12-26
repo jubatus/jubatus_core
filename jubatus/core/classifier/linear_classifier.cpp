@@ -99,6 +99,7 @@ void linear_classifier::clear() {
   storage_->clear();
   labels_.get_model()->clear();
   if (unlearner_) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     unlearner_->clear();
   }
 }
@@ -113,6 +114,7 @@ bool linear_classifier::set_label(const string& label) {
   bool result = storage_->set_label(label);
   result = labels_.get_model()->add(label) && result;
   if (unlearner_ && result) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     result = unlearner_->touch(label);
   }
 
@@ -124,6 +126,7 @@ void linear_classifier::get_status(std::map<string, string>& status) const {
   status["storage"] = storage_->type();
 
   if (unlearner_) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     unlearner_->get_status(status);
   }
 }
@@ -235,15 +238,19 @@ void linear_classifier::touch(const std::string& label) {
   check_touchable(label);
 
   if (unlearner_) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     unlearner_->touch(label);
   }
 }
 
 void linear_classifier::check_touchable(const std::string& label) {
-  if (unlearner_ && !unlearner_->can_touch(label)) {
-    throw JUBATUS_EXCEPTION(common::exception::runtime_error(
-        "cannot add new label as number of sticky labels reached "
-        "the maximum size of unlearner: " + label));
+  if (unlearner_) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
+    if (!unlearner_->can_touch(label)) {
+      throw JUBATUS_EXCEPTION(common::exception::runtime_error(
+          "cannot add new label as number of sticky labels reached "
+          "the maximum size of unlearner: " + label));
+    }
   }
 }
 
@@ -253,6 +260,7 @@ bool linear_classifier::delete_label(const std::string& label) {
   result = labels_.get_model()->erase(label) && result;
 
   if (unlearner_ && result) {
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
     // Notify unlearner that the label was removed.
     result = unlearner_->remove(label);
   }

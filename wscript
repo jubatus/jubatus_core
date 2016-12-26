@@ -1,11 +1,11 @@
 # -*- python -*-
-import Options
+from waflib import Options
 from waflib.Errors import TaskNotReady
 from functools import partial
 import os
 import sys
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 ABI_VERSION = VERSION
 APPNAME = 'jubatus_core'
 
@@ -72,6 +72,13 @@ def configure(conf):
     must be recompiled with this option.
     """
     # conf.define('_GLIBCXX_DEBUG', 1)
+
+    """
+    The following flag enables sanity check to detect double acquision of a read lock of pthread_rwlock
+    in the same thread.  More precisely, it raises assertion if the thread that already owns read lock
+    tries to take a read/write lock.
+    """
+    conf.define('JUBATUS_UTIL_CONCURRENT_RWMUTEX_ERRORCHECK', 1)
   else:
     # Disable standard assertions
     conf.define('NDEBUG', 1)
@@ -83,6 +90,7 @@ def configure(conf):
     conf.env.append_value('CXXFLAGS', '-fprofile-arcs')
     conf.env.append_value('CXXFLAGS', '-ftest-coverage')
     conf.env.append_value('LINKFLAGS', '-lgcov')
+    conf.env.append_value('LINKFLAGS', '--coverage')
 
   sanitizer_names = Options.options.fsanitize
   if len(sanitizer_names) > 0:

@@ -66,7 +66,7 @@ void euclidean_distance_classifier::classify_with_scores(
 }
 
 std::string euclidean_distance_classifier::name() const {
-  return "cosine similarity classifier";
+  return "euclidean distance classifier";
 }
 
 }  // namespace classifier
