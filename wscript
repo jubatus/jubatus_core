@@ -52,8 +52,10 @@ def configure(conf):
   conf.check_cxx(lib = 'pthread')
 
   # Generate config.hpp
+  conf.env.JUBATUS_PLUGIN_DIR = conf.env['LIBDIR'] + '/jubatus/plugin'
   conf.define('JUBATUS_CORE_VERSION', VERSION)
   conf.define('JUBATUS_CORE_APPNAME', APPNAME)
+  conf.define('JUBATUS_PLUGIN_DIR', conf.env.JUBATUS_PLUGIN_DIR)
   conf.write_config_header('jubatus/core_config.hpp', guard="JUBATUS_CORE_CONFIG_HPP_", remove=False)
 
   # Version constants
