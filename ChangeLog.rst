@@ -1,3 +1,16 @@
+Release 1.0.1 - 2016/12/26
+--------------------------
+
+* Improvements
+    * fv_converter plugin loading code moved from Jubatus server (#338)
+    * Add rwmutex sanity check assertion (#312)
+    * Upgrade waf to support build with Python 3.5 (#277, #308)
+
+* Bug fixes
+    * anomaly: fix ``"ignore_kth_same_point": false`` treated as ``true`` (#340)
+    * classifier: fix euclidean distance classifier name (#341)
+    * classifier: fix unlearner not protected by mutex (#311, #343)
+
 Release 1.0.0 - 2016/10/31
 --------------------------
 
