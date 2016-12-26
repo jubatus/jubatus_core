@@ -23,6 +23,19 @@
 #include "dynamic_loader.hpp"
 #include "exception.hpp"
 
+namespace {
+
+bool is_absolute_or_relative_path(const std::string& path) {
+  return path.find('/') != std::string::npos;
+}
+
+const char* get_plugin_path() {
+  return ::getenv("JUBATUS_PLUGIN_PATH");
+}
+
+}  // namespace
+
+
 namespace jubatus {
 namespace core {
 namespace fv_converter {
@@ -30,10 +43,34 @@ namespace fv_converter {
 dynamic_loader::dynamic_loader(const std::string& path)
     : handle_(0) {
 
-  // Load the plugin with the given path
-  handle_ = ::dlopen(path.c_str(), RTLD_LAZY);
+  void* handle = NULL;
+  std::string loaded_path;
 
-  if (!handle_) {
+  if (is_absolute_or_relative_path(path)) {
+    // If the path contains "/", load the plugin with the given path.
+    handle = ::dlopen(path.c_str(), RTLD_LAZY);
+    loaded_path = path;
+  } else {
+    // Try to load the plugin from the plugin path environment.
+    const char* plugin_dir = get_plugin_path();
+    if (plugin_dir) {
+      const std::string plugin_path =
+          std::string(plugin_dir) + "/" + path;
+      handle = ::dlopen(plugin_path.c_str(), RTLD_LAZY);
+      loaded_path = plugin_path;
+    }
+
+    // If failed, try to load it from the plugin directory specified on
+    // configure.
+    if (!handle) {
+      const std::string plugin_path =
+          std::string(JUBATUS_PLUGIN_DIR) + "/" + path;
+      handle = ::dlopen(plugin_path.c_str(), RTLD_LAZY);
+      loaded_path = plugin_path;
+    }
+  }
+
+  if (!handle) {
     char* error = dlerror();
     throw JUBATUS_EXCEPTION(
         converter_exception(
@@ -42,6 +79,8 @@ dynamic_loader::dynamic_loader(const std::string& path)
         << jubatus::core::common::exception::error_file_name(path)
         << jubatus::core::common::exception::error_message(error));
   }
+
+  handle_ = handle;
 }
 
 dynamic_loader::~dynamic_loader() {
