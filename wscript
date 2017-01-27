@@ -140,7 +140,13 @@ def build(bld):
   bld.recurse(subdirs)
 
   # core
-  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=list(set(bld.core_use)), vnum = ABI_VERSION)
+  use_list = list(set(bld.core_use))
+  if bld.env.COMPILER_CXX == 'g++' and int(bld.env.CC_VERSION[0]) < 6:
+    # workaround
+    # https://bugs.launchpad.net/ubuntu/+source/gcc-5/+bug/1568899
+    use_list.append('GCC_WORKAROUND')
+    bld.env.LIB_GCC_WORKAROUND = ['gcc_s', 'gcc']
+  bld.shlib(source=list(set(bld.core_sources)), target='jubatus_core', use=use_list, vnum = ABI_VERSION)
   bld.install_files('${PREFIX}/include/', list(set(bld.core_headers)), relative_trick=True)
 
 
