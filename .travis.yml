@@ -65,10 +65,11 @@ before_script:
   - docker exec -t test bash -ic "g++ --version"
 
 script:
-  - docker exec -t test bash -ic "./waf configure"
+  - docker exec -t test bash -ic "./waf configure --prefix=/usr"
   - docker exec -t test bash -ic "./waf build --checkall"
   - docker exec -t test bash -ic "./waf cpplint"
   - if [ -n "$SCL" ]; then docker exec test ./waf build --checkall; fi
+  - docker exec -t test bash -ic "./waf install; ldconfig; python -c 'import ctypes; ctypes.cdll.LoadLibrary(\"libjubatus_core.so\")'"
 
 branches:
   only:
