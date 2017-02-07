@@ -54,7 +54,7 @@ install:
   - if [ "$DIST" == "ubuntu" ]; then
       docker exec test apt-get update;
       docker exec test apt-get -qq install lsb-release autoconf automake make g++ python2.7 wget tar bzip2 libmsgpack-dev;
-      docker exec test bash -c "wget --no-check-certificate https://github.com/kkos/oniguruma/releases/download/v5.9.6/onig-5.9.6.tar.gz && tar xvf onig-5.9.6.tar.gz && cd onig-5.9.6 && ./configure && make && make install && ldconfig";
+      docker exec test bash -c "wget --no-check-certificate https://github.com/kkos/oniguruma/releases/download/v5.9.6/onig-5.9.6.tar.gz && tar xvf onig-5.9.6.tar.gz && cd onig-5.9.6 && ./configure --prefix=/usr && make && make install && ldconfig";
       if [ "$VERSION" != "12.04" ]; then
         docker exec test ln -sf /usr/bin/python2.7 /usr/bin/python;
       fi;
