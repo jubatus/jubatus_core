@@ -120,6 +120,8 @@ int main() { test(); }
   if not func_multiver_enabled:
     sse2_test_code = '#ifdef __SSE2__\nint main() {}\n#else\n#error\n#endif'
     conf.check_cxx(fragment=sse2_test_code, msg='Checking for sse2', mandatory=False)
+  if func_multiver_enabled and env.COMPILER_CXX == 'g++' and int(ver[0]) < 6:
+    conf.env.append_unique('LINKFLAGS', '-fuse-ld=gold')
 
   conf.recurse(subdirs)
 
