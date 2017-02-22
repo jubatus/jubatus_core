@@ -373,7 +373,7 @@ class column_table {
   }
 
   bool delete_row_nolock(uint64_t index) {
-    if (size() <= index) {
+    if (size_nolock() <= index) {
       return false;
     }
     delete_row_(index);
@@ -406,7 +406,7 @@ class column_table {
   index_table index_;
 
   void delete_row_(uint64_t index) {
-    JUBATUS_ASSERT_LT(index, size(), "");
+    JUBATUS_ASSERT_LT(index, size_nolock(), "");
 
     for (std::vector<detail::abstract_column>::iterator jt = columns_.begin();
          jt != columns_.end();
