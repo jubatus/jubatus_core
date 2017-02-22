@@ -328,7 +328,7 @@ class column_table {
 
   bool update_clock(const uint64_t index, const owner& o) {
     jubatus::util::concurrent::scoped_wlock lk(table_lock_);
-    if (size() < index) {
+    if (size_nolock() < index) {
       return false;
     }
     versions_[index] = std::make_pair(o, clock_);
