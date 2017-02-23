@@ -8,7 +8,7 @@ See http://jubat.us/ for details of Jubatus.
 How to install
 -----------
 
-We officially support Red Hat Enterprise Linux (RHEL) 6.2 or later (64-bit) and Ubuntu Server 12.04 LTS / 14.04 LTS (64-bit).
+We officially support Red Hat Enterprise Linux (RHEL) 6.2 or later (64-bit) and Ubuntu Server 12.04 LTS / 14.04 LTS / 16.04 LTS (64-bit).
 On supported systems, you can install all components of Jubatus using binary packages.
 
 If you have already installed Jubatus 0.6.0 or later, you can already use jubatus_core.
