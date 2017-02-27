@@ -5,7 +5,7 @@ from functools import partial
 import os
 import sys
 
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 ABI_VERSION = VERSION
 APPNAME = 'jubatus_core'
 

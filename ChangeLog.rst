@@ -1,3 +1,12 @@
+Release 1.0.2 - 2017/02/27
+--------------------------
+
+* Improvements
+    * Support building on Ubuntu 16.04 (#282, #345, #346, #347)
+
+* Bug fixes
+    * Fix double acquision of read locks (#342)
+
 Release 1.0.1 - 2016/12/26
 --------------------------
 
