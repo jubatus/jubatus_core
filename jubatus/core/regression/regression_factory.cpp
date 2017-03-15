@@ -98,7 +98,7 @@ shared_ptr<regression_base> regression_factory::create_regression(
             conf.method, conf.parameter, table, ""));
     shared_ptr<regression_base> res(new regression::nearest_neighbor_regression(
                                         nearest_neighbor_engine,
-                                        conf.nearest_neighbor_num));
+                                        conf));
     if (unlearner) {
       res->set_unlearner(unlearner);
     }
@@ -112,7 +112,7 @@ shared_ptr<regression_base> regression_factory::create_regression(
     regression::inverted_index_regression::config conf
       = config_cast_check<regression::inverted_index_regression::config>(param);
     return shared_ptr<regression::cosine_similarity_regression> (
-      new regression::cosine_similarity_regression(conf.nearest_neighbor_num));
+      new regression::cosine_similarity_regression(conf));
   } else if (name == "euclidean") {
     if (param.type() == jubatus::util::text::json::json::Null) {
       throw JUBATUS_EXCEPTION(
@@ -122,7 +122,7 @@ shared_ptr<regression_base> regression_factory::create_regression(
     regression::inverted_index_regression::config conf
       = config_cast_check<regression::inverted_index_regression::config>(param);
     return shared_ptr<regression::euclidean_distance_regression> (
-      new regression::euclidean_distance_regression(conf.nearest_neighbor_num));
+            new regression::euclidean_distance_regression(conf));
   } else {
     throw JUBATUS_EXCEPTION(common::unsupported_method(name));
   }

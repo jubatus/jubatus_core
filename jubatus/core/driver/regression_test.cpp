@@ -98,6 +98,7 @@ shared_ptr<core::regression::regression_base> make_nn_regression() {
   js["parameter"] = json(new json_object);
   js["parameter"]["hash_num"] = to_json(8);
   js["nearest_neighbor_num"] = to_json(5);
+  js["weight"] = to_json(std::string("distance"));
   common::jsonconfig::config param(js);
   core::regression::nearest_neighbor_regression::config conf
     = config_cast_check<core::regression::nearest_neighbor_regression::config>(
@@ -109,14 +110,21 @@ shared_ptr<core::regression::regression_base> make_nn_regression() {
   shared_ptr<core::regression::regression_base> res(
        new core::regression::nearest_neighbor_regression(
            nearest_neighbor_engine,
-           conf.nearest_neighbor_num));
+           conf));
   return res;
 }
 
 shared_ptr<core::regression::regression_base> make_inverted_index_regression() {
   shared_ptr<storage::storage_base> storage(new storage::local_storage);
+  json js(new json_object);
+  js["nearest_neighbor_num"] = to_json(5);
+  js["weight"] = to_json(std::string("distance"));
+  common::jsonconfig::config param(js);
+  core::regression::inverted_index_regression::config conf
+    = config_cast_check<core::regression::inverted_index_regression::config>(
+        param);
   return shared_ptr<core::regression::regression_base> (
-      new core::regression::cosine_similarity_regression(10));
+      new core::regression::cosine_similarity_regression(conf));
 }
 
 void regression_test::my_test() {

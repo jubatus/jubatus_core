@@ -30,7 +30,7 @@ namespace core {
 namespace regression {
 
 cosine_similarity_regression::cosine_similarity_regression(
-    size_t k) : inverted_index_regression(k) {
+    const config& conf): inverted_index_regression(conf) {
 }
 
 float cosine_similarity_regression::estimate(
@@ -38,24 +38,45 @@ float cosine_similarity_regression::estimate(
   std::vector<std::pair<std::string, float> > ids;
   {
     util::concurrent::scoped_rlock lk(storage_mutex_);
-    mixable_storage_->get_model()->calc_scores(fv, ids, k_);
+    mixable_storage_->get_model()->calc_scores(
+        fv, ids, config_.nearest_neighbor_num);
   }
-  float sum = 0.0;
   if (ids.size() > 0) {
-    for (std::vector<std::pair<std::string, float> >::const_iterator
-           it = ids.begin();
-         it != ids.end(); ++it) {
-      const std::pair<bool, uint64_t> index =
-          values_->get_model()->exact_match(it->first);
-      sum += values_->get_model()->get_float_column(0)[index.second];
+    float sum = 0.0;
+    if (config_.weight && *config_.weight == "distance") {
+      float sum_w = 0.0;
+       for (std::vector<std::pair<std::string, float> >:: const_iterator
+                it = ids.begin(); it != ids.end(); ++it) {
+         const std::pair<bool, uint64_t> index =
+             values_->get_model()->exact_match(it->first);
+         float t = values_->get_model()->get_float_column(0)[index.second];
+         // The range of cosine similarity score is [-1.0, 1.0].
+         float d = (1.0 - it->second) / 2.0;
+         if (d == 0.0) {
+           // In case distance equals zero, returns the vector's target value.
+           return t;
+         } else {
+           float w = 1.0 / d;
+           sum += w * t;
+           sum_w += w;
+         }
+      }
+      return sum / sum_w;
+    } else {
+      for (std::vector<std::pair<std::string, float> >:: const_iterator
+               it = ids.begin(); it != ids.end(); ++it) {
+        const std::pair<bool, uint64_t> index =
+            values_->get_model()->exact_match(it->first);
+        sum += values_->get_model()->get_float_column(0)[index.second];
     }
-    return sum / ids.size();
+      return sum / ids.size();
+    }
   } else {
-    return 0;
+      return 0;
   }
 }
 
-std::string cosine_similarity_regression:: name() const {
+std::string cosine_similarity_regression::name() const {
     return "cosine similarity regression";
 }
 

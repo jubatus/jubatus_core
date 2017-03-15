@@ -58,9 +58,9 @@ class nearest_neighbor_regression::unlearning_callback {
 
 nearest_neighbor_regression::nearest_neighbor_regression(
     shared_ptr<nearest_neighbor::nearest_neighbor_base> engine,
-    size_t k)
-  : nearest_neighbor_engine_(engine), k_(k) {
-  if (!(k >= 1)) {
+    const config& conf)
+  : nearest_neighbor_engine_(engine), config_(conf) {
+  if (!(conf.nearest_neighbor_num >= 1)) {
     throw JUBATUS_EXCEPTION(common::invalid_parameter(
         "nearest_neighbor_num should >= 1"));
   }
@@ -111,18 +111,37 @@ float nearest_neighbor_regression::estimate(
     const common::sfv_t& fv) const {
   std::vector<std::pair<std::string, float> > ids;
   // lock acquired inside
-  nearest_neighbor_engine_->neighbor_row(fv, ids, k_);
-  float sum = 0.0;
+  nearest_neighbor_engine_->neighbor_row(fv, ids, config_.nearest_neighbor_num);
 
   if (ids.size() > 0) {
-    for (std::vector<std::pair<std::string, float> >::const_iterator
-           it = ids.begin();
-         it != ids.end(); ++it) {
-      const std::pair<bool, uint64_t> index =
-        values_->get_model()->exact_match(it->first);
-      sum += values_->get_model()->get_float_column(0)[index.second];
+    float sum = 0.0;
+    if (config_.weight && *config_.weight == "distance") {
+      float sum_w = 0.0;
+      for (std::vector<std::pair<std::string, float> >::const_iterator
+               it = ids.begin(); it != ids.end(); ++it) {
+        const std::pair<bool, uint64_t> index =
+            values_->get_model()->exact_match(it->first);
+        float t = values_->get_model()->get_float_column(0)[index.second];
+        float d = it->second;
+        if (d == 0.0) {
+          // In case distance equals zero, returns the vector's target value.
+          return t;
+        } else {
+          float w = 1.0 / d;
+          sum += w * t;
+          sum_w += w;
+        }
+      }
+      return sum / sum_w;
+    } else {
+      for (std::vector<std::pair<std::string, float> >:: const_iterator
+               it = ids.begin(); it != ids.end(); ++it) {
+        const std::pair<bool, uint64_t> index =
+            values_->get_model()->exact_match(it->first);
+        sum += values_->get_model()->get_float_column(0)[index.second];
     }
-    return sum / ids.size();
+      return sum / ids.size();
+    }
   } else {
     return 0;
   }

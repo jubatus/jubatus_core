@@ -37,11 +37,19 @@ namespace jubatus {
 namespace core {
 namespace regression {
 
+const size_t DEFAULT_NEIGHBOR_NUM = 10;
+const std::string DEFAULT_WEIGHT = "uniform";
+
+inverted_index_regression::config::config()
+    : nearest_neighbor_num(DEFAULT_NEIGHBOR_NUM),
+      weight(DEFAULT_WEIGHT) {
+}
+
 inverted_index_regression::inverted_index_regression(
-    size_t k) :
+    const config& conf) :
   mixable_storage_(),
-  k_(k) {
-  if (!(k >= 1)) {
+  config_(conf) {
+  if (!(conf.nearest_neighbor_num >= 1)) {
     throw JUBATUS_EXCEPTION(common::invalid_parameter(
         "nearest neighbor num >= 1"));
   }

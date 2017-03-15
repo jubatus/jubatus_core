@@ -27,7 +27,7 @@
 #include "jubatus/util/concurrent/lock.h"
 #include "jubatus/util/concurrent/mutex.h"
 #include "jubatus/util/concurrent/rwmutex.h"
-
+#include "jubatus/util/data/optional.h"
 #include "../common/type.hpp"
 #include "../framework/packer.hpp"
 #include "../framework/mixable.hpp"
@@ -45,17 +45,18 @@ namespace regression {
 class inverted_index_regression : public regression_base {
  public:
   struct config {
-    config() : nearest_neighbor_num(10) {
-    }
+    config();
     int nearest_neighbor_num;
+    jubatus::util::data::optional<std::string> weight;
 
     template<typename Ar>
     void serialize(Ar& ar) {
-      ar & JUBA_MEMBER(nearest_neighbor_num);
+      ar & JUBA_MEMBER(nearest_neighbor_num)
+         & JUBA_MEMBER(weight);
     }
   };
 
-  explicit inverted_index_regression(size_t k);
+  explicit inverted_index_regression(const config& config);
   void train(const common::sfv_t& fv, const float value);
   virtual float estimate(const common::sfv_t& fv) const = 0;
   std::string name() const;
@@ -73,7 +74,7 @@ class inverted_index_regression : public regression_base {
       mixable_storage_;
   jubatus::util::lang::shared_ptr<framework::mixable_versioned_table> values_;
   // A map from label to number of records that belongs to the label.
-  size_t k_;
+  config config_;
   mutable jubatus::util::concurrent::rw_mutex storage_mutex_;
   jubatus::util::concurrent::mutex rand_mutex_;
   jubatus::util::math::random::mtrand rand_;
