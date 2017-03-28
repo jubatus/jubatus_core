@@ -53,6 +53,12 @@ inverted_index_regression::inverted_index_regression(
     throw JUBATUS_EXCEPTION(common::invalid_parameter(
         "nearest neighbor num >= 1"));
   }
+  if (conf.weight) {
+    if (!(*conf.weight == "distance") && !(*conf.weight == "uniform")) {
+      throw JUBATUS_EXCEPTION(common::invalid_parameter(
+        "weight option must be distance or uniform"));
+    }
+  }
   typedef storage::inverted_index_storage ii_storage;
   typedef storage::mixable_inverted_index_storage mii_storage;
   jubatus::util::lang::shared_ptr<ii_storage> p(new ii_storage);

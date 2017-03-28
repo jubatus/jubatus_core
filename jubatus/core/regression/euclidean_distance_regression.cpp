@@ -46,29 +46,36 @@ float euclidean_distance_regression::estimate(
     float sum = 0.0;
     if (config_.weight && *config_.weight == "distance") {
       float sum_w = 0.0;
-      for (std::vector<std::pair<std::string, float> >:: const_iterator
+      if (ids[0].second == 0.0) {
+        // in case same points exist, return mean value of their target values.
+        for (std::vector<std::pair<std::string, float> >:: const_iterator
                it = ids.begin(); it != ids.end(); ++it) {
-        const std::pair<bool, uint64_t> index =
-            values_->get_model()->exact_match(it->first);
-        float t = values_->get_model()->get_float_column(0)[index.second];
-        // calc_euclid_scores(...) returns minus euclid distance.
-        float d = -1.0 * it->second;
-        if (d == 0.0) {
-          return t;
-        } else {
-          float w = 1.0 / d;
-          sum += w * t;
+          if (it->second != 0.0) {
+            break;
+          }
+          const std::pair<bool, uint64_t> index =
+              values_->get_model()->exact_match(it->first);
+          sum += values_->get_model()->get_float_column(0)[index.second];
+          sum_w += 1.0;
+        }
+      } else {
+        for (std::vector<std::pair<std::string, float> >:: const_iterator
+               it = ids.begin(); it != ids.end(); ++it) {
+          float w = 1.0 / (-1.0 * it->second);
+          const std::pair<bool, uint64_t> index =
+              values_->get_model()->exact_match(it->first);
+          sum += w * values_->get_model()->get_float_column(0)[index.second];
           sum_w += w;
         }
       }
       return sum / sum_w;
     } else {
       for (std::vector<std::pair<std::string, float> >:: const_iterator
-               it = ids.begin(); it != ids.end(); ++it) {
+             it = ids.begin(); it != ids.end(); ++it) {
         const std::pair<bool, uint64_t> index =
             values_->get_model()->exact_match(it->first);
         sum += values_->get_model()->get_float_column(0)[index.second];
-    }
+      }
       return sum / ids.size();
     }
   } else {

@@ -122,7 +122,7 @@ shared_ptr<regression_base> regression_factory::create_regression(
     regression::inverted_index_regression::config conf
       = config_cast_check<regression::inverted_index_regression::config>(param);
     return shared_ptr<regression::euclidean_distance_regression> (
-            new regression::euclidean_distance_regression(conf));
+      new regression::euclidean_distance_regression(conf));
   } else {
     throw JUBATUS_EXCEPTION(common::unsupported_method(name));
   }
