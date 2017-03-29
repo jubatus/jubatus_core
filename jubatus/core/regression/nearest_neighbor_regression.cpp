@@ -120,25 +120,25 @@ float nearest_neighbor_regression::estimate(
   nearest_neighbor_engine_->neighbor_row(fv, ids, config_.nearest_neighbor_num);
 
   if (ids.size() > 0) {
-    float sum = 0.0;
+    float sum = 0.f;
     if (config_.weight && *config_.weight == "distance") {
-      float sum_w = 0.0;
-      if (ids[0].second == 0.0) {
+      float sum_w = 0.f;
+      if (ids[0].second == 0.f) {
         // in case same points exist, return mean value of their target values.
         for (std::vector<std::pair<std::string, float> >::const_iterator
                  it = ids.begin(); it != ids.end(); ++it) {
-          if (it->second != 0.0) {
+          if (it->second != 0.f) {
             break;
           }
           const std::pair<bool, uint64_t> index =
               values_->get_model()->exact_match(it->first);
           sum += values_->get_model()->get_float_column(0)[index.second];
-          sum_w += 1.0;
+          sum_w += 1.f;
         }
       } else {
         for (std::vector<std::pair<std::string, float> >::const_iterator
                  it = ids.begin(); it != ids.end(); ++it) {
-          float w = 1.0 / it->second;
+          float w = 1.f / it->second;
           const std::pair<bool, uint64_t> index =
               values_->get_model()->exact_match(it->first);
           sum += w * values_->get_model()->get_float_column(0)[index.second];
