@@ -1,6 +1,9 @@
 jubatus_core
 ============
 
+.. image:: https://api.travis-ci.org/jubatus/jubatus_core.svg?branch=master
+    :target: https://api.travis-ci.org/jubatus/jubatus_core
+
 jubatus_core is the core library of Jubatus.
 
 See http://jubat.us/ for details of Jubatus.
