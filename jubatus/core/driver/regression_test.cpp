@@ -254,3 +254,4 @@ TEST_F(regression_test, inverted_index) {
 }  // namespace driver
 }  // namespace core
 }  // namespace jubatus
+
