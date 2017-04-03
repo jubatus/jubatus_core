@@ -26,8 +26,7 @@ namespace regression {
 
 class euclidean_distance_regression : public inverted_index_regression {
  public:
-  euclidean_distance_regression(
-    size_t k);
+  explicit euclidean_distance_regression(const config& conf);
   float estimate(
       const common::sfv_t& fv) const;
 

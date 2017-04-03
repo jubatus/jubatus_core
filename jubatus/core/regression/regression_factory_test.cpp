@@ -96,19 +96,12 @@ TEST(regression_factory, trivial) {
   }
 
   {
-    common::jsonconfig::config param(to_json(
-      regression::normal_herd::config()));
-    shared_ptr<regression::regression_base> r =
-      f.create_regression("NHERD", param, s);
-    EXPECT_EQ(typeid(*r), typeid(regression::normal_herd&));
-  }
-
-  {
     json js(new json_object);
     js["method"] = to_json(std::string("lsh"));
     js["parameter"] = json(new json_object);
     js["parameter"]["hash_num"] = to_json(8);
     js["nearest_neighbor_num"] = to_json(5);
+    js["weight"] = to_json(std::string("distance"));
     common::jsonconfig::config param(js);
     shared_ptr<regression::regression_base> r =
       f.create_regression("NN", param, s);

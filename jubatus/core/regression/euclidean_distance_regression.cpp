@@ -19,6 +19,7 @@
 #include <utility>
 #include <map>
 #include <vector>
+#include <cfloat>
 
 #include "jubatus/util/concurrent/lock.h"
 #include "nearest_neighbor_regression_util.hpp"
@@ -31,7 +32,7 @@ namespace core {
 namespace regression {
 
 euclidean_distance_regression::euclidean_distance_regression(
-    size_t k) : inverted_index_regression(k) {
+    const config& conf) : inverted_index_regression(conf) {
 }
 
 float euclidean_distance_regression::estimate(
@@ -39,18 +40,45 @@ float euclidean_distance_regression::estimate(
   std::vector<std::pair<std::string, float> > ids;
   {
     util::concurrent::scoped_rlock lk(storage_mutex_);
-    mixable_storage_->get_model()->calc_euclid_scores(fv, ids, k_);
+    mixable_storage_->get_model()->calc_euclid_scores(
+        fv, ids, config_.nearest_neighbor_num);
   }
-  float sum = 0.0;
   if (ids.size() > 0) {
-    for (std::vector<std::pair<std::string, float> >::const_iterator
-           it = ids.begin();
-         it != ids.end(); ++it) {
-      const std::pair<bool, uint64_t> index =
-          values_->get_model()->exact_match(it->first);
-      sum += values_->get_model()->get_float_column(0)[index.second];
+    float sum = 0.f;
+    if (config_.weight && *config_.weight == "distance") {
+      float sum_w = 0.f;
+      if (-1.f * ids[0].second <= FLT_EPSILON) {
+        // in case same points exist, return mean value of their target values.
+        for (std::vector<std::pair<std::string, float> >:: const_iterator
+               it = ids.begin(); it != ids.end(); ++it) {
+          if (-1.f * it->second > FLT_EPSILON) {
+            break;
+          }
+          const std::pair<bool, uint64_t> index =
+              values_->get_model()->exact_match(it->first);
+          sum += values_->get_model()->get_float_column(0)[index.second];
+          sum_w += 1.f;
+        }
+      } else {
+        for (std::vector<std::pair<std::string, float> >:: const_iterator
+               it = ids.begin(); it != ids.end(); ++it) {
+          float w = 1.f / (-1.f * it->second);
+          const std::pair<bool, uint64_t> index =
+              values_->get_model()->exact_match(it->first);
+          sum += w * values_->get_model()->get_float_column(0)[index.second];
+          sum_w += w;
+        }
+      }
+      return sum / sum_w;
+    } else {
+      for (std::vector<std::pair<std::string, float> >:: const_iterator
+             it = ids.begin(); it != ids.end(); ++it) {
+        const std::pair<bool, uint64_t> index =
+            values_->get_model()->exact_match(it->first);
+        sum += values_->get_model()->get_float_column(0)[index.second];
+      }
+      return sum / ids.size();
     }
-    return sum / ids.size();
   } else {
     return 0;
   }
