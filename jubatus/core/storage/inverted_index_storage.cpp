@@ -33,6 +33,8 @@ using std::ostringstream;
 using std::pair;
 using std::sort;
 using std::sqrt;
+using std::min;
+using std::max;
 using std::string;
 using std::vector;
 using jubatus::util::data::unordered_map;
@@ -395,7 +397,7 @@ void inverted_index_storage::calc_scores(
   for (size_t i = 0; i < sorted_scores.size() && i < ret_num; ++i) {
     scores.push_back(
         make_pair(column2id_.get_key(sorted_scores[i].second),
-                  sorted_scores[i].first));
+                  std::min(std::max(-1.f, sorted_scores[i].first), 1.f)));
   }
 }
 
