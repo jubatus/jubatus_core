@@ -442,12 +442,10 @@ void lof_storage::update_lrd_with_neighbors(
     sum_reachability += max(neighbors[i].second, get_kdist(neighbors[i].first));
   }
 
-  if (sum_reachability == 0) {
-    lof_table_diff_[row].lrd = numeric_limits<float>::infinity();
-    return;
-  }
-
-  lof_table_diff_[row].lrd = length / sum_reachability;
+  // NOTE : `sum_reachability` can be zero due to a numerical error,
+  // which will cause the lof score inf.
+  // To avoid inf score, a small number 1e-10 is added to `sum_reachability`.
+  lof_table_diff_[row].lrd = length / (sum_reachability + 1e-10f);
 }
 
 }  // namespace anomaly
