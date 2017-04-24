@@ -58,12 +58,14 @@ class nearest_neighbor_regression : public regression_base {
     std::string method;
     common::jsonconfig::config parameter;
     int nearest_neighbor_num;
+    jubatus::util::data::optional<std::string> weight;
 
     template<typename Ar>
     void serialize(Ar& ar) {
       ar & JUBA_MEMBER(method)
         & JUBA_MEMBER(parameter)
-        & JUBA_MEMBER(nearest_neighbor_num);
+        & JUBA_MEMBER(nearest_neighbor_num)
+        & JUBA_MEMBER(weight);
       unlearner_config::serialize(ar);
     }
   };
@@ -71,7 +73,7 @@ class nearest_neighbor_regression : public regression_base {
   nearest_neighbor_regression(
       jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
         nearest_neighbor_engine,
-      size_t k);
+      const config& config);
 
   void train(const common::sfv_t& fv, const float value);
   float estimate(const common::sfv_t& fv) const;
@@ -96,7 +98,7 @@ class nearest_neighbor_regression : public regression_base {
   jubatus::util::lang::shared_ptr<nearest_neighbor::nearest_neighbor_base>
       nearest_neighbor_engine_;
 
-  size_t k_;
+  config config_;
   jubatus::util::concurrent::mutex unlearner_mutex_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   jubatus::util::lang::shared_ptr<framework::mixable_versioned_table> values_;

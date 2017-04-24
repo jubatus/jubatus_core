@@ -105,13 +105,18 @@ class local_storage : public storage_base {
   }
   std::string type() const;
 
-  MSGPACK_DEFINE(tbl_, class2id_);
+  MSGPACK_DEFINE(tbl_, class2id_, tbl_diff_, model_version_);
 
  private:
   // map_features3_t tbl_;
   mutable util::concurrent::rw_mutex mutex_;
   id_features3_t tbl_;
   common::key_manager class2id_;
+
+  // The following fields are unused in local_storage.  They are appended to
+  // MSGPACK_DEFINE to keep model format compatible with local_storage_mixture.
+  id_features3_t tbl_diff_;
+  version model_version_;
 
   // used for dump data
   friend std::ostream& operator<<(std::ostream& os, const local_storage& ls) {
