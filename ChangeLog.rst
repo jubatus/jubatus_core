@@ -1,3 +1,12 @@
+Release 1.0.3 - 2017/04/24
+--------------------------
+
+* Improvements
+    * regression: add distance-based weighting option (#351, #352)
+    * anomaly: improve to avoid causing ``inf`` (#348, #358)
+    * recommender: improve to avoid causing scores larger than 1.0 in ``inverted_index`` (#355, #356)
+    * Improve ``local_storage`` model serialization format be compatible with ``local_storage_mixture`` (#359)
+
 Release 1.0.2 - 2017/02/27
 --------------------------
 
