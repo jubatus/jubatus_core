@@ -97,11 +97,11 @@ jubatus::util::lang::shared_ptr<storage> storage_factory::create(
       s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
              new compressor::gmm_compressor(conf.seed)));
       ret.reset(s);
-#endif
     } else {
       throw JUBATUS_EXCEPTION(
           common::unsupported_method(compressor_method));
     }
+#endif
   } else {
     throw JUBATUS_EXCEPTION(
       common::unsupported_method(method));
