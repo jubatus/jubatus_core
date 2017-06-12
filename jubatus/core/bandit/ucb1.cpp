@@ -86,7 +86,7 @@ void ucb1::pack(framework::packer& pk) const {
   pk.pack(s_);
 }
 void ucb1::unpack(msgpack::object o) {
-  o.convert(&s_);
+  o.convert(s_);
 }
 
 void ucb1::get_diff(diff_t& diff) const {

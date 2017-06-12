@@ -130,9 +130,9 @@ TEST(sparse_matrix_storage, pack_and_unpack) {
   msgpack::pack(buf, s);
 
   sparse_matrix_storage s2;
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  unpacked.get().convert(&s2);
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
+  o.convert(s2);
   EXPECT_FLOAT_EQ(1.0, s2.get("r1", "c1"));
 }
 

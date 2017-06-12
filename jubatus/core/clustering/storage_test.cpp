@@ -131,10 +131,10 @@ TEST_P(storage_test, pack_unpack) {
                                            conf);
   ASSERT_TRUE(s2 != NULL);
   {
-    msgpack::unpacked unpacked;
-    msgpack::unpack(&unpacked, buf.data(), buf.size());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
     //    msgpack::unpack(&unpacked, buf.data(), buf.size());
-    s2->unpack(unpacked.get());
+    s2->unpack(o);
   }
   EXPECT_EQ(s->get_revision(), s2->get_revision());
 

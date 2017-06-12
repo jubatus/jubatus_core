@@ -109,7 +109,7 @@ class weight_manager : public framework::model {
 
   void unpack(msgpack::object o) {
     util::concurrent::scoped_lock lk(mutex_);
-    o.convert(this);
+    o.convert(*this);
   }
 
   std::string to_string() const {

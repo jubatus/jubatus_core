@@ -165,13 +165,13 @@ void compressive_storage::pack_impl_(framework::packer& packer) const {
 
 void compressive_storage::unpack_impl_(msgpack::object o) {
   std::vector<msgpack::object> mems;
-  o.convert(&mems);
+  o.convert(mems);
   if (mems.size() != 3) {
     throw msgpack::type_error();
   }
   storage::unpack_impl_(mems[0]);
-  mems[1].convert(&mine_);
-  mems[2].convert(&status_);
+  mems[1].convert(mine_);
+  mems[2].convert(status_);
 }
 
 void compressive_storage::clear_impl_() {

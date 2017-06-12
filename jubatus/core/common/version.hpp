@@ -75,7 +75,7 @@ class version {
   }
 
   void unpack(msgpack::object o) {
-    o.convert(this);
+    o.convert(*this);
   }
 
  private:

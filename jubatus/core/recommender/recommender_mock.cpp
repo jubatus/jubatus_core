@@ -120,7 +120,7 @@ void recommender_mock::pack(framework::packer& packer) const {
 
 void recommender_mock::unpack(msgpack::object o) {
   std::vector<msgpack::object> mems;
-  o.convert(&mems);
+  o.convert(mems);
   if (mems.size() != 2) {
     throw msgpack::type_error();
   }

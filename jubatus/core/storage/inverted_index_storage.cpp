@@ -355,7 +355,7 @@ void inverted_index_storage::pack(framework::packer& packer) const {
 }
 
 void inverted_index_storage::unpack(msgpack::object o) {
-  o.convert(this);
+  o.convert(*this);
 }
 
 void inverted_index_storage::calc_scores(

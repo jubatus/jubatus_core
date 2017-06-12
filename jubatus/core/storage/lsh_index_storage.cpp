@@ -294,7 +294,7 @@ void lsh_index_storage::pack(framework::packer& packer) const {
 }
 
 void lsh_index_storage::unpack(msgpack::object o) {
-  o.convert(this);
+  o.convert(*this);
 }
 
 void lsh_index_storage::get_diff(lsh_master_table_t& diff) const {

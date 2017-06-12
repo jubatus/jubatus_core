@@ -393,7 +393,7 @@ class column_table {
 
   void unpack(msgpack::object o) {
     jubatus::util::concurrent::scoped_wlock lk(table_lock_);
-    o.convert(this);
+    o.convert(*this);
   }
 
  private:

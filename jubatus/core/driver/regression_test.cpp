@@ -182,9 +182,9 @@ TEST_F(regression_test, small) {
   regression_->clear();
 
   // load
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, save_data.data(), save_data.size());
-  regression_->unpack(msg.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, save_data.data(), save_data.size());
+  regression_->unpack(o);
 
   cout << "estimate" << endl;
   float res = regression_->estimate(d);
@@ -212,9 +212,9 @@ TEST_F(regression_test, nn) {
   regression_->clear();
 
   // load
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, save_data.data(), save_data.size());
-  regression_->unpack(msg.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, save_data.data(), save_data.size());
+  regression_->unpack(o);
 
   cout << "estimate" << endl;
   float res = regression_->estimate(d);
@@ -242,9 +242,9 @@ TEST_F(regression_test, inverted_index) {
   regression_->clear();
 
   // load
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, save_data.data(), save_data.size());
-  regression_->unpack(msg.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, save_data.data(), save_data.size());
+  regression_->unpack(o);
 
   cout << "estimate" << endl;
   float res = regression_->estimate(d);

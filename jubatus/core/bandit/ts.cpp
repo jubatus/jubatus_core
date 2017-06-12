@@ -96,7 +96,7 @@ void ts::pack(framework::packer& pk) const {
   pk.pack(s_);
 }
 void ts::unpack(msgpack::object o) {
-  o.convert(&s_);
+  o.convert(s_);
 }
 
 void ts::get_diff(diff_t& diff) const {
