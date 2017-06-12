@@ -232,7 +232,7 @@ void bit_index_storage::pack(framework::packer& packer) const {
 }
 
 void bit_index_storage::unpack(msgpack::object o) {
-  o.convert(this);
+  o.convert(*this);
 }
 
 string bit_index_storage::name() const {

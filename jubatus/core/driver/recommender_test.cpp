@@ -309,27 +309,29 @@ class recommender_mix_with_unlearning_test
 
   framework::diff_object make_diff() {
     msgpack::sbuffer data1;
-    msgpack::unpacked unpacked1;
+    msgpack::zone z1;
+    msgpack::object o1;
     {
       core::framework::stream_writer<msgpack::sbuffer> st(data1);
       core::framework::jubatus_packer jp(st);
       core::framework::packer pk(jp);
       mixable1->get_diff(pk);
-      msgpack::unpack(&unpacked1, data1.data(), data1.size());
+      o1 = msgpack::unpack(z1, data1.data(), data1.size());
     }
 
     msgpack::sbuffer data2;
-    msgpack::unpacked unpacked2;
+    msgpack::zone z2;
+    msgpack::object o2;
     {
       core::framework::stream_writer<msgpack::sbuffer> st(data2);
       core::framework::jubatus_packer jp(st);
       core::framework::packer pk(jp);
       mixable2->get_diff(pk);
-      msgpack::unpack(&unpacked2, data2.data(), data2.size());
+      o2 = msgpack::unpack(z2, data2.data(), data2.size());
     }
     framework::diff_object diff =
-        mixable2->convert_diff_object(unpacked2.get());
-    mixable2->mix(unpacked1.get(), diff);
+        mixable2->convert_diff_object(o2);
+    mixable2->mix(o1, diff);
     return diff;
   }
   shared_ptr<driver::recommender> recommender1, recommender2;

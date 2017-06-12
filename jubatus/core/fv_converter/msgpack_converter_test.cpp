@@ -19,6 +19,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 #include <msgpack.hpp>
+#include <msgpack/v1/object_fwd.hpp>
 #include "datum.hpp"
 #include "msgpack_converter.hpp"
 
@@ -33,9 +34,8 @@ void make(const T& data, datum& datum) {
   msgpack::sbuffer sbuf;
   msgpack::pack(sbuf, data);
 
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-  msgpack::object obj = msg.get();
+  msgpack::zone z;
+  msgpack::v1::object obj = msgpack::unpack(z, sbuf.data(), sbuf.size());
   msgpack_converter::convert(obj, datum);
 }
 
@@ -51,9 +51,7 @@ TEST(msgpack_converter, empty) {
 
 TEST(msgpack_converter, nil) {
   datum datum;
-  msgpack::object nil;
-  nil.type = msgpack::type::NIL;
-  make(nil, datum);
+  make(NULL, datum);
 
   ASSERT_EQ(1u, datum.string_values_.size());
   ASSERT_EQ(0u, datum.num_values_.size());

@@ -203,7 +203,7 @@ class typed_column : public detail::abstract_column_base {
     packer.pack(array_);
   }
   void unpack_array(msgpack::object o) {
-    o.convert(&array_);
+    o.convert(array_);
   }
 
  private:
@@ -228,7 +228,7 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
   }
   void push_back(const msgpack::object& obj) {
     bit_vector value(type().bit_vector_length());
-    obj.convert(&value);
+    obj.convert(value);
     typed_column::push_back(value);
   }
 
@@ -246,7 +246,7 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
   }
   bool insert(uint64_t target, const msgpack::object& obj) {
     bit_vector value(type().bit_vector_length());
-    obj.convert(&value);
+    obj.convert(value);
     return typed_column::insert(target, value);
   }
 
@@ -261,7 +261,7 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
   }
   bool update(uint64_t index, const msgpack::object& obj) {
     bit_vector value(type().bit_vector_length());
-    obj.convert(&value);
+    obj.convert(value);
     return typed_column::update(index, value);
   }
 
@@ -318,7 +318,7 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
     packer.pack(array_);
   }
   void unpack_array(msgpack::object o) {
-    o.convert(&array_);
+    o.convert(array_);
   }
 
  private:
@@ -518,7 +518,7 @@ class abstract_column {
     msgpack::object* objs = o.via.array.ptr;
 
     column_type type;
-    objs[0].convert(&type);
+    objs[0].convert(type);
 
     abstract_column tmp;
     if (!base_) {

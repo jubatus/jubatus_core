@@ -18,13 +18,10 @@
 #define JUBATUS_CORE_BANDIT_BANDIT_BASE_HPP_
 
 #include <string>
+#include <msgpack.hpp>
 
 #include "arm_info.hpp"
 
-namespace msgpack {
-template <typename T>
-class packer;
-}  // namespace msgpack
 namespace jubatus {
 namespace core {
 namespace framework {

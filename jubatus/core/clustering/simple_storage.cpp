@@ -54,12 +54,12 @@ void simple_storage::pack_impl_(framework::packer& packer) const {
 
 void simple_storage::unpack_impl_(msgpack::object o) {
   std::vector<msgpack::object> mems;
-  o.convert(&mems);
+  o.convert(mems);
   if (mems.size() != 2) {
     throw msgpack::type_error();
   }
   storage::unpack_impl_(mems[0]);
-  mems[1].convert(&mine_);
+  mems[1].convert(mine_);
 }
 
 void simple_storage::clear_impl_() {

@@ -109,9 +109,9 @@ TEST(labels, pack_unpack) {
   }
 
   {
-    msgpack::unpacked unpacked;
-    msgpack::unpack(&unpacked, buf.data(), buf.size());
-    l2.unpack(unpacked.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
+    l2.unpack(o);
   }
 
   EXPECT_EQ(2u, l2.get_labels().size());

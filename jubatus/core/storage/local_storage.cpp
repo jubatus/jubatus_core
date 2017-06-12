@@ -283,7 +283,7 @@ void local_storage::pack(framework::packer& packer) const {
 
 void local_storage::unpack(msgpack::object o) {
   scoped_wlock lk(mutex_);
-  o.convert(this);
+  o.convert(*this);
 }
 
 std::string local_storage::type() const {

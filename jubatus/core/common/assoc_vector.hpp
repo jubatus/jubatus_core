@@ -120,8 +120,8 @@ class assoc_vector {
     }
     std::vector<std::pair<K, V> > data(o.via.map.size);
     for (std::size_t i = 0; i < data.size(); ++i) {
-      o.via.map.ptr[i].key.convert(&data[i].first);
-      o.via.map.ptr[i].val.convert(&data[i].second);
+      o.via.map.ptr[i].key.convert(data[i].first);
+      o.via.map.ptr[i].val.convert(data[i].second);
     }
     data.swap(data_);
   }

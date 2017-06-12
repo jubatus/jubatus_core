@@ -170,9 +170,9 @@ class column_type {
       throw msgpack::type_error();
     }
     uint8_t type;
-    o.via.array.ptr[0].convert(&type);
+    o.via.array.ptr[0].convert(type);
     uint64_t bit_vector_length;
-    o.via.array.ptr[1].convert(&bit_vector_length);
+    o.via.array.ptr[1].convert(bit_vector_length);
     type_ = static_cast<type_name>(type);
     bit_vector_length_ = bit_vector_length;
   }

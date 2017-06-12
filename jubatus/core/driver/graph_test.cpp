@@ -83,9 +83,9 @@ TEST_F(graph_test, simple) {
     graph_->pack(pk);
     graph_->clear();
 
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-    graph_->unpack(msg.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+    graph_->unpack(o);
   }
   {
     node_info info = graph_->get_node(nid);

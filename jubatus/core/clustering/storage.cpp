@@ -113,7 +113,7 @@ void storage::pack_impl_(framework::packer& packer) const {
   packer.pack(*this);
 }
 void storage::unpack_impl_(msgpack::object o) {
-  o.convert(this);
+  o.convert(*this);
 }
 void storage::clear_impl_() {
   common_.clear();

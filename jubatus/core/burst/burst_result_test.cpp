@@ -260,9 +260,9 @@ TEST(burst_result, pack_and_unpack) {
 
   burst_result b;
   {
-    msgpack::unpacked unpacked;
-    msgpack::unpack(&unpacked, buf.data(), buf.size());
-    unpacked.get().convert(&b);
+    msgpack::zone z;
+    msgpack::object unpacked = msgpack::unpack(z, buf.data(), buf.size());
+    unpacked.convert(b);
   }
 
   ASSERT_TRUE(burst_result_equals_to(a, b));
