@@ -38,6 +38,16 @@ TEST(bandit_factory, epsilon_greedy) {
   EXPECT_EQ("epsilon_greedy", p->name());
 }
 
+TEST(bandit_factory, epsilon_greedy_seed) {
+  json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
+  js["epsilon"] = json::to_json(0.5);
+  js["seed"] = json::to_json(10);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p = bandit_factory::create("epsilon_greedy", conf);
+  EXPECT_EQ("epsilon_greedy", p->name());
+}
+
 TEST(bandit_factory, ucb1) {
   json::json js(new json::json_object);
   js["assume_unrewarded"] = json::to_json(true);
@@ -54,6 +64,15 @@ TEST(bandit_factory, ts) {
   EXPECT_EQ("ts", p->name());
 }
 
+TEST(bandit_factory, ts_seed) {
+  json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
+  js["seed"] = json::to_json(10);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p = bandit_factory::create("ts", conf);
+  EXPECT_EQ("ts", p->name());
+}
+
 TEST(bandit_factory, softmax) {
   json::json js(new json::json_object);
   js["assume_unrewarded"] = json::to_json(true);
@@ -63,10 +82,31 @@ TEST(bandit_factory, softmax) {
   EXPECT_EQ("softmax", p->name());
 }
 
+TEST(bandit_factory, softmax_seed) {
+  json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
+  js["tau"] = json::to_json(0.5);
+  js["seed"] = json::to_json(10);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p = bandit_factory::create("softmax", conf);
+  EXPECT_EQ("softmax", p->name());
+}
+
+
 TEST(bandit_factory, exp3) {
   json::json js(new json::json_object);
   js["assume_unrewarded"] = json::to_json(true);
   js["gamma"] = json::to_json(0.5);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p = bandit_factory::create("exp3", conf);
+  EXPECT_EQ("exp3", p->name());
+}
+
+TEST(bandit_factory, exp3_seed) {
+  json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
+  js["gamma"] = json::to_json(0.5);
+  js["seed"] = json::to_json(10);
   common::jsonconfig::config conf(js);
   shared_ptr<bandit_base> p = bandit_factory::create("exp3", conf);
   EXPECT_EQ("exp3", p->name());

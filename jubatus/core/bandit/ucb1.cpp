@@ -27,8 +27,8 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-ucb1::ucb1(bool assume_unrewarded)
-    : s_(assume_unrewarded) {
+ucb1::ucb1(const config& conf)
+    : s_(conf.assume_unrewarded) {
 }
 
 std::string ucb1::select_arm(const std::string& player_id) {

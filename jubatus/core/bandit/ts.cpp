@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 #include <cfloat>
+#include <limits>
+
 #include "../common/exception.hpp"
 #include "select_by_weights.hpp"
 #include "../framework/packer.hpp"
@@ -31,7 +33,15 @@ namespace bandit {
 
 using jubatus::util::math::random::mtrand;
 
-ts::ts(bool assume_unrewarded): s_(assume_unrewarded) {
+ts::ts(const config& conf): s_(conf.assume_unrewarded) {
+  if (conf.seed) {
+    if (*conf.seed < 0 || std::numeric_limits<uint32_t>::max() < *conf.seed) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "seed must be within unsigned 32 bit integer"));
+    }
+    rand_ = jubatus::util::math::random::mtrand(*conf.seed);
+  }
 }
 
 std::string ts::select_arm(const std::string& player_id) {
