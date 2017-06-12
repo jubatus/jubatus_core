@@ -187,7 +187,7 @@ void stat::pack(framework::packer& packer) const {
   packer.pack(*this);
 }
 void stat::unpack(msgpack::object o) {
-  o.convert(this);
+  o.convert(*this);
 }
 std::string stat::type() const {
   return "stat";

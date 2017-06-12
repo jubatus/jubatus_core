@@ -84,7 +84,7 @@ void recommender_mock_storage::pack(framework::packer& packer) const {
 }
 
 void recommender_mock_storage::unpack(msgpack::object o) {
-  o.convert(this);
+  o.convert(*this);
 }
 
 void recommender_mock_storage::get_diff(recommender_mock_storage& diff) const {

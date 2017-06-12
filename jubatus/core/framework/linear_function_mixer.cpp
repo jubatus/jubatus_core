@@ -124,7 +124,7 @@ diff_object linear_function_mixer::convert_diff_object(
     const msgpack::object& obj) const {
   internal_diff_object* diff = new internal_diff_object;
   diff_object diff_obj(diff);
-  obj.convert(&diff->diff_);
+  obj.convert(diff->diff_);
   return diff_obj;
 }
 
@@ -138,7 +138,7 @@ void linear_function_mixer::mix(
     throw JUBATUS_EXCEPTION(
         core::common::exception::runtime_error("bad diff_object"));
   }
-  obj.convert(&diff);
+  obj.convert(diff);
   mix(diff, diff_obj->diff_);
 }
 

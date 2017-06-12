@@ -281,9 +281,9 @@ TEST_P(nearest_neighbor_test, save_load) {
   SetUp();
 
   // unpack the buffer
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, sbuf.data(), sbuf.size());
-  nn_driver_->unpack(unpacked.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+  nn_driver_->unpack(o);
 
   vector<pair<string, float> > res
       = nn_driver_->similar_row("1", 1);
@@ -341,14 +341,14 @@ TEST_P(nearest_neighbor_test, small_mix) {
     core::framework::packer pk(jp);
     other_mixable->get_diff(pk);
 
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-    framework::diff_object diff = other_mixable->convert_diff_object(msg.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+    framework::diff_object diff = other_mixable->convert_diff_object(o);
 
-    msgpack::unpacked data_msg;
-    msgpack::unpack(&data_msg, data.data(), data.size());
+    msgpack::zone data_z;
+    msgpack::object msg = msgpack::unpack(data_z, data.data(), data.size());
 
-    other_mixable->mix(data_msg.get(), diff);
+    other_mixable->mix(msg, diff);
     other_mixable->put_diff(diff);
   }
 }
@@ -442,14 +442,14 @@ TEST_P(nearest_neighbor_with_unlearning_test, mix_and_unlearning) {
     core::framework::packer pk(jp);
     other_mixable->get_diff(pk);
 
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-    framework::diff_object diff = other_mixable->convert_diff_object(msg.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+    framework::diff_object diff = other_mixable->convert_diff_object(o);
 
-    msgpack::unpacked data_msg;
-    msgpack::unpack(&data_msg, data.data(), data.size());
+    msgpack::zone z_msg;
+    msgpack::object msg = msgpack::unpack(z_msg, data.data(), data.size());
 
-    other_mixable->mix(data_msg.get(), diff);
+    other_mixable->mix(msg, diff);
     other_mixable->put_diff(diff);
   }
   ASSERT_EQ(MAX_SIZE, nn_driver_->get_all_rows().size());

@@ -158,7 +158,7 @@ void result_storage::pack(framework::packer& packer) const {
 
 void result_storage::unpack(msgpack::object o) {
   JUBATUS_ASSERT(p_);
-  o.convert(p_.get());
+  o.convert(*p_);
 }
 
 }  // namespace burst

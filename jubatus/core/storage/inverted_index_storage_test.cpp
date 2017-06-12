@@ -71,9 +71,10 @@ TEST(inverted_index_storage, trivial) {
   framework::packer packer(jp);
   s.pack(packer);
   inverted_index_storage s2;
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  s2.unpack(unpacked.get());
+
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
+  s2.unpack(o);
   vector<pair<string, float> > scores2;
   s.calc_scores(v, scores2, 100);
   // expect to get same result
@@ -108,7 +109,7 @@ TEST(inverted_index_storage, trivial_euclid) {
   vector<pair<string, float> > scores;
   s.calc_euclid_scores(v, scores, 100);
 
-  ASSERT_EQ(3, scores.size());
+  ASSERT_EQ(3u, scores.size());
   EXPECT_EQ("r1", scores[0].first);
   EXPECT_FLOAT_EQ(-1, scores[0].second);
   EXPECT_EQ("r3", scores[1].first);
@@ -122,7 +123,7 @@ TEST(inverted_index_storage, trivial_euclid) {
 
   scores.clear();
   s.calc_euclid_scores(v, scores, 100);
-  ASSERT_EQ(2, scores.size());
+  ASSERT_EQ(2u, scores.size());
   EXPECT_EQ("r1", scores[0].first);
   EXPECT_EQ("r2", scores[1].first);
 }
@@ -250,11 +251,11 @@ TEST(inverted_index_storage, mix_removal) {
 
   // rows must be registered in both storage
   s1.get_all_column_ids(ids);
-  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+  EXPECT_EQ(4u, ids.size());  // r1, r2, r3, r4
   s2.get_all_column_ids(ids);
-  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+  EXPECT_EQ(4u, ids.size());  // r1, r2, r3, r4
   s3.get_all_column_ids(ids);
-  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+  EXPECT_EQ(4u, ids.size());  // r1, r2, r3, r4
 
   // remove column ``r2``
   for (size_t i = 100; i < 1024; ++i) {
@@ -266,9 +267,9 @@ TEST(inverted_index_storage, mix_removal) {
 
   // rows must not be removed from s1 before MIX
   s1.get_all_column_ids(ids);
-  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+  EXPECT_EQ(4u, ids.size());  // r1, r2, r3, r4
   s2.get_all_column_ids(ids);
-  EXPECT_EQ(4, ids.size());  // r1, r2, r3, r4
+  EXPECT_EQ(4u, ids.size());  // r1, r2, r3, r4
 
   // MIX
   s1.get_diff(d1);
@@ -282,11 +283,11 @@ TEST(inverted_index_storage, mix_removal) {
 
   // rows must be removed from both storage after MIX
   s1.get_all_column_ids(ids);
-  EXPECT_EQ(3, ids.size());  // r1, r3, r4
+  EXPECT_EQ(3u, ids.size());  // r1, r3, r4
   s2.get_all_column_ids(ids);
-  EXPECT_EQ(3, ids.size());  // r1, r3, r4
+  EXPECT_EQ(3u, ids.size());  // r1, r3, r4
   s3.get_all_column_ids(ids);
-  EXPECT_EQ(3, ids.size());  // r1, r3, r4
+  EXPECT_EQ(3u, ids.size());  // r1, r3, r4
 }
 
 TEST(inverted_index_storage, empty) {

@@ -140,7 +140,7 @@ class lof_storage {
     packer.pack(*this);
   }
   void unpack(msgpack::object o) {
-    o.convert(this);
+    o.convert(*this);
   }
 
   MSGPACK_DEFINE(lof_table_, lof_table_diff_,

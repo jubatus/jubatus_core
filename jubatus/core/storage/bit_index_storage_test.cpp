@@ -67,9 +67,9 @@ TEST(bit_index_storage, trivial) {
   framework::packer packer(jp);
   s.pack(packer);
   bit_index_storage t;
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  t.unpack(unpacked.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
+  t.unpack(o);
   ids.clear();
   t.similar_row(make_vector("1100"), ids, 2);
   ASSERT_EQ(2u, ids.size());

@@ -167,7 +167,7 @@ void sparse_matrix_storage::pack(framework::packer& packer)
 }
 
 void sparse_matrix_storage::unpack(msgpack::object o) {
-  o.convert(this);
+  o.convert(*this);
 }
 
 }  // namespace storage

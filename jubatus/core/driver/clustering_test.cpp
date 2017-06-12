@@ -276,9 +276,9 @@ TEST_P(clustering_test, save_load) {
   SetUp();
 
   // unpack the buffer
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, sbuf.data(), sbuf.size());
-  clustering_->unpack(unpacked.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+  clustering_->unpack(o);
 }
 
 TEST_P(clustering_test, clear) {
@@ -672,14 +672,14 @@ TEST_P(clustering_test, empty_mix) {
     core::framework::packer pk(jp);
     other_mixable->get_diff(pk);
 
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-    framework::diff_object diff = other_mixable->convert_diff_object(msg.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+    framework::diff_object diff = other_mixable->convert_diff_object(o);
 
-    msgpack::unpacked data_msg;
-    msgpack::unpack(&data_msg, data.data(), data.size());
+    msgpack::zone zone_data;
+    msgpack::object data_msg = msgpack::unpack(zone_data, data.data(), data.size());
 
-    other_mixable->mix(data_msg.get(), diff);
+    other_mixable->mix(data_msg, diff);
     other_mixable->put_diff(diff);
   }
 }

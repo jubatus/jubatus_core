@@ -55,9 +55,9 @@ TEST(local_storage_mixture, pack_and_unpack) {
 
   local_storage_mixture st2;
   {
-    msgpack::unpacked unpacked;
-    msgpack::unpack(&unpacked, buf.data(), buf.size());
-    st2.unpack(unpacked.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
+    st2.unpack(o);
   }
 
   feature_val1_t a1, b1;

@@ -105,11 +105,11 @@ namespace msgpack {
 inline jubatus::core::common::byte_buffer& operator>>(
     object o,
     jubatus::core::common::byte_buffer& b) {
-  if (o.type != type::RAW) {
+  if (o.type != type::BIN) {
     throw type_error();
   }
 
-  b.assign(o.via.raw.ptr, o.via.raw.size);
+  b.assign(o.via.bin.ptr, o.via.bin.size);
   return b;
 }
 
@@ -117,27 +117,27 @@ template<typename Stream>
 inline packer<Stream>& operator<<(
     packer<Stream>& o,
     const jubatus::core::common::byte_buffer& b) {
-  o.pack_raw(b.size());
-  o.pack_raw_body(b.ptr(), b.size());
+  o.pack_bin(b.size());
+  o.pack_bin_body(b.ptr(), b.size());
   return o;
 }
 
 inline void operator<<(
     object::with_zone& o,
     const jubatus::core::common::byte_buffer& b) {
-  o.type = type::RAW;
-  char* ptr = static_cast<char*>(o.zone->malloc(b.size()));
-  o.via.raw.ptr = ptr;
-  o.via.raw.size = static_cast<uint32_t>(b.size());
+  o.type = type::BIN;
+  char* ptr = static_cast<char*>(o.zone.allocate_no_align(b.size()));
+  o.via.bin.ptr = ptr;
+  o.via.bin.size = static_cast<uint32_t>(b.size());
   std::memcpy(ptr, b.ptr(), b.size());
 }
 
 inline void operator<<(
     object& o,
     const jubatus::core::common::byte_buffer& b) {
-  o.type = type::RAW;
-  o.via.raw.ptr = b.ptr();
-  o.via.raw.size = static_cast<uint32_t>(b.size());
+  o.type = type::BIN;
+  o.via.bin.ptr = b.ptr();
+  o.via.bin.size = static_cast<uint32_t>(b.size());
 }
 
 }  // namespace msgpack
