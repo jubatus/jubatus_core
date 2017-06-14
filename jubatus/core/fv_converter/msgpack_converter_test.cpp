@@ -19,7 +19,7 @@
 #include <vector>
 #include <gtest/gtest.h>
 #include <msgpack.hpp>
-#include <msgpack/v1/object_fwd.hpp>
+#include <msgpack/object.hpp>
 #include "datum.hpp"
 #include "msgpack_converter.hpp"
 
@@ -35,7 +35,8 @@ void make(const T& data, datum& datum) {
   msgpack::pack(sbuf, data);
 
   msgpack::zone z;
-  msgpack::v1::object obj = msgpack::unpack(z, sbuf.data(), sbuf.size());
+  msgpack::v2::object obj = msgpack::unpack(z, sbuf.data(), sbuf.size());
+  std::cout << obj << std::endl;
   msgpack_converter::convert(obj, datum);
 }
 
@@ -53,7 +54,7 @@ TEST(msgpack_converter, nil) {
   datum datum;
   make(NULL, datum);
 
-  ASSERT_EQ(1u, datum.string_values_.size());
+  EXPECT_EQ(1u, datum.string_values_.size());
   ASSERT_EQ(0u, datum.num_values_.size());
   ASSERT_EQ("", datum.string_values_[0].first);
   ASSERT_EQ("NULL", datum.string_values_[0].second);

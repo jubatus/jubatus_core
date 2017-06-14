@@ -365,7 +365,7 @@ struct bit_vector_base {
   void msgpack_pack(msgpack::packer<Buffer>& packer) const {
     packer.pack_array(2);
     packer.pack(static_cast<uint64_t>(bit_num_));
-    packer.pack(used_bytes());
+    packer.pack_bin(used_bytes());
     if (bits_) {
       const size_t n = used_bytes() / BLOCKSIZE;
       for (size_t i = 0; i < n; ++i) {
