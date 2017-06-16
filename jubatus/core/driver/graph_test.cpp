@@ -73,7 +73,7 @@ TEST_F(graph_test, simple) {
     graph_->create_edge(eid, nid, nid0, p);
   }
 
-  EXPECT_EQ(2, graph_->find_max_int_id());
+  EXPECT_EQ(2u, graph_->find_max_int_id());
 
   {
     msgpack::sbuffer sbuf;

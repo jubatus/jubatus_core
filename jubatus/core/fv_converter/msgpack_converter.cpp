@@ -30,7 +30,7 @@ namespace {
 const char* NULL_VALUE = "NULL";
 
 void iter_convert(
-    const msgpack::v1::object& object,
+    const msgpack::v2::object& object,
     const std::string& path,
     datum& datum) {
   switch (object.type) {
@@ -99,9 +99,12 @@ void iter_convert(
         const msgpack::object_kv& kv = map.ptr[i];
         std::ostringstream oss;
         oss << path << "/" << kv.key;
+        std::cout << "mapkey: "  << kv.key << std::endl;
         iter_convert(kv.val, oss.str(), datum);
       }
+      break;
     }
+
     case msgpack::type::EXT: {
       throw JUBATUS_EXCEPTION(common::bad_storage_type("where do we use EXT type"));
     }
@@ -110,7 +113,7 @@ void iter_convert(
 
 }  // namespace
 
-void msgpack_converter::convert(const msgpack::v1::object& object, datum& datum) {
+void msgpack_converter::convert(const msgpack::v2::object& object, datum& datum) {
   iter_convert(object, "", datum);
 }
 

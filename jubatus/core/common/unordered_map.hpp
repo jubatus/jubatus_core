@@ -23,46 +23,7 @@
 // to make util::data::unordered_map serializable
 
 namespace msgpack {
-
-template<typename K, typename V, typename H, typename E, typename A>
-inline jubatus::util::data::unordered_map<K, V, H, E, A> operator>>(
-    object o,
-    jubatus::util::data::unordered_map<K, V, H, E, A>& v) {
-  if (o.type != type::MAP) {
-    throw type_error();
-  }
-  object_kv* const p_end = o.via.map.ptr + o.via.map.size;
-  for (object_kv* p = o.via.map.ptr; p != p_end; ++p) {
-    K key;
-    p->key.convert(&key);
-    p->val.convert(&v[key]);
-  }
-  return v;
-}
-
-
-template<typename Stream,
-         typename K,
-         typename V,
-         typename H,
-         typename E,
-         typename A>
-inline packer<Stream>& operator<<(
-    packer<Stream>& o,
-    const jubatus::util::data::unordered_map<K, V, H, E, A>& v) {
-  o.pack_map(v.size());
-  typedef typename
-    jubatus::util::data::unordered_map<K, V, H, E, A>::const_iterator
-    iter_t;
-  for (iter_t it = v.begin(); it != v.end(); ++it) {
-    o.pack(it->first);
-    o.pack(it->second);
-  }
-  return o;
-}
-
 MSGPACK_API_VERSION_NAMESPACE(v1) {
-
 namespace adaptor {
 
 template <typename K, typename V, typename Hash, typename Pred, typename Alloc>
@@ -124,7 +85,6 @@ struct object_with_zone<jubatus::util::data::unordered_map<K, V, Hash, Pred, All
 
 }  // MSGPACK_API_VERSION_NAMESPACE(v1)
 }  // namespace adaptor
-
 }  // namespace msgpack
 
 #endif  // JUBATUS_CORE_COMMON_UNORDERED_MAP_HPP_
