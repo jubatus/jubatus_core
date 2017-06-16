@@ -106,14 +106,17 @@ void iter_convert(
     }
 
     case msgpack::type::EXT: {
-      throw JUBATUS_EXCEPTION(common::bad_storage_type("where do we use EXT type"));
+      throw JUBATUS_EXCEPTION(
+        common::bad_storage_type("where do we use EXT type"));
     }
   }
 }
 
 }  // namespace
 
-void msgpack_converter::convert(const msgpack::v2::object& object, datum& datum) {
+void msgpack_converter::convert(
+    const msgpack::v2::object& object,
+    datum& datum) {
   iter_convert(object, "", datum);
 }
 

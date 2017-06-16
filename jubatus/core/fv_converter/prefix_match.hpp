@@ -30,6 +30,7 @@ class prefix_match : public key_matcher {
   explicit prefix_match(const std::string& prefix)
       : prefix_(prefix) {
   }
+
   ~prefix_match() {
   }
 

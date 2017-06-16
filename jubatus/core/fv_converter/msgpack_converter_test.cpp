@@ -19,7 +19,6 @@
 #include <vector>
 #include <gtest/gtest.h>
 #include <msgpack.hpp>
-#include <msgpack/object.hpp>
 #include "datum.hpp"
 #include "msgpack_converter.hpp"
 

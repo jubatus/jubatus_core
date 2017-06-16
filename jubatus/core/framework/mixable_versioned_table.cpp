@@ -67,11 +67,12 @@ framework::diff_object mixable_versioned_table::convert_diff_object(
   diff_object diff_obj(diff);
 
   shared_ptr<msgpack::zone> zone(new msgpack::zone());
-  msgpack::object msg = msgpack::unpack(*zone, obj.via.bin.ptr, obj.via.bin.size);
+  msgpack::object msg = msgpack::unpack(*zone,
+                                        obj.via.bin.ptr,
+                                        obj.via.bin.size);
 
   msg.convert(diff->objs);
   if (!diff->objs.empty()) {
-    //shared_ptr<msgpack::zone> owner(zone);
     diff->zones.push_back(zone);
   }
   return diff_obj;
@@ -125,7 +126,9 @@ void mixable_versioned_table::mix(
   }
 
   shared_ptr<msgpack::zone> zone(new msgpack::zone());
-  msgpack::object msg = msgpack::unpack(*zone, obj.via.bin.ptr, obj.via.bin.size);
+  msgpack::object msg = msgpack::unpack(*zone,
+                                        obj.via.bin.ptr,
+                                        obj.via.bin.size);
   if (msg.type != msgpack::type::ARRAY) {
     throw JUBATUS_EXCEPTION(
         core::common::exception::runtime_error("bad diff_object"));

@@ -677,7 +677,9 @@ TEST_P(clustering_test, empty_mix) {
     framework::diff_object diff = other_mixable->convert_diff_object(o);
 
     msgpack::zone zone_data;
-    msgpack::object data_msg = msgpack::unpack(zone_data, data.data(), data.size());
+    msgpack::object data_msg = msgpack::unpack(zone_data,
+                                               data.data(),
+                                               data.size());
 
     other_mixable->mix(data_msg, diff);
     other_mixable->put_diff(diff);

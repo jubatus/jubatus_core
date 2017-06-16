@@ -280,7 +280,9 @@ TEST_P(classifier_test, save_load_2) {
   // Load empty
   {
     msgpack::zone z;
-    msgpack::object o = msgpack::unpack(z, save_empty.data(), save_empty.size());
+    msgpack::object o = msgpack::unpack(z,
+                                        save_empty.data(),
+                                        save_empty.size());
     classifier_->unpack(o);
   }
 
