@@ -182,6 +182,7 @@ TEST(clustering_factory_test, kmeans) {
   }
 }
 
+#ifdef JUBATUS_USE_EIGEN
 TEST(clustering_factory_test, gmm) {
   {
     json js(new json_object);
@@ -232,6 +233,8 @@ TEST(clustering_factory_test, gmm) {
                                                conf["compressor_parameter"]));
   }
 }
+#endif  // #ifdef JUBATUS_USE_EIGEN
+
 }
 }
 }
