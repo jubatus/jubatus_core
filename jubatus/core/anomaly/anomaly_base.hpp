@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_ANOMALY_ANOMALY_BASE_HPP_
 #define JUBATUS_CORE_ANOMALY_ANOMALY_BASE_HPP_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -78,6 +79,7 @@ class anomaly_base : public framework::model {
   virtual bool set_row(const std::string& id, const common::sfv_t& sfv) = 0;
 
   virtual void get_all_row_ids(std::vector<std::string>& ids) const = 0;
+  virtual void get_status(std::map<std::string, std::string>& status) const = 0;
   virtual std::string type() const = 0;
   virtual std::vector<framework::mixable*> get_mixables() const = 0;
 

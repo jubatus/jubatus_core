@@ -15,6 +15,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <algorithm>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -69,6 +70,9 @@ class anomaly_impl : public anomaly_base {
     ids.push_back("100");
     ids.push_back("99.0");
     ids.push_back("A300");
+  }
+
+  void get_status(std::map<std::string, std::string>& status) const {
   }
 
   std::string type() const {
