@@ -42,6 +42,7 @@ class nearest_neighbor_base {
   virtual ~nearest_neighbor_base() {}
 
   void get_all_row_ids(std::vector<std::string>& ids) const;
+  uint64_t size() const;
 
   jubatus::util::lang::shared_ptr<const storage::column_table>
   get_const_table() const {
