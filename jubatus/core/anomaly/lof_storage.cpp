@@ -18,11 +18,13 @@
 
 #include <algorithm>
 #include <limits>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+#include "jubatus/util/lang/cast.h"
 
 #include "anomaly_type.hpp"
 #include "../common/exception.hpp"
@@ -63,6 +65,7 @@ lof_storage::lof_storage()
     : neighbor_num_(DEFAULT_NEIGHBOR_NUM),
       reverse_nn_num_(DEFAULT_REVERSE_NN_NUM),
       ignore_kth_same_point_(DEFAULT_IGNORE_KTH_SAME_POINT),
+      ignored_count_(0),
       nn_engine_(recommender::recommender_factory::create_recommender(
           "euclid_lsh",
           common::jsonconfig::config(jubatus::util::text::json::to_json(
@@ -74,6 +77,7 @@ lof_storage::lof_storage(
     : neighbor_num_(DEFAULT_NEIGHBOR_NUM),
       reverse_nn_num_(DEFAULT_REVERSE_NN_NUM),
       ignore_kth_same_point_(DEFAULT_IGNORE_KTH_SAME_POINT),
+      ignored_count_(0),
       nn_engine_(nn_engine) {
 }
 
@@ -84,6 +88,7 @@ lof_storage::lof_storage(
       reverse_nn_num_(config.reverse_nearest_neighbor_num),
       ignore_kth_same_point_(
           config.ignore_kth_same_point && *config.ignore_kth_same_point),
+      ignored_count_(0),
       nn_engine_(nn_engine) {
 }
 
@@ -144,10 +149,23 @@ void lof_storage::clear() {
   lof_table_t().swap(lof_table_);
   lof_table_t().swap(lof_table_diff_);
   nn_engine_->clear();
+  ignored_count_ = 0;
 }
 
 void lof_storage::get_all_row_ids(vector<string>& ids) const {
   nn_engine_->get_all_row_ids(ids);
+}
+
+void lof_storage::get_status(std::map<std::string, std::string>& status) const {
+  status["num_id_master"] =
+    jubatus::util::lang::lexical_cast<std::string>(lof_table_.size());
+  status["num_id_diff"] =
+    jubatus::util::lang::lexical_cast<std::string>(lof_table_diff_.size());
+
+  if (ignore_kth_same_point_) {
+    status["num_ignored"] =
+      jubatus::util::lang::lexical_cast<std::string>(ignored_count_);
+  }
 }
 
 bool lof_storage::update_row(const string& row, const common::sfv_t& diff) {
@@ -165,6 +183,7 @@ bool lof_storage::update_row(const string& row, const common::sfv_t& diff) {
         updated_row, nn_result, neighbor_num_ - 1);
     if (nn_result.size() == (neighbor_num_ - 1) &&
        (nn_result.back().second == 0)) {
+      ++ignored_count_;
       return false;
     }
   }

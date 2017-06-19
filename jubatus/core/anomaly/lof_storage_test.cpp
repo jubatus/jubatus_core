@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -111,6 +112,10 @@ TEST(lof_storage, get_all_row_ids) {
   expect.push_back("r6");
 
   EXPECT_EQ(expect, ids);
+
+  std::map<std::string, std::string> status;
+  s.get_status(status);
+  EXPECT_EQ(status["num_id_diff"], "6");  // includes removed ids
 }
 
 TEST(lof_storage, ignore_kth_same_point) {
@@ -126,7 +131,16 @@ TEST(lof_storage, ignore_kth_same_point) {
   EXPECT_TRUE(s.update_row("r2", make_sfv("1:1")));
   EXPECT_TRUE(s.update_row("r3", make_sfv("1:1")));
   EXPECT_TRUE(s.update_row("r4", make_sfv("1:1")));
+
+  std::map<std::string, std::string> status;
+  s.get_status(status);
+  EXPECT_EQ(status["num_ignored"], "0");
+
   EXPECT_FALSE(s.update_row("r5", make_sfv("1:1")));
+
+  status.clear();
+  s.get_status(status);
+  EXPECT_EQ(status["num_ignored"], "1");
 }
 
 // One dimensional example (points = { -1, 0, 1, 10 }, k = 2)
@@ -270,13 +284,33 @@ TEST_P(lof_storage_mix_test, consistency) {
     update(lexical_cast<string>(i), mu0, deviation);
   }
 
+  std::map<std::string, std::string> status;
+  single_storage_->get_status(status);
+  EXPECT_EQ(status["num_id_master"], "0");
+  EXPECT_EQ(status["num_id_diff"], lexical_cast<string>(num_sample));
+
   mix();  // mix the recommenders
+
+  status.clear();
+  single_storage_->get_status(status);
+  EXPECT_EQ(status["num_id_master"], lexical_cast<string>(num_sample));
+  EXPECT_EQ(status["num_id_diff"], "0");
 
   for (size_t i = 0; i < num_sample; ++i) {
     update(lexical_cast<string>(i), mu0, deviation);
   }
 
+  status.clear();
+  single_storage_->get_status(status);
+  EXPECT_EQ(status["num_id_master"], lexical_cast<string>(num_sample));
+  EXPECT_EQ(status["num_id_diff"], lexical_cast<string>(num_sample));
+
   mix();  // mix the latest k-dists and lrds
+
+  status.clear();
+  single_storage_->get_status(status);
+  EXPECT_EQ(status["num_id_master"], lexical_cast<string>(num_sample));
+  EXPECT_EQ(status["num_id_diff"], "0");
 
   for (size_t i = 0; i < num_query; ++i) {
     const common::sfv_t x =
