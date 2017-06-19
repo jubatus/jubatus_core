@@ -16,9 +16,11 @@
 
 #include "anomaly.hpp"
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
+#include "jubatus/util/lang/cast.h"
 
 #include "../anomaly/anomaly_factory.hpp"
 #include "../anomaly/anomaly_base.hpp"
@@ -96,6 +98,14 @@ float anomaly::overwrite(const string& id, const fv_converter::datum& d) {
   } else {
     return anomaly_->calc_anomaly_score(v);
   }
+}
+
+void anomaly::get_status(std::map<string, string>& status) const {
+  status["storage"] = anomaly_->type();
+  status["max_id"] =
+    jubatus::util::lang::lexical_cast<string>(find_max_int_id());
+
+  anomaly_->get_status(status);
 }
 
 void anomaly::clear() {

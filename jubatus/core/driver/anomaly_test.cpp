@@ -14,6 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -32,6 +33,7 @@
 
 using std::make_pair;
 using std::vector;
+using std::map;
 using std::string;
 using std::pair;
 using jubatus::util::lang::shared_ptr;
@@ -59,6 +61,11 @@ class anomaly_test
 };
 
 TEST_P(anomaly_test, small) {
+  map<string, string> status;
+  anomaly_->get_status(status);
+  EXPECT_NE(status["storage"], "");
+  EXPECT_EQ(status["max_id"], "0");
+
   {
     fv_converter::datum datum;
     datum.num_values_.push_back(make_pair("f1", 1.0));
@@ -72,7 +79,9 @@ TEST_P(anomaly_test, small) {
     vector<string> rows = anomaly_->get_all_rows();
     ASSERT_EQ(2u, rows.size());
   }
-
+  status.clear();
+  anomaly_->get_status(status);
+  EXPECT_EQ(status["max_id"], "2");
 
   // save
   msgpack::sbuffer sbuf;
@@ -87,6 +96,9 @@ TEST_P(anomaly_test, small) {
     std::vector<std::string> rows = anomaly_->get_all_rows();
     ASSERT_EQ(0u, rows.size());
   }
+  status.clear();
+  anomaly_->get_status(status);
+  EXPECT_EQ(status["max_id"], "0");
 
   { // load
     msgpack::unpacked msg;
@@ -95,6 +107,9 @@ TEST_P(anomaly_test, small) {
     std::vector<std::string> rows = anomaly_->get_all_rows();
     ASSERT_EQ(2u, rows.size());
   }
+  status.clear();
+  anomaly_->get_status(status);
+  EXPECT_EQ(status["max_id"], "2");
 }
 
 vector<shared_ptr<anomaly_base> > create_anomaly_base() {
