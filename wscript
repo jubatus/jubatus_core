@@ -108,7 +108,7 @@ def configure(conf):
   func_multiver_test_code = '''#include <immintrin.h>
 __attribute__((target("default"))) void test() {}
 __attribute__((target("sse2"))) void test() { __m128i x; _mm_xor_si128(x,x); }
-__attribute__((target("avx2"))) void test() { __m256i x; _mm256_xor_si256(x,x); }
+__attribute__((target("avx2"))) void test() { __m256i x; _mm256_xor_si256(x,x); _mm256_srl_epi32(x,x); }
 int main() { test(); }
 '''
   func_multiver_enabled = conf.check_cxx(
