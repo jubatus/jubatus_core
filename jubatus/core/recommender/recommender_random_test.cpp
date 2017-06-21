@@ -122,10 +122,11 @@ TYPED_TEST_P(recommender_random_test, random) {
   framework::jubatus_packer jp(st);
   framework::packer packer(jp);
   r.pack(packer);
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
+
+  msgpack::zone zone;
+  msgpack::object o = msgpack::unpack(zone, buf.data(), buf.size());
   TypeParam r2;
-  r2.unpack(unpacked.get());
+  r2.unpack(o);
 
   // Run the same test
   ids.clear();
@@ -195,11 +196,11 @@ TYPED_TEST_P(recommender_random_test, pack_and_unpack) {
   framework::packer packer(jp);
   r.pack(packer);
 
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
 
   TypeParam r2;
-  r2.unpack(unpacked.get());
+  r2.unpack(o);
 
   vector<string> row_ids;
   r2.get_all_row_ids(row_ids);
@@ -253,9 +254,9 @@ TYPED_TEST_P(recommender_random_test, diff) {
   core::framework::packer pk(jp);
   get_mixable(r)->get_diff(pk);
 
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-  framework::diff_object diff = get_mixable(r)->convert_diff_object(msg.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+  framework::diff_object diff = get_mixable(r)->convert_diff_object(o);
   TypeParam r2;
   get_mixable(r2)->put_diff(diff);
 
@@ -276,29 +277,31 @@ TYPED_TEST_P(recommender_random_test, mix) {
     expect.update_row(row, vec);
   }
 
-  msgpack::unpacked msg1;
+  msgpack::zone z1;
   msgpack::sbuffer sbuf1;
+  msgpack::object o1;
   {
     framework::stream_writer<msgpack::sbuffer> st(sbuf1);
     framework::jubatus_packer jp(st);
     framework::packer pk(jp);
     get_mixable(r1)->get_diff(pk);
-    msgpack::unpack(&msg1, sbuf1.data(), sbuf1.size());
+    o1 = msgpack::unpack(z1, sbuf1.data(), sbuf1.size());
   }
 
-  msgpack::unpacked msg2;
+  msgpack::zone z2;
   msgpack::sbuffer sbuf2;
+  msgpack::object o2;
   {
     framework::stream_writer<msgpack::sbuffer> st(sbuf2);
     framework::jubatus_packer jp(st);
     framework::packer pk(jp);
     get_mixable(r2)->get_diff(pk);
-    msgpack::unpack(&msg2, sbuf2.data(), sbuf2.size());
+    o2 = msgpack::unpack(z2, sbuf2.data(), sbuf2.size());
   }
 
   framework::diff_object diff =
-    get_mixable(r1)->convert_diff_object(msg1.get());
-  get_mixable(r1)->mix(msg2.get(), diff);
+    get_mixable(r1)->convert_diff_object(o1);
+  get_mixable(r1)->mix(o2, diff);
 
   TypeParam mixed;
   get_mixable(mixed)->put_diff(diff);

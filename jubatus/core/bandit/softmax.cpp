@@ -84,7 +84,7 @@ void softmax::pack(framework::packer& pk) const {
   pk.pack(s_);
 }
 void softmax::unpack(msgpack::object o) {
-  o.convert(&s_);
+  o.convert(s_);
 }
 
 void softmax::get_diff(diff_t& diff) const {

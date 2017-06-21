@@ -47,8 +47,8 @@ struct internal_diff : framework::diff_object_raw {
     core::framework::packer p(jp);
     p.pack(objs);
 
-    pk.pack_raw(data.size());
-    pk.pack_raw_body(data.data(), data.size());
+    pk.pack_bin(data.size());
+    pk.pack_bin_body(data.data(), data.size());
   }
 
   vector<msgpack::object> objs;
@@ -59,20 +59,21 @@ struct internal_diff : framework::diff_object_raw {
 
 framework::diff_object mixable_versioned_table::convert_diff_object(
     const msgpack::object& obj) const {
-  if (obj.type != msgpack::type::RAW) {
+  if (obj.type != msgpack::type::BIN) {
     throw JUBATUS_EXCEPTION(
         core::common::exception::runtime_error("bad diff_object"));
   }
   internal_diff* diff = new internal_diff;
   diff_object diff_obj(diff);
 
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, obj.via.raw.ptr, obj.via.raw.size);
+  shared_ptr<msgpack::zone> zone(new msgpack::zone());
+  msgpack::object msg = msgpack::unpack(*zone,
+                                        obj.via.bin.ptr,
+                                        obj.via.bin.size);
 
-  msg.get().convert(&diff->objs);
+  msg.convert(diff->objs);
   if (!diff->objs.empty()) {
-    shared_ptr<msgpack::zone> owner(msg.zone().release());
-    diff->zones.push_back(owner);
+    diff->zones.push_back(zone);
   }
   return diff_obj;
 }
@@ -85,8 +86,8 @@ void mixable_versioned_table::get_diff(framework::packer& pk) const {
   pull_impl(vc_, p);
 
   // Wrap msgpack binary more for holding msgpack::zone in internal diff_object.
-  pk.pack_raw(data.size());
-  pk.pack_raw_body(data.data(), data.size());
+  pk.pack_bin(data.size());
+  pk.pack_bin_body(data.data(), data.size());
 }
 
 bool mixable_versioned_table::put_diff(const framework::diff_object& ptr) {
@@ -119,24 +120,25 @@ void mixable_versioned_table::mix(
         core::common::exception::runtime_error("bad diff_object"));
   }
 
-  if (obj.type != msgpack::type::RAW) {
+  if (obj.type != msgpack::type::BIN) {
     throw JUBATUS_EXCEPTION(
         core::common::exception::runtime_error("bad diff_object"));
-  }
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, obj.via.raw.ptr, obj.via.raw.size);
-  msgpack::object o = msg.get();
-  if (o.type != msgpack::type::ARRAY) {
-    throw JUBATUS_EXCEPTION(
-        core::common::exception::runtime_error("bad diff_object"));
-  }
-  for (size_t i = 0; i < o.via.array.size; i++) {
-    diff_obj->objs.push_back(o.via.array.ptr[i]);
   }
 
-  if (o.via.array.size > 0) {
-    shared_ptr<msgpack::zone> owner(msg.zone().release());
-    diff_obj->zones.push_back(owner);
+  shared_ptr<msgpack::zone> zone(new msgpack::zone());
+  msgpack::object msg = msgpack::unpack(*zone,
+                                        obj.via.bin.ptr,
+                                        obj.via.bin.size);
+  if (msg.type != msgpack::type::ARRAY) {
+    throw JUBATUS_EXCEPTION(
+        core::common::exception::runtime_error("bad diff_object"));
+  }
+  for (size_t i = 0; i < msg.via.array.size; i++) {
+    diff_obj->objs.push_back(msg.via.array.ptr[i]);
+  }
+
+  if (msg.via.array.size > 0) {
+    diff_obj->zones.push_back(zone);
   }
 }
 
@@ -148,7 +150,7 @@ void mixable_versioned_table::pull(
     const msgpack::object& arg,
     framework::packer& pk) const {
   version_clock vc;
-  arg.convert(&vc);
+  arg.convert(vc);
   pull_impl(vc, pk);
 }
 

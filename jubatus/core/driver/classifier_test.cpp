@@ -243,9 +243,9 @@ TEST_P(classifier_test, save_load) {
 
   classifier_->clear();
 
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-  classifier_->unpack(msg.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+  classifier_->unpack(o);
 
   my_test();
 }
@@ -279,9 +279,11 @@ TEST_P(classifier_test, save_load_2) {
 
   // Load empty
   {
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, save_empty.data(), save_empty.size());
-    classifier_->unpack(msg.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z,
+                                        save_empty.data(),
+                                        save_empty.size());
+    classifier_->unpack(o);
   }
 
   // And the classifier classify data improperly, but cannot expect results
@@ -290,9 +292,9 @@ TEST_P(classifier_test, save_load_2) {
 
   // Reload server
   {
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, save_test.data(), save_test.size());
-    classifier_->unpack(msg.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, save_test.data(), save_test.size());
+    classifier_->unpack(o);
   }
 
   // The classifier works well
@@ -317,9 +319,9 @@ TEST_P(classifier_test, save_load_3) {
   }
 
   {
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, save_data.data(), save_data.size());
-    classifier_->unpack(msg.get());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, save_data.data(), save_data.size());
+    classifier_->unpack(o);
   }
 
   {

@@ -360,7 +360,7 @@ void graph_wo_index::pack(framework::packer& packer) const {
 }
 
 void graph_wo_index::unpack(msgpack::object o) {
-  o.convert(this);
+  o.convert(*this);
 }
 
 void graph_wo_index::update_index() {

@@ -19,6 +19,7 @@
 #include <msgpack.hpp>
 #include "datum.hpp"
 #include "msgpack_converter.hpp"
+#include "../common/exception.hpp"
 
 namespace jubatus {
 namespace core {
@@ -29,7 +30,7 @@ namespace {
 const char* NULL_VALUE = "NULL";
 
 void iter_convert(
-    const msgpack::object& object,
+    const msgpack::v2::object& object,
     const std::string& path,
     datum& datum) {
   switch (object.type) {
@@ -56,16 +57,29 @@ void iter_convert(
       break;
     }
 
-    case msgpack::type::DOUBLE: {
-      double v = object.via.dec;
+    case msgpack::type::FLOAT32: {
+      float v = object.via.f64;
       datum.num_values_.push_back(std::make_pair(path, v));
       break;
     }
 
-    case msgpack::type::RAW: {
-      const msgpack::object_raw& raw = object.via.raw;
+    case msgpack::type::FLOAT64: {
+      double v = object.via.f64;
+      datum.num_values_.push_back(std::make_pair(path, v));
+      break;
+    }
+
+    case msgpack::type::BIN: {
+      const msgpack::object_bin& bin = object.via.bin;
       datum.string_values_.push_back(
-          std::make_pair(path, std::string(raw.ptr, raw.size)));
+          std::make_pair(path, std::string(bin.ptr, bin.size)));
+      break;
+    }
+
+    case msgpack::type::STR: {
+      const msgpack::object_str& str = object.via.str;
+      datum.string_values_.push_back(
+          std::make_pair(path, std::string(str.ptr, str.size)));
       break;
     }
 
@@ -85,15 +99,24 @@ void iter_convert(
         const msgpack::object_kv& kv = map.ptr[i];
         std::ostringstream oss;
         oss << path << "/" << kv.key;
+        std::cout << "mapkey: "  << kv.key << std::endl;
         iter_convert(kv.val, oss.str(), datum);
       }
+      break;
+    }
+
+    case msgpack::type::EXT: {
+      throw JUBATUS_EXCEPTION(
+        common::bad_storage_type("where do we use EXT type"));
     }
   }
 }
 
 }  // namespace
 
-void msgpack_converter::convert(const msgpack::object& object, datum& datum) {
+void msgpack_converter::convert(
+    const msgpack::v2::object& object,
+    datum& datum) {
   iter_convert(object, "", datum);
 }
 

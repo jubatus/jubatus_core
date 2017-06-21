@@ -78,13 +78,12 @@ TEST(assoc_vector, pack) {
   msgpack::sbuffer buf;
   msgpack::pack(buf, v);
 
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  msgpack::object obj = unpacked.get();
+  msgpack::zone z;
+  msgpack::object obj = msgpack::unpack(z, buf.data(), buf.size());
 
   std::map<std::string, int> m;
   m["saitama"] = 1;
-  obj.convert(&m);
+  obj.convert(m);
 
   ASSERT_EQ(1u, m.size());
   ASSERT_EQ(1u, m.count("saitama"));
@@ -100,12 +99,11 @@ TEST(assoc_vector, unpack) {
   msgpack::sbuffer buf;
   msgpack::pack(buf, m);
 
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  msgpack::object obj = unpacked.get();
+  msgpack::zone z;
+  msgpack::object obj = msgpack::unpack(z, buf.data(), buf.size());
 
   assoc_vector<std::string, int> v;
-  obj.convert(&v);
+  obj.convert(v);
 
   ASSERT_EQ(1u, v.size());
   ASSERT_EQ(1u, v.count("saitama"));

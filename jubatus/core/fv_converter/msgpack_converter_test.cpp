@@ -33,9 +33,10 @@ void make(const T& data, datum& datum) {
   msgpack::sbuffer sbuf;
   msgpack::pack(sbuf, data);
 
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-  msgpack::object obj = msg.get();
+  msgpack::object_handle result;
+  msgpack::unpack(result, sbuf.data(), sbuf.size());
+  msgpack::v2::object obj(result.get());
+  std::cout << "obj: " << obj << std::endl;
   msgpack_converter::convert(obj, datum);
 }
 
@@ -50,12 +51,18 @@ TEST(msgpack_converter, empty) {
 }
 
 TEST(msgpack_converter, nil) {
-  datum datum;
-  msgpack::object nil;
-  nil.type = msgpack::type::NIL;
-  make(nil, datum);
+  msgpack::sbuffer sbuf;
+  msgpack::packer<msgpack::sbuffer> pk(sbuf);
+  pk.pack_nil();
 
-  ASSERT_EQ(1u, datum.string_values_.size());
+  msgpack::object_handle result;
+  msgpack::unpack(result, sbuf.data(), sbuf.size());
+  msgpack::v2::object obj(result.get());
+
+  datum datum;
+  msgpack_converter::convert(obj, datum);
+
+  EXPECT_EQ(1u, datum.string_values_.size());
   ASSERT_EQ(0u, datum.num_values_.size());
   ASSERT_EQ("", datum.string_values_[0].first);
   ASSERT_EQ("NULL", datum.string_values_[0].second);
@@ -129,39 +136,37 @@ TEST(msgpack_converter, array) {
 }
 
 TEST(msgpack_converter, map) {
-  {
-    datum datum;
-    std::map<std::string, std::string> m;
-    m["age"] = "20";
-    m["name"] = "taro";
-    make(m, datum);
+  datum datum;
+  std::map<std::string, std::string> m;
+  m["age"] = "20";
+  m["name"] = "taro";
+  make(m, datum);
 
-    ASSERT_EQ(2u, datum.string_values_.size());
-    ASSERT_EQ(0u, datum.num_values_.size());
+  ASSERT_EQ(2u, datum.string_values_.size());
+  ASSERT_EQ(0u, datum.num_values_.size());
 
-    ASSERT_EQ("/\"age\"", datum.string_values_[0].first);
-    ASSERT_EQ("20", datum.string_values_[0].second);
+  ASSERT_EQ("/\"age\"", datum.string_values_[0].first);
+  ASSERT_EQ("20", datum.string_values_[0].second);
 
-    ASSERT_EQ("/\"name\"", datum.string_values_[1].first);
-    ASSERT_EQ("taro", datum.string_values_[1].second);
-  }
+  ASSERT_EQ("/\"name\"", datum.string_values_[1].first);
+  ASSERT_EQ("taro", datum.string_values_[1].second);
+}
 
-  {
-    datum datum;
-    std::map<std::string, std::map<std::string, int> > m;
-    m["hanako"]["age"] = 25;
-    m["taro"]["age"] = 20;
-    make(m, datum);
+TEST(msgpack_converter, map_of_map) {
+  datum datum;
+  std::map<std::string, std::map<std::string, int> > m;
+  m["hanako"]["age"] = 25;
+  m["taro"]["age"] = 20;
+  make(m, datum);
 
-    ASSERT_EQ(0u, datum.string_values_.size());
-    ASSERT_EQ(2u, datum.num_values_.size());
+  ASSERT_EQ(0u, datum.string_values_.size());
+  ASSERT_EQ(2u, datum.num_values_.size());
 
-    ASSERT_EQ("/\"hanako\"/\"age\"", datum.num_values_[0].first);
-    ASSERT_EQ(25., datum.num_values_[0].second);
+  ASSERT_EQ("/\"hanako\"/\"age\"", datum.num_values_[0].first);
+  ASSERT_EQ(25., datum.num_values_[0].second);
 
-    ASSERT_EQ("/\"taro\"/\"age\"", datum.num_values_[1].first);
-    ASSERT_EQ(20., datum.num_values_[1].second);
-  }
+  ASSERT_EQ("/\"taro\"/\"age\"", datum.num_values_[1].first);
+  ASSERT_EQ(20., datum.num_values_[1].second);
 }
 
 }  // namespace fv_converter

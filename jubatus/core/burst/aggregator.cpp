@@ -164,7 +164,7 @@ void aggregator::pack(framework::packer& packer) const {
 
 void aggregator::unpack(msgpack::object o) {
   JUBATUS_ASSERT(p_);
-  o.convert(p_.get());
+  o.convert(*p_);
 }
 
 }  // namespace burst

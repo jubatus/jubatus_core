@@ -67,7 +67,7 @@ struct burst::diff_t::impl_ {
   }
 
   explicit impl_(msgpack::object o) : data() {
-    o.convert(this);
+    o.convert(*this);
   }
 
   MSGPACK_DEFINE(data);
@@ -467,7 +467,7 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       throw msgpack::type_error();
     }
 
-    o.via.array.ptr[0].convert(&unpacked_options);
+    o.via.array.ptr[0].convert(unpacked_options);
 
     {
       const msgpack::object& m = o.via.array.ptr[1];
@@ -477,10 +477,10 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       size_t n = m.via.map.size;
       for (size_t i = 0; i < n; ++i) {
         string keyword;
-        m.via.map.ptr[i].key.convert(&keyword);
+        m.via.map.ptr[i].key.convert(keyword);
 
         std::pair<keyword_params, msgpack::object> val;
-        m.via.map.ptr[i].val.convert(&val);
+        m.via.map.ptr[i].val.convert(val);
         storage_ s(unpacked_options, val.first);
         s.get_storage()->unpack(val.second);
 
@@ -496,7 +496,7 @@ class burst::impl_ : jubatus::util::lang::noncopyable {
       size_t n = m.via.map.size;
       for (size_t i = 0; i < n; ++i) {
         string keyword;
-        m.via.map.ptr[i].key.convert(&keyword);
+        m.via.map.ptr[i].key.convert(keyword);
 
         storages_t::const_iterator iter = unpacked_storages.find(keyword);
         if (iter == unpacked_storages.end()) {

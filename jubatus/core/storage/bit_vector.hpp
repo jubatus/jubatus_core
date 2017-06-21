@@ -365,18 +365,18 @@ struct bit_vector_base {
   void msgpack_pack(msgpack::packer<Buffer>& packer) const {
     packer.pack_array(2);
     packer.pack(static_cast<uint64_t>(bit_num_));
-    packer.pack_raw(used_bytes());
+    packer.pack_bin(used_bytes());
     if (bits_) {
       const size_t n = used_bytes() / BLOCKSIZE;
       for (size_t i = 0; i < n; ++i) {
         char buf[BLOCKSIZE];
         common::write_big_endian(bits_[i], buf);
-        packer.pack_raw_body(buf, BLOCKSIZE);
+        packer.pack_bin_body(buf, BLOCKSIZE);
       }
     } else {
       const char c = 0;
       for (size_t i = 0; i < used_bytes(); ++i) {
-        packer.pack_raw_body(&c, 1);
+        packer.pack_bin_body(&c, 1);
       }
     }
   }

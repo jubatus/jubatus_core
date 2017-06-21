@@ -176,7 +176,7 @@ class stub_storage : public storage_base {
   }
 
   void unpack(msgpack::object o) {
-    o.convert(this);
+    o.convert(*this);
   }
 
   void register_label(const std::string& label) {
@@ -408,10 +408,10 @@ TYPED_TEST_P(storage_test, messagepack) {
   {
     TypeParam s;
 
-    msgpack::unpacked unpacked;
-    msgpack::unpack(&unpacked, buf.data(), buf.size());
+    msgpack::zone z;
+    msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
 
-    unpacked.get().convert(&s);
+    o.convert(s);
 
     {
       feature_val3_t mm;

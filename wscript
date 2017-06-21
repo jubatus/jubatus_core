@@ -62,7 +62,7 @@ def configure(conf):
   conf.env.VERSION = VERSION
   conf.env.ABI_VERSION = ABI_VERSION
 
-  conf.check_cxx(lib = 'msgpack')
+  conf.check_cxx(lib = 'msgpackc')
 
   if Options.options.debug:
     """

@@ -350,7 +350,7 @@ void local_storage_mixture::pack(framework::packer& packer) const {
 
 void local_storage_mixture::unpack(msgpack::object o) {
   util::concurrent::scoped_wlock lk(mutex_);
-  o.convert(this);
+  o.convert(*this);
 }
 
 std::string local_storage_mixture::type() const {

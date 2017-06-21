@@ -54,8 +54,9 @@ inline void copy_by_pack_and_unpack(const burst& src, burst& dst) {
   src.pack(packer);
 
   msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  dst.unpack(unpacked.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
+  dst.unpack(o);
 }
 
 template<class F>

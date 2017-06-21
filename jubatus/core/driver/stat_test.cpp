@@ -57,9 +57,9 @@ TEST_F(stat_test, small) {
   framework::packer pk(jp);
   stat_->pack(pk);
 
-  msgpack::unpacked msg;
-  msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-  stat_->unpack(msg.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, sbuf.data(), sbuf.size());
+  stat_->unpack(o);
 }
 
 }  // driver namespace

@@ -42,7 +42,7 @@ struct int_model : public model {
   }
 
   void unpack(msgpack::object o) {
-    o.convert(&value);
+    o.convert(value);
   }
 
   void clear() {
@@ -89,7 +89,7 @@ struct str_model : public model {
   }
 
   void unpack(msgpack::object o) {
-    o.convert(&value);
+    o.convert(value);
   }
 
   void clear() {
@@ -136,9 +136,9 @@ TEST(mixable, pack_unpack) {
 
   m.get_model()->value = 5;
 
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  m.get_model()->unpack(unpacked.get());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
+  m.get_model()->unpack(o);
 
   EXPECT_EQ(10, m.get_model()->value);
 }
@@ -155,12 +155,12 @@ TEST(mixable, trivial) {
   m.get_diff(pk1);
   m.get_diff(pk2);
 
-  msgpack::unpacked m1, m2;
-  msgpack::unpack(&m1, diff1.data(), diff1.size());
-  msgpack::unpack(&m2, diff2.data(), diff2.size());
+  msgpack::zone z1, z2;
+  msgpack::object o1 = msgpack::unpack(z1, diff1.data(), diff1.size());
+  msgpack::object o2 = msgpack::unpack(z2, diff2.data(), diff2.size());
 
-  diff_object diff_obj_mixed = m.convert_diff_object(m1.get());
-  m.mix(m2.get(), diff_obj_mixed);
+  diff_object diff_obj_mixed = m.convert_diff_object(o1);
+  m.mix(o2, diff_obj_mixed);
   m.put_diff(diff_obj_mixed);
 
   EXPECT_EQ(20, m.get_model()->value);
@@ -179,12 +179,12 @@ TEST(mixable, string) {
   m.get_diff(pk1);
   m.get_diff(pk2);
 
-  msgpack::unpacked m1, m2;
-  msgpack::unpack(&m1, diff1.data(), diff1.size());
-  msgpack::unpack(&m2, diff2.data(), diff2.size());
+  msgpack::zone z1, z2;
+  msgpack::object o1 = msgpack::unpack(z1, diff1.data(), diff1.size());
+  msgpack::object o2 = msgpack::unpack(z2, diff2.data(), diff2.size());
 
-  diff_object diff_obj_mixed = m.convert_diff_object(m1.get());
-  m.mix(m2.get(), diff_obj_mixed);  // "add" + "add"
+  diff_object diff_obj_mixed = m.convert_diff_object(o1);
+  m.mix(o2, diff_obj_mixed);  // "add" + "add"
   m.put_diff(diff_obj_mixed);
 
   EXPECT_EQ("addadd", m.get_model()->value);

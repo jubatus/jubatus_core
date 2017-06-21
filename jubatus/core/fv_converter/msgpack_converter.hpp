@@ -29,7 +29,7 @@ struct datum;
 
 class msgpack_converter {
  public:
-  static void convert(const msgpack::object& object, datum& ret_datum);
+  static void convert(const msgpack::v2::object& object, datum& ret_datum);
 };
 
 }  // namespace fv_converter

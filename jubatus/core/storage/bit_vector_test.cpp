@@ -300,9 +300,8 @@ TEST(msgpack_pack, empty) {
   msgpack::sbuffer buf;
   msgpack::pack(buf, bv);
 
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  msgpack::object obj = unpacked.get();
+  msgpack::zone z;
+  msgpack::object obj = msgpack::unpack(z, buf.data(), buf.size());
 
   ASSERT_EQ(msgpack::type::ARRAY, obj.type);
   ASSERT_EQ(2u, obj.via.array.size);
@@ -325,9 +324,8 @@ TEST(msgpack_pack, simple) {
   msgpack::sbuffer buf;
   msgpack::pack(buf, bv);
 
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
-  msgpack::object obj = unpacked.get();
+  msgpack::zone z;
+  msgpack::object obj = msgpack::unpack(z, buf.data(), buf.size());
 
   ASSERT_EQ(msgpack::type::ARRAY, obj.type);
   ASSERT_EQ(2u, obj.via.array.size);
@@ -352,11 +350,11 @@ TEST(msgpack_unpack, packed) {
   msgpack::sbuffer buf;
   msgpack::pack(buf, orig);
 
-  msgpack::unpacked unpacked;
-  msgpack::unpack(&unpacked, buf.data(), buf.size());
+  msgpack::zone z;
+  msgpack::object o = msgpack::unpack(z, buf.data(), buf.size());
 
   bit_vector copied(10);
-  unpacked.get().convert(&copied);
+  o.convert(copied);
 
   EXPECT_EQ(orig, copied);
 }

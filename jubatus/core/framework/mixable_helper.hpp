@@ -66,11 +66,11 @@ class linear_mixable_helper : public linear_mixable {
   diff_object convert_diff_object(const msgpack::object& obj) const {
     internal_diff_object* diff = new internal_diff_object;
     diff_object diff_obj(diff);
-    obj.convert(&diff->diff_);
+    obj.convert(diff->diff_);
     return diff_obj;
   }
 
-  void mix(const msgpack::object& obj, diff_object ptr) const {
+  void mix(const msgpack::v2::object& obj, diff_object ptr) const {
     Diff diff;
     internal_diff_object* diff_obj =
       dynamic_cast<internal_diff_object*>(ptr.get());
@@ -78,7 +78,7 @@ class linear_mixable_helper : public linear_mixable {
       throw JUBATUS_EXCEPTION(
           core::common::exception::runtime_error("bad diff_object"));
     }
-    obj.convert(&diff);
+    obj.convert(diff);
     model_->mix(diff, diff_obj->diff_);
   }
 

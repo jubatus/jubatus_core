@@ -89,9 +89,9 @@ TEST_P(anomaly_test, small) {
   }
 
   { // load
-    msgpack::unpacked msg;
-    msgpack::unpack(&msg, sbuf.data(), sbuf.size());
-    anomaly_->unpack(msg.get());
+    msgpack::zone z;
+    msgpack::object obj = msgpack::unpack(z, sbuf.data(), sbuf.size());
+    anomaly_->unpack(obj);
     std::vector<std::string> rows = anomaly_->get_all_rows();
     ASSERT_EQ(2u, rows.size());
   }

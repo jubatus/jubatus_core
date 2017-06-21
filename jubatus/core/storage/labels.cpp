@@ -125,7 +125,7 @@ void labels::pack(framework::packer& packer) const {
 
 void labels::unpack(msgpack::object o) {
   util::concurrent::scoped_wlock lock(mutex_);
-  o.convert(this);
+  o.convert(*this);
 }
 
 }  // namespace storage

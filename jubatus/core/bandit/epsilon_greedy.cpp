@@ -15,9 +15,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "epsilon_greedy.hpp"
-
 #include <string>
 #include <vector>
+#include <msgpack/pack_decl.hpp>
 #include "../common/exception.hpp"
 #include "../framework/packer.hpp"
 #include "../common/version.hpp"
@@ -89,7 +89,7 @@ void epsilon_greedy::pack(framework::packer& pk) const {
   pk.pack(s_);
 }
 void epsilon_greedy::unpack(msgpack::object o) {
-  o.convert(&s_);
+  o.convert(s_);
 }
 
 void epsilon_greedy::get_diff(diff_t& diff) const {
