@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_ANOMALY_LIGHT_LOF_HPP_
 #define JUBATUS_CORE_ANOMALY_LIGHT_LOF_HPP_
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -94,6 +95,7 @@ class light_lof : public anomaly_base {
   bool set_row(const std::string& id, const common::sfv_t& sfv);
 
   void get_all_row_ids(std::vector<std::string>& ids) const;
+  void get_status(std::map<std::string, std::string>& status) const;
   std::string type() const;
   std::vector<framework::mixable*> get_mixables() const;
 
@@ -147,6 +149,7 @@ class light_lof : public anomaly_base {
 
   config config_;
   std::string my_id_;
+  uint64_t ignored_count_;
 };
 
 }  // namespace anomaly

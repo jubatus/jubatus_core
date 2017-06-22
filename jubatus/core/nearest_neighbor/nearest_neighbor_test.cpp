@@ -138,6 +138,22 @@ TEST_P(nearest_neighbor_test, get_all_row_ids) {
   EXPECT_EQ(expect, actual);
 }
 
+TEST_P(nearest_neighbor_test, size) {
+  nearest_neighbor_base* nn = get_nn();
+
+  EXPECT_EQ(0, nn->size());
+
+  nn->set_row("a", common::sfv_t());
+  nn->set_row("b", common::sfv_t());
+  EXPECT_EQ(2, nn->size());
+
+  nn->set_row("a", common::sfv_t());  // duplicated id
+  EXPECT_EQ(2, nn->size());
+
+  nn->clear();
+  EXPECT_EQ(0, nn->size());
+}
+
 TEST_P(nearest_neighbor_test, empty_neighbor_row) {
   nearest_neighbor_base* nn = get_nn();
 
