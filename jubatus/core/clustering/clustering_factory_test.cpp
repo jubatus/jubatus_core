@@ -234,7 +234,6 @@ TEST(clustering_factory_test, gmm) {
   }
 }
 #endif  // #ifdef JUBATUS_USE_EIGEN
-
 }
 }
 }
