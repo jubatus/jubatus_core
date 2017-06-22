@@ -19,6 +19,8 @@
 
 #include <string>
 
+#include "jubatus/util/data/serialization.h"
+#include "jubatus/util/data/optional.h"
 #include "jubatus/util/math/random.h"
 #include "bandit_base.hpp"
 #include "summation_storage.hpp"
@@ -29,7 +31,20 @@ namespace bandit {
 
 class softmax : public bandit_base {
  public:
-  softmax(bool assume_unrewarded, double tau);
+  struct config {
+    bool assume_unrewarded;
+    double tau;
+    jubatus::util::data::optional<int64_t> seed;
+
+    template<class Ar>
+    void serialize(Ar& ar) {
+      ar & JUBA_MEMBER(assume_unrewarded)
+        & JUBA_MEMBER(tau)
+        & JUBA_MEMBER(seed);
+    }
+  };
+
+  explicit softmax(const config& conf);
 
   std::string select_arm(const std::string& player_id);
 

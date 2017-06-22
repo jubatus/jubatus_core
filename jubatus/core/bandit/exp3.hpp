@@ -19,7 +19,10 @@
 
 #include <string>
 #include <vector>
+#include <limits>
 
+#include "jubatus/util/data/serialization.h"
+#include "jubatus/util/data/optional.h"
 #include "bandit_base.hpp"
 #include "summation_storage.hpp"
 #include "jubatus/util/math/random.h"
@@ -30,7 +33,20 @@ namespace bandit {
 
 class exp3 : public bandit_base {
  public:
-  exp3(bool assume_unrewarded, double gamma);
+  struct config {
+    bool assume_unrewarded;
+    double gamma;
+    jubatus::util::data::optional<int64_t> seed;
+
+    template<class Ar>
+    void serialize(Ar& ar) {
+      ar & JUBA_MEMBER(assume_unrewarded)
+        & JUBA_MEMBER(gamma)
+        & JUBA_MEMBER(seed);
+    }
+  };
+
+  explicit exp3(const config& conf);
 
   std::string select_arm(const std::string& player_id);
 

@@ -18,6 +18,8 @@
 
 #include <string>
 #include <vector>
+#include <limits>
+
 #include "../common/exception.hpp"
 #include "../framework/packer.hpp"
 #include "../common/version.hpp"
@@ -26,11 +28,19 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-epsilon_greedy::epsilon_greedy(bool assume_unrewarded, double eps)
-    : eps_(eps), s_(assume_unrewarded) {
-  if (eps < 0 || 1 < eps) {
+epsilon_greedy::epsilon_greedy(const config& conf)
+    : eps_(conf.epsilon), s_(conf.assume_unrewarded) {
+  if (conf.epsilon < 0 || 1 < conf.epsilon) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0 <= epsilon <= 1"));
+  }
+  if (conf.seed) {
+    if (*conf.seed < 0 || std::numeric_limits<uint32_t>::max() < *conf.seed) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "seed must be within unsigned 32 bit integer"));
+    }
+    rand_ = jubatus::util::math::random::mtrand(*conf.seed);
   }
 }
 

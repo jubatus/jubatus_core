@@ -32,54 +32,6 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-struct epsilon_greedy_config {
-  bool assume_unrewarded;
-  double epsilon;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & JUBA_MEMBER(assume_unrewarded) & JUBA_MEMBER(epsilon);
-  }
-};
-
-struct ucb1_config {
-  bool assume_unrewarded;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & JUBA_MEMBER(assume_unrewarded);
-  }
-};
-
-struct ts_config {
-  bool assume_unrewarded;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & JUBA_MEMBER(assume_unrewarded);
-  }
-};
-
-struct softmax_config {
-  bool assume_unrewarded;
-  double tau;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & JUBA_MEMBER(assume_unrewarded) & JUBA_MEMBER(tau);
-  }
-};
-
-struct exp3_config {
-  bool assume_unrewarded;
-  double gamma;
-
-  template<class Ar>
-  void serialize(Ar& ar) {
-    ar & JUBA_MEMBER(assume_unrewarded) & JUBA_MEMBER(gamma);
-  }
-};
-
 shared_ptr<bandit_base> bandit_factory::create(
     const std::string& name,
     const common::jsonconfig::config& param) {
@@ -89,46 +41,46 @@ shared_ptr<bandit_base> bandit_factory::create(
           common::config_exception() << common::exception::error_message(
               "parameter block is not specified in config"));
     }
-    epsilon_greedy_config conf =
-        config_cast_check<epsilon_greedy_config>(param);
+    epsilon_greedy::config conf =
+      config_cast_check<epsilon_greedy::config>(param);
     return shared_ptr<bandit_base>(
-        new epsilon_greedy(conf.assume_unrewarded, conf.epsilon));
+        new epsilon_greedy(conf));
   } else if (name == "ucb1") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
           common::config_exception() << common::exception::error_message(
               "parameter block is not specified in config"));
     }
-    ucb1_config conf =
-        config_cast_check<ucb1_config>(param);
-    return shared_ptr<bandit_base>(new ucb1(conf.assume_unrewarded));
+    ucb1::config conf =
+      config_cast_check<ucb1::config>(param);
+    return shared_ptr<bandit_base>(new ucb1(conf));
   } else if (name == "ts") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
           common::config_exception() << common::exception::error_message(
               "parameter block is not specified in config"));
     }
-    ts_config conf =
-        config_cast_check<ts_config>(param);
-    return shared_ptr<bandit_base>(new ts(conf.assume_unrewarded));
+    ts::config conf =
+      config_cast_check<ts::config>(param);
+    return shared_ptr<bandit_base>(new ts(conf));
   } else if (name == "softmax") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
           common::config_exception() << common::exception::error_message(
               "parameter block is not specified in config"));
     }
-    softmax_config conf = config_cast_check<softmax_config>(param);
+    softmax::config conf = config_cast_check<softmax::config>(param);
     return shared_ptr<bandit_base>(
-        new softmax(conf.assume_unrewarded, conf.tau));
+        new softmax(conf));
   } else if (name == "exp3") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(
           common::config_exception() << common::exception::error_message(
               "parameter block is not specified in config"));
     }
-    exp3_config conf = config_cast_check<exp3_config>(param);
+    exp3::config conf = config_cast_check<exp3::config>(param);
     return shared_ptr<bandit_base>(
-        new exp3(conf.assume_unrewarded, conf.gamma));
+        new exp3(conf));
   } else {
     throw JUBATUS_EXCEPTION(
         common::unsupported_method("bandit(" + name + ")"));
