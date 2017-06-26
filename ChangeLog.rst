@@ -7,7 +7,7 @@ Release 1.0.4 - 2017/06/26
 
 * Bug fixes
     * Fix build issues on some platforms (#349, #373)
-    * Fix ``--disable-eignen`` build option not working (#361, #362, #370)
+    * Fix ``--disable-eigen`` build option not working (#361, #362, #370)
 
 Release 1.0.3 - 2017/04/24
 --------------------------
