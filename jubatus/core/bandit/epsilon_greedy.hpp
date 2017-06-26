@@ -19,6 +19,8 @@
 
 #include <string>
 
+#include "jubatus/util/data/serialization.h"
+#include "jubatus/util/data/optional.h"
 #include "bandit_base.hpp"
 #include "summation_storage.hpp"
 #include "jubatus/util/math/random.h"
@@ -29,7 +31,21 @@ namespace bandit {
 
 class epsilon_greedy : public bandit_base {
  public:
-  epsilon_greedy(bool assume_unrewarded, double eps);
+  struct config {
+    bool assume_unrewarded;
+    double epsilon;
+    jubatus::util::data::optional<int64_t> seed;
+
+    template<class Ar>
+    void serialize(Ar& ar) {
+      ar
+        & JUBA_MEMBER(assume_unrewarded)
+        & JUBA_MEMBER(epsilon)
+        & JUBA_MEMBER(seed);
+    }
+  };
+
+  explicit epsilon_greedy(const config& conf);
 
   std::string select_arm(const std::string& player_id);
 

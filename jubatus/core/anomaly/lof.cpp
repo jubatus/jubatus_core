@@ -18,6 +18,7 @@
 
 #include <cmath>
 #include <limits>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -173,6 +174,14 @@ bool lof::set_row(const string& id, const common::sfv_t& sfv) {
 
 void lof::get_all_row_ids(vector<string>& ids) const {
   mixable_storage_->get_model()->get_all_row_ids(ids);
+}
+
+void lof::get_status(std::map<std::string, std::string>& status) const {
+  mixable_storage_->get_model()->get_status(status);
+
+  if (unlearner_) {
+    unlearner_->get_status(status);
+  }
 }
 
 string lof::type() const {

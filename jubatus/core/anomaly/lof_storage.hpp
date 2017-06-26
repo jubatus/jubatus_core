@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_ANOMALY_LOF_STORAGE_HPP_
 
 #include <iosfwd>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -106,6 +107,7 @@ class lof_storage {
   void remove_row(const std::string& row);
   void clear();
   void get_all_row_ids(std::vector<std::string>& ids) const;
+  void get_status(std::map<std::string, std::string>& status) const;
   bool update_row(const std::string& row, const common::sfv_t& diff);
 
   void update_all();  // Update kdists and lrds
@@ -177,6 +179,7 @@ class lof_storage {
   uint32_t neighbor_num_;  // k of k-nn
   uint32_t reverse_nn_num_;  // ck of ck-nn as an approx. of k-reverse-nn
   bool ignore_kth_same_point_;
+  uint64_t ignored_count_;
 
   jubatus::util::lang::shared_ptr<core::recommender::recommender_base>
     nn_engine_;

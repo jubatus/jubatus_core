@@ -19,6 +19,7 @@
 
 #include <string>
 
+#include "jubatus/util/data/serialization.h"
 #include "bandit_base.hpp"
 #include "summation_storage.hpp"
 
@@ -28,7 +29,16 @@ namespace bandit {
 
 class ucb1 : public bandit_base {
  public:
-  explicit ucb1(bool assume_unrewarded);
+  struct config {
+    bool assume_unrewarded;
+
+    template<class Ar>
+    void serialize(Ar& ar) {
+      ar & JUBA_MEMBER(assume_unrewarded);
+    }
+  };
+
+  explicit ucb1(const config& conf);
 
   std::string select_arm(const std::string& player_id);
 

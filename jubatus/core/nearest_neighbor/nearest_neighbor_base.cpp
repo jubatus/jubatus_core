@@ -55,6 +55,15 @@ void nearest_neighbor_base::get_all_row_ids(vector<string>& ids) const {
   ret.swap(ids);
 }
 
+uint64_t nearest_neighbor_base::size() const {
+  shared_ptr<const storage::column_table> table = get_const_table();
+  util::concurrent::scoped_rlock lk(table->get_mutex());
+
+  /* table lock acquired; all subsequent table operations must be nolock */
+
+  return table->size_nolock();
+}
+
 void nearest_neighbor_base::clear() {
   mixable_table_->get_model()->clear();  // lock acquired inside
 }

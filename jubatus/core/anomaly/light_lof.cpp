@@ -19,11 +19,13 @@
 #include <algorithm>
 #include <limits>
 #include <numeric>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/lang/bind.h"
+#include "jubatus/util/lang/cast.h"
 #include "jubatus/util/lang/shared_ptr.h"
 #include "../common/exception.hpp"
 #include "../storage/column_table.hpp"
@@ -88,7 +90,8 @@ light_lof::light_lof(
       mixable_nearest_neighbor_(new framework::mixable_versioned_table),
       mixable_scores_(new framework::mixable_versioned_table),
       config_(conf),
-      my_id_(id) {
+      my_id_(id),
+      ignored_count_(0) {
   if (!(2 <= conf.nearest_neighbor_num)) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("2 <= nearest_neighbor_num"));
@@ -115,7 +118,8 @@ light_lof::light_lof(
       mixable_nearest_neighbor_(new framework::mixable_versioned_table),
       mixable_scores_(new framework::mixable_versioned_table),
       config_(conf),
-      my_id_(id) {
+      my_id_(id),
+      ignored_count_(0) {
   shared_ptr<column_table> nn_table = nearest_neighbor_engine_->get_table();
   shared_ptr<column_table> lof_table = create_lof_table();
   unlearner_->set_callback(bind(
@@ -133,7 +137,6 @@ light_lof::~light_lof() {
 float light_lof::calc_anomaly_score(const common::sfv_t& query) const {
   std::vector<float> neighbor_lrds;
   const float lrd = collect_lrds(query, neighbor_lrds);
-
   return calculate_lof(lrd, neighbor_lrds);
 }
 
@@ -153,6 +156,7 @@ float light_lof::calc_anomaly_score(
 void light_lof::clear() {
   nearest_neighbor_engine_->clear();
   mixable_scores_->get_model()->clear();
+  ignored_count_ = 0;
   if (unlearner_) {
     unlearner_->clear();
   }
@@ -180,6 +184,7 @@ bool light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
         sfv, nn_result, config_.nearest_neighbor_num - 1);
     if (nn_result.size() == (config_.nearest_neighbor_num - 1) &&
        (nn_result.back().second == 0)) {
+      ++ignored_count_;
       return false;
     }
   }
@@ -206,6 +211,20 @@ bool light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
 
 void light_lof::get_all_row_ids(std::vector<std::string>& ids) const {
   nearest_neighbor_engine_->get_all_row_ids(ids);
+}
+
+void light_lof::get_status(std::map<std::string, std::string>& status) const {
+  status["num_id"] = jubatus::util::lang::lexical_cast<std::string>(
+      nearest_neighbor_engine_->size());
+
+  if (config_.ignore_kth_same_point && *config_.ignore_kth_same_point) {
+    status["num_ignored"] = jubatus::util::lang::lexical_cast<std::string>(
+        ignored_count_);
+  }
+
+  if (unlearner_) {
+    unlearner_->get_status(status);
+  }
 }
 
 std::string light_lof::type() const {

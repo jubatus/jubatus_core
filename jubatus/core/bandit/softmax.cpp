@@ -20,6 +20,8 @@
 #include <vector>
 #include <cmath>
 #include <numeric>
+#include <limits>
+
 #include "../common/exception.hpp"
 #include "../framework/packer.hpp"
 #include "select_by_weights.hpp"
@@ -29,11 +31,19 @@ namespace jubatus {
 namespace core {
 namespace bandit {
 
-softmax::softmax(bool assume_unrewarded, double tau)
-    : tau_(tau), s_(assume_unrewarded) {
-  if (tau <= 0) {
+softmax::softmax(const config& conf)
+    : tau_(conf.tau), s_(conf.assume_unrewarded) {
+  if (conf.tau <= 0) {
     throw JUBATUS_EXCEPTION(
         common::invalid_parameter("0 < tau"));
+  }
+  if (conf.seed) {
+    if (*conf.seed < 0 || std::numeric_limits<uint32_t>::max() < *conf.seed) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "seed must be within unsigned 32 bit integer"));
+    }
+    rand_ = jubatus::util::math::random::mtrand(*conf.seed);
   }
 }
 

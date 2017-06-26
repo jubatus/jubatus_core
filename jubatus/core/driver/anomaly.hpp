@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_DRIVER_ANOMALY_HPP_
 #define JUBATUS_CORE_DRIVER_ANOMALY_HPP_
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -57,6 +58,7 @@ class anomaly : public driver_base {
       const fv_converter::datum& d);
   float update(const std::string& id, const fv_converter::datum& d);
   float overwrite(const std::string& id, const fv_converter::datum& d);
+  void get_status(std::map<std::string, std::string>& status) const;
   void clear();
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);

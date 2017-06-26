@@ -14,6 +14,7 @@
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+#include <map>
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>
@@ -127,12 +128,20 @@ TYPED_TEST_P(light_lof_test, get_all_row_ids) {
   this->light_lof_->get_all_row_ids(actual_ids);
   EXPECT_EQ(ids, actual_ids);
 
+  std::map<std::string, std::string> status;
+  this->light_lof_->get_status(status);
+  EXPECT_EQ(status["num_id"], lexical_cast<string>(actual_ids.size()));
+
   // duplicated set
   for (size_t i = 0; i < ids.size(); ++i) {
     EXPECT_TRUE(this->light_lof_->set_row(ids[i], common::sfv_t()));
   }
   this->light_lof_->get_all_row_ids(actual_ids);
   EXPECT_EQ(ids, actual_ids);
+
+  status.clear();
+  this->light_lof_->get_status(status);
+  EXPECT_EQ(status["num_id"], lexical_cast<string>(actual_ids.size()));
 }
 
 TYPED_TEST_P(light_lof_test, calc_anomaly_score_on_gaussian_random_samples) {
@@ -163,11 +172,19 @@ TYPED_TEST_P(light_lof_with_ignore_kth_test, ignore_kth_same_point) {
   EXPECT_TRUE(this->light_lof_->set_row("dummy_2", dup1));
   EXPECT_TRUE(this->light_lof_->set_row("dummy_3", dup1));
 
+  std::map<std::string, std::string> status;
+  this->light_lof_->get_status(status);
+  EXPECT_EQ(status["num_ignored"], "0");
+
   for (int i = 0; i < (this->K - 1); ++i) {
     EXPECT_TRUE(this->light_lof_->set_row(
         lexical_cast<string>(i) + "th_point", dup2));
   }
   EXPECT_FALSE(this->light_lof_->set_row("Kth_point", dup2));
+
+  status.clear();
+  this->light_lof_->get_status(status);
+  EXPECT_EQ(status["num_ignored"], "1");
 }
 
 TYPED_TEST_P(light_lof_test, config_validation) {
