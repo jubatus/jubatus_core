@@ -7,7 +7,7 @@ Release 1.0.4 - 2017/06/26
 
 * Bug fixes
     * Fix build issues on some platforms (#349, #373)
-    * Fix ``--disable-eignen`` build option not working (#361, #362, #370)
+    * Fix ``--disable-eigen`` build option not working (#361, #362, #370)
 
 Release 1.0.3 - 2017/04/24
 --------------------------
@@ -117,7 +117,7 @@ Release 0.3.0 - 2016/04/25
     * nearest_neighbor: support multi-threaded nearest neighbor search (#260)
     * nearest_neighbor: improve random projection hash calculation performance (#246)
     * nearest_neighbor and recommender: improve bit_vector hamming distance calculation performance (#250)
-    * recommender: add new recommender method (cosine/euclidean) (#234, #276)
+    * classifier: add new recommender method (cosine/euclidean) (#234, #276)
     * bandit: add new bandit method (Thompson sampling) (#238)
     * classifier: improve get_labels API to return number of trained instances (#204, #272)
     * recommender: support unlearning in euclid_lsh algorithm (#189, #264)
