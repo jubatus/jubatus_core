@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 #include <utility>
 #include <vector>
 #include "jubatus/core/common/thread_pool.hpp"
@@ -49,6 +50,7 @@ void ranking_hamming_bit_vectors_internal(
   typedef std::vector<
     jubatus::util::lang::shared_ptr<
       jubatus::core::common::thread_pool::future<THeap> > > future_list_t;
+  assert(size > 0);
   if (threads > 1) {
     size_t block_size = static_cast<size_t>(
       std::ceil(size / static_cast<float>(threads)));
