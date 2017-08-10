@@ -180,6 +180,10 @@ void euclid_lsh::neighbor_row_from_hash(
   // Take lock out of this function.
   jubatus::util::lang::shared_ptr<const column_table> table =
     get_const_table();
+  ids.clear();
+  if (table->size_nolock() == 0) {
+    return;
+  }
   const_bit_vector_column& bv_col = lsh_column();
   const_float_column& norm_col = norm_column();
   const float denom = bv.bit_num();
@@ -195,7 +199,6 @@ void euclid_lsh::neighbor_row_from_hash(
   vector<pair<float, size_t> > sorted;
   heap.get_sorted(sorted);
 
-  ids.clear();
   for (size_t i = 0; i < sorted.size(); ++i) {
     ids.push_back(make_pair(
       table->get_key_nolock(sorted[i].second), sorted[i].first));
