@@ -172,8 +172,8 @@ static uint64_t get_free_memory()
   ifstream fin("/proc/meminfo");
   string s;
 
-  uint64_t memfree = 0;
-  uint64_t memcached = 0;
+  int64_t memfree = 0;
+  int64_t memcached = 0;
   while (getline(fin, s)) {
     if (s.find("MemFree") == 0) {
       istringstream iss(s);
@@ -182,7 +182,7 @@ static uint64_t get_free_memory()
       string kb;
       iss >> type >> mem >> kb;
       if (mem != "") {
-        memfree = atoi(mem.c_str());
+        memfree = strtoll(mem.c_str(), NULL, 10);
         if (kb == "kB") {
           memfree *= 1000;
         }
@@ -195,7 +195,7 @@ static uint64_t get_free_memory()
       string kb;
       iss >> type >> cached >> kb;
       if (cached != "") {
-        memcached = atoi(cached.c_str());
+        memcached = strtoll(cached.c_str(), NULL, 10);
         if (kb == "kB") {
           memcached *= 1000;
         }
