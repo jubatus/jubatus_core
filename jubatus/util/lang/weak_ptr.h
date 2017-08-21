@@ -33,7 +33,7 @@
 #define JUBATUS_UTIL_LANG_WEAK_PTR_H_
 
 #include <memory>
-#ifdef __GLIBCXX__
+#if defined(__GLIBCXX__) && __cplusplus < 201103
 #include <tr1/memory>
 #endif
 
@@ -42,7 +42,7 @@ namespace util {
 namespace lang {
 
 namespace detail {
-#ifdef __GLIBCXX__
+#if defined(__GLIBCXX__) && __cplusplus < 201103
 namespace weak_ptr_ns = ::std::tr1;
 #else
 namespace weak_ptr_ns = ::std;

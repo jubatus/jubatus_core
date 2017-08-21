@@ -32,12 +32,12 @@
 #ifndef JUBATUS_UTIL_DATA_SERIALIZATION_TR1_UNORDERED_MAP_H_
 #define JUBATUS_UTIL_DATA_SERIALIZATION_TR1_UNORDERED_MAP_H_
 
+#if defined(__GLIBCXX__) && __cplusplus < 201103
+
 #include "base.h"
 
 #include <utility> // Include a lightweight header for __GLIBCXX__.
-#ifdef __GLIBCXX__
 #include <tr1/unordered_map>
-#endif
 
 #include "pair.h"
 
@@ -45,8 +45,6 @@ namespace jubatus {
 namespace util{
 namespace data{
 namespace serialization{
-
-#ifdef __GLIBCXX__
 
 template <class Archive, class K, class V, class H, class P, class A>
 void serialize(Archive &ar, std::tr1::unordered_map<K, V, H, P, A> &m)
@@ -71,10 +69,10 @@ void serialize(Archive &ar, std::tr1::unordered_map<K, V, H, P, A> &m)
   }
 }
 
-#endif
-
 } // serialization
 } // data
 } // util
 } // jubatus
+
+#endif // #if defined(__GLIBCXX__) && __cplusplus < 201103
 #endif // #ifndef JUBATUS_UTIL_DATA_SERIALIZATION_TR1_UNORDERED_MAP_H_
