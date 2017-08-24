@@ -19,6 +19,7 @@
 #include <string>
 #include "../common/jsonconfig.hpp"
 #include "epsilon_greedy.hpp"
+#include "epsilon_decreasing.hpp"
 #include "ucb1.hpp"
 #include "ts.hpp"
 #include "softmax.hpp"
@@ -45,6 +46,16 @@ shared_ptr<bandit_base> bandit_factory::create(
       config_cast_check<epsilon_greedy::config>(param);
     return shared_ptr<bandit_base>(
         new epsilon_greedy(conf));
+  } else if (name == "epsilon_decreasing") {
+    if (param.type() == json::json::Null) {
+      throw JUBATUS_EXCEPTION(
+          common::config_exception() << common::exception::error_message(
+              "parameter block is not specified in config"));
+    }
+    epsilon_decreasing::config conf =
+      config_cast_check<epsilon_decreasing::config>(param);
+    return shared_ptr<bandit_base>(
+        new epsilon_decreasing(conf));
   } else if (name == "ucb1") {
     if (param.type() == json::json::Null) {
       throw JUBATUS_EXCEPTION(

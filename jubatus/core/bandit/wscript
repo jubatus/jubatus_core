@@ -6,6 +6,7 @@ def build(bld):
   source = [
       'bandit_factory.cpp',
       'epsilon_greedy.cpp',
+      'epsilon_decreasing.cpp',
       'exp3.cpp',
       'select_by_weights.cpp',
       'softmax.cpp',
@@ -18,6 +19,7 @@ def build(bld):
       'bandit_base.hpp',
       'bandit_factory.hpp',
       'epsilon_greedy.hpp',
+      'epsilon_decreasing.hpp',
       'exp3.hpp',
       'select_by_weights.hpp',
       'softmax.hpp',
