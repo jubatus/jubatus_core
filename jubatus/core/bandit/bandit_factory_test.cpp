@@ -51,7 +51,7 @@ TEST(bandit_factory, epsilon_greedy_seed) {
 TEST(bandit_factory, epsilon_decreasing) {
   json::json js(new json::json_object);
   js["assume_unrewarded"] = json::to_json(true);
-  js["d"] = json::to_json(0.5);
+  js["decreasing_rate"] = json::to_json(0.5);
   common::jsonconfig::config conf(js);
   shared_ptr<bandit_base> p =
     bandit_factory::create("epsilon_decreasing", conf);
@@ -61,7 +61,7 @@ TEST(bandit_factory, epsilon_decreasing) {
 TEST(bandit_factory, epsilon_decreasing_seed) {
   json::json js(new json::json_object);
   js["assume_unrewarded"] = json::to_json(true);
-  js["d"] = json::to_json(0.5);
+  js["decreasing_rate"] = json::to_json(0.5);
   js["seed"] = json::to_json(10);
   common::jsonconfig::config conf(js);
   shared_ptr<bandit_base> p =

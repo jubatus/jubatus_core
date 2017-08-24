@@ -33,14 +33,14 @@ class epsilon_decreasing : public bandit_base {
  public:
   struct config {
     bool assume_unrewarded;
-    double d;
+    double decreasing_rate;
     jubatus::util::data::optional<int64_t> seed;
 
     template<class Ar>
     void serialize(Ar& ar) {
       ar
         & JUBA_MEMBER(assume_unrewarded)
-        & JUBA_MEMBER(d)
+        & JUBA_MEMBER(decreasing_rate)
         & JUBA_MEMBER(seed);
     }
   };

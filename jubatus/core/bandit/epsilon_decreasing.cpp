@@ -30,10 +30,10 @@ namespace core {
 namespace bandit {
 
 epsilon_decreasing::epsilon_decreasing(const config& conf)
-    : d_(conf.d), s_(conf.assume_unrewarded) {
-  if (conf.d <= 0 || 1 < conf.d) {
+    : d_(conf.decreasing_rate), s_(conf.assume_unrewarded) {
+  if (conf.decreasing_rate <= 0 || 1 <= conf.decreasing_rate) {
     throw JUBATUS_EXCEPTION(
-        common::invalid_parameter("0 < d <= 1"));
+        common::invalid_parameter("0 < d < 1"));
   }
   if (conf.seed) {
     if (*conf.seed < 0 || std::numeric_limits<uint32_t>::max() < *conf.seed) {
