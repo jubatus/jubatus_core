@@ -121,7 +121,11 @@ int main() { test(); }
     sse2_test_code = '#ifdef __SSE2__\nint main() {}\n#else\n#error\n#endif'
     conf.check_cxx(fragment=sse2_test_code, msg='Checking for sse2', mandatory=False)
   if func_multiver_enabled and env.COMPILER_CXX == 'g++' and int(ver[0]) < 6:
+    conf.env.stash()
     conf.env.append_unique('LINKFLAGS', '-fuse-ld=gold')
+    has_ld_gold = conf.check_cxx(msg='Checking for ld.gold', mandatory=False)
+    if not has_ld_gold:
+      conf.env.revert()
 
   conf.recurse(subdirs)
 
