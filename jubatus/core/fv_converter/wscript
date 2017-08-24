@@ -23,7 +23,7 @@ def configure(conf):
     conf.fatal('unsupported regexp library specified: ' + regexp_lib)
 
   if Options.options.enable_fvconverter_dynamic:
-    conf.check_cxx(lib='dl', define_name='HAVE_DL', errmsg = 'not found')
+    conf.check_cxx(lib='dl', define_name='HAVE_DL', errmsg = 'not found', mandatory = False)
     libpat = conf.env.cxxshlib_PATTERN
     conf.define('LIBSPLITTER_SAMPLE', './' + libpat % 'splitter_sample')
     conf.define('LIBSPLITTER_NULL', './' + libpat % 'splitter_null')
