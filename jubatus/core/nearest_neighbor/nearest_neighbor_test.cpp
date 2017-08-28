@@ -172,7 +172,15 @@ const map<string, string> configs[] = {
   make_config("nearest_neighbor:name", "minhash")("hash_num", "64")(),
   make_config(
       "nearest_neighbor:name", "euclid_lsh")(
-      "hash_num", "64")()
+      "hash_num", "64")(),
+  make_config(
+      "nearest_neighbor:name", "lsh")(
+      "hash_num", "64")(
+      "threads", "2")(),
+  make_config(
+      "nearest_neighbor:name", "euclid_lsh")(
+      "hash_num", "64")(
+      "threads", "2")(),
 };
 
 INSTANTIATE_TEST_CASE_P(

@@ -561,6 +561,98 @@ TEST(json, size)
   }
 }
 
+TEST(json, equality)
+{
+  {
+    json j1(new json_integer(123));
+    json j2(new json_integer(123));
+    json j3(new json_integer(456));
+    json j4(new json_bool(true));
+    EXPECT_TRUE(j1 == j2);
+    EXPECT_FALSE(j1 == j3);
+    EXPECT_FALSE(j1 == j4);
+  }
+  {
+    json j1(new json_float(3.14));
+    json j2(new json_float(3.14));
+    json j3(new json_float(2.71828));
+    json j4(new json_bool(true));
+    EXPECT_TRUE(j1 == j2);
+    EXPECT_FALSE(j1 == j3);
+    EXPECT_FALSE(j1 == j4);
+  }
+  {
+    json j1(new json_string("hello, world!"));
+    json j2(new json_string("hello, world!"));
+    json j3(new json_string("hell, world!"));
+    json j4(new json_bool(true));
+    EXPECT_TRUE(j1 == j2);
+    EXPECT_FALSE(j1 == j3);
+    EXPECT_FALSE(j1 == j4);
+  }
+  {
+    json j1(new json_bool(true));
+    json j2(new json_bool(true));
+    json j3(new json_bool(false));
+    json j4(new json_null());
+    EXPECT_TRUE(j1 == j2);
+    EXPECT_FALSE(j1 == j3);
+    EXPECT_FALSE(j1 == j4);
+  }
+  {
+    json j1(new json_array());
+    j1.add(new json_integer(0));
+    json j2(new json_array());
+    j2.add(new json_integer(0));
+    json j3(new json_array());
+    j3.add(new json_integer(1));
+    json j4(new json_bool(false));
+    EXPECT_TRUE(j1 == j2);
+    EXPECT_FALSE(j1 == j3);
+    EXPECT_FALSE(j1 == j4);
+  }
+  {
+    json j1(new json_object());
+    j1["key"] = json(new json_float(0));
+    json j2(new json_object());
+    j2["key"] = json(new json_float(0));
+    json j3(new json_object());
+    j3["key"] = json(new json_float(3.14));
+    json j4(new json_string("key"));
+    EXPECT_TRUE(j1 == j2);
+    EXPECT_FALSE(j1 == j3);
+    EXPECT_FALSE(j1 == j4);
+  }
+  {
+    json j1(new json_null());
+    json j2(new json_null());
+    json j3(new json_bool(false));
+    EXPECT_TRUE(j1 == j2);
+    EXPECT_FALSE(j1 == j3);
+  }
+  {
+    // NULL test
+    json j1;
+    json j2;
+    json j3(new json_bool(false));
+    EXPECT_TRUE(j1 == j2);
+    EXPECT_FALSE(j1 == j3);
+  }
+  {
+    // "integration" test
+    example3 v1, v2;
+    json j1, j2;
+    serialize(j1, v1);
+    serialize(j2, v2);
+    EXPECT_TRUE(j1 == j2);
+
+    v2.a = 2;
+    serialize(j2, v2);
+    EXPECT_FALSE(j1 == j2);
+  }
+}
+
+
 TEST(json, type)
 {
   {

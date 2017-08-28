@@ -106,6 +106,9 @@ public:
   const json& operator[](const std::string& name) const;
   const json& operator[](size_t ix) const;
 
+  bool operator==(const json& other) const;
+  bool operator!=(const json& other) const;
+
   size_t count(const std::string& name) const;
 
   void add(const std::string& name, const json& v);
@@ -145,6 +148,11 @@ public:
   virtual void print(std::ostream& os, bool escape) const = 0;
   virtual void pretty(std::ostream& os, int /* level */, bool escape) const {
     print(os, escape);
+  }
+
+  virtual bool operator==(const json_value& other) const = 0;
+  virtual bool operator!=(const json_value& other) const {
+    return (!(*this == other));
   }
 
 private:
@@ -210,6 +218,11 @@ public:
     os << ']';
   }
 
+  bool operator==(const json_value& other) const {
+    const json_array* v = dynamic_cast<const json_array*>(&other);
+    return v != NULL && v->dat == dat;
+  }
+
 private:
   json_value* clone() const {
     std::auto_ptr<json_array> arr(new json_array);
@@ -235,6 +248,11 @@ public:
 
   void print(std::ostream& os, bool /* escape */) const {
     os << dat;
+  }
+
+  bool operator==(const json_value& other) const {
+    const json_integer* v = dynamic_cast<const json_integer*>(&other);
+    return v != NULL && v->dat == dat;
   }
 
 private:
@@ -271,6 +289,11 @@ public:
     os << std::setprecision(prec);
   }
 
+  bool operator==(const json_value& other) const {
+    const json_float* v = dynamic_cast<const json_float*>(&other);
+    return v != NULL && v->dat == dat;
+  }
+
 private:
   json_value* clone() const {
     return new json_float(dat);
@@ -291,6 +314,11 @@ public:
 
   void print(std::ostream& os, bool escape) const {
     print(os, dat, escape);
+  }
+
+  bool operator==(const json_value& other) const {
+    const json_string* v = dynamic_cast<const json_string*>(&other);
+    return v != NULL && v->dat == dat;
   }
 
   static void print(std::ostream& os, const std::string& dat, bool escape) {
@@ -489,6 +517,28 @@ public:
     os << '}';
   }
 
+  bool operator==(const json_value& other) const {
+    const json_object* v = dynamic_cast<const json_object*>(&other);
+    if (v == NULL) {
+      return false;
+    }
+
+    // As `std::tr1::unordered_map` does not implement `operator==`,
+    // manually compare elements one by one.
+    if (v->member.size() != member.size()) {
+      return false;
+    }
+    for (const_iterator it = v->member.begin(); it != v->member.end(); ++it) {
+      const_iterator it2 = member.find(it->first);
+      if (it2 == member.end() || it->second != it2->second) {
+        // A key in `other` is missing in self, or the corresponding values
+        // are not equal.
+        return false;
+      }
+    }
+    return true;
+  }
+
 private:
   json_value* clone() const {
     std::auto_ptr<json_object> obj(new json_object);
@@ -514,6 +564,11 @@ public:
     os << (dat ? "true" : "false");
   }
 
+  bool operator==(const json_value& other) const {
+    const json_bool* v = dynamic_cast<const json_bool*>(&other);
+    return v != NULL && v->dat == dat;
+  }
+
 private:
   json_value* clone() const {
     return new json_bool(dat);
@@ -532,6 +587,11 @@ public:
 
   void print(std::ostream& os, bool /* escape */) const {
     os << "null";
+  }
+
+  bool operator==(const json_value& other) const {
+    const json_null* v = dynamic_cast<const json_null*>(&other);
+    return v != NULL;
   }
 
 private:
@@ -582,6 +642,16 @@ inline const json& json::operator[](size_t ix) const
 inline json &json::operator[](size_t ix)
 {
   return const_cast<json&>(const_cast<json const&>(*this)[ix]);
+}
+
+inline bool json::operator==(const json& other) const
+{
+  return (*val == *other.val);
+}
+
+inline bool json::operator!=(const json& other) const
+{
+  return (!(*val == *other.val));
 }
 
 inline size_t json::count(const std::string& name) const

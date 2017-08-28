@@ -51,6 +51,10 @@ void ranking_hamming_bit_vectors(
     const const_bit_vector_column& bvs,
     vector<pair<uint64_t, float> >& ret,
     uint64_t ret_num, uint32_t threads) {
+  ret.clear();
+  if (bvs.size() == 0) {
+    return;
+  }
   heap_t heap(ret_num);
   jubatus::util::lang::function<heap_t(size_t, size_t)> f =
     jubatus::util::lang::bind(
@@ -61,7 +65,6 @@ void ranking_hamming_bit_vectors(
   vector<pair<uint32_t, uint64_t> > sorted;
   heap.get_sorted(sorted);
 
-  ret.clear();
   const float denom = query.bit_num();
   for (size_t i = 0; i < sorted.size(); ++i) {
     ret.push_back(make_pair(sorted[i].second, sorted[i].first / denom));

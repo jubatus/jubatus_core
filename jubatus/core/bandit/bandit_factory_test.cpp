@@ -48,6 +48,27 @@ TEST(bandit_factory, epsilon_greedy_seed) {
   EXPECT_EQ("epsilon_greedy", p->name());
 }
 
+TEST(bandit_factory, epsilon_decreasing) {
+  json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
+  js["decreasing_rate"] = json::to_json(0.5);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p =
+    bandit_factory::create("epsilon_decreasing", conf);
+  EXPECT_EQ("epsilon_decreasing", p->name());
+}
+
+TEST(bandit_factory, epsilon_decreasing_seed) {
+  json::json js(new json::json_object);
+  js["assume_unrewarded"] = json::to_json(true);
+  js["decreasing_rate"] = json::to_json(0.5);
+  js["seed"] = json::to_json(10);
+  common::jsonconfig::config conf(js);
+  shared_ptr<bandit_base> p =
+    bandit_factory::create("epsilon_decreasing", conf);
+  EXPECT_EQ("epsilon_decreasing", p->name());
+}
+
 TEST(bandit_factory, ucb1) {
   json::json js(new json::json_object);
   js["assume_unrewarded"] = json::to_json(true);
