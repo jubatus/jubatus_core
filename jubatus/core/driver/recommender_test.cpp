@@ -93,6 +93,39 @@ TEST_F(recommender_test, small) {
   recommender_->complete_row_from_id("key");
 }
 
+TEST_F(recommender_test, similar_row_from) {
+  datum d1, d2;
+  d1.num_values_.push_back(make_pair("f1", 1.0));
+  d2.num_values_.push_back(make_pair("f1", 1.0));
+  d2.num_values_.push_back(make_pair("f2", 1.0));
+
+  recommender_->update_row("id1", d1);
+  recommender_->update_row("id2", d1);
+  recommender_->update_row("id3", d1);
+  recommender_->update_row("id4", d2);
+  recommender_->update_row("id5", d2);
+
+  vector<pair<string, float> > ret;
+
+  ret = recommender_->similar_row_from_datum(d1, 5);
+  ASSERT_EQ(5, ret.size());
+
+  ret = recommender_->similar_row_from_id("id1", 5);
+  ASSERT_EQ(5, ret.size());
+
+  ret = recommender_->similar_row_from_datum_and_score(d1, 0.8);
+  ASSERT_EQ(3, ret.size());  // id1, id2, id3
+
+  ret = recommender_->similar_row_from_id_and_score("id4", 0.8);
+  ASSERT_EQ(2, ret.size());  // id4, id5
+
+  ret = recommender_->similar_row_from_datum_and_rate(d1, 60);
+  ASSERT_EQ(3, ret.size());  // id1, id2, id3
+
+  ret = recommender_->similar_row_from_id_and_rate("id4", 20);
+  ASSERT_EQ(1, ret.size());  // id4
+}
+
 class nn_recommender_test
     : public ::testing::TestWithParam<
         shared_ptr<core::recommender::recommender_base> > {
