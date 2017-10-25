@@ -119,10 +119,10 @@ TEST_F(recommender_test, similar_row_from) {
   ret = recommender_->similar_row_from_id_and_score("id4", 0.8);
   ASSERT_EQ(2, ret.size());  // id4, id5
 
-  ret = recommender_->similar_row_from_datum_and_rate(d1, 60);
+  ret = recommender_->similar_row_from_datum_and_rate(d1, 0.6);
   ASSERT_EQ(3, ret.size());  // id1, id2, id3
 
-  ret = recommender_->similar_row_from_id_and_rate("id4", 20);
+  ret = recommender_->similar_row_from_id_and_rate("id4", 0.2);
   ASSERT_EQ(1, ret.size());  // id4
 }
 

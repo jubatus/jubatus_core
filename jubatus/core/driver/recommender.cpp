@@ -129,7 +129,7 @@ recommender::similar_row_from_id_and_rate(
     const std::string& id,
     float rate) {
   std::vector<std::string> rows = get_all_rows();
-  size_t ret_num = std::ceil(rows.size() * rate / 100);
+  size_t ret_num = std::ceil(rows.size() * rate);
 
   std::vector<std::pair<std::string, float> > ret;
   recommender_->similar_row(id, ret, ret_num);
@@ -181,7 +181,7 @@ recommender::similar_row_from_datum_and_rate(
   converter_->convert(data, v);
 
   std::vector<std::string> rows = get_all_rows();
-  size_t size = std::ceil(rows.size() * rate / 100);
+  size_t size = std::ceil(rows.size() * rate);
 
   std::vector<std::pair<std::string, float> > ret;
   recommender_->similar_row(v, ret, size);
