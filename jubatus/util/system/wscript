@@ -8,7 +8,6 @@ def build(bld):
       'time_util.h',
       'file.h',
       'syscall.h',
-      'mmapper.h',
       'sysstat.h',
       ])
 
@@ -18,8 +17,7 @@ def build(bld):
       'time_util.cpp',
       'file.cpp',
       'syscall.cpp',
-      'sysstat.cpp',
-      'mmapper.cpp'],
+      'sysstat.cpp'],
     target = 'jubatus_util_system',
     vnum = bld.env['ABI_VERSION'],
     includes = '.')
@@ -28,13 +26,6 @@ def build(bld):
     features = 'gtest',
     source = 'time_util_test.cpp',
     target = 'time_util_test',
-    includes = '.',
-    use = 'jubatus_util_system')
-
-  bld.program(
-    features = 'gtest',
-    source = 'mmapper_test.cpp',
-    target = 'mmapper_test',
     includes = '.',
     use = 'jubatus_util_system')
 
