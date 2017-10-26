@@ -128,6 +128,11 @@ std::vector<std::pair<std::string, float> >
 recommender::similar_row_from_id_and_rate(
     const std::string& id,
     float rate) {
+  if (rate <= 0 || 1 < rate) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("0 < rate <= 1"));
+  }
+
   std::vector<std::string> rows = get_all_rows();
   size_t ret_num = std::ceil(rows.size() * rate);
 
@@ -177,6 +182,11 @@ std::vector<std::pair<std::string, float> >
 recommender::similar_row_from_datum_and_rate(
     const fv_converter::datum& data,
     float rate) {
+  if (rate <= 0 || 1 < rate) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("0 < rate <= 1"));
+  }
+
   common::sfv_t v;
   converter_->convert(data, v);
 

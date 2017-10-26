@@ -126,6 +126,47 @@ TEST_F(recommender_test, similar_row_from) {
   ASSERT_EQ(1, ret.size());  // id4
 }
 
+TEST_F(recommender_test, validate_rate) {
+  datum d1;
+  d1.num_values_.push_back(make_pair("f1", 1.0));
+
+  recommender_->update_row("id1", d1);
+
+  // similar_row_from_datum_and_rate
+
+  ASSERT_THROW(
+    recommender_->similar_row_from_datum_and_rate(d1, -0.1),
+    common::invalid_parameter);
+
+  ASSERT_THROW(
+    recommender_->similar_row_from_datum_and_rate(d1, 0),
+    common::invalid_parameter);
+
+  ASSERT_NO_THROW(
+    recommender_->similar_row_from_datum_and_rate(d1, 1));
+
+  ASSERT_THROW(
+    recommender_->similar_row_from_datum_and_rate(d1, 1.1),
+    common::invalid_parameter);
+
+  // similar_row_from_id_and_rate
+
+  ASSERT_THROW(
+    recommender_->similar_row_from_id_and_rate("id1", -0.1),
+    common::invalid_parameter);
+
+  ASSERT_THROW(
+    recommender_->similar_row_from_id_and_rate("id1", 0),
+    common::invalid_parameter);
+
+  ASSERT_NO_THROW(
+    recommender_->similar_row_from_id_and_rate("id1", 1));
+
+  ASSERT_THROW(
+    recommender_->similar_row_from_id_and_rate("id1", 1.1),
+    common::invalid_parameter);
+}
+
 class nn_recommender_test
     : public ::testing::TestWithParam<
         shared_ptr<core::recommender::recommender_base> > {
