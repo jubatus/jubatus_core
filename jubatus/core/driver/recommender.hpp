@@ -59,9 +59,21 @@ class recommender : public driver_base {
   std::vector<std::pair<std::string, float> > similar_row_from_id(
       const std::string& id,
       size_t ret_num);
+  std::vector<std::pair<std::string, float> > similar_row_from_id_and_score(
+      const std::string& id,
+      float score);
+  std::vector<std::pair<std::string, float> > similar_row_from_id_and_rate(
+      const std::string& id,
+      float rate);
   std::vector<std::pair<std::string, float> > similar_row_from_datum(
       const fv_converter::datum& data,
       size_t size);
+  std::vector<std::pair<std::string, float> > similar_row_from_datum_and_score(
+      const fv_converter::datum& data,
+      float score);
+  std::vector<std::pair<std::string, float> > similar_row_from_datum_and_rate(
+      const fv_converter::datum& data,
+      float rate);
 
   float calc_similarity(
       const fv_converter::datum& l,

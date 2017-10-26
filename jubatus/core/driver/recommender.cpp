@@ -16,6 +16,7 @@
 
 #include "recommender.hpp"
 
+#include <cmath>
 #include <string>
 #include <utility>
 #include <vector>
@@ -102,11 +103,95 @@ std::vector<std::pair<std::string, float> > recommender::similar_row_from_id(
 }
 
 std::vector<std::pair<std::string, float> >
+recommender::similar_row_from_id_and_score(
+    const std::string& id,
+    float score) {
+  std::vector<std::string> rows = get_all_rows();
+  size_t ret_num = rows.size();
+
+  std::vector<std::pair<std::string, float> > ret;
+  recommender_->similar_row(id, ret, ret_num);
+
+  std::vector<std::pair<std::string, float> >::iterator it = ret.begin();
+  while (it != ret.end()) {
+      if (it->second < score) {
+          it = ret.erase(it);
+      } else {
+          ++it;
+      }
+  }
+
+  return ret;
+}
+
+std::vector<std::pair<std::string, float> >
+recommender::similar_row_from_id_and_rate(
+    const std::string& id,
+    float rate) {
+  if (rate <= 0 || 1 < rate) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("0 < rate <= 1"));
+  }
+
+  std::vector<std::string> rows = get_all_rows();
+  size_t ret_num = std::ceil(rows.size() * rate);
+
+  std::vector<std::pair<std::string, float> > ret;
+  recommender_->similar_row(id, ret, ret_num);
+  return ret;
+}
+
+std::vector<std::pair<std::string, float> >
 recommender::similar_row_from_datum(
     const fv_converter::datum& data,
     size_t size) {
   common::sfv_t v;
   converter_->convert(data, v);
+
+  std::vector<std::pair<std::string, float> > ret;
+  recommender_->similar_row(v, ret, size);
+  return ret;
+}
+
+std::vector<std::pair<std::string, float> >
+recommender::similar_row_from_datum_and_score(
+    const fv_converter::datum& data,
+    float score) {
+  common::sfv_t v;
+  converter_->convert(data, v);
+
+  std::vector<std::string> rows = get_all_rows();
+  size_t size = rows.size();
+
+  std::vector<std::pair<std::string, float> > ret;
+  recommender_->similar_row(v, ret, size);
+
+  std::vector<std::pair<std::string, float> >::iterator it = ret.begin();
+  while (it != ret.end()) {
+      if (it->second < score) {
+          it = ret.erase(it);
+      } else {
+          ++it;
+      }
+  }
+
+  return ret;
+}
+
+std::vector<std::pair<std::string, float> >
+recommender::similar_row_from_datum_and_rate(
+    const fv_converter::datum& data,
+    float rate) {
+  if (rate <= 0 || 1 < rate) {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter("0 < rate <= 1"));
+  }
+
+  common::sfv_t v;
+  converter_->convert(data, v);
+
+  std::vector<std::string> rows = get_all_rows();
+  size_t size = std::ceil(rows.size() * rate);
 
   std::vector<std::pair<std::string, float> > ret;
   recommender_->similar_row(v, ret, size);
