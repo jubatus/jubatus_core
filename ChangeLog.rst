@@ -1,3 +1,12 @@
+Release 1.0.6 - 2017/10/30
+--------------------------
+
+* New Features
+    * Recommender: Add filtering API (#387)
+
+* Bug fixes
+    * Failed to build on MacOS High Sierra (#388)
+
 Release 1.0.5 - 2017/08/28
 --------------------------
 
