@@ -109,7 +109,10 @@ class lof_storage {
   void get_all_row_ids(std::vector<std::string>& ids) const;
   void get_status(std::map<std::string, std::string>& status) const;
   bool update_row(const std::string& row, const common::sfv_t& diff);
-
+  std::vector<std::string> update_bulk(
+     const std::vector<std::pair<std::string, common::sfv_t> > data);
+  std::vector<std::string> set_bulk(
+     const std::vector<std::pair<std::string, common::sfv_t> > data);
   void update_all();  // Update kdists and lrds
 
   std::string name() const;

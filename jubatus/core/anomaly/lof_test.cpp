@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <sstream>
 #include <gtest/gtest.h>
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/text/json.h"
@@ -31,6 +32,7 @@ using jubatus::util::lang::shared_ptr;
 using std::pair;
 using std::string;
 using std::vector;
+using std::make_pair;
 
 namespace jubatus {
 namespace core {
@@ -49,6 +51,21 @@ TYPED_TEST_P(lof_test, update_row) {
   l.update_row(id, v);
   l.calc_anomaly_score(id);
 }
+
+TYPED_TEST_P(lof_test, update_bulk) {
+  lof l(lof_storage::config(), shared_ptr<TypeParam>(new TypeParam));
+  vector<pair<string, common::sfv_t> > data;
+  for (int i = 0; i < 10; i++) {
+    common::sfv_t v;
+    std::ostringstream id;
+    id << i;
+    v.push_back(make_pair("x", static_cast<float>(i)));
+    data.push_back(make_pair(id.str(), v));
+  }
+  l.update_bulk(data);
+  l.calc_anomaly_score("0");
+}
+
 
 TYPED_TEST_P(lof_test, set_row) {
   lof l(lof_storage::config(), shared_ptr<TypeParam>(new TypeParam));
@@ -83,7 +100,11 @@ TYPED_TEST_P(lof_test, config_validation) {
   ASSERT_NO_THROW(l.reset(new lof(c, nn_engine)));
 }
 
-REGISTER_TYPED_TEST_CASE_P(lof_test, update_row, set_row, config_validation);
+REGISTER_TYPED_TEST_CASE_P(lof_test,
+                           update_row,
+                           set_row,
+                           config_validation,
+                           update_bulk);
 
 typedef testing::Types<recommender::inverted_index, recommender::lsh,
   recommender::minhash, recommender::euclid_lsh> recommender_types;

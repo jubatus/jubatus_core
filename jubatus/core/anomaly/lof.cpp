@@ -21,6 +21,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "jubatus/util/lang/bind.h"
 
@@ -167,16 +168,51 @@ bool lof::update_row(const string& id, const sfv_diff_t& diff) {
   return updated;
 }
 
+vector<string> lof::update_bulk(
+    const vector<std::pair<string, common::sfv_t> > diff) {
+  vector<std::pair<string, common::sfv_t> > update_entries;
+
+  {
+    vector<std::pair<string, common::sfv_t> >::const_iterator it;
+    if (unlearner_) {
+      for (it = diff.begin(); it < diff.end(); ++it) {
+        if (unlearner_->can_touch((*it).first)) {
+          update_entries.push_back((*it));
+        }
+      }
+    } else {
+      update_entries = diff;
+    }
+  }
+
+  vector<string> updated_ids =
+    mixable_storage_->get_model()->update_bulk(update_entries);
+
+  if (unlearner_) {
+    vector<string>::const_iterator it;
+    for (it = updated_ids.begin(); it < updated_ids.end(); ++it) {
+      unlearner_->touch(*it);
+    }
+  }
+  return updated_ids;
+}
+
+
 bool lof::set_row(const string& id, const common::sfv_t& sfv) {
   remove_row(id);
   return update_row(id, sfv);
+}
+
+vector<string> lof::set_bulk(
+    const vector<std::pair<string, common::sfv_t> > diff) {
+  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 
 void lof::get_all_row_ids(vector<string>& ids) const {
   mixable_storage_->get_model()->get_all_row_ids(ids);
 }
 
-void lof::get_status(std::map<std::string, std::string>& status) const {
+void lof::get_status(std::map<string, string>& status) const {
   mixable_storage_->get_model()->get_status(status);
 
   if (unlearner_) {
@@ -188,8 +224,8 @@ string lof::type() const {
   return "lof";
 }
 
-std::vector<framework::mixable*> lof::get_mixables() const {
-  std::vector<framework::mixable*> mixables;
+vector<framework::mixable*> lof::get_mixables() const {
+  vector<framework::mixable*> mixables;
   mixables.push_back(mixable_storage_.get());
   mixables.push_back(nn_engine_->get_mixable());
   return mixables;

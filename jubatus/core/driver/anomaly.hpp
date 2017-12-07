@@ -56,6 +56,9 @@ class anomaly : public driver_base {
   std::pair<std::string, float> add(
       const std::string& id,
       const fv_converter::datum& d);
+  std::vector<std::string> add_bulk(
+      const std::vector<std::pair<std::string, fv_converter::datum> > data);
+
   float update(const std::string& id, const fv_converter::datum& d);
   float overwrite(const std::string& id, const fv_converter::datum& d);
   void get_status(std::map<std::string, std::string>& status) const;

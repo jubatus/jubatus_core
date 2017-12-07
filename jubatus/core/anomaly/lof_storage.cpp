@@ -132,7 +132,7 @@ float lof_storage::collect_lrds(
 float lof_storage::collect_lrds(
     const string& id,
     const common::sfv_t& query,
-    jubatus::util::data::unordered_map<std::string, float>&
+    jubatus::util::data::unordered_map<string, float>&
     neighbor_lrd) const {
   common::sfv_t updated_row;
   nn_engine_->decode_row(id, updated_row);
@@ -156,21 +156,85 @@ void lof_storage::get_all_row_ids(vector<string>& ids) const {
   nn_engine_->get_all_row_ids(ids);
 }
 
-void lof_storage::get_status(std::map<std::string, std::string>& status) const {
+void lof_storage::get_status(std::map<string, string>& status) const {
   status["num_id_master"] =
-    jubatus::util::lang::lexical_cast<std::string>(lof_table_.size());
+    jubatus::util::lang::lexical_cast<string>(lof_table_.size());
   status["num_id_diff"] =
-    jubatus::util::lang::lexical_cast<std::string>(lof_table_diff_.size());
+    jubatus::util::lang::lexical_cast<string>(lof_table_diff_.size());
 
   if (ignore_kth_same_point_) {
     status["num_ignored"] =
-      jubatus::util::lang::lexical_cast<std::string>(ignored_count_);
+      jubatus::util::lang::lexical_cast<string>(ignored_count_);
   }
+}
+
+
+vector<string> lof_storage::update_bulk(
+    const vector<pair<string, common::sfv_t> > diff) {
+
+  vector<pair<string, common::sfv_t> > update_data;
+  unordered_set<string> update_set;
+  vector<string> updated_ids;
+
+  {
+    vector<pair<string, common::sfv_t> >::const_iterator it;
+    if (ignore_kth_same_point_) {
+      vector<pair<string, common::sfv_t> > update_data;
+      for (it = diff.begin(); it < diff.end(); ++it) {
+        vector<pair<string, float> > nn_result;
+        common::sfv_t updated_row;
+        nn_engine_->decode_row((*it).first, updated_row);
+        common::merge_vector(updated_row, (*it).second);
+
+        nn_engine_->neighbor_row(
+            updated_row, nn_result, neighbor_num_ - 1);
+        if (nn_result.size() == (neighbor_num_ - 1) &&
+            (nn_result.back().second == 0)) {
+          ++ignored_count_;
+        } else {
+          {
+            common::sfv_t query;
+            nn_engine_->decode_row((*it).first, query);
+            if (!query.empty()) {
+              collect_neighbors((*it).first, update_set);
+            }
+          }
+          // nn_engine_->update_row((*it).first, (*it).second);
+          update_data.push_back(*it);
+        }
+      }
+    } else {
+      for (it = diff.begin(); it < diff.end(); ++it) {
+        // nn_engine_->update_row((*it).first, (*it).second);
+          {
+            common::sfv_t query;
+            nn_engine_->decode_row((*it).first, query);
+            if (!query.empty()) {
+              collect_neighbors((*it).first, update_set);
+            }
+          }
+      }
+      update_data = diff;
+    }
+  }
+
+  {
+    vector<pair<string, common::sfv_t> >::const_iterator it;
+    for (it = update_data.begin(); it < update_data.end(); ++it) {
+      nn_engine_->update_row((*it).first, (*it).second);
+      collect_neighbors((*it).first, update_set);
+      update_set.insert((*it).first);
+      updated_ids.push_back((*it).first);
+    }
+  }
+
+  update_entries(update_set);
+  return updated_ids;
 }
 
 bool lof_storage::update_row(const string& row, const common::sfv_t& diff) {
   if (ignore_kth_same_point_) {
-    std::vector<std::pair<std::string, float> > nn_result;
+    vector<pair<string, float> > nn_result;
 
     // Find k-1 NNs for the given sfv.
     // If the distance to the (k-1) th neighbor is 0, the model already
@@ -293,7 +357,7 @@ bool lof_storage::put_diff(const lof_table_t& mixed_diff) {
   }
 
   // Create a set of removed (unlearned) rows since get_diff.
-  unordered_set<std::string> removed_ids;
+  unordered_set<string> removed_ids;
   for (lof_table_t::const_iterator it = lof_table_diff_.begin();
       it != lof_table_diff_.end(); ++it) {
     if (is_removed(it->second)) {
@@ -313,7 +377,7 @@ bool lof_storage::put_diff(const lof_table_t& mixed_diff) {
 
   // Keep removed rows in the diff area until next MIX to
   // propagate the removal of this data to other nodes.
-  for (unordered_set<std::string>::const_iterator it = removed_ids.begin();
+  for (unordered_set<string>::const_iterator it = removed_ids.begin();
       it != removed_ids.end(); ++it) {
     mark_removed(lof_table_diff_[*it]);
   }
