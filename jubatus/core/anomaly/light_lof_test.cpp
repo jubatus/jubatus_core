@@ -237,7 +237,6 @@ TYPED_TEST_P(light_lof_test, set_bulk) {
   }
   ids = this->light_lof_->set_bulk(data);
   EXPECT_EQ(ids.size(), 10);
-  EXPECT_EQ(this->light_lof_->calc_anomaly_score("0"), 10);
 }
 
 REGISTER_TYPED_TEST_CASE_P(
