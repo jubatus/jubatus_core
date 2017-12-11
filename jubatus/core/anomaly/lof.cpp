@@ -29,6 +29,7 @@
 
 using jubatus::core::anomaly::lof;
 using jubatus::util::data::unordered_map;
+using jubatus::util::data::unordered_set;
 using std::numeric_limits;
 using std::string;
 using std::vector;
@@ -171,29 +172,29 @@ bool lof::update_row(const string& id, const sfv_diff_t& diff) {
 vector<string> lof::update_bulk(
     const vector<std::pair<string, common::sfv_t> > diff) {
   vector<std::pair<string, common::sfv_t> > update_entries;
+  vector<string> updated_ids;
+  unordered_set<string> update_set;
 
-  {
-    vector<std::pair<string, common::sfv_t> >::const_iterator it;
-    if (unlearner_) {
-      for (it = diff.begin(); it < diff.end(); ++it) {
-        if (unlearner_->can_touch((*it).first)) {
-          update_entries.push_back((*it));
-        }
-      }
-    } else {
-      update_entries = diff;
-    }
-  }
-
-  vector<string> updated_ids =
-    mixable_storage_->get_model()->update_bulk(update_entries);
-
+  vector<std::pair<string, common::sfv_t> >::const_iterator it;
   if (unlearner_) {
-    vector<string>::const_iterator it;
-    for (it = updated_ids.begin(); it < updated_ids.end(); ++it) {
-      unlearner_->touch(*it);
+    for (it = diff.begin(); it < diff.end(); ++it) {
+      if (unlearner_->can_touch((*it).first) &&
+          mixable_storage_->get_model()->update_row(*it, update_set)) {
+        update_entries.push_back(*it);
+        unlearner_->touch((*it).first);
+        updated_ids.push_back((*it).first);
+        update_set.insert((*it).first);
+      }
+    }
+  } else {
+    for (it = diff.begin(); it < diff.end(); ++it) {
+      if (mixable_storage_->get_model()->update_row(*it, update_set)) {
+        updated_ids.push_back((*it).first);
+        update_set.insert((*it).first);
+      }
     }
   }
+  mixable_storage_->get_model()->update_bulk(update_set);
   return updated_ids;
 }
 

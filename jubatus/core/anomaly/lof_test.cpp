@@ -26,9 +26,14 @@
 #include "../common/jsonconfig.hpp"
 #include "../recommender/recommender.hpp"
 #include "lof_storage.hpp"
+#include "../unlearner/unlearner_base.hpp"
+#include "../unlearner/unlearner_factory.hpp"
 
 using jubatus::util::data::unordered_map;
 using jubatus::util::lang::shared_ptr;
+using jubatus::util::text::json::json;
+using jubatus::util::text::json::json_object;
+using jubatus::util::text::json::to_json;
 using std::pair;
 using std::string;
 using std::vector;
@@ -55,6 +60,7 @@ TYPED_TEST_P(lof_test, update_row) {
 TYPED_TEST_P(lof_test, update_bulk) {
   lof l(lof_storage::config(), shared_ptr<TypeParam>(new TypeParam));
   vector<pair<string, common::sfv_t> > data;
+  vector<string> ids;
   for (int i = 0; i < 10; i++) {
     common::sfv_t v;
     std::ostringstream id;
@@ -62,8 +68,65 @@ TYPED_TEST_P(lof_test, update_bulk) {
     v.push_back(make_pair("x", static_cast<float>(i)));
     data.push_back(make_pair(id.str(), v));
   }
-  l.update_bulk(data);
-  l.calc_anomaly_score("0");
+  ids = l.update_bulk(data);
+  EXPECT_EQ(ids.size(), 10);
+}
+
+TYPED_TEST_P(lof_test, bulk_ignore_kth) {
+  lof_storage::config c;
+  c.ignore_kth_same_point = jubatus::util::data::optional<bool>(true);
+  lof l(c, shared_ptr<TypeParam>(new TypeParam));
+  vector<pair<string, common::sfv_t> > data;
+  vector<string> ids;
+  common::sfv_t v;
+  for (int i = 0; i < 10; i++) {
+    v.clear();
+    std::ostringstream id;
+    id << i;
+    v.push_back(make_pair("x", 1.0));
+    v.push_back(make_pair("y", 1.0));
+    data.push_back(make_pair(id.str(), v));
+  }
+  ids = l.update_bulk(data);
+  vector<string> all_ids;
+  l.get_all_row_ids(all_ids);
+  EXPECT_EQ(ids.size(), 9);
+  EXPECT_EQ(all_ids.size(), 9);
+  EXPECT_EQ(l.calc_anomaly_score("0"), 0.0);
+  v.clear();
+  v.push_back(make_pair("x", 1.0));
+  v.push_back(make_pair("y", -1.0));
+  EXPECT_TRUE(l.update_row("10", v));
+}
+
+TYPED_TEST_P(lof_test, bulk_unlearner) {
+  lof_storage::config c;
+  c.ignore_kth_same_point = jubatus::util::data::optional<bool>(true);
+  json js(new json_object);
+  js["max_size"] = to_json(5);
+  jubatus::core::common::jsonconfig::config conf(js);
+  shared_ptr<jubatus::core::unlearner::unlearner_base> unlearner =
+    jubatus::core::unlearner::create_unlearner(
+                                               "lru",
+                                               conf);
+  lof l(c, shared_ptr<TypeParam>(new TypeParam), unlearner);
+  vector<pair<string, common::sfv_t> > data;
+  vector<string> ids;
+  common::sfv_t v;
+  for (int i = 0; i < 10; i++) {
+    v.clear();
+    std::ostringstream id;
+    id << i;
+    v.push_back(make_pair("x", 1.0));
+    v.push_back(make_pair("y", 1.0));
+    data.push_back(make_pair(id.str(), v));
+  }
+  ids = l.update_bulk(data);
+  vector<string> all_ids;
+  l.get_all_row_ids(all_ids);
+  EXPECT_EQ(ids.size(), 10);  // update bulk will succeed for all points
+  EXPECT_EQ(all_ids.size(), 5);  // the model has max_size points
+  EXPECT_EQ(l.calc_anomaly_score("9"), 0.0);  // the last point's score will 0
 }
 
 
@@ -104,7 +167,9 @@ REGISTER_TYPED_TEST_CASE_P(lof_test,
                            update_row,
                            set_row,
                            config_validation,
-                           update_bulk);
+                           update_bulk,
+                           bulk_ignore_kth,
+                           bulk_unlearner);
 
 typedef testing::Types<recommender::inverted_index, recommender::lsh,
   recommender::minhash, recommender::euclid_lsh> recommender_types;

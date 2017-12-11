@@ -245,6 +245,7 @@ vector<string> light_lof::set_bulk(
           collect_neighbors((*it).first, update_set);
         }
         update_data.push_back((*it));
+        nearest_neighbor_engine_->set_row((*it).first, (*it).second);
       }
     }
   } else {
@@ -253,14 +254,13 @@ vector<string> light_lof::set_bulk(
       if (table->exact_match((*it).first).first) {
         collect_neighbors((*it).first, update_set);
       }
+      nearest_neighbor_engine_->set_row((*it).first, (*it).second);
     }
   }
 
   for (it = update_data.begin(); it < update_data.end(); ++it) {
     touch((*it).first);
-    nearest_neighbor_engine_->set_row((*it).first, (*it).second);
     collect_neighbors((*it).first, update_set);
-
     // Primarily add id to lof table with dummy parameters.
     // update_entries() below overwrites this row.
     table->add((*it).first, storage::owner(my_id_), -1.f, -1.f);

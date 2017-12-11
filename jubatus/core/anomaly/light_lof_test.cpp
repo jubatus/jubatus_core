@@ -239,13 +239,39 @@ TYPED_TEST_P(light_lof_test, set_bulk) {
   EXPECT_EQ(ids.size(), 10);
 }
 
+TYPED_TEST_P(light_lof_test, bulk_ignore_kth) {
+  light_lof::config c;
+  c.ignore_kth_same_point = jubatus::util::data::optional<bool>(true);
+  this->light_lof_.reset(new light_lof(c, ID, this->nn_engine_));
+  vector<pair<string, common::sfv_t> > data;
+  vector<string> ids;
+  common::sfv_t v;
+  for (int i = 0; i < 10; i++) {
+    v.clear();
+    std::ostringstream id;
+    id << i;
+    v.push_back(make_pair("x", 1.0));
+    v.push_back(make_pair("y", 1.0));
+    data.push_back(make_pair(id.str(), v));
+  }
+  ids = this->light_lof_->set_bulk(data);
+  EXPECT_EQ(ids.size(), 9);
+  v.clear();
+  v.push_back(make_pair("x", 1.0));
+  v.push_back(make_pair("y", -1.0));
+  EXPECT_TRUE(this->light_lof_->set_row("10", v));
+}
+
+
+
 REGISTER_TYPED_TEST_CASE_P(
     light_lof_test,
     name,
     get_all_row_ids,
     calc_anomaly_score_on_gaussian_random_samples,
     config_validation,
-    set_bulk);
+    set_bulk,
+    bulk_ignore_kth);
 
 INSTANTIATE_TYPED_TEST_CASE_P(
     usual_case, light_lof_test, nearest_neighbor_types);

@@ -169,68 +169,48 @@ void lof_storage::get_status(std::map<string, string>& status) const {
 }
 
 
-vector<string> lof_storage::update_bulk(
-    const vector<pair<string, common::sfv_t> > diff) {
-
-  vector<pair<string, common::sfv_t> > update_data;
-  unordered_set<string> update_set;
-  vector<string> updated_ids;
-
-  {
-    vector<pair<string, common::sfv_t> >::const_iterator it;
-    if (ignore_kth_same_point_) {
-      vector<pair<string, common::sfv_t> > update_data;
-      for (it = diff.begin(); it < diff.end(); ++it) {
-        vector<pair<string, float> > nn_result;
-        common::sfv_t updated_row;
-        nn_engine_->decode_row((*it).first, updated_row);
-        common::merge_vector(updated_row, (*it).second);
-
-        nn_engine_->neighbor_row(
-            updated_row, nn_result, neighbor_num_ - 1);
-        if (nn_result.size() == (neighbor_num_ - 1) &&
-            (nn_result.back().second == 0)) {
-          ++ignored_count_;
-        } else {
-          {
-            common::sfv_t query;
-            nn_engine_->decode_row((*it).first, query);
-            if (!query.empty()) {
-              collect_neighbors((*it).first, update_set);
-            }
-          }
-          // nn_engine_->update_row((*it).first, (*it).second);
-          update_data.push_back(*it);
-        }
-      }
-    } else {
-      for (it = diff.begin(); it < diff.end(); ++it) {
-        // nn_engine_->update_row((*it).first, (*it).second);
-          {
-            common::sfv_t query;
-            nn_engine_->decode_row((*it).first, query);
-            if (!query.empty()) {
-              collect_neighbors((*it).first, update_set);
-            }
-          }
-      }
-      update_data = diff;
-    }
-  }
-
-  {
-    vector<pair<string, common::sfv_t> >::const_iterator it;
-    for (it = update_data.begin(); it < update_data.end(); ++it) {
-      nn_engine_->update_row((*it).first, (*it).second);
-      collect_neighbors((*it).first, update_set);
-      update_set.insert((*it).first);
-      updated_ids.push_back((*it).first);
-    }
-  }
-
+void lof_storage::update_bulk(
+    unordered_set<string> update_set) {
   update_entries(update_set);
-  return updated_ids;
+  return;
 }
+
+bool lof_storage::update_row(
+    const pair<string, common::sfv_t> data,
+    unordered_set<string> update_set) {
+  if (ignore_kth_same_point_) {
+    vector<pair<string, float> > nn_result;
+
+    // Find k-1 NNs for the given sfv.
+    // If the distance to the (k-1) th neighbor is 0, the model already
+    // have (k-1) points that have the same feature vector as given sfv.
+    common::sfv_t updated_row;
+    nn_engine_->decode_row(data.first, updated_row);
+    common::merge_vector(updated_row, data.second);
+
+    nn_engine_->neighbor_row(
+        updated_row, nn_result, neighbor_num_ - 1);
+    if (nn_result.size() == (neighbor_num_ - 1) &&
+       (nn_result.back().second == 0)) {
+      ++ignored_count_;
+      return false;
+    }
+  }
+
+  {
+    common::sfv_t query;
+    nn_engine_->decode_row(data.first, query);
+    if (!query.empty()) {
+      collect_neighbors(data.first, update_set);
+    }
+  }
+
+  nn_engine_->update_row(data.first, data.second);
+  collect_neighbors(data.first, update_set);
+  update_set.insert(data.first);
+  return true;
+}
+
 
 bool lof_storage::update_row(const string& row, const common::sfv_t& diff) {
   if (ignore_kth_same_point_) {
