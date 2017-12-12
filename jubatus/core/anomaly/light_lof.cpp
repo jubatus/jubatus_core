@@ -38,6 +38,9 @@ using jubatus::util::lang::shared_ptr;
 using jubatus::util::lang::bind;
 using jubatus::core::nearest_neighbor::nearest_neighbor_base;
 using jubatus::core::storage::column_table;
+using std::string;
+using std::vector;
+using std::pair;
 
 namespace jubatus {
 namespace core {
@@ -53,13 +56,13 @@ const size_t LRD_COLUMN_INDEX = 1;
 
 shared_ptr<column_table> create_lof_table() {
   shared_ptr<column_table> table(new column_table);
-  std::vector<storage::column_type> schema(
+  vector<storage::column_type> schema(
       2, storage::column_type(storage::column_type::float_type));
   table->init(schema);
   return table;
 }
 
-float calculate_lof(float lrd, const std::vector<float>& neighbor_lrds) {
+float calculate_lof(float lrd, const vector<float>& neighbor_lrds) {
   if (neighbor_lrds.empty()) {
     return lrd == 0 ? 1 : std::numeric_limits<float>::infinity();
   }
@@ -84,7 +87,7 @@ light_lof::config::config()
 
 light_lof::light_lof(
     const config& conf,
-    const std::string& id,
+    const string& id,
     shared_ptr<nearest_neighbor_base> nearest_neighbor_engine)
     : nearest_neighbor_engine_(nearest_neighbor_engine),
       mixable_nearest_neighbor_(new framework::mixable_versioned_table),
@@ -110,7 +113,7 @@ light_lof::light_lof(
 
 light_lof::light_lof(
     const config& conf,
-    const std::string& id,
+    const string& id,
     shared_ptr<nearest_neighbor_base> nearest_neighbor_engine,
     shared_ptr<unlearner::unlearner_base> unlearner)
     : nearest_neighbor_engine_(nearest_neighbor_engine),
@@ -135,20 +138,20 @@ light_lof::~light_lof() {
 }
 
 float light_lof::calc_anomaly_score(const common::sfv_t& query) const {
-  std::vector<float> neighbor_lrds;
+  vector<float> neighbor_lrds;
   const float lrd = collect_lrds(query, neighbor_lrds);
   return calculate_lof(lrd, neighbor_lrds);
 }
 
-float light_lof::calc_anomaly_score(const std::string& id) const {
-  std::vector<float> neighbor_lrds;
+float light_lof::calc_anomaly_score(const string& id) const {
+  vector<float> neighbor_lrds;
   const float lrd = collect_lrds(id, neighbor_lrds);
 
   return calculate_lof(lrd, neighbor_lrds);
 }
 
 float light_lof::calc_anomaly_score(
-    const std::string& id,
+    const string& id,
     const common::sfv_t& query) const {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
@@ -162,20 +165,25 @@ void light_lof::clear() {
   }
 }
 
-void light_lof::clear_row(const std::string& id) {
+void light_lof::clear_row(const string& id) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 
-bool light_lof::update_row(const std::string& id, const sfv_diff_t& diff) {
+bool light_lof::update_row(const string& id, const sfv_diff_t& diff) {
+  throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
+}
+vector<string> light_lof::update_bulk(
+    const vector<pair<string, common::sfv_t> > diff) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 
-bool light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
+bool light_lof::set_row(const string& id, const common::sfv_t& sfv) {
   // Reject adding points that have the same fv for k times.
   // This helps avoiding LRD to become inf (so that LOF scores of its
   // neighbors won't go inf.)
+
   if (config_.ignore_kth_same_point && *config_.ignore_kth_same_point) {
-    std::vector<std::pair<std::string, float> > nn_result;
+    vector<pair<string, float> > nn_result;
 
     // Find k-1 NNs for the given sfv.
     // If the distance to the (k-1) th neighbor is 0, the model already
@@ -189,7 +197,7 @@ bool light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
     }
   }
 
-  unordered_set<std::string> update_set;
+  unordered_set<string> update_set;
 
   shared_ptr<column_table> table = mixable_scores_->get_model();
   if (table->exact_match(id).first) {
@@ -209,16 +217,71 @@ bool light_lof::set_row(const std::string& id, const common::sfv_t& sfv) {
   return true;
 }
 
-void light_lof::get_all_row_ids(std::vector<std::string>& ids) const {
+vector<string> light_lof::set_bulk(
+    const vector<pair<string, common::sfv_t> > diff) {
+  vector<pair<string, common::sfv_t> > update_data;
+  unordered_set<string> update_set;
+  vector<string> set_ids;
+  shared_ptr<column_table> table = mixable_scores_->get_model();
+
+  // Reject adding points that have the same fv for k times.
+  // This helps avoiding LRD to become inf (so that LOF scores of its
+  // neighbors won't go inf.)
+  vector<pair<string, common::sfv_t> >::const_iterator it;
+  if (config_.ignore_kth_same_point && *config_.ignore_kth_same_point) {
+    for (it = diff.begin(); it < diff.end(); ++it) {
+      vector<pair<string, float> > nn_result;
+
+    // Find k-1 NNs for the given sfv.
+    // If the distance to the (k-1) th neighbor is 0, the model already
+    // have (k-1) points that have the same feature vector as given sfv.
+      nearest_neighbor_engine_->neighbor_row(
+          (*it).second, nn_result, config_.nearest_neighbor_num - 1);
+      if (nn_result.size() == (config_.nearest_neighbor_num - 1) &&
+          (nn_result.back().second == 0)) {
+        ++ignored_count_;
+      } else {
+        if (table->exact_match((*it).first).first) {
+          collect_neighbors((*it).first, update_set);
+        }
+        update_data.push_back((*it));
+        nearest_neighbor_engine_->set_row((*it).first, (*it).second);
+      }
+    }
+  } else {
+    update_data = diff;
+    for (it = diff.begin(); it < diff.end(); ++it) {
+      if (table->exact_match((*it).first).first) {
+        collect_neighbors((*it).first, update_set);
+      }
+      nearest_neighbor_engine_->set_row((*it).first, (*it).second);
+    }
+  }
+
+  for (it = update_data.begin(); it < update_data.end(); ++it) {
+    touch((*it).first);
+    collect_neighbors((*it).first, update_set);
+    // Primarily add id to lof table with dummy parameters.
+    // update_entries() below overwrites this row.
+    table->add((*it).first, storage::owner(my_id_), -1.f, -1.f);
+    update_set.insert((*it).first);
+    set_ids.push_back((*it).first);
+  }
+
+  update_entries(update_set);
+  return set_ids;
+}
+
+void light_lof::get_all_row_ids(vector<string>& ids) const {
   nearest_neighbor_engine_->get_all_row_ids(ids);
 }
 
-void light_lof::get_status(std::map<std::string, std::string>& status) const {
-  status["num_id"] = jubatus::util::lang::lexical_cast<std::string>(
+void light_lof::get_status(std::map<string, string>& status) const {
+  status["num_id"] = jubatus::util::lang::lexical_cast<string>(
       nearest_neighbor_engine_->size());
 
   if (config_.ignore_kth_same_point && *config_.ignore_kth_same_point) {
-    status["num_ignored"] = jubatus::util::lang::lexical_cast<std::string>(
+    status["num_ignored"] = jubatus::util::lang::lexical_cast<string>(
         ignored_count_);
   }
 
@@ -227,12 +290,12 @@ void light_lof::get_status(std::map<std::string, std::string>& status) const {
   }
 }
 
-std::string light_lof::type() const {
+string light_lof::type() const {
   return "light_lof";
 }
 
-std::vector<framework::mixable*> light_lof::get_mixables() const {
-  std::vector<framework::mixable*> mixables;
+vector<framework::mixable*> light_lof::get_mixables() const {
+  vector<framework::mixable*> mixables;
   mixables.push_back(nearest_neighbor_engine_->get_mixable());
   mixables.push_back(mixable_scores_.get());
   return mixables;
@@ -240,7 +303,7 @@ std::vector<framework::mixable*> light_lof::get_mixables() const {
 
 // private
 
-void light_lof::touch(const std::string& id) {
+void light_lof::touch(const string& id) {
   if (unlearner_) {
     if (!unlearner_->touch(id)) {
       throw JUBATUS_EXCEPTION(common::exception::runtime_error(
@@ -259,8 +322,8 @@ void light_lof::touch(const std::string& id) {
 // It is necessary to update reverse k-NNs of the point to be removed for model
 // correctness: if this procedure is omitted, ``light_lof`` no longer runs
 // correctly.
-void light_lof::unlearn(const std::string& key) {
-  unordered_set<std::string> reverse_knn;
+void light_lof::unlearn(const string& key) {
+  unordered_set<string> reverse_knn;
   collect_neighbors(key, reverse_knn);
   reverse_knn.erase(key);
 
@@ -272,8 +335,8 @@ void light_lof::unlearn(const std::string& key) {
 
 float light_lof::collect_lrds(
     const common::sfv_t& query,
-    std::vector<float>& neighbor_lrds) const {
-  std::vector<std::pair<std::string, float> > neighbors;
+    vector<float>& neighbor_lrds) const {
+  vector<pair<string, float> > neighbors;
   nearest_neighbor_engine_->neighbor_row(
       query, neighbors, config_.nearest_neighbor_num);
 
@@ -281,9 +344,9 @@ float light_lof::collect_lrds(
 }
 
 float light_lof::collect_lrds(
-    const std::string& id,
-    std::vector<float>& neighbor_lrds) const {
-  std::vector<std::pair<std::string, float> > neighbors;
+    const string& id,
+    vector<float>& neighbor_lrds) const {
+  vector<pair<string, float> > neighbors;
   nearest_neighbor_engine_->neighbor_row(
       id, neighbors, config_.nearest_neighbor_num + 1);
 
@@ -303,15 +366,15 @@ float light_lof::collect_lrds(
 }
 
 float light_lof::collect_lrds_from_neighbors(
-    const std::vector<std::pair<std::string, float> >& neighbors,
-    std::vector<float>& neighbor_lrds) const {
+    const vector<pair<string, float> >& neighbors,
+    vector<float>& neighbor_lrds) const {
   neighbor_lrds.resize(neighbors.size());
   if (neighbors.empty()) {
     return std::numeric_limits<float>::infinity();
   }
 
   // Collect parameters of given neighbors.
-  std::vector<parameter> parameters(neighbors.size());
+  vector<parameter> parameters(neighbors.size());
   for (size_t i = 0; i < neighbors.size(); ++i) {
     parameters[i] = get_row_parameter(neighbors[i].first);
     neighbor_lrds[i] = parameters[i].lrd;
@@ -335,9 +398,9 @@ float light_lof::collect_lrds_from_neighbors(
 }
 
 void light_lof::collect_neighbors(
-    const std::string& query,
-    unordered_set<std::string>& neighbors) const {
-  std::vector<std::pair<std::string, float> > nn_result;
+    const string& query,
+    unordered_set<string>& neighbors) const {
+  vector<pair<string, float> > nn_result;
   nearest_neighbor_engine_->neighbor_row(
       query, nn_result, config_.reverse_nearest_neighbor_num);
 
@@ -346,38 +409,38 @@ void light_lof::collect_neighbors(
   }
 }
 
-void light_lof::update_entries(const unordered_set<std::string>& neighbors) {
+void light_lof::update_entries(const unordered_set<string>& neighbors) {
   shared_ptr<column_table> table = mixable_scores_->get_model();
   storage::float_column& kdist_column =
       table->get_float_column(KDIST_COLUMN_INDEX);
   storage::float_column& lrd_column = table->get_float_column(LRD_COLUMN_INDEX);
 
-  std::vector<uint64_t> ids;
+  vector<uint64_t> ids;
   ids.reserve(neighbors.size());
-  for (unordered_set<std::string>::const_iterator it = neighbors.begin();
+  for (unordered_set<string>::const_iterator it = neighbors.begin();
        it != neighbors.end(); ++it) {
-    const std::pair<bool, uint64_t> hit = table->exact_match(*it);
+    const pair<bool, uint64_t> hit = table->exact_match(*it);
     if (hit.first) {
       ids.push_back(hit.second);
     }
   }
 
-  unordered_map<uint64_t, std::vector<std::pair<uint64_t, float> > >
+  unordered_map<uint64_t, vector<pair<uint64_t, float> > >
       nested_neighbors;
 
   // Gather k-nearest neighbors of each member of neighbors and update their
   // k-dists.
-  std::vector<std::pair<std::string, float> > nn_result;
-  for (std::vector<uint64_t>::const_iterator it = ids.begin();
+  vector<pair<string, float> > nn_result;
+  for (vector<uint64_t>::const_iterator it = ids.begin();
        it != ids.end(); ++it) {
     nearest_neighbor_engine_->neighbor_row(
         table->get_key(*it), nn_result, config_.nearest_neighbor_num);
-    std::vector<std::pair<uint64_t, float> >& nn_indexes =
+    vector<pair<uint64_t, float> >& nn_indexes =
         nested_neighbors[*it];
 
     nn_indexes.reserve(nn_result.size());
     for (size_t i = 0; i < nn_result.size(); ++i) {
-      const std::pair<bool, uint64_t> hit =
+      const pair<bool, uint64_t> hit =
           table->exact_match(nn_result[i].first);
       if (hit.first) {
         nn_indexes.push_back(std::make_pair(hit.second, nn_result[i].second));
@@ -389,9 +452,9 @@ void light_lof::update_entries(const unordered_set<std::string>& neighbors) {
 
   // Calculate LRDs of neighbors.
   const storage::owner owner(my_id_);
-  for (std::vector<uint64_t>::const_iterator it = ids.begin();
+  for (vector<uint64_t>::const_iterator it = ids.begin();
        it != ids.end(); ++it) {
-    const std::vector<std::pair<uint64_t, float> >& nn = nested_neighbors[*it];
+    const vector<pair<uint64_t, float> >& nn = nested_neighbors[*it];
     float lrd = 1;
     if (!nn.empty()) {
       const size_t length = std::min(
@@ -412,10 +475,10 @@ void light_lof::update_entries(const unordered_set<std::string>& neighbors) {
   }
 }
 
-light_lof::parameter light_lof::get_row_parameter(const std::string& row)
+light_lof::parameter light_lof::get_row_parameter(const string& row)
     const {
   shared_ptr<column_table> table = mixable_scores_->get_model();
-  std::pair<bool, uint64_t> hit = table->exact_match(row);
+  pair<bool, uint64_t> hit = table->exact_match(row);
   if (!hit.first) {
     throw JUBATUS_EXCEPTION(common::exception::runtime_error(
         "row \"" + row + "\" not found in light_lof table"));
