@@ -233,22 +233,44 @@ vector<framework::mixable*> lof::get_mixables() const {
 }
 
 void lof::pack(framework::packer& packer) const {
-  packer.pack_array(2);
+  if (unlearner_) {
+    packer.pack_array(3);
+    unlearner_->pack(packer);
+  } else {
+    packer.pack_array(2);
+  }
+
   mixable_storage_->get_model()->pack(packer);
   nn_engine_->pack(packer);
 }
 
 void lof::unpack(msgpack::object o) {
-  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+  if (o.type != msgpack::type::ARRAY) {
     throw msgpack::type_error();
   }
 
-  // clear before load
-  mixable_storage_->get_model()->clear();
-  nn_engine_->clear();
+  size_t i = 0;
+  if (unlearner_) {
+    if (o.via.array.size != 3) {
+      throw msgpack::type_error();
+    }
 
-  mixable_storage_->get_model()->unpack(o.via.array.ptr[0]);
-  nn_engine_->unpack(o.via.array.ptr[1]);
+    // clear before load
+    mixable_storage_->get_model()->clear();
+    nn_engine_->clear();
+
+    unlearner_->unpack(o.via.array.ptr[i]);
+    ++i;
+  } else if (o.via.array.size != 2) {
+    throw msgpack::type_error();
+  } else {
+    // clear before load
+    mixable_storage_->get_model()->clear();
+    nn_engine_->clear();
+  }
+
+  mixable_storage_->get_model()->unpack(o.via.array.ptr[i]);
+  nn_engine_->unpack(o.via.array.ptr[i+1]);
 }
 
 }  // namespace anomaly

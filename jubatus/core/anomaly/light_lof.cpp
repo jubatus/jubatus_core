@@ -490,21 +490,41 @@ light_lof::parameter light_lof::get_row_parameter(const string& row)
 }
 
 void light_lof::pack(framework::packer& packer) const {
-  packer.pack_array(2);
+  if (unlearner_) {
+    packer.pack_array(3);
+    unlearner_->pack(packer);
+  } else {
+    packer.pack_array(2);
+  }
   nearest_neighbor_engine_->pack(packer);
   mixable_scores_->get_model()->pack(packer);
 }
 
 void light_lof::unpack(msgpack::object o) {
-  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+  if (o.type != msgpack::type::ARRAY) {
     throw msgpack::type_error();
   }
 
-  // clear before load
-  clear();
+  size_t i = 0;
+  if (unlearner_) {
+    if (o.via.array.size != 3) {
+      throw msgpack::type_error();
+    }
 
-  nearest_neighbor_engine_->unpack(o.via.array.ptr[0]);
-  mixable_scores_->get_model()->unpack(o.via.array.ptr[1]);
+    // clear before load
+    clear();
+
+    unlearner_->unpack(o.via.array.ptr[i]);
+    ++i;
+  } else if (o.via.array.size != 2) {
+    throw msgpack::type_error();
+  } else {
+    // clear before load
+    clear();
+  }
+
+  nearest_neighbor_engine_->unpack(o.via.array.ptr[i]);
+  mixable_scores_->get_model()->unpack(o.via.array.ptr[i+1]);
 }
 
 }  // namespace anomaly
