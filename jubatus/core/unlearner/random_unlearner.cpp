@@ -100,6 +100,14 @@ void random_unlearner::get_status(
     jubatus::util::lang::lexical_cast<std::string>(ids_.size());
 }
 
+void random_unlearner::pack(framework::packer& pk) const {
+  pk.pack(*this);
+}
+
+void random_unlearner::unpack(msgpack::object o) {
+  o.convert(this);
+}
+
 }  // namespace unlearner
 }  // namespace core
 }  // namespace jubatus
