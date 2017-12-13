@@ -76,7 +76,7 @@ class nearest_neighbor_classifier : public classifier_base {
   storage::labels labels_;
   size_t k_;
   float alpha_;
-  jubatus::util::concurrent::mutex unlearner_mutex_;
+  mutable jubatus::util::concurrent::mutex unlearner_mutex_;
   jubatus::util::lang::shared_ptr<unlearner::unlearner_base> unlearner_;
   jubatus::util::concurrent::mutex rand_mutex_;
   jubatus::util::math::random::mtrand rand_;
