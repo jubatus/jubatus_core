@@ -128,17 +128,37 @@ framework::mixable* nearest_neighbor_recommender::get_mixable() const {
 }
 
 void nearest_neighbor_recommender::pack(framework::packer& packer) const {
-  packer.pack_array(2);
+  if (unlearner_) {
+    packer.pack_array(3);
+    unlearner_->pack(packer);
+  } else {
+    packer.pack_array(2);
+  }
+
   orig_.pack(packer);
   nearest_neighbor_engine_->pack(packer);
 }
 
 void nearest_neighbor_recommender::unpack(msgpack::object o) {
-  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+  if (o.type != msgpack::type::ARRAY) {
     throw msgpack::type_error();
   }
-  orig_.unpack(o.via.array.ptr[0]);
-  nearest_neighbor_engine_->unpack(o.via.array.ptr[1]);
+
+  size_t i = 0;
+
+  if (unlearner_) {
+    if (o.via.array.size != 3) {
+      throw msgpack::type_error();
+    }
+
+    unlearner_->unpack(o.via.array.ptr[i]);
+    ++i;
+  } else if (o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  orig_.unpack(o.via.array.ptr[i]);
+  nearest_neighbor_engine_->unpack(o.via.array.ptr[i+1]);
 }
 
 jubatus::util::lang::shared_ptr<storage::column_table>
