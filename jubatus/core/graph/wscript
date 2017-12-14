@@ -27,6 +27,6 @@ def build(bld):
       includes = '.',
       use = ['jubatus_util', 'jubatus_core'])
 
-  map(make_test, [
-      'graph_wo_index_test.cpp',
-      ])
+  [make_test(x) for x in [
+    'graph_wo_index_test.cpp',
+  ]]
