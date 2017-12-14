@@ -131,23 +131,42 @@ void nearest_neighbor::clear() {
 }
 
 void nearest_neighbor::pack(framework::packer& pk) const {
-  pk.pack_array(2);
+  if (unlearner_) {
+    pk.pack_array(3);
+    unlearner_->pack(pk);
+  } else {
+    pk.pack_array(2);
+  }
+
   nn_->pack(pk);
   wm_.get_model()->pack(pk);
 }
 
 void nearest_neighbor::unpack(msgpack::object o) {
-  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+  if (o.type != msgpack::type::ARRAY) {
     throw msgpack::type_error();
   }
 
-  // clear
-  nn_->clear();
-  converter_->clear_weights();
+  size_t i = 0;
+  if (unlearner_) {
+    if (o.via.array.size != 3) {
+      throw msgpack::type_error();
+    }
 
-  // load
-  nn_->unpack(o.via.array.ptr[0]);
-  wm_.get_model()->unpack(o.via.array.ptr[1]);
+    // clear before load
+    clear();
+
+    unlearner_->unpack(o.via.array.ptr[i]);
+    ++i;
+  } else if (o.via.array.size != 2) {
+    throw msgpack::type_error();
+  } else {
+    // clear before load
+    clear();
+  }
+
+  nn_->unpack(o.via.array.ptr[i]);
+  wm_.get_model()->unpack(o.via.array.ptr[i+1]);
 }
 
 }  // namespace driver
