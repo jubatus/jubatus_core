@@ -37,11 +37,11 @@ def build(bld):
       includes = '.',
       use = ['jubatus_util', 'jubatus_core'])
 
-  map(make_test, [
-      'anomaly_base_test.cpp',
-      'anomaly_factory_test.cpp',
-      'light_lof_test.cpp',
-      'lof_storage_test.cpp',
-      'lof_test.cpp',
-      ])
+  [make_test(x) for x in [
+    'anomaly_base_test.cpp',
+    'anomaly_factory_test.cpp',
+    'light_lof_test.cpp',
+    'lof_storage_test.cpp',
+    'lof_test.cpp',
+  ]]
 
