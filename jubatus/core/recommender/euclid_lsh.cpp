@@ -264,17 +264,37 @@ void euclid_lsh::initialize_model() {
 }
 
 void euclid_lsh::pack(framework::packer& packer) const {
-  packer.pack_array(2);
+  if (unlearner_) {
+    packer.pack_array(3);
+    unlearner_->pack(packer);
+  } else {
+    packer.pack_array(2);
+  }
+
   orig_.pack(packer);
   mixable_storage_->get_model()->pack(packer);
 }
 
 void euclid_lsh::unpack(msgpack::object o) {
-  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+  if (o.type != msgpack::type::ARRAY) {
     throw msgpack::type_error();
   }
-  orig_.unpack(o.via.array.ptr[0]);
-  mixable_storage_->get_model()->unpack(o.via.array.ptr[1]);
+
+  size_t i = 0;
+
+  if (unlearner_) {
+    if (o.via.array.size != 3) {
+      throw msgpack::type_error();
+    }
+
+    unlearner_->unpack(o.via.array.ptr[i]);
+    ++i;
+  } else if (o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  orig_.unpack(o.via.array.ptr[i]);
+  mixable_storage_->get_model()->unpack(o.via.array.ptr[i+1]);
 }
 
 }  // namespace recommender

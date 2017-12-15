@@ -26,6 +26,8 @@
 #include "jubatus/util/data/unordered_set.h"
 #include "jubatus/util/data/optional.h"
 #include "jubatus/util/lang/shared_ptr.h"
+#include "../common/unordered_map.hpp"
+#include "../common/unordered_set.hpp"
 #include "unlearner_base.hpp"
 
 namespace jubatus {
@@ -65,6 +67,10 @@ class lru_unlearner : public unlearner_base {
   bool remove(const std::string& id);
   bool exists_in_memory(const std::string& id) const;
   void get_status(std::map<std::string, std::string>& status) const;
+  void pack(framework::packer& pk) const;
+  void unpack(msgpack::object o);
+
+  MSGPACK_DEFINE(lru_, sticky_ids_);
 
  private:
   typedef std::list<std::string> lru;
