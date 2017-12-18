@@ -215,16 +215,39 @@ float linear_classifier::squared_norm(const common::sfv_t& fv) {
 }
 
 void linear_classifier::pack(framework::packer& pk) const {
-  pk.pack_array(2);
+  if (unlearner_) {
+    pk.pack_array(3);
+
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
+    unlearner_->pack(pk);
+  } else {
+    pk.pack_array(2);
+  }
+
   storage_->pack(pk);
   labels_.get_model()->pack(pk);
 }
 void linear_classifier::unpack(msgpack::object o) {
-  if (o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+  if (o.type != msgpack::type::ARRAY) {
     throw msgpack::type_error();
   }
-  storage_->unpack(o.via.array.ptr[0]);
-  labels_.get_model()->unpack(o.via.array.ptr[1]);
+
+  size_t i = 0;
+
+  if (unlearner_) {
+    if (o.via.array.size != 3) {
+      throw msgpack::type_error();
+    }
+
+    util::concurrent::scoped_lock unlearner_lk(unlearner_mutex_);
+    unlearner_->unpack(o.via.array.ptr[i]);
+    ++i;
+  } else if (o.via.array.size != 2) {
+    throw msgpack::type_error();
+  }
+
+  storage_->unpack(o.via.array.ptr[i]);
+  labels_.get_model()->unpack(o.via.array.ptr[i+1]);
 }
 
 std::vector<framework::mixable*> linear_classifier::get_mixables() {

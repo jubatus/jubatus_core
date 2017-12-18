@@ -17,7 +17,11 @@
 #include <string>
 #include <vector>
 #include <gtest/gtest.h>
+#include <msgpack.hpp>
+
 #include "../common/exception.hpp"
+#include "../framework/packer.hpp"
+#include "../framework/stream_writer.hpp"
 #include "lru_unlearner.hpp"
 #include "test_util.hpp"
 
@@ -103,6 +107,48 @@ TEST(lru_unlearner, sticky) {
   EXPECT_TRUE(unlearner.touch("id6"));
 }
 
+TEST(lru_unlearner, pack_and_unpack) {
+  lru_unlearner::config config;
+  config.max_size = 3;
+  config.sticky_pattern = "sticky-*";
+  lru_unlearner unlearner_1(config);
+  lru_unlearner unlearner_2(config);
+
+  mock_callback callback_1, callback_2;
+  unlearner_1.set_callback(callback_1);
+  unlearner_2.set_callback(callback_2);
+
+  std::vector<std::string> touch_sequence;
+  touch_sequence.push_back("id1");
+  touch_sequence.push_back("id2");
+  touch_sequence.push_back("sticky-1");
+
+  for (size_t i = 0; i < touch_sequence.size(); ++i) {
+    unlearner_1.touch(touch_sequence[i]);
+  }
+
+  msgpack::sbuffer buf;
+  {
+    framework::stream_writer<msgpack::sbuffer> sw(buf);
+    framework::jubatus_packer jp(sw);
+    framework::packer packer(jp);
+    unlearner_1.pack(packer);
+  }
+
+  {
+    msgpack::unpacked unpacked;
+    msgpack::unpack(&unpacked, buf.data(), buf.size());
+    unlearner_2.unpack(unpacked.get());
+  }
+
+  for (size_t i = 0; i < touch_sequence.size(); ++i) {
+    EXPECT_TRUE(unlearner_2.exists_in_memory(touch_sequence[i]));
+  }
+
+  unlearner_2.touch("id3");
+  EXPECT_EQ("id1", callback_2.unlearned_id());
+  EXPECT_FALSE(unlearner_2.exists_in_memory(callback_2.unlearned_id()));
+}
 
 }  // namespace unlearner
 }  // namespace core

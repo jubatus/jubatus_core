@@ -144,6 +144,15 @@ void lru_unlearner::get_status(
     jubatus::util::lang::lexical_cast<std::string>(sticky_ids_.size());
 }
 
+void lru_unlearner::pack(framework::packer& pk) const {
+  pk.pack(*this);
+}
+
+void lru_unlearner::unpack(msgpack::object o) {
+  o.convert(this);
+  lru_unlearner::rebuild_entry_map();
+}
+
 }  // namespace unlearner
 }  // namespace core
 }  // namespace jubatus

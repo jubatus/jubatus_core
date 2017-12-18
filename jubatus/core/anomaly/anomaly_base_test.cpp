@@ -27,6 +27,10 @@
 #include "../storage/column_table.hpp"
 #include "anomaly_base.hpp"
 
+using std::vector;
+using std::string;
+using std::pair;
+
 namespace jubatus {
 namespace core {
 namespace anomaly {
@@ -63,6 +67,18 @@ class anomaly_impl : public anomaly_base {
 
   bool set_row(const std::string& id, const common::sfv_t& sfv) {
     return true;
+  }
+
+  vector<string> update_bulk(
+      const vector<pair<string, common::sfv_t> > data) {
+    vector<string> v(1);
+    return v;
+  }
+
+  vector<string> set_bulk(
+      const vector<pair<string, common::sfv_t> > data) {
+    vector<string> v(1);
+    return v;
   }
 
   void get_all_row_ids(std::vector<std::string>& ids) const {

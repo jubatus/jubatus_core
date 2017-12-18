@@ -20,6 +20,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/lang/shared_ptr.h"
@@ -71,12 +72,15 @@ class anomaly_base : public framework::model {
   //
   // Some implementations including light_lof do not support this function.
   virtual bool update_row(const std::string& id, const sfv_diff_t& diff) = 0;
-
+  virtual std::vector<std::string> update_bulk(
+      const std::vector<std::pair<std::string, common::sfv_t> >) = 0;
   // Updates the row corresponding to given id.
   // Returns true when the row was successfully updated.
   //
   // Some implementations including lof do not support this function.
   virtual bool set_row(const std::string& id, const common::sfv_t& sfv) = 0;
+  virtual std::vector<std::string> set_bulk(
+      const std::vector<std::pair<std::string, common::sfv_t> >) = 0;
 
   virtual void get_all_row_ids(std::vector<std::string>& ids) const = 0;
   virtual void get_status(std::map<std::string, std::string>& status) const = 0;

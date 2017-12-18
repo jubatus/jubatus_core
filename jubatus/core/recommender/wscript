@@ -36,14 +36,14 @@ def build(bld):
       includes = '.',
       use = ['jubatus_util', 'jubatus_core'])
 
-  map(make_test, [
-      'recommender_base_test.cpp',
-      'recommender_mock_storage_test.cpp',
-      'recommender_mock_test.cpp',
-      'recommender_random_test.cpp',
-      'euclid_lsh_test.cpp',
-      'minhash_test.cpp',
-      'lsh_test.cpp',
-      'recommender_factory_test.cpp',
-      'inverted_index_euclid_test.cpp'
-      ])
+  [make_test(x) for x in [
+    'recommender_base_test.cpp',
+    'recommender_mock_storage_test.cpp',
+    'recommender_mock_test.cpp',
+    'recommender_random_test.cpp',
+    'euclid_lsh_test.cpp',
+    'minhash_test.cpp',
+    'lsh_test.cpp',
+    'recommender_factory_test.cpp',
+    'inverted_index_euclid_test.cpp'
+  ]]

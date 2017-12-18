@@ -24,6 +24,7 @@
 #include "jubatus/util/data/serialization.h"
 #include "jubatus/util/data/unordered_map.h"
 #include "jubatus/util/math/random.h"
+#include "../common/unordered_map.hpp"
 #include "unlearner_base.hpp"
 
 namespace jubatus {
@@ -59,6 +60,10 @@ class random_unlearner : public unlearner_base {
   bool remove(const std::string& id);
   bool exists_in_memory(const std::string& id) const;
   void get_status(std::map<std::string, std::string>& status) const;
+  void pack(framework::packer& pk) const;
+  void unpack(msgpack::object o);
+
+  MSGPACK_DEFINE(id_map_, ids_);
 
  private:
   /**

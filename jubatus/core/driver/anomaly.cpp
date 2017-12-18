@@ -64,7 +64,7 @@ bool anomaly::is_updatable() const {
   return anomaly_->is_updatable();
 }
 
-void anomaly::clear_row(const std::string& id) {
+void anomaly::clear_row(const string& id) {
   anomaly_->clear_row(id);
 }
 
@@ -75,6 +75,23 @@ pair<string, float> anomaly::add(
     return make_pair(id, this->update(id, d));
   } else {
     return make_pair(id, this->overwrite(id, d));
+  }
+}
+
+vector<string> anomaly::add_bulk(
+    const vector<pair<string, fv_converter::datum> > data) {
+
+  vector<pair<string, common::sfv_t> > diff;
+  vector<pair<string, fv_converter::datum> >::const_iterator it;
+  for (it = data.begin(); it < data.end(); ++it) {
+    common::sfv_t v;
+    converter_->convert_and_update_weight((*it).second, v);
+    diff.push_back(make_pair((*it).first, v));
+  }
+  if (anomaly_->is_updatable()) {
+    return anomaly_->update_bulk(diff);
+  } else {
+    return anomaly_->set_bulk(diff);
   }
 }
 

@@ -55,6 +55,12 @@ class mock_unlearner : public unlearner_base {
     // mock unlearner does not remember anything
     return false;
   }
+
+  void pack(framework::packer& pk) const {
+  }
+
+  void unpack(msgpack::object o) {
+  }
 };
 
 }  // namespace

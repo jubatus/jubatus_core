@@ -1,3 +1,13 @@
+Release 1.0.7 - 2017/12/18
+--------------------------
+
+* New Features
+    * Anomaly: Add bulk API (#360, #391)
+
+* Bug fixes
+    * Unlearner does not be saved (#389, 392)
+    * Some unittests do not run on Python 3 (#390, #393)
+
 Release 1.0.6 - 2017/10/30
 --------------------------
 

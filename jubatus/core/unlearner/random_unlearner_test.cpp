@@ -16,8 +16,12 @@
 
 #include <string>
 #include <gtest/gtest.h>
+#include <msgpack.hpp>
+
 #include "jubatus/util/data/unordered_set.h"
 #include "../common/exception.hpp"
+#include "../framework/packer.hpp"
+#include "../framework/stream_writer.hpp"
 #include "random_unlearner.hpp"
 #include "test_util.hpp"
 
@@ -107,6 +111,50 @@ TEST(random_unlearner, trivial) {
   unlearner.touch("last");
   EXPECT_EQ(1ul, keys.count(callback.unlearned_id()));
   EXPECT_FALSE(unlearner.exists_in_memory(callback.unlearned_id()));
+}
+
+TEST(random_unlearner, pack_and_unpack) {
+  random_unlearner::config config;
+  config.max_size = 3;
+  random_unlearner unlearner_1(config);
+  random_unlearner unlearner_2(config);
+
+  mock_callback callback_1, callback_2;
+  unlearner_1.set_callback(callback_1);
+  unlearner_2.set_callback(callback_2);
+
+  unordered_set<std::string> keys;
+  keys.insert("id1");
+  keys.insert("id2");
+  keys.insert("id3");
+
+  for (unordered_set<std::string>::iterator it = keys.begin();
+       it != keys.end(); ++it) {
+    unlearner_1.touch(*it);
+  }
+
+  msgpack::sbuffer buf;
+  {
+    framework::stream_writer<msgpack::sbuffer> sw(buf);
+    framework::jubatus_packer jp(sw);
+    framework::packer packer(jp);
+    unlearner_1.pack(packer);
+  }
+
+  {
+    msgpack::unpacked unpacked;
+    msgpack::unpack(&unpacked, buf.data(), buf.size());
+    unlearner_2.unpack(unpacked.get());
+  }
+
+  for (unordered_set<std::string>::iterator it = keys.begin();
+       it != keys.end(); ++it) {
+    EXPECT_TRUE(unlearner_2.exists_in_memory(*it));
+  }
+
+  unlearner_2.touch("last");
+  EXPECT_EQ(1ul, keys.count(callback_2.unlearned_id()));
+  EXPECT_FALSE(unlearner_2.exists_in_memory(callback_2.unlearned_id()));
 }
 
 }  // namespace unlearner
