@@ -110,12 +110,12 @@ class lof_storage {
   void get_status(std::map<std::string, std::string>& status) const;
   bool update_row(const std::string& row, const common::sfv_t& diff);
   bool update_row(
-     const std::pair<std::string, common::sfv_t> data,
-     jubatus::util::data::unordered_set<std::string> update_set);
+     const std::pair<std::string, common::sfv_t>& data,
+     jubatus::util::data::unordered_set<std::string>& update_set);
   void update_bulk(
-      jubatus::util::data::unordered_set<std::string> update_set);
+      const jubatus::util::data::unordered_set<std::string>& update_set);
   void set_bulk(
-      jubatus::util::data::unordered_set<std::string> update_set);
+      const jubatus::util::data::unordered_set<std::string>& update_set);
   void update_all();  // Update kdists and lrds
 
   std::string name() const;

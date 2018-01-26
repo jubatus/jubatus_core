@@ -170,7 +170,7 @@ bool lof::update_row(const string& id, const sfv_diff_t& diff) {
 }
 
 vector<string> lof::update_bulk(
-    const vector<std::pair<string, common::sfv_t> > diff) {
+    const vector<std::pair<string, common::sfv_t> >& diff) {
   vector<std::pair<string, common::sfv_t> > update_entries;
   vector<string> updated_ids;
   unordered_set<string> update_set;
@@ -205,7 +205,7 @@ bool lof::set_row(const string& id, const common::sfv_t& sfv) {
 }
 
 vector<string> lof::set_bulk(
-    const vector<std::pair<string, common::sfv_t> > diff) {
+    const vector<std::pair<string, common::sfv_t> >& diff) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 

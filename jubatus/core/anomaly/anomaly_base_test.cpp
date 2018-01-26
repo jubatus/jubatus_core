@@ -70,13 +70,13 @@ class anomaly_impl : public anomaly_base {
   }
 
   vector<string> update_bulk(
-      const vector<pair<string, common::sfv_t> > data) {
+      const vector<pair<string, common::sfv_t> >& data) {
     vector<string> v(1);
     return v;
   }
 
   vector<string> set_bulk(
-      const vector<pair<string, common::sfv_t> > data) {
+      const vector<pair<string, common::sfv_t> >& data) {
     vector<string> v(1);
     return v;
   }

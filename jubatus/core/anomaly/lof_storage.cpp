@@ -170,14 +170,14 @@ void lof_storage::get_status(std::map<string, string>& status) const {
 
 
 void lof_storage::update_bulk(
-    unordered_set<string> update_set) {
+    const unordered_set<string>& update_set) {
   update_entries(update_set);
   return;
 }
 
 bool lof_storage::update_row(
-    const pair<string, common::sfv_t> data,
-    unordered_set<string> update_set) {
+    const pair<string, common::sfv_t>& data,
+    unordered_set<string>& update_set) {
   if (ignore_kth_same_point_) {
     vector<pair<string, float> > nn_result;
 
