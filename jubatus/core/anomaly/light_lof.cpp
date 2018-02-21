@@ -173,7 +173,7 @@ bool light_lof::update_row(const string& id, const sfv_diff_t& diff) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 vector<string> light_lof::update_bulk(
-    const vector<pair<string, common::sfv_t> > diff) {
+    const vector<pair<string, common::sfv_t> >& diff) {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
 }
 
@@ -218,7 +218,7 @@ bool light_lof::set_row(const string& id, const common::sfv_t& sfv) {
 }
 
 vector<string> light_lof::set_bulk(
-    const vector<pair<string, common::sfv_t> > diff) {
+    const vector<pair<string, common::sfv_t> >& diff) {
   vector<pair<string, common::sfv_t> > update_data;
   unordered_set<string> update_set;
   vector<string> set_ids;

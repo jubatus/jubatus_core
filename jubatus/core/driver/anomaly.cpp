@@ -79,7 +79,7 @@ pair<string, float> anomaly::add(
 }
 
 vector<string> anomaly::add_bulk(
-    const vector<pair<string, fv_converter::datum> > data) {
+    const vector<pair<string, fv_converter::datum> >& data) {
 
   vector<pair<string, common::sfv_t> > diff;
   vector<pair<string, fv_converter::datum> >::const_iterator it;

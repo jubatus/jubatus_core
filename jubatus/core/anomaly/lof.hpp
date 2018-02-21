@@ -58,10 +58,10 @@ class lof : public anomaly_base {
   void remove_row(const std::string& id);
   bool update_row(const std::string& id, const sfv_diff_t& diff);
   std::vector<std::string> update_bulk(
-      const std::vector<std::pair<std::string, common::sfv_t> >);
+      const std::vector<std::pair<std::string, common::sfv_t> >&);
   bool set_row(const std::string& id, const common::sfv_t& sfv);
   std::vector<std::string> set_bulk(
-      const std::vector<std::pair<std::string, common::sfv_t> >);
+      const std::vector<std::pair<std::string, common::sfv_t> >&);
   void get_all_row_ids(std::vector<std::string>& ids) const;
   void get_status(std::map<std::string, std::string>& status) const;
   std::string type() const;
