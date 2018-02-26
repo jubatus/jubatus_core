@@ -1,3 +1,9 @@
+Release 1.0.8 - 2018/02/26
+--------------------------
+
+* Improvements
+    * Anomaly: Use reference in add_bulk (#394)
+
 Release 1.0.7 - 2017/12/18
 --------------------------
 
