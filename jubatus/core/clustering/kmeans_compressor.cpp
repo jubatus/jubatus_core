@@ -25,12 +25,14 @@
 #include <stack>
 
 #include "../common/assert.hpp"
+#include "../../util/lang/function.h"
 
 using std::min;
 using std::max;
 using std::stack;
 using std::pair;
 using std::vector;
+using jubatus::util::lang::function;
 
 namespace jubatus {
 namespace core {
@@ -77,7 +79,8 @@ void bicriteria_as_coreset(
     const wplist& src,
     wplist bic,
     const size_t dstsize,
-    wplist& dst) {
+    wplist& dst,
+    function<double (const weighted_point&, const weighted_point&)> point_dist_) {
   JUBATUS_ASSERT_GE(dstsize, dst.size(), "");
 
   typedef wplist::const_iterator citer;
@@ -87,11 +90,11 @@ void bicriteria_as_coreset(
     it->weight = 0;
   }
   for (citer it = dst.begin(); it != dst.end(); ++it) {
-    pair<int, double> m = min_dist(*it, bic);
+    pair<int, double> m = min_dist(*it, bic, point_dist_);
     bic[m.first].weight -= it->weight;
   }
   for (citer it = src.begin(); it != src.end(); ++it) {
-    pair<int, double> m = min_dist(*it, bic);
+    pair<int, double> m = min_dist(*it, bic, point_dist_);
     bic[m.first].weight += it->weight;
   }
   dst.insert(dst.end(), bic.begin(), bic.end());
@@ -130,7 +133,7 @@ void kmeans_compressor::compress(
         dstsize - bicriteria.size(),
         dst);
   }
-  bicriteria_as_coreset(src, bicriteria, dstsize, dst);
+  bicriteria_as_coreset(src, bicriteria, dstsize, dst, point_dist_);
 }
 
 void kmeans_compressor::get_bicriteria(
@@ -167,7 +170,7 @@ void kmeans_compressor::get_bicriteria(
     // Remove `r` nearest points from `resid`
     std::vector<double> distances;
     for (wplist::iterator itr = resid.begin(); itr != resid.end(); ++itr) {
-      distances.push_back(-min_dist(*itr, dst).second);
+      distances.push_back(-min_dist(*itr, dst, point_dist_).second);
     }
     // TODO(unno): Is `r` lesser than 1.0?
     size_t size = std::min(resid.size(),
@@ -207,7 +210,7 @@ void kmeans_compressor::bicriteria_to_coreset(
   std::vector<double> bicriteria_scores(bicriteria.size());
   for (size_t i = 0; i < src.size(); ++i) {
     double weight = src[i].weight;
-    std::pair<int, double> m = min_dist(src[i], bicriteria);
+    std::pair<int, double> m = min_dist(src[i], bicriteria, point_dist_);
     nearest_indexes[i] = m.first;
     nearest_distances[i] = m.second;
 

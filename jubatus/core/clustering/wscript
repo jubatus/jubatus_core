@@ -18,7 +18,6 @@ def build(bld):
     'clustering_method_factory.cpp',
     'discrete_distribution.cpp',
     'util.cpp',
-    'dbscan.cpp',
     'clustering_factory.cpp'
   ]
   headers = [
@@ -42,7 +41,6 @@ def build(bld):
     'storage.hpp',
     'types.hpp',
     'util.hpp',
-    'dbscan.hpp',
     'clustering_factory.hpp'
   ]
   if bld.env.USE_EIGEN:

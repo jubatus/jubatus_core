@@ -40,14 +40,20 @@ common::sfv_t add(const common::sfv_t& p1, const common::sfv_t& p2);
 common::sfv_t sub(const common::sfv_t& p1, const common::sfv_t& p2);
 common::sfv_t scalar_dot(const common::sfv_t& p, double s);
 
-double dist(const common::sfv_t& p1, const common::sfv_t& p2);
-double dist(const weighted_point& p1, const weighted_point& p2);
+double euclid_dist_sfv(const common::sfv_t& p1, const common::sfv_t& p2);
+double cosine_dist_sfv(const common::sfv_t& p1, const common::sfv_t& p2);
+double euclid_dist(const weighted_point& p1, const weighted_point& p2);
+double cosine_dist(const weighted_point& p1, const weighted_point& p2);
+ 
 std::pair<size_t, double> min_dist(
     const common::sfv_t& p,
-    const std::vector<common::sfv_t>& P);
+    const std::vector<common::sfv_t>& P,
+    const util::lang::function<double (const common::sfv_t&, const common::sfv_t&)> dist);
+  
 std::pair<size_t, double> min_dist(
     const weighted_point& p,
-    const wplist& P);
+    const wplist& P,
+    const util::lang::function<double (const weighted_point&, const weighted_point&)> dist);
 
 void dump_wplist(const wplist& src);
 

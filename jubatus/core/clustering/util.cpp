@@ -21,15 +21,20 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "../recommender/recommender_base.hpp"
+#include "../../util/lang/function.h"
 
 using std::pair;
 using std::string;
 using std::vector;
+using std::sort;
+using jubatus::util::lang::function;
 
 namespace jubatus {
 namespace core {
 namespace clustering {
 
+  
 void concat(const wplist& src, wplist& dst) {
   dst.insert(dst.end(), src.begin(), src.end());
 }
@@ -84,6 +89,14 @@ void scalar_mul_and_add(
     p.second *= s;
     right.push_back(p);
   }
+}
+
+float calc_l2norm(const common::sfv_t& point) {
+  float ret = 0.f;
+  for (size_t i = 0; i < point.size(); ++i) {
+    ret += point[i].second * point[i].second;
+  }
+  return std::sqrt(ret);
 }
 
 common::sfv_t add(const common::sfv_t& p1, const common::sfv_t& p2) {
@@ -149,7 +162,7 @@ common::sfv_t scalar_dot(const common::sfv_t& p, double s) {
 }
 
 // sfv_t must be sorted by key.
-double dist(const common::sfv_t& p1, const common::sfv_t& p2) {
+double euclid_dist_sfv(const common::sfv_t& p1, const common::sfv_t& p2) {
   double ret = 0;
   common::sfv_t::const_iterator it1 = p1.begin();
   common::sfv_t::const_iterator it2 = p2.begin();
@@ -176,13 +189,48 @@ double dist(const common::sfv_t& p1, const common::sfv_t& p2) {
   return std::sqrt(ret);
 }
 
-double dist(const weighted_point &d1, const weighted_point &d2) {
-  return dist(d1.data, d2.data);
+double euclid_dist(const weighted_point &d1, const weighted_point &d2) {
+  return euclid_dist_sfv(d1.data, d2.data);
 }
 
+double cosine_dist_sfv(const common::sfv_t& p1, const common::sfv_t& p2) {
+  float p1_norm = calc_l2norm(p1);
+  float p2_norm = calc_l2norm(p2);
+  if (p1_norm == 0.f || p2_norm == 0.f) {
+    return 0.f;
+  }
+
+  size_t i1 = 0;
+  size_t i2 = 0;
+  float ret = 0.f;
+  while (i1 < p1.size() && i2 < p2.size()) {
+    const string& ind1 = p1[i1].first;
+    const string& ind2 = p2[i2].first;
+    if (ind1 < ind2) {
+      ++i1;
+    } else if (ind1 > ind2) {
+      ++i2;
+    } else {
+      ret += p1[i1].second * p2[i2].second;
+      ++i1;
+      ++i2;
+    }
+  }
+
+  float similarity = ret / p1_norm / p2_norm;
+
+  return 1.f - similarity;
+}
+
+double cosine_dist(const weighted_point &d1, const weighted_point &d2) {
+  return cosine_dist_sfv(d1.data, d2.data);
+}
+ 
+  
 pair<size_t, double> min_dist(
     const common::sfv_t& p,
-    const vector<common::sfv_t>& P) {
+    const vector<common::sfv_t>& P,
+    const function<double (const common::sfv_t&, const common::sfv_t&)> dist) {
   size_t idx = 0;
   double mindist = DBL_MAX;
   for (vector<common::sfv_t>::const_iterator it = P.begin();
@@ -196,7 +244,10 @@ pair<size_t, double> min_dist(
   return std::make_pair(idx, mindist);
 }
 
-std::pair<size_t, double> min_dist(const weighted_point& d1, const wplist& P) {
+std::pair<size_t, double> min_dist(
+    const weighted_point& d1,
+    const wplist& P,
+    const function<double (const weighted_point&, const weighted_point&)> dist) {
   double md = DBL_MAX;
   size_t midx = 0;
   for (wplist::const_iterator it = P.begin(); it != P.end(); ++it) {

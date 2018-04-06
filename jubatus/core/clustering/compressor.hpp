@@ -20,6 +20,7 @@
 #include <msgpack.hpp>
 #include "types.hpp"
 #include "util.hpp"
+#include "../../util/lang/function.h"
 
 namespace jubatus {
 namespace core {
@@ -37,6 +38,9 @@ class compressor {
       size_t dstsize,
       wplist& dst) = 0;
   //  MSGPACK_DEFINE();
+  util::lang::function<double (const common::sfv_t&, const common::sfv_t&)> sfv_dist_;
+  util::lang::function<double (const weighted_point&, const weighted_point&)> point_dist_;
+
 };
 
 }  // namespace compressor

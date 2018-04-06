@@ -21,6 +21,7 @@
 
 #include "jubatus/util/math/random.h"
 #include "clustering_method.hpp"
+#include "jubatus/util/data/optional.h"
 
 namespace jubatus {
 namespace core {
@@ -30,23 +31,25 @@ class kmeans_clustering_method : public clustering_method {
  public:
   struct config {
     config()
-      : k(2), seed(0) {
+      : k(2), seed(0), distance("euclidean") {
     }
     int k;
     int64_t seed;
-
-    MSGPACK_DEFINE(
-        k,
-        seed);
-
+    jubatus::util::data::optional<std::string> distance;
+    
     template<typename Ar>
     void serialize(Ar& ar) {
       ar & JUBA_MEMBER(k)
-        & JUBA_MEMBER(seed);
+        & JUBA_MEMBER(seed)
+        & JUBA_MEMBER(distance);
     }
   };
 
   explicit kmeans_clustering_method(size_t k, uint32_t seed);
+  explicit kmeans_clustering_method(
+      size_t k,
+      uint32_t seed,
+      std::string distance);
   ~kmeans_clustering_method();
 
   void batch_update(wplist points);

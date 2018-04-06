@@ -41,9 +41,10 @@ shared_ptr<clustering_method> clustering_method_factory::create(
   if (method == "kmeans") {
     kmeans_clustering_method::config conf =
       config_cast_check<kmeans_clustering_method::config>(config);
+    if (conf.distance) {
     return shared_ptr<clustering_method>(
-        new kmeans_clustering_method(conf.k, conf.seed));
-
+      new kmeans_clustering_method(conf.k, conf.seed, *conf.distance));
+    }
   } else if (method == "dbscan") {
     dbscan_clustering_method::config conf =
       config_cast_check<dbscan_clustering_method::config>(config);

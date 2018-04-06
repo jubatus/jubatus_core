@@ -19,6 +19,9 @@
 
 #include <vector>
 #include "types.hpp"
+#include "../../util/lang/shared_ptr.h"
+#include "../../util/lang/function.h"
+#include "util.hpp"
 
 namespace jubatus {
 namespace core {
@@ -37,6 +40,8 @@ class clustering_method {
       get_nearest_center_index(const common::sfv_t& point) const = 0;
   virtual wplist get_cluster(size_t cluster_id, const wplist& points) const = 0;
   virtual std::vector<wplist> get_clusters(const wplist& points) const = 0;
+  util::lang::function<double (const common::sfv_t&, const common::sfv_t&)> sfv_dist_;
+  util::lang::function<double (const weighted_point&, const weighted_point&)> point_dist_;
 };
 
 }  // namespace clustering

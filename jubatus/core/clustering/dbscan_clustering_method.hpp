@@ -56,15 +56,27 @@ class dbscan_clustering_method : public clustering_method {
   int64_t get_nearest_center_index(const common::sfv_t& point) const;
   wplist get_cluster(size_t cluster_id, const wplist& points) const;
   std::vector<wplist> get_clusters(const wplist& points) const;
+  
+  void update(const wplist& points);
+  std::vector<int> get_point_states() const;
+  std::vector<wplist> get_clusters() const;
 
  private:
   void initialize_centers(wplist& points);
   void do_batch_update(wplist& points);
+  wplist expand_cluster(const size_t idx, const wplist& points);
+  std::vector<size_t> region_query(
+      const size_t idx, const wplist& points) const;
 
   std::vector<common::sfv_t> kcenters_;
   double eps_;
   size_t min_core_point_;
-  dbscan dbscan_;
+  std::vector<int> point_states_;
+  std::vector<wplist> clusters_;
+  static const int UNCLASSIFIED;
+  static const int CLASSIFIED;
+  static const int NOISE;
+  
 };
 
 }  // namespace clustering
