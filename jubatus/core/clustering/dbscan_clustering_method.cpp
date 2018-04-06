@@ -17,23 +17,26 @@
 #include "dbscan_clustering_method.hpp"
 
 #include <vector>
+#include <string>
 #include "../common/exception.hpp"
 #include "clustering.hpp"
 #include "util.hpp"
+#include "jubatus/util/lang/cast.h"
 
 using std::pair;
 using std::vector;
-
+using jubatus::util::lang::lexical_cast;
 namespace jubatus {
 namespace core {
 namespace clustering {
+
 
 dbscan_clustering_method::dbscan_clustering_method(
     double eps,
     size_t min_core_point)
     : eps_(eps),
       min_core_point_(min_core_point),
-      dbscan_(eps, min_core_point) {
+      dbscan_(eps, min_core_point, "euclidean") {
   if (!(0 < eps)) {
     throw JUBATUS_EXCEPTION(
                 common::invalid_parameter("0 < eps"));
@@ -41,6 +44,36 @@ dbscan_clustering_method::dbscan_clustering_method(
   if (!(1 <= min_core_point)) {
     throw JUBATUS_EXCEPTION(
                 common::invalid_parameter("0 < min_core_point"));
+  }
+  sfv_dist_ = sfv_euclid_dist;
+  point_dist_ = point_euclid_dist;
+}
+
+dbscan_clustering_method::dbscan_clustering_method(
+    double eps,
+    size_t min_core_point,
+    std::string distance)
+    : eps_(eps),
+      min_core_point_(min_core_point),
+      dbscan_(eps, min_core_point, distance) {
+  if (!(0 < eps)) {
+    throw JUBATUS_EXCEPTION(
+                common::invalid_parameter("0 < eps"));
+  }
+  if (!(1 <= min_core_point)) {
+    throw JUBATUS_EXCEPTION(
+                common::invalid_parameter("0 < min_core_point"));
+  }
+  if (distance == "euclidean") {
+    sfv_dist_ = sfv_euclid_dist;
+    point_dist_ = point_euclid_dist;
+  } else if (distance == "cosine") {
+    sfv_dist_ = sfv_cosine_dist;
+    point_dist_ = point_cosine_dist;
+  } else {
+    throw JUBATUS_EXCEPTION(
+      common::invalid_parameter(
+        "distance should be 'euclidean' or 'cosine'"));
   }
 }
 

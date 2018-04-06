@@ -18,6 +18,7 @@
 #define JUBATUS_CORE_CLUSTERING_DBSCAN_HPP_
 
 #include <vector>
+#include <string>
 #include "types.hpp"
 
 namespace jubatus {
@@ -26,7 +27,8 @@ namespace clustering {
 
 class dbscan {
  public:
-  dbscan(double eps, size_t min_core_point);
+  explicit dbscan(double eps, size_t min_core_point);
+  explicit dbscan(double eps, size_t min_core_point, std::string distance);
 
   void batch(const wplist& points);
   std::vector<int> get_point_states() const;
@@ -42,6 +44,11 @@ class dbscan {
   size_t min_core_point_;
   std::vector<int> point_states_;
   std::vector<wplist> clusters_;
+  util::lang::function<
+    double (const common::sfv_t&, const common::sfv_t&)> sfv_dist_;  // NOLINT
+  util::lang::function<
+    double (const weighted_point&,  // NOLINT
+            const weighted_point&)> point_dist_;
 
   static const int UNCLASSIFIED;
   static const int CLASSIFIED;

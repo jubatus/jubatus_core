@@ -40,6 +40,14 @@ class clustering_factory {
     const std::string& compressor,
     const common::jsonconfig::config& method_param,
     const common::jsonconfig::config& compressor_param);
+
+  static jubatus::util::lang::shared_ptr<clustering> create(
+    const std::string& name,
+    const std::string& method,
+    const std::string& compressor,
+    const std::string& distance,
+    const common::jsonconfig::config& method_param,
+    const common::jsonconfig::config& compressor_param);
 };
 
 }  // namespace clustering

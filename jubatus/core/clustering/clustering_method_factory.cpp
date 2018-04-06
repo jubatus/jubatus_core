@@ -36,19 +36,48 @@ namespace clustering {
 
 shared_ptr<clustering_method> clustering_method_factory::create(
     const std::string& method,
+    const std::string& distance,
     const config& config) {
 
   if (method == "kmeans") {
     kmeans_clustering_method::config conf =
       config_cast_check<kmeans_clustering_method::config>(config);
+      return shared_ptr<clustering_method>(
+        new kmeans_clustering_method(conf.k, conf.seed, distance));
+  } else if (method == "dbscan") {
+    dbscan_clustering_method::config conf =
+      config_cast_check<dbscan_clustering_method::config>(config);
+      return shared_ptr<clustering_method>(
+        new dbscan_clustering_method(
+            conf.eps,
+            conf.min_core_point,
+            distance));
+#ifdef JUBATUS_USE_EIGEN
+  } else if (method == "gmm") {
+    gmm_clustering_method::config conf =
+      config_cast_check<gmm_clustering_method::config>(config);
     return shared_ptr<clustering_method>(
-        new kmeans_clustering_method(conf.k, conf.seed));
+        new gmm_clustering_method(conf.k, conf.seed));
+#endif
+  }
+  throw JUBATUS_EXCEPTION(core::common::unsupported_method(method));
+}
 
+shared_ptr<clustering_method> clustering_method_factory::create(
+    const std::string& method,
+    const config& config) {
+
+  if (method == "kmeans") {
+    kmeans_clustering_method::config conf =
+      config_cast_check<kmeans_clustering_method::config>(config);
+      return shared_ptr<clustering_method>(
+        new kmeans_clustering_method(conf.k, conf.seed));
   } else if (method == "dbscan") {
     dbscan_clustering_method::config conf =
       config_cast_check<dbscan_clustering_method::config>(config);
     return shared_ptr<clustering_method>(
-        new dbscan_clustering_method(conf.eps, conf.min_core_point));
+      new dbscan_clustering_method(conf.eps, conf.min_core_point));
+
 #ifdef JUBATUS_USE_EIGEN
   } else if (method == "gmm") {
     gmm_clustering_method::config conf =

@@ -16,41 +16,34 @@
 
 #include <vector>
 #include <string>
+#include <map>
 
 #include <gtest/gtest.h>
 
 #include "jubatus/util/lang/scoped_ptr.h"
 #include "jubatus/util/math/random.h"
 #include "clustering.hpp"
-#include "dbscan.hpp"
+#include "dbscan_clustering_method.hpp"
 #include "../common/type.hpp"
 #include "types.hpp"
 #include "jubatus/util/lang/cast.h"
 #include "../common/exception.hpp"
 
+using std::map;
+using std::string;
 using jubatus::util::lang::lexical_cast;
-using jubatus::util::lang::shared_ptr;
+using jubatus::util::lang::scoped_ptr;
 
 namespace jubatus {
 namespace core {
 namespace clustering {
 
-class dbscan_test : public ::testing::Test {
+class dbscan_p_test : public ::testing::TestWithParam<map<string, string> > {
  protected:
-  static const double eps = 4.0;
-  static const size_t min_core_point = 2;
-
-  virtual void SetUp() {
-    dbscan_.reset(new dbscan(eps, min_core_point, "euclidean"));
-  }
-
-  virtual void TearDown() {
-    dbscan_.reset();
-  }
-
-  jubatus::util::lang::scoped_ptr<dbscan> dbscan_;
+  scoped_ptr<dbscan> dbscan_;
 
   void do_batch() {
+    // p1, p2, p3, p4 construct cluster 0
     common::sfv_t p1;
     p1.push_back(std::make_pair("x", 1));
     p1.push_back(std::make_pair("y", 1));
@@ -83,9 +76,10 @@ class dbscan_test : public ::testing::Test {
     wp4.weight = 1.0;
     wp4.data = p4;
 
+    // p5, p6 construct cluster 1
     common::sfv_t p5;
     p5.push_back(std::make_pair("x", 50));
-    p5.push_back(std::make_pair("y", 50));
+    p5.push_back(std::make_pair("y", 0));
     weighted_point wp5;
     wp5.id = "4";
     wp5.weight = 1.0;
@@ -93,15 +87,16 @@ class dbscan_test : public ::testing::Test {
 
     common::sfv_t p6;
     p6.push_back(std::make_pair("x", 51));
-    p6.push_back(std::make_pair("y", 51));
+    p6.push_back(std::make_pair("y", 0));
     weighted_point wp6;
     wp6.id = "5";
     wp6.weight = 1.0;
     wp6.data = p6;
 
+    // noise
     common::sfv_t p7;
-    p7.push_back(std::make_pair("x", 100));
-    p7.push_back(std::make_pair("y", 100));
+    p7.push_back(std::make_pair("x", -100));
+    p7.push_back(std::make_pair("y", -100));
     weighted_point wp7;
     wp7.id = "6";
     wp7.weight = 1.0;
@@ -118,40 +113,41 @@ class dbscan_test : public ::testing::Test {
 
     dbscan_->batch(points);
   }
-
-  void do_two_clustering() {
-    dbscan_->set_eps(100.0);
-    jubatus::util::math::random::mtrand r(0);
-    int data_num = 50;
-    wplist points;
-
-    for (int i = 0; i < data_num; ++i) {
-      common::sfv_t x, y;
-      weighted_point wp;
-
-      x.push_back(std::make_pair("a", 100 + r.next_gaussian() * 20));
-      x.push_back(std::make_pair("b", 100 + r.next_gaussian() * 40));
-
-      wp.id = lexical_cast<std::string>(2*i);
-      wp.weight = 1.0;
-      wp.data = x;
-
-      points.push_back(wp);
-
-      y.push_back(std::make_pair("c", -1000 - r.next_gaussian() * 20));
-      y.push_back(std::make_pair("d", -1000 - r.next_gaussian() * 40));
-
-      wp.id = lexical_cast<std::string>(2*i+1);
-      wp.weight = 1.0;
-      wp.data = y;
-
-      points.push_back(wp);
-    }
-    dbscan_->batch(points);
-  }
 };
 
-TEST_F(dbscan_test, batch) {
+class make_case_type {
+ public:
+  make_case_type& operator()(const string& key, const string& value) {
+    cases_.insert(make_pair(key, value));
+    return *this;
+  }
+
+  map<string, string> operator()() {
+    map<string, string> ret;
+    ret.swap(cases_);
+    return ret;
+  }
+
+ private:
+  map<string, string> cases_;
+} make_case;
+
+
+TEST_P(dbscan_param_test, init) {
+  map<string, string> param = GetParam();
+  double eps = lexical_cast<double>(param["eps"]);
+  size_t min_core_point = lexical_cast<size_t>(param["min_core_point"]);
+  string distance = param["distance"];
+  EXPECT_NO_THROW(dbscan_.reset(new dbscan(eps, min_core_point, distance)));
+}
+
+TEST_P(dbscan_param_test, trivial) {
+  map<string, string> param = GetParam();
+  double eps = lexical_cast<double>(param["eps"]);
+  size_t min_core_point = lexical_cast<size_t>(param["min_core_point"]);
+  string distance = param["distance"];
+  dbscan_.reset(new dbscan(eps, min_core_point, distance));
+
   do_batch();
 
   std::vector<int> point_states = dbscan_->get_point_states();
@@ -162,34 +158,19 @@ TEST_F(dbscan_test, batch) {
   ASSERT_EQ(lexical_cast<size_t>(2), clusters[1].size());
 }
 
-TEST_F(dbscan_test, devide_two_cluster) {
-  do_two_clustering();
+const map<string, string> test_cases[] = {
+  make_case("eps", "4.0")
+  ("min_core_point", "2")
+  ("distance", "euclidean")(),
+  make_case("eps", "0.2")
+  ("min_core_point", "2")
+  ("distance", "cosine")()
+};
 
-  std::vector<int> point_states = dbscan_->get_point_states();
-  std::cout << "poinst states:" << point_states.size() << " [";
-  for (std::vector<int>::iterator it = point_states.begin();
-       it != point_states.end(); ++it) {
-    std::cout << *it << " ";
-  }
-  std::cout << "]" << std::endl;
-  std::vector<wplist> clusters = dbscan_->get_clusters();
-  for (std::vector<wplist>::iterator it = clusters.begin();
-       it != clusters.end(); ++it) {
-    std::cout << "[ ";
-    for (wplist::iterator wit = (*it).begin(); wit != (*it).end(); ++wit) {
-      std::cout << (*wit).id << " ";
-    }
-    std::cout << "]" << std::endl;
-  }
-
-  size_t cluster_num(2);
-  size_t cluster1_num(50);
-  size_t cluster2_num(50);
-  ASSERT_EQ(cluster_num, clusters.size());
-  ASSERT_EQ(cluster1_num, clusters[0].size());
-  ASSERT_EQ(cluster2_num, clusters[1].size());
-}
-
+INSTANTIATE_TEST_CASE_P(
+  batch,
+  dbscan_param_test,
+  ::testing::ValuesIn(test_cases));
 
 }  // namespace clustering
 }  // namespace core
