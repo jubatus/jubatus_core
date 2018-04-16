@@ -67,7 +67,6 @@ def build(bld):
     'storage_test.cpp',
     'util_test.cpp',
     'dbscan_test.cpp',
-    'dbscan_param_test.cpp',
     'clustering_factory_test.cpp'
   ]
   if bld.env.USE_EIGEN:
