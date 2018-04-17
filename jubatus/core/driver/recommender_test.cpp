@@ -237,6 +237,14 @@ TEST_P(nn_recommender_test, update) {
   ASSERT_EQ("id4", ret[0].first);
 }
 
+TEST_P(nn_recommender_test, missing_id) {
+  recommender_->update_row("id1", create_datum_str("a", "a b c"));
+
+  vector<pair<string, float> > ret =
+      recommender_->similar_row_from_id("id2", 10);
+  ASSERT_EQ(0, ret.size());
+}
+
 INSTANTIATE_TEST_CASE_P(nn_recommender_test_instance,
     nn_recommender_test,
     testing::ValuesIn(create_recommender_bases()));
@@ -343,6 +351,14 @@ TEST_P(recommender_with_unlearning_test, clear_row) {
 
   vector<string> all = recommender_->get_all_rows();
   ASSERT_EQ(MAX_SIZE, all.size());
+}
+
+TEST_P(recommender_with_unlearning_test, missing_id) {
+  recommender_->update_row("id1", create_datum_str("a", "b c"));
+
+  vector<pair<string, float> > ret =
+    recommender_->similar_row_from_id("id2", MAX_SIZE + 1);
+  ASSERT_EQ(0, ret.size());
 }
 
 INSTANTIATE_TEST_CASE_P(
