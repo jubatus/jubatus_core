@@ -45,7 +45,7 @@ kmeans_clustering_method::kmeans_clustering_method(size_t k, uint32_t seed)
 kmeans_clustering_method::kmeans_clustering_method(
     size_t k,
     uint32_t seed,
-    std::string distance)
+    const std::string& distance)
     : k_(k),
       seed_(seed),
       rand_(seed) {

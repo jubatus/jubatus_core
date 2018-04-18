@@ -116,7 +116,9 @@ kmeans_compressor::kmeans_compressor(const int seed)
   point_dist_ = point_euclid_dist;
 }
 
-kmeans_compressor::kmeans_compressor(const int seed, std::string distance)
+kmeans_compressor::kmeans_compressor(
+    const int seed,
+    const std::string& distance)
   : rand_(seed) {
   if (distance == "euclidean") {
     sfv_dist_ = sfv_euclid_dist;

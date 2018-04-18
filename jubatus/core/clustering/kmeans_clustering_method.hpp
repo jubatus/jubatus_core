@@ -48,7 +48,7 @@ class kmeans_clustering_method : public clustering_method {
   explicit kmeans_clustering_method(
       size_t k,
       uint32_t seed,
-      std::string distance);
+      const std::string& distance);
   ~kmeans_clustering_method();
 
   void batch_update(wplist points);

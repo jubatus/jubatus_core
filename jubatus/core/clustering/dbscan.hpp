@@ -28,7 +28,10 @@ namespace clustering {
 class dbscan {
  public:
   explicit dbscan(double eps, size_t min_core_point);
-  explicit dbscan(double eps, size_t min_core_point, std::string distance);
+  explicit dbscan(
+      double eps,
+      size_t min_core_point,
+      const std::string& distance);
 
   void batch(const wplist& points);
   std::vector<int> get_point_states() const;

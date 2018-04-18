@@ -52,7 +52,7 @@ dbscan_clustering_method::dbscan_clustering_method(
 dbscan_clustering_method::dbscan_clustering_method(
     double eps,
     size_t min_core_point,
-    std::string distance)
+    const std::string& distance)
     : eps_(eps),
       min_core_point_(min_core_point),
       dbscan_(eps, min_core_point, distance) {

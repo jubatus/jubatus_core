@@ -54,7 +54,7 @@ class dbscan_clustering_method : public clustering_method {
   explicit dbscan_clustering_method(
       double eps,
       size_t min_core_point,
-      std::string distance);
+      const std::string& distance);
   ~dbscan_clustering_method();
 
   void batch_update(wplist points);

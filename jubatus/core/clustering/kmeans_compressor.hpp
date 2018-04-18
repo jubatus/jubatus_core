@@ -28,7 +28,7 @@ namespace compressor {
 class kmeans_compressor : public compressor {
  public:
   explicit kmeans_compressor(const int seed);
-  explicit kmeans_compressor(const int seed, const std::string distnace);
+  explicit kmeans_compressor(const int seed, const std::string& disance);
   ~kmeans_compressor();
 
   void compress(const wplist& src, size_t bsize, size_t dstsize, wplist& dst);
