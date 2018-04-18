@@ -28,7 +28,8 @@ namespace clustering {
 
 class util_test : public ::testing::Test {};
 
-TEST_F(util_test, dist) {
+
+TEST_F(util_test, euclid_dist) {
   sfv_t p1;
   p1.push_back(make_pair("x", 1));
   p1.push_back(make_pair("y", 1));
@@ -37,9 +38,23 @@ TEST_F(util_test, dist) {
   p2.push_back(make_pair("x", 2));
   p2.push_back(make_pair("y", 2));
 
-  EXPECT_EQ(dist(p1, p1), 0);
-  EXPECT_EQ(dist(p1, p2), std::sqrt(2));
+  EXPECT_EQ(sfv_euclid_dist(p1, p1), 0);
+  EXPECT_EQ(sfv_euclid_dist(p1, p2), std::sqrt(2));
 }
+
+TEST_F(util_test, cosine_test) {
+  sfv_t p1;
+  p1.push_back(make_pair("x", 0));
+  p1.push_back(make_pair("y", 1));
+
+  sfv_t p2;
+  p2.push_back(make_pair("x", 1));
+  p2.push_back(make_pair("y", 0));
+
+  EXPECT_FLOAT_EQ(0., sfv_cosine_dist(p1, p1));
+  EXPECT_FLOAT_EQ(1., sfv_cosine_dist(p1, p2));
+}
+
 
 }  // namespace clustering
 }  // namespace core

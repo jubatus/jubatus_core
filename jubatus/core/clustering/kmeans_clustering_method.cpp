@@ -18,6 +18,7 @@
 
 #include <utility>
 #include <vector>
+#include <string>
 #include "../common/exception.hpp"
 #include "clustering.hpp"
 #include "util.hpp"
@@ -36,6 +37,32 @@ kmeans_clustering_method::kmeans_clustering_method(size_t k, uint32_t seed)
   if (!(1 <= k)) {
     throw JUBATUS_EXCEPTION(
                             common::invalid_parameter("1 <= k"));
+  }
+  sfv_dist_ = sfv_euclid_dist;
+  point_dist_ = point_euclid_dist;
+}
+
+kmeans_clustering_method::kmeans_clustering_method(
+    size_t k,
+    uint32_t seed,
+    const std::string& distance)
+    : k_(k),
+      seed_(seed),
+      rand_(seed) {
+  if (!(1 <= k)) {
+    throw JUBATUS_EXCEPTION(
+                            common::invalid_parameter("1 <= k"));
+  }
+  if (distance == "euclidean") {
+    sfv_dist_ = sfv_euclid_dist;
+    point_dist_ = point_euclid_dist;
+  } else if (distance == "cosine") {
+    sfv_dist_ = sfv_cosine_dist;
+    point_dist_ = point_cosine_dist;
+  } else {
+    throw JUBATUS_EXCEPTION(
+        common::invalid_parameter(
+            "distance should be 'euclidean' or 'cosine'"));
   }
 }
 
@@ -61,7 +88,7 @@ void kmeans_clustering_method::initialize_centers(wplist& points) {
   while (kcenters_.size() < k_) {
     weights.clear();
     for (wplist::iterator it = points.begin(); it != points.end(); ++it) {
-      pair<int64_t, double> m = min_dist((*it).data, kcenters_);
+      pair<int64_t, double> m = min_dist((*it).data, kcenters_, sfv_dist_);
       weights.push_back(m.second * it->weight);
     }
     discrete_distribution d(weights.begin(), weights.end(), rand_.next_int());
@@ -78,7 +105,7 @@ void kmeans_clustering_method::do_batch_update(wplist& points) {
     vector<common::sfv_t> kcenters_new(k_);
     vector<double> center_count(k_, 0);
     for (wplist::iterator it = points.begin(); it != points.end(); ++it) {
-      pair<int64_t, double> m = min_dist((*it).data, kcenters_);
+      pair<int64_t, double> m = min_dist((*it).data, kcenters_, sfv_dist_);
       scalar_mul_and_add(it->data, it->weight, kcenters_new[m.first]);
       center_count[m.first] += it->weight;
     }
@@ -89,7 +116,7 @@ void kmeans_clustering_method::do_batch_update(wplist& points) {
         continue;
       }
       kcenters_new[i] = scalar_dot(kcenters_new[i], 1.0 / center_count[i]);
-      double d = dist(kcenters_new[i], kcenters_[i]);
+      double d = sfv_dist_(kcenters_new[i], kcenters_[i]);
       if (d > 1e-9) {
         terminated = false;
       }
@@ -115,7 +142,7 @@ int64_t kmeans_clustering_method::get_nearest_center_index(
     throw JUBATUS_EXCEPTION(not_performed());
   }
 
-  return min_dist(point, kcenters_).first;
+  return min_dist(point, kcenters_, sfv_dist_).first;
 }
 
 common::sfv_t kmeans_clustering_method::get_nearest_center(
@@ -140,7 +167,7 @@ vector<wplist> kmeans_clustering_method::get_clusters(
 
   vector<wplist> ret(k_);
   for (wplist::const_iterator it = points.begin(); it != points.end(); ++it) {
-    pair<int64_t, double> m = min_dist(it->data, kcenters_);
+    pair<int64_t, double> m = min_dist(it->data, kcenters_, sfv_dist_);
     ret[m.first].push_back(*it);
   }
   return ret;

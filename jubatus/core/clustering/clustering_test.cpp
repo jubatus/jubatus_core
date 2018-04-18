@@ -108,7 +108,6 @@ TEST_P(clustering_test, clustering_tests) {
   string n("name");
   map<string, string> param = GetParam();
   string m = param["method"];
-
   common::jsonconfig::config method_config;
   common::jsonconfig::config storage_config;
 
@@ -135,11 +134,13 @@ TEST_P(clustering_test, clustering_tests) {
       clustering k(
           clustering_method_factory::create(
                param["method"],
+               param["distance"],
                method_config),
           storage_factory::create(
                n,
                param["method"],
                param["compressor_method"],
+               param["distance"],
                storage_config)));
 }
 
@@ -157,28 +158,31 @@ const map<string, string> test_cases[] = {
 #endif
   make_case("method", "kmeans")
     ("compressor_method", "compressive")
+    ("distance", "euclidean")
     ("result", "true")(),
   make_case("method", "kmeans")
     ("compressor_method", "compressive")
+    ("distance", "euclidean")
     ("result", "false")(),
   make_case("method", "kmeans")
     ("compressor_method", "simple")
+    ("distance", "cosine")
     ("result", "true")(),
-};
-
-const map<string, string> test_cases_nocenter[] = {
   make_case("method", "dbscan")
-  ("compressor_method", "simple")
-  ("result", "true")(),
+    ("compressor_method", "simple")
+    ("distance", "euclidean")
+    ("result", "true")(),
   make_case("method", "dbscan")
-  ("compressor_method", "compressive")
-  ("result", "false")()
+    ("distance", "cosine")
+    ("compressor_method", "simple")
+    ("result", "true")()
 };
 
 INSTANTIATE_TEST_CASE_P(
     clustering_tests,
     clustering_test,
     ::testing::ValuesIn(test_cases));
+
 }  // namespace clustering
 }  // namespace core
 }  // namespace jubatus

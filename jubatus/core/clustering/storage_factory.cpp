@@ -59,7 +59,85 @@ jubatus::util::lang::shared_ptr<storage> storage_factory::create(
                                        conf.forgetting_factor,
                                        conf.forgetting_threshold);
       s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
-              new compressor::kmeans_compressor(conf.seed)));
+          new compressor::kmeans_compressor(conf.seed)));
+      ret.reset(s);
+    } else {
+      throw JUBATUS_EXCEPTION(
+          common::unsupported_method(compressor_method));
+    }
+  } else if (method == "dbscan") {
+    if (compressor_method == "simple") {
+      simple_storage::config conf =
+         config_cast_check<simple_storage::config>(compressor_param);
+      simple_storage *s = new simple_storage(name, conf.bucket_size);
+      ret.reset(s);
+    } else {
+      throw JUBATUS_EXCEPTION(
+          common::unsupported_method(compressor_method));
+    }
+#ifdef JUBATUS_USE_EIGEN
+  } else if (method == "gmm") {
+    if (compressor_method == "simple") {
+      simple_storage::config conf =
+        config_cast_check<simple_storage::config>(compressor_param);
+      simple_storage *s = new simple_storage(name, conf.bucket_size);
+      ret.reset(s);
+    } else if (compressor_method == "compressive") {
+      compressive_storage::config conf =
+        config_cast_check<compressive_storage::config>(compressor_param);
+
+      compressive_storage *s = new compressive_storage(
+                                        name,
+                                        conf.bucket_size,
+                                        conf.bucket_length,
+                                        conf.compressed_bucket_size,
+                                        conf.bicriteria_base_size,
+                                        conf.forgetting_factor,
+                                        conf.forgetting_threshold);
+      s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
+             new compressor::gmm_compressor(conf.seed)));
+      ret.reset(s);
+    } else {
+      throw JUBATUS_EXCEPTION(
+          common::unsupported_method(compressor_method));
+    }
+#endif
+  } else {
+    throw JUBATUS_EXCEPTION(
+      common::unsupported_method(method));
+  }
+  return ret;
+}
+
+jubatus::util::lang::shared_ptr<storage> storage_factory::create(
+    const std::string& name,
+    const std::string& method,
+    const std::string& compressor_method,
+    const std::string& distance,
+    const config& compressor_param) {
+  typedef jubatus::util::lang::shared_ptr<storage> ptr;
+  ptr ret;
+
+  if (method == "kmeans") {
+    if (compressor_method == "simple") {
+      simple_storage::config conf =
+        config_cast_check<simple_storage::config>(compressor_param);
+      simple_storage *s = new simple_storage(name, conf.bucket_size);
+      ret.reset(s);
+    } else if (compressor_method == "compressive") {
+      compressive_storage::config conf =
+        config_cast_check<compressive_storage::config>(compressor_param);
+
+      compressive_storage *s = new compressive_storage(
+                                       name,
+                                       conf.bucket_size,
+                                       conf.bucket_length,
+                                       conf.compressed_bucket_size,
+                                       conf.bicriteria_base_size,
+                                       conf.forgetting_factor,
+                                       conf.forgetting_threshold);
+      s->set_compressor(jubatus::util::lang::shared_ptr<compressor::compressor>(
+          new compressor::kmeans_compressor(conf.seed, distance)));
       ret.reset(s);
     } else {
       throw JUBATUS_EXCEPTION(

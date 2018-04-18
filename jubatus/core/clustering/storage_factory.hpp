@@ -38,6 +38,13 @@ class storage_factory {
       const std::string& method,
       const std::string& compressor_method,
       const core::common::jsonconfig::config& config);
+ public:
+  static jubatus::util::lang::shared_ptr<storage> create(
+      const std::string& name,
+      const std::string& method,
+      const std::string& compressor_method,
+      const std::string& distance,
+      const core::common::jsonconfig::config& config);
 };
 
 }  // namespace clustering

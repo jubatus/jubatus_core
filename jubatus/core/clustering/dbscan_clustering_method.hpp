@@ -18,7 +18,9 @@
 #define JUBATUS_CORE_CLUSTERING_DBSCAN_CLUSTERING_METHOD_HPP_
 
 #include <vector>
+#include <string>
 #include "../common/type.hpp"
+#include "jubatus/util/data/optional.h"
 #include "clustering_method.hpp"
 #include "dbscan.hpp"
 
@@ -34,6 +36,7 @@ class dbscan_clustering_method : public clustering_method {
     }
     double eps;
     int min_core_point;
+    jubatus::util::data::optional<std::string> distance;
 
     MSGPACK_DEFINE(
         eps,
@@ -42,11 +45,16 @@ class dbscan_clustering_method : public clustering_method {
     template<typename Ar>
     void serialize(Ar& ar) {
       ar & JUBA_MEMBER(eps)
-        & JUBA_MEMBER(min_core_point);
+        & JUBA_MEMBER(min_core_point)
+        & JUBA_MEMBER(distance);
     }
   };
 
-  dbscan_clustering_method(double eps, size_t min_core_point);
+  explicit dbscan_clustering_method(double eps, size_t min_core_point);
+  explicit dbscan_clustering_method(
+      double eps,
+      size_t min_core_point,
+      const std::string& distance);
   ~dbscan_clustering_method();
 
   void batch_update(wplist points);

@@ -17,12 +17,14 @@
 #include "dbscan.hpp"
 
 #include <vector>
+#include <string>
 #include "clustering.hpp"
 #include "util.hpp"
 #include "jubatus/util/lang/cast.h"
 #include "../common/exception.hpp"
 
 using std::vector;
+using std::string;
 using jubatus::util::lang::lexical_cast;
 
 
@@ -34,9 +36,20 @@ const int dbscan::UNCLASSIFIED = 0;
 const int dbscan::CLASSIFIED = 1;
 const int dbscan::NOISE = -1;
 
-dbscan::dbscan(double eps, size_t min_core_point)
+dbscan::dbscan(double eps, size_t min_core_point, const string& distance)
     : eps_(eps),
       min_core_point_(min_core_point) {
+  if (distance == "euclidean") {
+    sfv_dist_ = sfv_euclid_dist;
+    point_dist_ = point_euclid_dist;
+  } else if (distance == "cosine") {
+    sfv_dist_ = sfv_cosine_dist;
+    point_dist_ = point_cosine_dist;
+  } else {
+    throw JUBATUS_EXCEPTION(
+      common::invalid_parameter(
+        "distance should be 'euclidean' or 'cosine'"));
+  }
 }
 
 void dbscan::batch(const wplist& points) {
@@ -113,7 +126,7 @@ std::vector<size_t> dbscan::region_query(
     const size_t idx, const wplist& points) const {
   std::vector<size_t> region;
   for (wplist::const_iterator it = points.begin(); it != points.end(); ++it) {
-    if (dist((*it).data, points[idx].data) < eps_) {
+    if (sfv_dist_((*it).data, points[idx].data) < eps_) {
       region.push_back(std::distance(points.begin(), it));
     }
   }
