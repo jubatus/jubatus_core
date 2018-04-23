@@ -17,6 +17,7 @@
 #ifndef JUBATUS_CORE_CLUSTERING_KMEANS_COMPRESSOR_HPP_
 #define JUBATUS_CORE_CLUSTERING_KMEANS_COMPRESSOR_HPP_
 
+#include <string>
 #include "compressor.hpp"
 
 namespace jubatus {
@@ -27,6 +28,7 @@ namespace compressor {
 class kmeans_compressor : public compressor {
  public:
   explicit kmeans_compressor(const int seed);
+  explicit kmeans_compressor(const int seed, const std::string& disance);
   ~kmeans_compressor();
 
   void compress(const wplist& src, size_t bsize, size_t dstsize, wplist& dst);

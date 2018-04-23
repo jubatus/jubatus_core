@@ -37,6 +37,10 @@ class clustering_method_factory {
   static jubatus::util::lang::shared_ptr<clustering_method> create(
       const std::string& method,
       const core::common::jsonconfig::config& config);
+  static jubatus::util::lang::shared_ptr<clustering_method> create(
+      const std::string& method,
+      const std::string& distance,
+      const core::common::jsonconfig::config& config);
 };
 
 }  // namespace clustering

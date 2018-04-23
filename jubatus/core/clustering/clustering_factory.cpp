@@ -32,7 +32,7 @@ namespace jubatus {
 namespace core {
 namespace clustering {
 
-  shared_ptr<clustering> clustering_factory::create(
+shared_ptr<clustering> clustering_factory::create(
     const std::string& name,
     const std::string& method,
     const std::string& compressor,
@@ -40,6 +40,26 @@ namespace clustering {
     const config& compressor_param) {
   shared_ptr<clustering_method>
     clustering_method(clustering_method_factory::create(method, method_param));
+  shared_ptr<storage> storage(storage_factory::create(
+                                  name,
+                                  method,
+                                  compressor,
+                                  compressor_param));
+  shared_ptr<clustering> cl(new clustering(clustering_method, storage));
+  return cl;
+}
+
+shared_ptr<clustering> clustering_factory::create(
+    const std::string& name,
+    const std::string& method,
+    const std::string& compressor,
+    const std::string& distance,
+    const config& method_param,
+    const config& compressor_param) {
+
+  shared_ptr<clustering_method>
+    clustering_method(clustering_method_factory::create(
+        method, distance, method_param));
   shared_ptr<storage> storage(storage_factory::create(
                                   name,
                                   method,

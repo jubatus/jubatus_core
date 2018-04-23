@@ -18,9 +18,11 @@
 #define JUBATUS_CORE_CLUSTERING_KMEANS_CLUSTERING_METHOD_HPP_
 
 #include <vector>
+#include <string>
 
 #include "jubatus/util/math/random.h"
 #include "clustering_method.hpp"
+#include "jubatus/util/data/optional.h"
 
 namespace jubatus {
 namespace core {
@@ -35,10 +37,6 @@ class kmeans_clustering_method : public clustering_method {
     int k;
     int64_t seed;
 
-    MSGPACK_DEFINE(
-        k,
-        seed);
-
     template<typename Ar>
     void serialize(Ar& ar) {
       ar & JUBA_MEMBER(k)
@@ -47,6 +45,10 @@ class kmeans_clustering_method : public clustering_method {
   };
 
   explicit kmeans_clustering_method(size_t k, uint32_t seed);
+  explicit kmeans_clustering_method(
+      size_t k,
+      uint32_t seed,
+      const std::string& distance);
   ~kmeans_clustering_method();
 
   void batch_update(wplist points);

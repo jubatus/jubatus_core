@@ -76,6 +76,33 @@ TEST(clustering_factory_test, dbscan) {
                                           conf["parameter"],
                                           conf["compressor_parameter"]),
                common::unsupported_method);
+
+  // euclidean
+  EXPECT_NO_THROW(clustering_factory::create(
+                                             std::string("dbscan"),
+                                             std::string("dbscan"),
+                                             std::string("simple"),
+                                             std::string("euclidean"),
+                                             conf["parameter"],
+                                             conf["compressor_parameter"]));
+  // cosine
+  EXPECT_NO_THROW(clustering_factory::create(
+                                             std::string("dbscan"),
+                                             std::string("dbscan"),
+                                             std::string("simple"),
+                                             std::string("cosine"),
+                                             conf["parameter"],
+                                             conf["compressor_parameter"]));
+
+  // invalide distance
+  EXPECT_THROW(clustering_factory::create(
+                                          std::string("dbscan"),
+                                          std::string("dbscan"),
+                                          std::string("simple"),
+                                          std::string("euclid"),
+                                          conf["parameter"],
+                                          conf["compressor_parameter"]),
+               common::invalid_parameter);
 }
 
 TEST(clustering_factory_test, kmeans) {
@@ -99,6 +126,32 @@ TEST(clustering_factory_test, kmeans) {
                                             std::string("kmeans"),
                                             std::string("kmeans"),
                                             std::string("simple"),
+                                            conf["parameter"],
+                                            conf["compressor_parameter"]),
+                 common::invalid_parameter);
+
+    js["parameter"]["k"] = to_json(2);
+    EXPECT_NO_THROW(clustering_factory::create(
+                                               std::string("kmeans"),
+                                               std::string("kmeans"),
+                                               std::string("simple"),
+                                               std::string("euclidean"),
+                                               conf["parameter"],
+                                               conf["compressor_parameter"]));
+
+    EXPECT_NO_THROW(clustering_factory::create(
+                                               std::string("kmeans"),
+                                               std::string("kmeans"),
+                                               std::string("simple"),
+                                               std::string("cosine"),
+                                               conf["parameter"],
+                                               conf["compressor_parameter"]));
+
+    EXPECT_THROW(clustering_factory::create(
+                                            std::string("kmeans"),
+                                            std::string("kmeans"),
+                                            std::string("simple"),
+                                            std::string("euclid"),
                                             conf["parameter"],
                                             conf["compressor_parameter"]),
                  common::invalid_parameter);

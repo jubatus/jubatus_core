@@ -176,6 +176,7 @@ class clustering_test
                                                             "dummy",
                                                             param.second,
                                                             param.first,
+                                                            "euclidean",
                                                             config,
                                                             compressor_config),
                make_fv_converter()));
@@ -571,6 +572,7 @@ TEST_P(clustering_test, get_core_members_light) {
 
   core::clustering::index_cluster_set result =
       clustering_->get_core_members_light();
+
   for (size_t i = 0; i < result.size(); ++i) {
     std::cout << i << " :[";  //  debug out
     if (lexical_cast<int>(result[i][0].second)%2 == 0) {
@@ -586,6 +588,8 @@ TEST_P(clustering_test, get_core_members_light) {
     }
     std::cout << "]" << std::endl;
   }
+
+
   ASSERT_EQ(std::size_t(conf_.k), result.size());
   ASSERT_EQ(std::size_t(data_num), result[0].size());
   ASSERT_EQ(std::size_t(data_num), result[1].size());
@@ -727,6 +731,7 @@ class clustering_with_idf_test
                                                             "dummy",
                                                             param.second,
                                                             param.first,
+                                                            "euclidean",
                                                             config,
                                                             compressor_config),
                make_tf_idf_fv_converter()));
