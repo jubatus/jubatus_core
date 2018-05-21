@@ -26,8 +26,8 @@ namespace jubatus {
 namespace core {
 namespace common {
 
-typedef std::vector<std::pair<std::string, float> > sfv_t;
-typedef std::vector<std::pair<uint64_t, float> > sfvi_t;
+typedef std::vector<std::pair<std::string, double> > sfv_t;
+typedef std::vector<std::pair<uint64_t, double> > sfvi_t;
 
 }  // namespace common
 }  // namespace core
