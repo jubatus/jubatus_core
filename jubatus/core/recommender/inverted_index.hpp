@@ -46,11 +46,11 @@ class inverted_index : public recommender_base {
 
   void similar_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   void clear();
   void clear_row(const std::string& id);

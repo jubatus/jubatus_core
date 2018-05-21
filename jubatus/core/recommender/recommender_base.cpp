@@ -41,7 +41,7 @@ recommender_base::~recommender_base() {
 }
 
 void recommender_base::similar_row(
-    const std::string& id, std::vector<std::pair<std::string, float> >& ids,
+    const std::string& id, std::vector<std::pair<std::string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   common::sfv_t sfv;
@@ -51,7 +51,7 @@ void recommender_base::similar_row(
 
 void recommender_base::neighbor_row(
     const string& id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   common::sfv_t sfv;
@@ -76,7 +76,7 @@ void recommender_base::complete_row(const std::string& id,
 void recommender_base::complete_row(const common::sfv_t& query,
                                     common::sfv_t& ret) const {
   ret.clear();
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   similar_row(query, ids, complete_row_similar_num_);
   if (ids.size() == 0) {
     return;
@@ -105,18 +105,18 @@ void recommender_base::complete_row(const common::sfv_t& query,
   }
 }
 
-float recommender_base::calc_similarity(common::sfv_t& q1, common::sfv_t& q2) {
-  float q1_norm = calc_l2norm(q1);
-  float q2_norm = calc_l2norm(q2);
-  if (q1_norm == 0.f || q2_norm == 0.f) {
-    return 0.f;
+double recommender_base::calc_similarity(common::sfv_t& q1, common::sfv_t& q2) {
+  double q1_norm = calc_l2norm(q1);
+  double q2_norm = calc_l2norm(q2);
+  if (q1_norm == 0.0 || q2_norm == 0.0) {
+    return 0.0;
   }
   sort(q1.begin(), q1.end());
   sort(q2.begin(), q2.end());
 
   size_t i1 = 0;
   size_t i2 = 0;
-  float ret = 0.f;
+  double ret = 0.0;
   while (i1 < q1.size() && i2 < q2.size()) {
     const string& ind1 = q1[i1].first;
     const string& ind2 = q2[i2].first;
@@ -134,8 +134,8 @@ float recommender_base::calc_similarity(common::sfv_t& q1, common::sfv_t& q2) {
   return ret / q1_norm / q2_norm;
 }
 
-float recommender_base::calc_l2norm(const common::sfv_t& query) {
-  float ret = 0.f;
+double recommender_base::calc_l2norm(const common::sfv_t& query) {
+  double ret = 0.0;
   for (size_t i = 0; i < query.size(); ++i) {
     ret += query[i].second * query[i].second;
   }

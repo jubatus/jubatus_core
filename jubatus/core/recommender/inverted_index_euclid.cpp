@@ -67,7 +67,7 @@ inverted_index_euclid::inverted_index_euclid(const config& config) {
 
 void inverted_index_euclid::similar_row(
     const common::sfv_t& query,
-    std::vector<std::pair<std::string, float> >& ids,
+    std::vector<std::pair<std::string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   if (ret_num == 0) {
@@ -86,7 +86,7 @@ void inverted_index_euclid::similar_row(
  */
 void inverted_index_euclid::neighbor_row(
     const common::sfv_t& query,
-    std::vector<std::pair<std::string, float> >& ids,
+    std::vector<std::pair<std::string, double> >& ids,
     size_t ret_num) const {
   similar_row(query, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {
