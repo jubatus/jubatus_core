@@ -30,7 +30,7 @@ namespace fv_converter {
 
 void revert_feature(const common::sfv_t& fv, fv_converter::datum& data) {
   for (size_t i = 0; i < fv.size(); ++i) {
-    std::pair<std::string, float> num_value;
+    std::pair<std::string, double> num_value;
     std::pair<std::string, std::string> string_value;
     if (revert_num_value(fv[i], num_value)) {
       data.num_values_.push_back(num_value);
@@ -41,14 +41,14 @@ void revert_feature(const common::sfv_t& fv, fv_converter::datum& data) {
 }
 
 bool revert_num_value(
-    const std::pair<std::string, float>& feature,
-    std::pair<std::string, float>& num_value) {
+    const std::pair<std::string, double>& feature,
+    std::pair<std::string, double>& num_value) {
   // Only 'num' features and 'str' features can be reverted.
   // Formats of two features are below:
   // ("<KEY_NAME>@num", value)
   // ("<KEY_NAME>@str$<VALUE>", 1)
   const std::string& key = feature.first;
-  float value = feature.second;
+  double value = feature.second;
   size_t at = key.rfind('@');
   if (at == std::string::npos) {
     return false;
@@ -63,7 +63,7 @@ bool revert_num_value(
   } else if (starts_with(feature_value, str_prefix)) {
     std::string val_string(feature_value.substr(str_prefix.size()));
     try {
-      float val = jubatus::util::lang::lexical_cast<float>(val_string);
+      double val = jubatus::util::lang::lexical_cast<double>(val_string);
       num_value.first.swap(num_value_key);
       num_value.second = val;
       return true;
@@ -76,7 +76,7 @@ bool revert_num_value(
 }
 
 bool revert_string_value(
-    const std::pair<std::string, float>& feature,
+    const std::pair<std::string, double>& feature,
     std::pair<std::string, std::string>& string_value) {
   // Format of string feature is
   // "<KEY_NAME>$<VALUE>@<FEATURE_TYPE>#<SAMPLE_WEIGHT>/<GLOBAL_WEIGHT>"

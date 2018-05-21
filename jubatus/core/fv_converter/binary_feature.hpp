@@ -35,7 +35,7 @@ class binary_feature {
   virtual void add_feature(
       const std::string& key,
       const std::string& value,
-      std::vector<std::pair<std::string, float> >& ret_fv) const = 0;
+      std::vector<std::pair<std::string, double> >& ret_fv) const = 0;
 };
 
 }  // namespace fv_converter

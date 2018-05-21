@@ -32,8 +32,8 @@ namespace {
 shared_ptr<add_filter> create_add_filter(
     const std::map<std::string, std::string>& params) {
   const std::string& value = get_or_die(params, "value");
-  double float_val = jubatus::util::lang::lexical_cast<double>(value);
-  return shared_ptr<add_filter>(new add_filter(float_val));
+  double double_val = jubatus::util::lang::lexical_cast<double>(value);
+  return shared_ptr<add_filter>(new add_filter(double_val));
 }
 
 shared_ptr<linear_normalization_filter> create_linear_normalization_filter(
@@ -41,31 +41,31 @@ shared_ptr<linear_normalization_filter> create_linear_normalization_filter(
   const std::string& min = get_or_die(params, "min");
   const std::string& max = get_or_die(params, "max");
   const std::string truncate = get_with_default(params, "truncate", "True");
-  const double float_min = jubatus::util::lang::lexical_cast<double>(min);
-  const double float_max = jubatus::util::lang::lexical_cast<double>(max);
+  const double double_min = jubatus::util::lang::lexical_cast<double>(min);
+  const double double_max = jubatus::util::lang::lexical_cast<double>(max);
   const bool truncate_flag = truncate == "True";
   return shared_ptr<linear_normalization_filter>(
-      new linear_normalization_filter(float_min, float_max, truncate_flag));
+      new linear_normalization_filter(double_min, double_max, truncate_flag));
 }
 
 shared_ptr<gaussian_normalization_filter> create_gaussian_normalization_filter(
     const std::map<std::string, std::string>& params) {
   const std::string& avg = get_or_die(params, "average");
   const std::string& stddev = get_or_die(params, "standard_deviation");
-  const double float_avg = jubatus::util::lang::lexical_cast<double>(avg);
-  const double float_stddev = jubatus::util::lang::lexical_cast<double>(stddev);
+  const double double_avg = jubatus::util::lang::lexical_cast<double>(avg);
+  const double double_stddev = jubatus::util::lang::lexical_cast<double>(stddev);
   return shared_ptr<gaussian_normalization_filter>(
-      new gaussian_normalization_filter(float_avg, float_stddev));
+      new gaussian_normalization_filter(double_avg, double_stddev));
 }
 
 shared_ptr<sigmoid_normalization_filter> create_sigmoid_normalization_filter(
     const std::map<std::string, std::string>& params) {
   const std::string gain = get_with_default(params, "gain", "1");
   const std::string bias = get_with_default(params, "bias", "0");
-  const double float_gain = jubatus::util::lang::lexical_cast<double>(gain);
-  const double float_bias = jubatus::util::lang::lexical_cast<double>(bias);
+  const double double_gain = jubatus::util::lang::lexical_cast<double>(gain);
+  const double double_bias = jubatus::util::lang::lexical_cast<double>(bias);
   return shared_ptr<sigmoid_normalization_filter>(
-      new sigmoid_normalization_filter(float_gain, float_bias));
+      new sigmoid_normalization_filter(double_gain, double_bias));
 }
 }  // namespace
 

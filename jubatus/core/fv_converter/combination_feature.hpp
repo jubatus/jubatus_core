@@ -34,7 +34,7 @@ class combination_feature {
       const std::string& key,
       double value_left,
       double value_right,
-      std::vector<std::pair<std::string, float> >& ret_fv) const = 0;
+      std::vector<std::pair<std::string, double> >& ret_fv) const = 0;
 
   virtual bool is_commutative() const = 0;
 };
