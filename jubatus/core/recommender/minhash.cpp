@@ -80,7 +80,7 @@ minhash::~minhash() {
 
 void minhash::similar_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   if (ret_num == 0) {
@@ -94,7 +94,7 @@ void minhash::similar_row(
 
 void minhash::similar_row(
     const string& id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   mixable_storage_->get_model()->similar_row(id, ids, ret_num);
@@ -102,7 +102,7 @@ void minhash::similar_row(
 
 void minhash::neighbor_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   similar_row(query, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {
@@ -112,7 +112,7 @@ void minhash::neighbor_row(
 
 void minhash::neighbor_row(
     const string& id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   similar_row(id, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {
@@ -146,7 +146,7 @@ void minhash::calc_minhash_values(const common::sfv_t& sfv,
   vector<uint64_t> hash_buffer(hash_num_);
   for (size_t i = 0; i < sfv.size(); ++i) {
     uint64_t key_hash = common::hash_util::calc_string_hash(sfv[i].first);
-    float val = sfv[i].second;
+    double val = sfv[i].second;
     for (uint64_t j = 0; j < hash_num_; ++j) {
       float hashval = calc_hash(key_hash, j, val);
       if (hashval < min_values_buffer[j]) {
@@ -226,7 +226,7 @@ void minhash::hash_mix64(uint64_t& a, uint64_t& b, uint64_t& c) {
   c ^= (b >> 22);
 }
 
-float minhash::calc_hash(uint64_t a, uint64_t b, float val) {
+float minhash::calc_hash(uint64_t a, uint64_t b, double val) {
   uint64_t c = hash_prime;
   hash_mix64(a, b, c);
   hash_mix64(a, b, c);

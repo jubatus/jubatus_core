@@ -93,7 +93,7 @@ class storage_base : public framework::model {
 
   virtual void bulk_update(
       const common::sfv_t& sfv,
-      float step_width,
+      double step_width,
       const std::string& inc_class,
       const std::string& dec_class);
 

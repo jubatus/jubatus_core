@@ -178,7 +178,7 @@ static void similar_row_one(
 
 void bit_index_storage::similar_row(
     const bit_vector& bv,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   ids.clear();
   uint64_t bit_num = bv.bit_num();
@@ -207,13 +207,13 @@ void bit_index_storage::similar_row(
   heap.get_sorted(scores);
   for (size_t i = 0; i < scores.size() && i < ret_num; ++i) {
     ids.push_back(make_pair(scores[i].second,
-                            static_cast<float>(scores[i].first) / bit_num));
+                            static_cast<double>(scores[i].first) / bit_num));
   }
 }
 
 void bit_index_storage::similar_row(
     const std::string& id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   ids.clear();
   bit_table_t::const_iterator it = bitvals_diff_.find(id);

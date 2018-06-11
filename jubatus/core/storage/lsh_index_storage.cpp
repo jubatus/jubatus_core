@@ -98,14 +98,14 @@ bit_vector binarize(const vector<float>& hash) {
 float calc_euclidean_distance(
     const lsh_entry& entry,
     const bit_vector& bv,
-    float norm) {
+    double norm) {
   const uint64_t hamm = bv.calc_hamming_similarity(entry.simhash_bv);
   if (hamm == bv.bit_num()) {
     // Avoid NaN caused by arithmetic error
     return std::fabs(norm - entry.norm);
   }
-  const float angle = (1 - static_cast<float>(hamm) / bv.bit_num()) * M_PI;
-  const float dot = entry.norm * norm * std::cos(angle);
+  const double angle = (1 - static_cast<double>(hamm) / bv.bit_num()) * M_PI;
+  const double dot = entry.norm * norm * std::cos(angle);
   return std::sqrt(norm * norm + entry.norm * entry.norm - 2 * dot);
 }
 
@@ -149,7 +149,7 @@ lsh_index_storage::~lsh_index_storage() {
 void lsh_index_storage::set_row(
     const string& row,
     const vector<float>& hash,
-    float norm) {
+    double norm) {
   lsh_master_table_t::iterator it = remove_and_get_row(row);
   if (it == master_table_diff_.end()) {
     it = master_table_diff_.insert(make_pair(row, lsh_entry())).first;
@@ -230,10 +230,10 @@ void lsh_index_storage::get_all_row_ids(vector<string>& ids) const {
 
 void lsh_index_storage::similar_row(
     const vector<float>& hash,
-    float norm,
+    double norm,
     uint64_t probe_num,
     uint64_t ret_num,
-    vector<pair<string, float> >& ids) const {
+    vector<pair<string, double> >& ids) const {
   const vector<float> shifted = shift_hash(hash, shift_);
   const bit_vector bv = binarize(hash);
 
@@ -263,7 +263,7 @@ void lsh_index_storage::similar_row(
 void lsh_index_storage::similar_row(
     const string& id,
     uint64_t ret_num,
-    vector<pair<string, float> >& ids) const {
+    vector<pair<string, double> >& ids) const {
   lsh_master_table_t::const_iterator it = master_table_diff_.find(id);
   if (it == master_table_diff_.end()) {
     it = master_table_.find(id);
@@ -415,7 +415,7 @@ void lsh_index_storage::put_empty_entry(
 
 vector<float> lsh_index_storage::make_entry(
     const vector<float>& hash,
-    float norm,
+    double norm,
     lsh_entry& entry) const {
   const vector<float> shifted = shift_hash(hash, shift_);
   lsh_probe_generator gen(shifted, table_num_);
@@ -479,9 +479,9 @@ bool lsh_index_storage::retrieve_hit_rows(
 void lsh_index_storage::get_sorted_similar_rows(
     const unordered_set<uint64_t>& cands,
     const bit_vector& query_simhash,
-    float query_norm,
+    double query_norm,
     uint64_t ret_num,
-    vector<pair<string, float> >& ids) const {
+    vector<pair<string, double> >& ids) const {
   // Avoid string copy as far as possible
   vector<pair<uint64_t, float> > scored;
   scored.reserve(cands.size());
@@ -491,7 +491,7 @@ void lsh_index_storage::get_sorted_similar_rows(
     if (!entry || entry->lsh_hash.empty()) {
       continue;
     }
-    const float dist = calc_euclidean_distance(*entry, query_simhash,
+    const double dist = calc_euclidean_distance(*entry, query_simhash,
                                                query_norm);
     scored.push_back(make_pair(*it, -dist));
   }

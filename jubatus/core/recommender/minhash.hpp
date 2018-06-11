@@ -61,19 +61,19 @@ class minhash : public recommender_base {
 
   void similar_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   virtual void similar_row(
       const std::string& id,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   virtual void neighbor_row(
       const std::string& id,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   void clear();
   void clear_row(const std::string& id);
@@ -92,7 +92,7 @@ class minhash : public recommender_base {
       const common::sfv_t& sfv,
       core::storage::bit_vector& bv) const;
 
-  static float calc_hash(uint64_t a, uint64_t b, float val);
+  static float calc_hash(uint64_t a, uint64_t b, double val);
   static void hash_mix64(uint64_t& a, uint64_t& b, uint64_t& c);
 
   void initialize_model();

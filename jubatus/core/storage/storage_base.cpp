@@ -30,8 +30,8 @@ void storage_base::update(
     const string& dec_class, const val1_t& w) {
   feature_val1_t row;
   get(feature, row);
-  float inc_class_val = w;
-  float dec_class_val = -w;
+  double inc_class_val = w;
+  double dec_class_val = -w;
   for (size_t i = 0; i < row.size(); ++i) {
     const string& label = row[i].first;
     if (label == inc_class) {
@@ -46,18 +46,18 @@ void storage_base::update(
 
 void storage_base::bulk_update(
     const common::sfv_t& sfv,
-    float step_width,
+    double step_width,
     const std::string& inc_class,
     const std::string& dec_class) {
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
-    float val = it->second;
+    double val = it->second;
     if (dec_class != "") {
       update(feature, inc_class, dec_class, step_width * val);
     } else {
       feature_val1_t ret;
       get(feature, ret);
-      float pos_val = 0.f;
+      double pos_val = 0.0;
       for (size_t i = 0; i < ret.size(); ++i) {
         if (ret[i].first == inc_class) {
           pos_val = ret[i].second;

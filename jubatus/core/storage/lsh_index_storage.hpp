@@ -38,7 +38,7 @@ namespace storage {
 struct lsh_entry {
   std::vector<uint64_t> lsh_hash;
   bit_vector simhash_bv;
-  float norm;
+  double norm;
 
   MSGPACK_DEFINE(lsh_hash, simhash_bv, norm);
 };
@@ -65,21 +65,21 @@ class lsh_index_storage {
   void set_row(
       const std::string& row,
       const std::vector<float>& hash,
-      float norm);
+      double norm);
   void remove_row(const std::string& row);
   void clear();
   void get_all_row_ids(std::vector<std::string>& ids) const;
 
   void similar_row(
       const std::vector<float>& hash,
-      float norm,
+      double norm,
       uint64_t probe_num,
       uint64_t ret_num,
-      std::vector<std::pair<std::string, float> >& ids) const;
+      std::vector<std::pair<std::string, double> >& ids) const;
   void similar_row(
       const std::string& id,
       uint64_t ret_num,
-      std::vector<std::pair<std::string, float> >& ids) const;
+      std::vector<std::pair<std::string, double> >& ids) const;
   std::string name() const;
 
   size_t table_num() const {
@@ -110,7 +110,7 @@ class lsh_index_storage {
 
   std::vector<float> make_entry(
       const std::vector<float>& hash,
-      float norm,
+      double norm,
       lsh_entry& entry) const;
   bool retrieve_hit_rows(
       uint64_t hash,
@@ -120,9 +120,9 @@ class lsh_index_storage {
   void get_sorted_similar_rows(
       const jubatus::util::data::unordered_set<uint64_t>& cands,
       const bit_vector& query_simhash,
-      float query_norm,
+      double query_norm,
       uint64_t ret_num,
-      std::vector<std::pair<std::string, float> >& ids) const;
+      std::vector<std::pair<std::string, double> >& ids) const;
   const lsh_entry* get_lsh_entry(const std::string& row) const;
   void remove_model_row(const std::string& row);
   void set_mixed_row(const std::string& row, const lsh_entry& entry);

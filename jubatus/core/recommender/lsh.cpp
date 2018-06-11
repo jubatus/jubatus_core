@@ -95,7 +95,7 @@ lsh::~lsh() {
 
 void lsh::similar_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   if (ret_num == 0) {
@@ -108,7 +108,7 @@ void lsh::similar_row(
 
 void lsh::similar_row(
     const string& id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   mixable_storage_->get_model()->similar_row(id, ids, ret_num);
@@ -116,7 +116,7 @@ void lsh::similar_row(
 
 void lsh::neighbor_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   similar_row(query, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {
@@ -126,7 +126,7 @@ void lsh::neighbor_row(
 
 void lsh::neighbor_row(
     const string& id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   similar_row(id, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {

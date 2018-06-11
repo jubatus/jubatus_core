@@ -50,14 +50,14 @@ namespace {
 
 struct greater_second {
   bool operator()(
-      const pair<string, float>& l,
-      const pair<string, float>& r) const {
+      const pair<string, double>& l,
+      const pair<string, double>& r) const {
     return l.second > r.second;
   }
 };
 
-float calc_norm(const common::sfv_t& sfv) {
-  float sqnorm = 0;
+double calc_norm(const common::sfv_t& sfv) {
+  double sqnorm = 0;
   for (size_t i = 0; i < sfv.size(); ++i) {
     sqnorm += sfv[i].second * sfv[i].second;
   }
@@ -158,7 +158,7 @@ euclid_lsh::~euclid_lsh() {
 
 void euclid_lsh::neighbor_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   similar_row(query, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {
@@ -168,7 +168,7 @@ void euclid_lsh::neighbor_row(
 
 void euclid_lsh::neighbor_row(
     const string& id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   similar_row(id, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {
@@ -178,19 +178,19 @@ void euclid_lsh::neighbor_row(
 
 void euclid_lsh::similar_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   storage::lsh_index_storage& lsh_index = *mixable_storage_->get_model();
   ids.clear();
 
   const vector<float> hash = calculate_lsh(query);
-  const float norm = calc_norm(query);
+  const double norm = calc_norm(query);
   lsh_index.similar_row(hash, norm, num_probe_, ret_num, ids);
 }
 
 void euclid_lsh::similar_row(
     const string& id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   mixable_storage_->get_model()->similar_row(id, ret_num, ids);
@@ -229,7 +229,7 @@ void euclid_lsh::update_row(const string& id, const sfv_diff_t& diff) {
   orig_.get_row(id, row);
 
   const vector<float> hash = calculate_lsh(row);
-  const float norm = calc_norm(row);
+  const double norm = calc_norm(row);
   lsh_index.set_row(id, hash, norm);
   if (unlearner_) {
     unlearner_->touch(id);
