@@ -374,8 +374,10 @@ void inverted_index_storage::calc_scores(
     add_inp_scores(fid, val, i_scores);
   }
 
-  storage::fixed_size_heap<pair<double, uint64_t>,
-                           std::greater<pair<double, uint64_t> > > heap(ret_num);
+  storage::fixed_size_heap<
+      pair<double, uint64_t>,
+      std::greater<pair<double, uint64_t> > > heap(ret_num);
+
   for (size_t i = 0; i < i_scores.size(); ++i) {
     double score = i_scores[i];
     if (score == 0.0)
@@ -417,8 +419,9 @@ void inverted_index_storage::calc_euclid_scores(
     add_inp_scores(fid, val, i_scores);
   }
 
-  storage::fixed_size_heap<pair<double, uint64_t>,
-                           std::greater<pair<double, uint64_t> > > heap(ret_num);
+  storage::fixed_size_heap<
+      pair<double, uint64_t>,
+      std::greater<pair<double, uint64_t> > > heap(ret_num);
 
   double squared_query_norm = calc_squared_l2norm(query);
   for (size_t i = 0; i < i_scores.size(); ++i) {
@@ -460,8 +463,9 @@ void inverted_index_storage::calc_euclid_scores_ignore_orthogonal(
     add_inp_scores(fid, val, i_scores, i_scores_index_set);
   }
 
-  storage::fixed_size_heap<pair<double, uint64_t>,
-                           std::greater<pair<double, uint64_t> > > heap(ret_num);
+  storage::fixed_size_heap<
+      pair<double, uint64_t>,
+      std::greater<pair<double, uint64_t> > > heap(ret_num);
 
   double squared_query_norm = calc_squared_l2norm(query);
 

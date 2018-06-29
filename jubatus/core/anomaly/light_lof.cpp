@@ -413,7 +413,8 @@ void light_lof::update_entries(const unordered_set<string>& neighbors) {
   shared_ptr<column_table> table = mixable_scores_->get_model();
   storage::double_column& kdist_column =
       table->get_double_column(KDIST_COLUMN_INDEX);
-  storage::double_column& lrd_column = table->get_double_column(LRD_COLUMN_INDEX);
+  storage::double_column& lrd_column =
+      table->get_double_column(LRD_COLUMN_INDEX);
 
   vector<uint64_t> ids;
   ids.reserve(neighbors.size());

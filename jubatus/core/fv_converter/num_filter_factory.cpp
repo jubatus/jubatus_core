@@ -53,7 +53,8 @@ shared_ptr<gaussian_normalization_filter> create_gaussian_normalization_filter(
   const std::string& avg = get_or_die(params, "average");
   const std::string& stddev = get_or_die(params, "standard_deviation");
   const double double_avg = jubatus::util::lang::lexical_cast<double>(avg);
-  const double double_stddev = jubatus::util::lang::lexical_cast<double>(stddev);
+  const double double_stddev =
+      jubatus::util::lang::lexical_cast<double>(stddev);
   return shared_ptr<gaussian_normalization_filter>(
       new gaussian_normalization_filter(double_avg, double_stddev));
 }
