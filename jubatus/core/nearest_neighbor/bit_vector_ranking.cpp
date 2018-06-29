@@ -49,7 +49,7 @@ static heap_t ranking_hamming_bit_vectors_worker(
 void ranking_hamming_bit_vectors(
     const bit_vector& query,
     const const_bit_vector_column& bvs,
-    vector<pair<uint64_t, float> >& ret,
+    vector<pair<uint64_t, double> >& ret,
     uint64_t ret_num, uint32_t threads) {
   ret.clear();
   if (bvs.size() == 0) {
@@ -65,7 +65,7 @@ void ranking_hamming_bit_vectors(
   vector<pair<uint32_t, uint64_t> > sorted;
   heap.get_sorted(sorted);
 
-  const float denom = query.bit_num();
+  const double denom = query.bit_num();
   for (size_t i = 0; i < sorted.size(); ++i) {
     ret.push_back(make_pair(sorted[i].second, sorted[i].first / denom));
   }

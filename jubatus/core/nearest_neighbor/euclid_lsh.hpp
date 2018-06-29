@@ -70,14 +70,14 @@ class euclid_lsh : public nearest_neighbor_base {
   virtual void set_row(const std::string& id, const common::sfv_t& sfv);
   virtual void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const;
   virtual void neighbor_row(
       const std::string& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const;
 
-  virtual float calc_similarity(float distance) const {
+  virtual double calc_similarity(double distance) const {
     return -distance;
   }
 
@@ -85,12 +85,12 @@ class euclid_lsh : public nearest_neighbor_base {
   void set_config(const config& conf);
   void fill_schema(std::vector<storage::column_type>& schema);
   storage::const_bit_vector_column& lsh_column() const;
-  storage::const_float_column& norm_column() const;
+  storage::const_double_column& norm_column() const;
 
   void neighbor_row_from_hash(
       const storage::bit_vector& bv,
-      float norm,
-      std::vector<std::pair<std::string, float> >& ids,
+      double norm,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const;
 
   uint64_t first_column_id_;
