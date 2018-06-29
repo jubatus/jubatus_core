@@ -39,7 +39,7 @@ class nearest_neighbor_mock : public nearest_neighbor_base {
       jubatus::util::lang::shared_ptr<storage::column_table> table)
       : nearest_neighbor_base(table, "test") {}
 
-  void add_next_answer(const string& id, float dist) {
+  void add_next_answer(const string& id, double dist) {
     answer_.push_back(make_pair(id, dist));
   }
 
@@ -51,7 +51,7 @@ class nearest_neighbor_mock : public nearest_neighbor_base {
 
   virtual void neighbor_row(
       const common::sfv_t&,
-      vector<pair<string, float> >& ids,
+      vector<pair<string, double> >& ids,
       uint64_t ret_num) const {
     ids = answer_;
     if (ids.size() > ret_num) {
@@ -61,7 +61,7 @@ class nearest_neighbor_mock : public nearest_neighbor_base {
 
   virtual void neighbor_row(
       const string&,
-      vector<pair<string, float> >& ids,
+      vector<pair<string, double> >& ids,
       uint64_t ret_num) const {
     ids = answer_;
     if (ids.size() > ret_num) {
@@ -70,7 +70,7 @@ class nearest_neighbor_mock : public nearest_neighbor_base {
   }
 
  private:
-  vector<pair<string, float> > answer_;
+  vector<pair<string, double> > answer_;
 };
 
 class nearest_neighbor_base_test : public testing::Test {
@@ -105,7 +105,7 @@ TEST_F(nearest_neighbor_base_test, similar_row) {
   mock_->add_next_answer("a", 0.75);
   mock_->add_next_answer("a", 1);
 
-  vector<pair<string, float> > neighbors, similars;
+  vector<pair<string, double> > neighbors, similars;
   mock_->neighbor_row("", neighbors, 5);
   mock_->similar_row("", similars, 5);
 

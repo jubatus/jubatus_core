@@ -95,7 +95,7 @@ bit_vector binarize(const vector<float>& hash) {
   return bv;
 }
 
-float calc_euclidean_distance(
+double calc_euclidean_distance(
     const lsh_entry& entry,
     const bit_vector& bv,
     double norm) {

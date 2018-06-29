@@ -73,7 +73,7 @@ common::sfv_t make_dense_sfv(const string& s) {
   istringstream iss(s);
 
   size_t i = 0;
-  float x = 0;
+  double x = 0.0;
   while (iss >> x) {
     sfv.push_back(make_pair(lexical_cast<string>(i++), x));
   }
@@ -170,44 +170,44 @@ class lof_storage_one_dimensional_test : public ::testing::Test {
 };
 
 TEST_F(lof_storage_one_dimensional_test, get_kdist) {
-  EXPECT_FLOAT_EQ(2.f, storage_->get_kdist("-1"));
-  EXPECT_FLOAT_EQ(1.f, storage_->get_kdist("0"));
-  EXPECT_FLOAT_EQ(2.f, storage_->get_kdist("1"));
-  EXPECT_FLOAT_EQ(10.f, storage_->get_kdist("10"));
+  EXPECT_FLOAT_EQ(2.0, storage_->get_kdist("-1"));
+  EXPECT_FLOAT_EQ(1.0, storage_->get_kdist("0"));
+  EXPECT_FLOAT_EQ(2.0, storage_->get_kdist("1"));
+  EXPECT_FLOAT_EQ(10.0, storage_->get_kdist("10"));
 }
 
 TEST_F(lof_storage_one_dimensional_test, get_lrd) {
-  EXPECT_FLOAT_EQ(2/3.f, storage_->get_lrd("-1"));
-  EXPECT_FLOAT_EQ(1/2.f, storage_->get_lrd("0"));
-  EXPECT_FLOAT_EQ(2/3.f, storage_->get_lrd("1"));
-  EXPECT_FLOAT_EQ(2/19.f, storage_->get_lrd("10"));
+  EXPECT_FLOAT_EQ(2/3.0, storage_->get_lrd("-1"));
+  EXPECT_FLOAT_EQ(1/2.0, storage_->get_lrd("0"));
+  EXPECT_FLOAT_EQ(2/3.0, storage_->get_lrd("1"));
+  EXPECT_FLOAT_EQ(2/19.0, storage_->get_lrd("10"));
 }
 
 TEST_F(lof_storage_one_dimensional_test, collect_lrds) {
-  unordered_map<string, float> lrds;
-  float lrd = storage_->collect_lrds(make_sfv("1:0"), lrds);
-  EXPECT_FLOAT_EQ(1/2.f, lrd);
+  unordered_map<string, double> lrds;
+  double lrd = storage_->collect_lrds(make_sfv("1:0"), lrds);
+  EXPECT_FLOAT_EQ(1/2.0, lrd);
 
   EXPECT_EQ(2u, lrds.size());
-  EXPECT_FLOAT_EQ(2/3.f, lrds["-1"]);
-  EXPECT_FLOAT_EQ(2/3.f, lrds["1"]);
+  EXPECT_FLOAT_EQ(2/3.0, lrds["-1"]);
+  EXPECT_FLOAT_EQ(2/3.0, lrds["1"]);
 }
 
 TEST_F(lof_storage_one_dimensional_test, collect_lrds_novel_input) {
-  unordered_map<string, float> lrds;
-  float lrd = storage_->collect_lrds(make_sfv("1:2"), lrds);
-  EXPECT_FLOAT_EQ(1/2.f, lrd);
+  unordered_map<string, double> lrds;
+  double lrd = storage_->collect_lrds(make_sfv("1:2"), lrds);
+  EXPECT_FLOAT_EQ(1/2.0, lrd);
 
   EXPECT_EQ(2u, lrds.size());
-  EXPECT_FLOAT_EQ(2/3.f, lrds["1"]);
-  EXPECT_FLOAT_EQ(1/2.f, lrds["0"]);
+  EXPECT_FLOAT_EQ(2/3.0, lrds["1"]);
+  EXPECT_FLOAT_EQ(1/2.0, lrds["0"]);
 }
 
 class lof_storage_mix_test : public ::testing::TestWithParam<
     std::pair<int, lof_storage::config> > {
  protected:
   common::sfv_t generate_gaussian(const string& name, const common::sfv_t& mean,
-                          float deviation) {
+                          double deviation) {
     common::sfv_t sfv(mean);
     const uint64_t seed = common::hash_util::calc_string_hash(name);
     jubatus::util::math::random::mtrand r(seed);
@@ -219,7 +219,7 @@ class lof_storage_mix_test : public ::testing::TestWithParam<
     return sfv;
   }
 
-  void update(const string& name, const common::sfv_t& mean, float deviation) {
+  void update(const string& name, const common::sfv_t& mean, double deviation) {
     const common::sfv_t x = generate_gaussian(name, mean, deviation);
     lof_storage* storage = portable_mixer_.get_hash(name);
     storage->update_row(name, x);
@@ -275,7 +275,7 @@ class lof_storage_mix_test : public ::testing::TestWithParam<
 TEST_P(lof_storage_mix_test, consistency) {
   static const size_t num_sample = 100;
   static const size_t num_query = 10;
-  static const float deviation = 2;
+  static const double deviation = 2;
 
   const common::sfv_t mu0 = make_dense_sfv("1 1");
   const common::sfv_t mu1 = make_dense_sfv("2 1");
@@ -315,8 +315,8 @@ TEST_P(lof_storage_mix_test, consistency) {
   for (size_t i = 0; i < num_query; ++i) {
     const common::sfv_t x =
       generate_gaussian("t" + lexical_cast<string>(i), mu1, 1);
-    float expect_lrd, actual_lrd;
-    unordered_map<string, float> expect_lrds, actual_lrds;
+    double expect_lrd, actual_lrd;
+    unordered_map<string, double> expect_lrds, actual_lrds;
 
     expect_lrd = single_storage_->collect_lrds(x, expect_lrds);
 
@@ -324,7 +324,7 @@ TEST_P(lof_storage_mix_test, consistency) {
       actual_lrd = storages_[j]->collect_lrds(x, actual_lrds);
       EXPECT_FLOAT_EQ(expect_lrd, actual_lrd);
 
-      for (unordered_map<string, float>::const_iterator it =
+      for (unordered_map<string, double>::const_iterator it =
              expect_lrds.begin(); it != expect_lrds.end(); ++it) {
         EXPECT_TRUE(actual_lrds.count(it->first));
         EXPECT_FLOAT_EQ(it->second, actual_lrds[it->first]);
@@ -357,7 +357,7 @@ TEST_P(lof_storage_mix_test, remove_between_mix) {
 
 TEST_P(lof_storage_mix_test, mix_after_remove) {
   static const size_t num_sample = 100;
-  static const float deviation = 2;
+  static const double deviation = 2;
 
   const common::sfv_t mu0 = make_dense_sfv("1 1");
   const common::sfv_t mu1 = make_dense_sfv("2 1");

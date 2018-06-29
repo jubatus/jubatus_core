@@ -57,15 +57,15 @@ vector<common::sfv_t> draw_2d_points_from_gaussian(
     jubatus::util::math::random::mtrand& mtr) {
   vector<common::sfv_t> points(num_points);
   for (size_t i = 0; i < points.size(); ++i) {
-    const float x = mtr.next_gaussian(x_mean, x_deviation);
-    const float y = mtr.next_gaussian(y_mean, y_deviation);
+    const double x = mtr.next_gaussian(x_mean, x_deviation);
+    const double y = mtr.next_gaussian(y_mean, y_deviation);
     points[i].push_back(make_pair("x", x));
     points[i].push_back(make_pair("y", y));
   }
   return points;
 }
 
-common::sfv_t create_2d_point(float x, float y) {
+common::sfv_t create_2d_point(double x, double y) {
   common::sfv_t point;
   point.push_back(make_pair("x", x));
   point.push_back(make_pair("y", y));
@@ -232,7 +232,7 @@ TYPED_TEST_P(light_lof_test, set_bulk) {
     common::sfv_t v;
     std::ostringstream id;
     id << i;
-    v.push_back(make_pair("x", static_cast<float>(i)));
+    v.push_back(make_pair("x", static_cast<double>(i)));
     data.push_back(make_pair(id.str(), v));
   }
   ids = this->light_lof_->set_bulk(data);

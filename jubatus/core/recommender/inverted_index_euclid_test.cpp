@@ -128,14 +128,14 @@ TEST(inverted_index_euclid, trivial_test_with_ignore_orthogonal) {
   EXPECT_EQ(res[0].first, "v1");
   EXPECT_EQ(res[0].second, -1.0);
   EXPECT_EQ(res[1].first, "v2");
-  EXPECT_DOUBLE_EQ(res[1].second, -5.83095);
+  EXPECT_DOUBLE_EQ(res[1].second, -5.8309518948453);
 
   q2.push_back(std::pair<std::string, double>("c", 1.0));
   res.clear();
   r->similar_row(q2, res, 2);
   EXPECT_EQ(res.size(), 1u);
   EXPECT_EQ(res[0].first, "v2");
-  EXPECT_DOUBLE_EQ(res[0].second, -5.6568542);
+  EXPECT_DOUBLE_EQ(res[0].second, -5.65685424949238);
 
   q3.push_back(std::pair<std::string, double>("a", 1.0));
   q3.push_back(std::pair<std::string, double>("b", -1.0));

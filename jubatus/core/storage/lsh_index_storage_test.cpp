@@ -92,8 +92,8 @@ TEST(lsh_index_storage, set_rows_and_similar_rows) {
 
   vector<pair<string, double> > expect;
   // NOTE: similarity of lsh_index_storage is a negative of Euclidean distance
-  expect.push_back(make_pair("r1", -0.25f));
-  expect.push_back(make_pair("r2", -0.75f));
+  expect.push_back(make_pair("r1", -0.25));
+  expect.push_back(make_pair("r2", -0.75));
 
   EXPECT_EQ(expect, res);
 }
@@ -116,12 +116,12 @@ TEST(lsh_index_storage, set_row_to_multiple_table) {
   s.similar_row(make_hash("1 -1 1 1"), 1, 0, 1, res);
 
   vector<pair<string, double> > expect;
-  expect.push_back(make_pair("r1", -distance(1, 1, 0.25f)));
+  expect.push_back(make_pair("r1", -distance(1, 1, 0.25)));
 
   EXPECT_EQ(expect.size(), res.size());
   for (std::size_t i = 0; i < expect.size(); ++i) {
     EXPECT_EQ(expect[i].first, res[i].first);
-    EXPECT_DOUBLE_EQ(expect[i].second, res[i].second);
+    EXPECT_FLOAT_EQ(expect[i].second, res[i].second);
   }
 }
 
@@ -221,8 +221,8 @@ TEST(lsh_index_storage, multi_probe_lsh) {
 
   vector<pair<string, double> > expect;
   expect.push_back(make_pair("r3", 0));
-  expect.push_back(make_pair("r4", -distance(1, 1, 0.25f)));
-  expect.push_back(make_pair("r2", -distance(1, 1, 0.5f)));
+  expect.push_back(make_pair("r4", -distance(1, 1, 0.25)));
+  expect.push_back(make_pair("r2", -distance(1, 1, 0.5)));
 
   // EXPECT_EQ(expect, ids);
 }
