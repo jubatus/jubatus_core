@@ -62,14 +62,14 @@ nearest_neighbor_recommender::nearest_neighbor_recommender(
 
 void nearest_neighbor_recommender::similar_row(
     const common::sfv_t& query,
-    std::vector<std::pair<std::string, float> >& ids,
+    std::vector<std::pair<std::string, double> >& ids,
     size_t ret_num) const {
   nearest_neighbor_engine_->similar_row(query, ids, ret_num);
 }
 
 void nearest_neighbor_recommender::neighbor_row(
     const common::sfv_t& query,
-    std::vector<std::pair<std::string, float> >& ids,
+    std::vector<std::pair<std::string, double> >& ids,
     size_t ret_num) const {
   nearest_neighbor_engine_->neighbor_row(query, ids, ret_num);
 }
