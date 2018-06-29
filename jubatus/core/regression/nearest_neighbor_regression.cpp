@@ -73,12 +73,12 @@ nearest_neighbor_regression::nearest_neighbor_regression(
   std::vector<column_type> schema;
   values_.reset(new mixable_versioned_table);
   values_->set_model(shared_ptr<column_table> (new column_table));
-  schema.push_back(column_type(column_type::float_type));
+  schema.push_back(column_type(column_type::double_type));
   values_->get_model()->init(schema);
 }
 
 void nearest_neighbor_regression::train(
-    const common::sfv_t& fv, const float value) {
+    const common::sfv_t& fv, const double value) {
   std::string id;
   {
     util::concurrent::scoped_lock lk(rand_mutex_);
@@ -113,50 +113,50 @@ void nearest_neighbor_regression::set_unlearner(
       (nearest_neighbor_engine_->get_mixable())->set_unlearner(unlearner_);
 }
 
-float nearest_neighbor_regression::estimate(
+double nearest_neighbor_regression::estimate(
     const common::sfv_t& fv) const {
-  std::vector<std::pair<std::string, float> > ids;
+  std::vector<std::pair<std::string, double> > ids;
   // lock acquired inside
   nearest_neighbor_engine_->neighbor_row(fv, ids, config_.nearest_neighbor_num);
 
   if (ids.size() > 0) {
-    float sum = 0.f;
+    double sum = 0.0;
     if (config_.weight && *config_.weight == "distance") {
-      float sum_w = 0.f;
-      if (ids[0].second == 0.f) {
+      double sum_w = 0.0;
+      if (ids[0].second == 0.0) {
         // in case same points exist, return mean value of their target values.
-        for (std::vector<std::pair<std::string, float> >::const_iterator
+        for (std::vector<std::pair<std::string, double> >::const_iterator
                  it = ids.begin(); it != ids.end(); ++it) {
-          if (it->second != 0.f) {
+          if (it->second != 0.0) {
             break;
           }
           const std::pair<bool, uint64_t> index =
               values_->get_model()->exact_match(it->first);
-          sum += values_->get_model()->get_float_column(0)[index.second];
-          sum_w += 1.f;
+          sum += values_->get_model()->get_double_column(0)[index.second];
+          sum_w += 1.0;
         }
       } else {
-        for (std::vector<std::pair<std::string, float> >::const_iterator
+        for (std::vector<std::pair<std::string, double> >::const_iterator
                  it = ids.begin(); it != ids.end(); ++it) {
-          float w = 1.f / it->second;
+          double w = 1.0 / it->second;
           const std::pair<bool, uint64_t> index =
               values_->get_model()->exact_match(it->first);
-          sum += w * values_->get_model()->get_float_column(0)[index.second];
+          sum += w * values_->get_model()->get_double_column(0)[index.second];
           sum_w += w;
         }
       }
       return sum / sum_w;
     } else {
-      for (std::vector<std::pair<std::string, float> >:: const_iterator
+      for (std::vector<std::pair<std::string, double> >:: const_iterator
                it = ids.begin(); it != ids.end(); ++it) {
         const std::pair<bool, uint64_t> index =
             values_->get_model()->exact_match(it->first);
-        sum += values_->get_model()->get_float_column(0)[index.second];
+        sum += values_->get_model()->get_double_column(0)[index.second];
     }
       return sum / ids.size();
     }
   } else {
-    return 0;
+    return 0.0;
   }
 }
 

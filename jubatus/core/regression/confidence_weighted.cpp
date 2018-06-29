@@ -45,18 +45,18 @@ confidence_weighted::confidence_weighted(storage_ptr storage)
   : linear_regression(storage) {
 }
 
-void confidence_weighted::train(const common::sfv_t& fv, float value) {
-  float predict = estimate(fv);
-  float error = value - predict;
-  float sign_error = error > 0.f ? 1.0f : -1.0f;
-  float loss = sign_error * error - config_.sensitivity;
-  float variance = calc_variance(fv);
-  float absolute_error = std::fabs(error);
-  if (loss > 0.f) {
+void confidence_weighted::train(const common::sfv_t& fv, double value) {
+  double predict = estimate(fv);
+  double error = value - predict;
+  double sign_error = error > 0.0 ? 1.0 : -1.0;
+  double loss = sign_error * error - config_.sensitivity;
+  double variance = calc_variance(fv);
+  double absolute_error = std::fabs(error);
+  if (loss > 0.0) {
     float C = config_.regularization_weight;
-    float b = 1.f - 2 * C * absolute_error;
-    float gamma = -b + std::sqrt(b * b +
-                                 8 * C * (absolute_error + C * variance));
+    double b = 1.0 - 2 * C * absolute_error;
+    double gamma = -b + std::sqrt(b * b +
+                                  8 * C * (absolute_error + C * variance));
     gamma /= 4 * C * variance;
     update(fv, gamma, sign_error);
   }
@@ -64,26 +64,26 @@ void confidence_weighted::train(const common::sfv_t& fv, float value) {
 
 void confidence_weighted::update(
     const common::sfv_t& sfv,
-    float step_width,
-    float sign_error) {
+    double step_width,
+    double sign_error) {
   util::concurrent::scoped_wlock lk(storage_->get_lock());
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const std::string& feature = it->first;
-    float val = it->second;
+    double val = it->second;
     storage::feature_val2_t val2;
     storage_->get2_nolock(feature, val2);
-    storage::val2_t current_val(0.f, 1.f);
+    storage::val2_t current_val(0.0, 1.0);
     if (val2.size() > 0) {
       current_val = val2[0].second;
     }
     const float C = config_.regularization_weight;
-    float covar_step = 2 * step_width * val * val * C;
+    double covar_step = 2 * step_width * val * val * C;
     storage_->set2_nolock(
         feature,
         "+",
         storage::val2_t(current_val.v1
               + sign_error * step_width * current_val.v2 * val,
-            1.f / (1.f / current_val.v2 + covar_step)));
+            1.0 / (1.0 / current_val.v2 + covar_step)));
   }
 }
 

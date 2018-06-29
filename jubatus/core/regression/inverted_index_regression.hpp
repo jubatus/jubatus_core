@@ -57,8 +57,8 @@ class inverted_index_regression : public regression_base {
   };
 
   explicit inverted_index_regression(const config& config);
-  void train(const common::sfv_t& fv, const float value);
-  virtual float estimate(const common::sfv_t& fv) const = 0;
+  void train(const common::sfv_t& fv, const double value);
+  virtual double estimate(const common::sfv_t& fv) const = 0;
   std::string name() const;
 
   void get_status(std::map<std::string, std::string>& status) const;

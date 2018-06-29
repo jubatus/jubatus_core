@@ -29,9 +29,9 @@ passive_aggressive_1::passive_aggressive_1(
     storage_ptr storage)
     : linear_regression(storage),
       config_(config),
-      sum_(0.f),
-      sq_sum_(0.f),
-      count_(0.f) {
+      sum_(0.0),
+      sq_sum_(0.0),
+      count_(0.0) {
 
   if (!(0.f < config.regularization_weight)) {
     throw JUBATUS_EXCEPTION(
@@ -46,34 +46,34 @@ passive_aggressive_1::passive_aggressive_1(
 
 passive_aggressive_1::passive_aggressive_1(storage_ptr storage)
     : linear_regression(storage),
-      sum_(0.f),
-      sq_sum_(0.f),
-      count_(0.f) {
+      sum_(0.0),
+      sq_sum_(0.0),
+      count_(0.0) {
 }
 
-static float squared_norm(const common::sfv_t& fv) {
-  float norm = 0.f;
+static double squared_norm(const common::sfv_t& fv) {
+  double norm = 0.0;
   for (size_t i = 0; i < fv.size(); ++i) {
     norm += fv[i].second * fv[i].second;
   }
   return norm;
 }
 
-void passive_aggressive_1::train(const common::sfv_t& fv, float value) {
+void passive_aggressive_1::train(const common::sfv_t& fv, double value) {
   sum_ += value;
   sq_sum_ += value * value;
   count_ += 1;
-  float avg = sum_ / count_;
-  float std_dev = std::sqrt(sq_sum_ / count_ -  avg * avg);
+  double avg = sum_ / count_;
+  double std_dev = std::sqrt(sq_sum_ / count_ -  avg * avg);
 
-  float predict = estimate(fv);
-  float error = value - predict;
-  float sign_error = error > 0.f ? 1.0f : -1.0f;
-  float loss = sign_error * error - config_.sensitivity * std_dev;
+  double predict = estimate(fv);
+  double error = value - predict;
+  double sign_error = error > 0.0 ? 1.0 : -1.0;
+  double loss = sign_error * error - config_.sensitivity * std_dev;
 
-  if (loss > 0.f) {
-    float C = config_.regularization_weight;
-    float coeff = sign_error * std::min(C, loss / squared_norm(fv));
+  if (loss > 0.0) {
+    double C = config_.regularization_weight;
+    double coeff = sign_error * std::min(C, loss / squared_norm(fv));
     if (!std::isinf(coeff)) {
       update(fv, coeff);
     }
@@ -82,9 +82,9 @@ void passive_aggressive_1::train(const common::sfv_t& fv, float value) {
 
 void passive_aggressive_1::clear() {
   linear_regression::clear();
-  sum_ = 0.f;
-  sq_sum_ = 0.f;
-  count_ = 0.f;
+  sum_ = 0.0;
+  sq_sum_ = 0.0;
+  count_ = 0.0;
 }
 
 }  // namespace regression

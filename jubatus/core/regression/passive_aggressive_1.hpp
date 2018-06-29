@@ -47,15 +47,15 @@ class passive_aggressive_1 : public linear_regression {
       storage_ptr storage);
   explicit passive_aggressive_1(storage_ptr storage);
 
-  void train(const common::sfv_t& fv, float value);
+  void train(const common::sfv_t& fv, double value);
 
   void clear();
 
  private:
   config config_;
-  float sum_;
-  float sq_sum_;
-  float count_;
+  double sum_;
+  double sq_sum_;
+  double count_;
 };
 
 }  // namespace regression

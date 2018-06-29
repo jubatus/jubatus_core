@@ -32,13 +32,13 @@ linear_regression::linear_regression(storage_ptr storage)
     mixable_storage_(storage) {
 }
 
-float linear_regression::estimate(const common::sfv_t& fv) const {
+double linear_regression::estimate(const common::sfv_t& fv) const {
   storage::map_feature_val1_t ret;
   storage_->inp(fv, ret);
   return ret["+"];
 }
 
-void linear_regression::update(const common::sfv_t& fv, float coeff) {
+void linear_regression::update(const common::sfv_t& fv, double coeff) {
   storage_->bulk_update(fv, coeff, "+", "");
 }
 
@@ -52,13 +52,13 @@ void linear_regression::get_status(std::map<string, string>& status)
   status["storage"] = storage_->type();
 }
 
-float linear_regression::calc_variance(const common::sfv_t& sfv) const {
-    float var = 0.f;
+double linear_regression::calc_variance(const common::sfv_t& sfv) const {
+    double var = 0.0;
     util::concurrent::scoped_rlock lk(storage_->get_lock());
     for (size_t i = 0; i < sfv.size(); ++i) {
       const string& feature = sfv[i].first;
-      const float val = sfv[i].second;
-      float covar = 1.f;
+      const double val = sfv[i].second;
+      double covar = 1.0;
       storage::feature_val2_t weight_covars;
       storage_->get2_nolock(feature, weight_covars);
 
