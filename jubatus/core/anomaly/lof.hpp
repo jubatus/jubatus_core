@@ -47,9 +47,9 @@ class lof : public anomaly_base {
   ~lof();
 
   // return anomaly score of query
-  float calc_anomaly_score(const common::sfv_t& query) const;
-  float calc_anomaly_score(const std::string& id) const;
-  float calc_anomaly_score(
+  double calc_anomaly_score(const common::sfv_t& query) const;
+  double calc_anomaly_score(const std::string& id) const;
+  double calc_anomaly_score(
       const std::string& id,
       const common::sfv_t& query) const;
 

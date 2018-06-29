@@ -40,15 +40,15 @@ namespace anomaly {
 
 namespace {
 
-float calculate_lof(
-    float lrd,
-    const unordered_map<string, float>& neighbor_lrd) {
+double calculate_lof(
+    double lrd,
+    const unordered_map<string, double>& neighbor_lrd) {
   if (neighbor_lrd.empty()) {
-    return lrd == 0 ? 1 : numeric_limits<float>::infinity();
+    return lrd == 0 ? 1 : numeric_limits<double>::infinity();
   }
 
-  float sum_neighbor_lrd = 0;
-  for (unordered_map<string, float>::const_iterator it = neighbor_lrd.begin();
+  double sum_neighbor_lrd = 0;
+  for (unordered_map<string, double>::const_iterator it = neighbor_lrd.begin();
        it != neighbor_lrd.end(); ++it) {
     sum_neighbor_lrd += it->second;
   }
@@ -114,26 +114,26 @@ lof::lof(
 lof::~lof() {
 }
 
-float lof::calc_anomaly_score(const common::sfv_t& query) const {
-  unordered_map<string, float> neighbor_lrd;
-  const float lrd = mixable_storage_->get_model()->collect_lrds(
+double lof::calc_anomaly_score(const common::sfv_t& query) const {
+  unordered_map<string, double> neighbor_lrd;
+  const double lrd = mixable_storage_->get_model()->collect_lrds(
       query, neighbor_lrd);
   return calculate_lof(lrd, neighbor_lrd);
 }
 
-float lof::calc_anomaly_score(const string& id) const {
-  unordered_map<string, float> neighbor_lrd;
-  const float lrd = mixable_storage_->get_model()->collect_lrds(
+double lof::calc_anomaly_score(const string& id) const {
+  unordered_map<string, double> neighbor_lrd;
+  const double lrd = mixable_storage_->get_model()->collect_lrds(
       id, neighbor_lrd);
 
   return calculate_lof(lrd, neighbor_lrd);
 }
 
-float lof::calc_anomaly_score(
+double lof::calc_anomaly_score(
     const string& id,
     const common::sfv_t& query) const {
-  unordered_map<string, float> neighbor_lrd;
-  const float lrd = mixable_storage_->get_model()->collect_lrds(
+  unordered_map<string, double> neighbor_lrd;
+  const double lrd = mixable_storage_->get_model()->collect_lrds(
       id, query, neighbor_lrd);
   return calculate_lof(lrd, neighbor_lrd);
 }

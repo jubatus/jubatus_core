@@ -44,8 +44,8 @@ class recommender_base;
 namespace anomaly {
 
 struct lof_entry {
-  float kdist;
-  float lrd;
+  double kdist;
+  double lrd;
 
   MSGPACK_DEFINE(kdist, lrd);
 };
@@ -89,18 +89,18 @@ class lof_storage {
 
   // For Analyze
   // calculate lrd of query and lrd values of its neighbors
-  float collect_lrds(
+  double collect_lrds(
       const common::sfv_t& query,
-      jubatus::util::data::unordered_map<std::string, float>&
+      jubatus::util::data::unordered_map<std::string, double>&
           neighbor_lrd) const;
-  float collect_lrds(
+  double collect_lrds(
       const std::string& id,
-      jubatus::util::data::unordered_map<std::string, float>&
+      jubatus::util::data::unordered_map<std::string, double>&
           neighbor_lrd) const;
-  float collect_lrds(
+  double collect_lrds(
       const std::string& id,
       const common::sfv_t& query,
-      jubatus::util::data::unordered_map<std::string, float>&
+      jubatus::util::data::unordered_map<std::string, double>&
       neighbor_lrd) const;
 
   // For Update
@@ -121,8 +121,8 @@ class lof_storage {
   std::string name() const;
 
   // getter & setter & update for kdist and lrd values
-  float get_kdist(const std::string& row) const;
-  float get_lrd(const std::string& row) const;
+  double get_kdist(const std::string& row) const;
+  double get_lrd(const std::string& row) const;
 
   bool has_row(const std::string& row) const;
 
@@ -158,9 +158,9 @@ class lof_storage {
   static void mark_removed(lof_entry& entry);
   static bool is_removed(const lof_entry& entry);
 
-  float collect_lrds_from_neighbors(
-      const std::vector<std::pair<std::string, float> >& neighbors,
-      jubatus::util::data::unordered_map<std::string, float>&
+  double collect_lrds_from_neighbors(
+      const std::vector<std::pair<std::string, double> >& neighbors,
+      jubatus::util::data::unordered_map<std::string, double>&
           neighbor_lrd) const;
 
   void collect_neighbors(
@@ -174,10 +174,10 @@ class lof_storage {
 
   void update_kdist_with_neighbors(
       const std::string& row,
-      const std::vector<std::pair<std::string, float> >& neighbors);
+      const std::vector<std::pair<std::string, double> >& neighbors);
   void update_lrd_with_neighbors(
       const std::string& row,
-      const std::vector<std::pair<std::string, float> >& neighbors);
+      const std::vector<std::pair<std::string, double> >& neighbors);
 
   lof_table_t lof_table_;  // table for storing k-dist and lrd values
   lof_table_t lof_table_diff_;

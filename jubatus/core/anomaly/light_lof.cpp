@@ -57,17 +57,17 @@ const size_t LRD_COLUMN_INDEX = 1;
 shared_ptr<column_table> create_lof_table() {
   shared_ptr<column_table> table(new column_table);
   vector<storage::column_type> schema(
-      2, storage::column_type(storage::column_type::float_type));
+      2, storage::column_type(storage::column_type::double_type));
   table->init(schema);
   return table;
 }
 
-float calculate_lof(float lrd, const vector<float>& neighbor_lrds) {
+double calculate_lof(double lrd, const vector<double>& neighbor_lrds) {
   if (neighbor_lrds.empty()) {
-    return lrd == 0 ? 1 : std::numeric_limits<float>::infinity();
+    return lrd == 0 ? 1 : std::numeric_limits<double>::infinity();
   }
 
-  const float sum_neighbor_lrd = std::accumulate(
+  const double sum_neighbor_lrd = std::accumulate(
       neighbor_lrds.begin(), neighbor_lrds.end(), 0.0f);
 
   if (std::isinf(sum_neighbor_lrd) && std::isinf(lrd)) {
@@ -137,20 +137,20 @@ light_lof::light_lof(
 light_lof::~light_lof() {
 }
 
-float light_lof::calc_anomaly_score(const common::sfv_t& query) const {
-  vector<float> neighbor_lrds;
-  const float lrd = collect_lrds(query, neighbor_lrds);
+double light_lof::calc_anomaly_score(const common::sfv_t& query) const {
+  vector<double> neighbor_lrds;
+  const double lrd = collect_lrds(query, neighbor_lrds);
   return calculate_lof(lrd, neighbor_lrds);
 }
 
-float light_lof::calc_anomaly_score(const string& id) const {
-  vector<float> neighbor_lrds;
-  const float lrd = collect_lrds(id, neighbor_lrds);
+double light_lof::calc_anomaly_score(const string& id) const {
+  vector<double> neighbor_lrds;
+  const double lrd = collect_lrds(id, neighbor_lrds);
 
   return calculate_lof(lrd, neighbor_lrds);
 }
 
-float light_lof::calc_anomaly_score(
+double light_lof::calc_anomaly_score(
     const string& id,
     const common::sfv_t& query) const {
   throw JUBATUS_EXCEPTION(common::unsupported_method(__func__));
@@ -183,7 +183,7 @@ bool light_lof::set_row(const string& id, const common::sfv_t& sfv) {
   // neighbors won't go inf.)
 
   if (config_.ignore_kth_same_point && *config_.ignore_kth_same_point) {
-    vector<pair<string, float> > nn_result;
+    vector<pair<string, double> > nn_result;
 
     // Find k-1 NNs for the given sfv.
     // If the distance to the (k-1) th neighbor is 0, the model already
@@ -210,7 +210,7 @@ bool light_lof::set_row(const string& id, const common::sfv_t& sfv) {
 
   // Primarily add id to lof table with dummy parameters.
   // update_entries() below overwrites this row.
-  table->add(id, storage::owner(my_id_), -1.f, -1.f);
+  table->add(id, storage::owner(my_id_), -1.0, -1.0);
   update_set.insert(id);
   update_entries(update_set);
 
@@ -230,7 +230,7 @@ vector<string> light_lof::set_bulk(
   vector<pair<string, common::sfv_t> >::const_iterator it;
   if (config_.ignore_kth_same_point && *config_.ignore_kth_same_point) {
     for (it = diff.begin(); it < diff.end(); ++it) {
-      vector<pair<string, float> > nn_result;
+      vector<pair<string, double> > nn_result;
 
     // Find k-1 NNs for the given sfv.
     // If the distance to the (k-1) th neighbor is 0, the model already
@@ -263,7 +263,7 @@ vector<string> light_lof::set_bulk(
     collect_neighbors((*it).first, update_set);
     // Primarily add id to lof table with dummy parameters.
     // update_entries() below overwrites this row.
-    table->add((*it).first, storage::owner(my_id_), -1.f, -1.f);
+    table->add((*it).first, storage::owner(my_id_), -1.0, -1.0);
     update_set.insert((*it).first);
     set_ids.push_back((*it).first);
   }
@@ -333,20 +333,20 @@ void light_lof::unlearn(const string& key) {
   update_entries(reverse_knn);
 }
 
-float light_lof::collect_lrds(
+double light_lof::collect_lrds(
     const common::sfv_t& query,
-    vector<float>& neighbor_lrds) const {
-  vector<pair<string, float> > neighbors;
+    vector<double>& neighbor_lrds) const {
+  vector<pair<string, double> > neighbors;
   nearest_neighbor_engine_->neighbor_row(
       query, neighbors, config_.nearest_neighbor_num);
 
   return collect_lrds_from_neighbors(neighbors, neighbor_lrds);
 }
 
-float light_lof::collect_lrds(
+double light_lof::collect_lrds(
     const string& id,
-    vector<float>& neighbor_lrds) const {
-  vector<pair<string, float> > neighbors;
+    vector<double>& neighbor_lrds) const {
+  vector<pair<string, double> > neighbors;
   nearest_neighbor_engine_->neighbor_row(
       id, neighbors, config_.nearest_neighbor_num + 1);
 
@@ -365,12 +365,12 @@ float light_lof::collect_lrds(
   return collect_lrds_from_neighbors(neighbors, neighbor_lrds);
 }
 
-float light_lof::collect_lrds_from_neighbors(
-    const vector<pair<string, float> >& neighbors,
-    vector<float>& neighbor_lrds) const {
+double light_lof::collect_lrds_from_neighbors(
+    const vector<pair<string, double> >& neighbors,
+    vector<double>& neighbor_lrds) const {
   neighbor_lrds.resize(neighbors.size());
   if (neighbors.empty()) {
-    return std::numeric_limits<float>::infinity();
+    return std::numeric_limits<double>::infinity();
   }
 
   // Collect parameters of given neighbors.
@@ -381,7 +381,7 @@ float light_lof::collect_lrds_from_neighbors(
   }
 
   // Calculate LRD value of the query.
-  float sum_reachability = 0;
+  double sum_reachability = 0;
   for (size_t i = 0; i < neighbors.size(); ++i) {
     // Accumulate the reachability distance of the query and the i-th neighbor.
     sum_reachability += std::max(neighbors[i].second, parameters[i].kdist);
@@ -389,7 +389,7 @@ float light_lof::collect_lrds_from_neighbors(
 
   if (sum_reachability == 0) {
     // All k-nearest neighbors are at the same point with given query.
-    return std::numeric_limits<float>::infinity();
+    return std::numeric_limits<double>::infinity();
   }
 
   // LRD is an inverse of mean of reachability distances between the query and
@@ -400,7 +400,7 @@ float light_lof::collect_lrds_from_neighbors(
 void light_lof::collect_neighbors(
     const string& query,
     unordered_set<string>& neighbors) const {
-  vector<pair<string, float> > nn_result;
+  vector<pair<string, double> > nn_result;
   nearest_neighbor_engine_->neighbor_row(
       query, nn_result, config_.reverse_nearest_neighbor_num);
 
@@ -411,9 +411,9 @@ void light_lof::collect_neighbors(
 
 void light_lof::update_entries(const unordered_set<string>& neighbors) {
   shared_ptr<column_table> table = mixable_scores_->get_model();
-  storage::float_column& kdist_column =
-      table->get_float_column(KDIST_COLUMN_INDEX);
-  storage::float_column& lrd_column = table->get_float_column(LRD_COLUMN_INDEX);
+  storage::double_column& kdist_column =
+      table->get_double_column(KDIST_COLUMN_INDEX);
+  storage::double_column& lrd_column = table->get_double_column(LRD_COLUMN_INDEX);
 
   vector<uint64_t> ids;
   ids.reserve(neighbors.size());
@@ -425,17 +425,17 @@ void light_lof::update_entries(const unordered_set<string>& neighbors) {
     }
   }
 
-  unordered_map<uint64_t, vector<pair<uint64_t, float> > >
+  unordered_map<uint64_t, vector<pair<uint64_t, double> > >
       nested_neighbors;
 
   // Gather k-nearest neighbors of each member of neighbors and update their
   // k-dists.
-  vector<pair<string, float> > nn_result;
+  vector<pair<string, double> > nn_result;
   for (vector<uint64_t>::const_iterator it = ids.begin();
        it != ids.end(); ++it) {
     nearest_neighbor_engine_->neighbor_row(
         table->get_key(*it), nn_result, config_.nearest_neighbor_num);
-    vector<pair<uint64_t, float> >& nn_indexes =
+    vector<pair<uint64_t, double> >& nn_indexes =
         nested_neighbors[*it];
 
     nn_indexes.reserve(nn_result.size());
@@ -454,18 +454,18 @@ void light_lof::update_entries(const unordered_set<string>& neighbors) {
   const storage::owner owner(my_id_);
   for (vector<uint64_t>::const_iterator it = ids.begin();
        it != ids.end(); ++it) {
-    const vector<pair<uint64_t, float> >& nn = nested_neighbors[*it];
-    float lrd = 1;
+    const vector<pair<uint64_t, double> >& nn = nested_neighbors[*it];
+    double lrd = 1;
     if (!nn.empty()) {
       const size_t length = std::min(
           nn.size(), static_cast<size_t>(config_.nearest_neighbor_num));
-      float sum_reachability = 0;
+      double sum_reachability = 0;
       for (size_t i = 0; i < length; ++i) {
         sum_reachability += std::max(nn[i].second, kdist_column[nn[i].first]);
       }
 
       if (sum_reachability == 0) {
-        lrd = std::numeric_limits<float>::infinity();
+        lrd = std::numeric_limits<double>::infinity();
       } else {
         lrd = length / sum_reachability;
       }
@@ -484,8 +484,8 @@ light_lof::parameter light_lof::get_row_parameter(const string& row)
         "row \"" + row + "\" not found in light_lof table"));
   }
   parameter param;
-  param.kdist = table->get_float_column(KDIST_COLUMN_INDEX)[hit.second];
-  param.lrd = table->get_float_column(LRD_COLUMN_INDEX)[hit.second];
+  param.kdist = table->get_double_column(KDIST_COLUMN_INDEX)[hit.second];
+  param.lrd = table->get_double_column(LRD_COLUMN_INDEX)[hit.second];
   return param;
 }
 
