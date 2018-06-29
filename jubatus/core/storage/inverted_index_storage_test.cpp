@@ -54,15 +54,15 @@ TEST(inverted_index_storage, trivial) {
   v.push_back(make_pair("c1", 1.0));
   v.push_back(make_pair("c2", 1.0));
 
-  vector<pair<string, float> > scores;
+  vector<pair<string, double> > scores;
   s.calc_scores(v, scores, 100);
 
   ASSERT_EQ(3u, scores.size());
-  EXPECT_FLOAT_EQ(2.0 / std::sqrt(3) / std::sqrt(2), scores[0].second);
+  EXPECT_DOUBLE_EQ(2.0 / std::sqrt(3) / std::sqrt(2), scores[0].second);
   EXPECT_EQ("r1", scores[0].first);
-  EXPECT_FLOAT_EQ(1.0 / std::sqrt(2) / std::sqrt(2), scores[1].second);
+  EXPECT_DOUBLE_EQ(1.0 / std::sqrt(2) / std::sqrt(2), scores[1].second);
   EXPECT_EQ("r3", scores[1].first);
-  EXPECT_FLOAT_EQ(1.0 / std::sqrt(2) / std::sqrt(3), scores[2].second);
+  EXPECT_DOUBLE_EQ(1.0 / std::sqrt(2) / std::sqrt(3), scores[2].second);
   EXPECT_EQ("r2", scores[2].first);
 
   msgpack::sbuffer buf;
@@ -74,15 +74,15 @@ TEST(inverted_index_storage, trivial) {
   msgpack::unpacked unpacked;
   msgpack::unpack(&unpacked, buf.data(), buf.size());
   s2.unpack(unpacked.get());
-  vector<pair<string, float> > scores2;
+  vector<pair<string, double> > scores2;
   s.calc_scores(v, scores2, 100);
   // expect to get same result
   ASSERT_EQ(3u, scores2.size());
-  EXPECT_FLOAT_EQ(2.0 / std::sqrt(3) / std::sqrt(2), scores2[0].second);
+  EXPECT_DOUBLE_EQ(2.0 / std::sqrt(3) / std::sqrt(2), scores2[0].second);
   EXPECT_EQ("r1", scores2[0].first);
-  EXPECT_FLOAT_EQ(1.0 / std::sqrt(2) / std::sqrt(2), scores2[1].second);
+  EXPECT_DOUBLE_EQ(1.0 / std::sqrt(2) / std::sqrt(2), scores2[1].second);
   EXPECT_EQ("r3", scores2[1].first);
-  EXPECT_FLOAT_EQ(1.0 / std::sqrt(2) / std::sqrt(3), scores2[2].second);
+  EXPECT_DOUBLE_EQ(1.0 / std::sqrt(2) / std::sqrt(3), scores2[2].second);
   EXPECT_EQ("r2", scores2[2].first);
 }
 
@@ -105,16 +105,16 @@ TEST(inverted_index_storage, trivial_euclid) {
   v.push_back(make_pair("c1", 1.0));
   v.push_back(make_pair("c2", 1.0));
 
-  vector<pair<string, float> > scores;
+  vector<pair<string, double> > scores;
   s.calc_euclid_scores(v, scores, 100);
 
   ASSERT_EQ(3, scores.size());
   EXPECT_EQ("r1", scores[0].first);
-  EXPECT_FLOAT_EQ(-1, scores[0].second);
+  EXPECT_DOUBLE_EQ(-1, scores[0].second);
   EXPECT_EQ("r3", scores[1].first);
-  EXPECT_FLOAT_EQ(- sqrt(2), scores[1].second);
+  EXPECT_DOUBLE_EQ(- sqrt(2), scores[1].second);
   EXPECT_EQ("r2", scores[2].first);
-  EXPECT_FLOAT_EQ(- sqrt(3), scores[2].second);
+  EXPECT_DOUBLE_EQ(- sqrt(3), scores[2].second);
 
   // remove column "r3"
   s.remove("c2", "r3");
@@ -297,7 +297,7 @@ TEST(inverted_index_storage, empty) {
 
   inverted_index_storage s;
 
-  vector<pair<string, float> > scores;
+  vector<pair<string, double> > scores;
   s.calc_scores(v, scores, 100);
 
   EXPECT_EQ(0u, scores.size());

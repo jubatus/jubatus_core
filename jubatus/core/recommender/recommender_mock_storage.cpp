@@ -35,26 +35,26 @@ recommender_mock_storage::~recommender_mock_storage() {
 
 void recommender_mock_storage::set_similar_items(
     const common::sfv_t& query,
-    const vector<pair<string, float> >& ids) {
+    const vector<pair<string, double> >& ids) {
   similar_relation_[query] = ids;
 }
 
 void recommender_mock_storage::set_neighbor_items(
     const common::sfv_t& query,
-    const vector<pair<string, float> >& ids) {
+    const vector<pair<string, double> >& ids) {
   neighbor_relation_[query] = ids;
 }
 
 void recommender_mock_storage::similar_items_similarity(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   get_relation(query, similar_relation_, ret_num, ids);
 }
 
 void recommender_mock_storage::neighbor_items_distance(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   get_relation(query, neighbor_relation_, ret_num, ids);
 }
@@ -111,7 +111,7 @@ void recommender_mock_storage::get_relation(
     const common::sfv_t& query,
     const relation_type& relmap,
     size_t ret_num,
-    vector<pair<string, float> >& ids) {
+    vector<pair<string, double> >& ids) {
   ids.clear();
 
   relation_type::const_iterator it = relmap.find(query);

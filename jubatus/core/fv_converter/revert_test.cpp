@@ -26,21 +26,21 @@ namespace core {
 namespace fv_converter {
 
 TEST(revert_num_value, str) {
-  std::pair<std::string, float> value;
+  std::pair<std::string, double> value;
   ASSERT_TRUE(revert_num_value(std::make_pair("age@str$25", 1), value));
   EXPECT_EQ("age", value.first);
   EXPECT_EQ(25.f, value.second);
 }
 
 TEST(revert_num_value, num) {
-  std::pair<std::string, float> value;
+  std::pair<std::string, double> value;
   ASSERT_TRUE(revert_num_value(std::make_pair("age@num", 25.f), value));
   EXPECT_EQ("age", value.first);
   EXPECT_EQ(25.f, value.second);
 }
 
 TEST(revert_num_value, error) {
-  std::pair<std::string, float> value;
+  std::pair<std::string, double> value;
   ASSERT_FALSE(revert_num_value(std::make_pair("age", 1), value));
   ASSERT_FALSE(revert_num_value(std::make_pair("age@log", 1), value));
   ASSERT_FALSE(revert_num_value(std::make_pair("age@str$hoge", 1), value));

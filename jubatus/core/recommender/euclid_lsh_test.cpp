@@ -49,7 +49,7 @@ common::sfv_t make_dense_sfv(const string& s) {
   istringstream iss(s);
 
   size_t i = 0;
-  float x = 0;
+  double x = 0;
   while (iss >> x) {
     sfv.push_back(make_pair(lexical_cast<string>(i++), x));
   }
@@ -146,7 +146,7 @@ class euclid_lsh_mix_test
  protected:
   static const uint32_t kSeed = 1340764259;  // It may be any FIXED value
 
-  common::sfv_t generate_gaussian(const common::sfv_t& mean, float deviation) {
+  common::sfv_t generate_gaussian(const common::sfv_t& mean, double deviation) {
     common::sfv_t sfv(mean);
     for (size_t i = 0; i < sfv.size(); ++i) {
       sfv[i].second += rand_.next_gaussian() * deviation;
@@ -154,7 +154,7 @@ class euclid_lsh_mix_test
     return sfv;
   }
 
-  void update(const string& name, const common::sfv_t& mean, float deviation) {
+  void update(const string& name, const common::sfv_t& mean, double deviation) {
     const common::sfv_t x = generate_gaussian(mean, deviation);
     euclid_lsh* recom =
       recoms_[common::hash_util::calc_string_hash(name) % recoms_.size()].get();
@@ -199,7 +199,7 @@ TEST_P(euclid_lsh_mix_test, consistency) {
   static const size_t kNumSample = 100;
   static const size_t kNumRetrieval = 10;
   static const size_t kNumQuery = 5;
-  static const float kDeviation = 1;
+  static const double kDeviation = 1;
 
   const common::sfv_t mu0 = make_dense_sfv("1 1");
   const common::sfv_t mu1 = make_dense_sfv("2 1");
@@ -211,7 +211,7 @@ TEST_P(euclid_lsh_mix_test, consistency) {
 
   for (size_t i = 0; i < kNumQuery; ++i) {
     const common::sfv_t x = generate_gaussian(mu1, 1);
-    vector<pair<string, float> > expect, actual;
+    vector<pair<string, double> > expect, actual;
 
     single_recom_->neighbor_row(x, expect, kNumRetrieval);
 
@@ -220,7 +220,7 @@ TEST_P(euclid_lsh_mix_test, consistency) {
 
       for (size_t k = 0; k < expect.size(); ++k) {
         EXPECT_EQ(expect[k].first, actual[k].first);
-        EXPECT_FLOAT_EQ(expect[k].second, actual[k].second);
+        EXPECT_DOUBLE_EQ(expect[k].second, actual[k].second);
       }
     }
   }

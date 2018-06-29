@@ -90,11 +90,11 @@ TEST(inverted_index_euclid, trivial_test) {
   r.reset(new inverted_index_euclid(
       config_cast<inverted_index_euclid::config>(conf)));
   sfv_t v1, v2;
-  std::vector<std::pair<std::string, float> > res;
-  v1.push_back(std::pair<std::string, float>("a", 1.0));
-  v1.push_back(std::pair<std::string, float>("b", 1.0));
-  v2.push_back(std::pair<std::string, float>("a", 4.0));
-  v2.push_back(std::pair<std::string, float>("b", 5.0));
+  std::vector<std::pair<std::string, double> > res;
+  v1.push_back(std::pair<std::string, double>("a", 1.0));
+  v1.push_back(std::pair<std::string, double>("b", 1.0));
+  v2.push_back(std::pair<std::string, double>("a", 4.0));
+  v2.push_back(std::pair<std::string, double>("b", 5.0));
   r->update_row("v1", v1);
   r->update_row("v2", v2);
   r->similar_row(v1, res, 2);
@@ -112,38 +112,38 @@ TEST(inverted_index_euclid, trivial_test_with_ignore_orthogonal) {
       config_cast<inverted_index_euclid::config>(conf)));
   sfv_t v1, v2, q1, q2, q3;
 
-  std::vector<std::pair<std::string, float> > res;
-  v1.push_back(std::pair<std::string, float>("a", 1.0));
-  v1.push_back(std::pair<std::string, float>("b", 1.0));
-  v2.push_back(std::pair<std::string, float>("a", 4.0));
-  v2.push_back(std::pair<std::string, float>("c", 5.0));
+  std::vector<std::pair<std::string, double> > res;
+  v1.push_back(std::pair<std::string, double>("a", 1.0));
+  v1.push_back(std::pair<std::string, double>("b", 1.0));
+  v2.push_back(std::pair<std::string, double>("a", 4.0));
+  v2.push_back(std::pair<std::string, double>("c", 5.0));
 
   r->update_row("v1", v1);
   r->update_row("v2", v2);
 
-  q1.push_back(std::pair<std::string, float>("a", 1.0));
+  q1.push_back(std::pair<std::string, double>("a", 1.0));
 
   r->similar_row(q1, res, 2);
 
   EXPECT_EQ(res[0].first, "v1");
   EXPECT_EQ(res[0].second, -1.0);
   EXPECT_EQ(res[1].first, "v2");
-  EXPECT_FLOAT_EQ(res[1].second, -5.83095);
+  EXPECT_DOUBLE_EQ(res[1].second, -5.83095);
 
-  q2.push_back(std::pair<std::string, float>("c", 1.0));
+  q2.push_back(std::pair<std::string, double>("c", 1.0));
   res.clear();
   r->similar_row(q2, res, 2);
   EXPECT_EQ(res.size(), 1u);
   EXPECT_EQ(res[0].first, "v2");
-  EXPECT_FLOAT_EQ(res[0].second, -5.6568542);
+  EXPECT_DOUBLE_EQ(res[0].second, -5.6568542);
 
-  q3.push_back(std::pair<std::string, float>("a", 1.0));
-  q3.push_back(std::pair<std::string, float>("b", -1.0));
+  q3.push_back(std::pair<std::string, double>("a", 1.0));
+  q3.push_back(std::pair<std::string, double>("b", -1.0));
   res.clear();
   r->similar_row(q3, res, 2);
   EXPECT_EQ(res.size(), 2u);
   EXPECT_EQ(res[0].first, "v1");
-  EXPECT_FLOAT_EQ(res[0].second, -2.0);
+  EXPECT_DOUBLE_EQ(res[0].second, -2.0);
 }
 
 }  // namespace recommender

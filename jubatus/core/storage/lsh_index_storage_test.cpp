@@ -46,7 +46,7 @@ vector<float> make_hash(const string& b) {
   return v;
 }
 
-float distance(float norm1, float norm2, float angle_ratio) {
+double distance(double norm1, double norm2, double angle_ratio) {
   return std::sqrt(
       norm1 * norm1 + norm2 * norm2
           - 2 * norm1 * norm2 * std::cos(angle_ratio * M_PI));
@@ -61,7 +61,7 @@ TEST(lsh_index_storage, name) {
 
 TEST(lsh_index_storage, empty_similar_row) {
   lsh_index_storage s(4, 1, 0);
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("0 0 0 0"), 1, 0, 2, res);
   EXPECT_TRUE(res.empty());
 }
@@ -70,10 +70,10 @@ TEST(lsh_index_storage, set_row_and_similar_row) {
   lsh_index_storage s(4, 1, 0);
   s.set_row("r1", make_hash("1 1 1 1"), 1);
 
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("1 1 1 1"), 1, 0, 2, res);
 
-  vector<pair<string, float> > expect;
+  vector<pair<string, double> > expect;
   expect.push_back(make_pair("r1", 0));
 
   EXPECT_EQ(expect, res);
@@ -87,10 +87,10 @@ TEST(lsh_index_storage, set_rows_and_similar_rows) {
   s.set_row("r4", make_hash("1 1 1 2"), 1);
   s.set_row("r5", make_hash("1 1 1 2"), 1);
 
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("1 1 1 1"), 1.25, 0, 2, res);
 
-  vector<pair<string, float> > expect;
+  vector<pair<string, double> > expect;
   // NOTE: similarity of lsh_index_storage is a negative of Euclidean distance
   expect.push_back(make_pair("r1", -0.25f));
   expect.push_back(make_pair("r2", -0.75f));
@@ -102,7 +102,7 @@ TEST(lsh_index_storage, set_row_and_not_similar_row) {
   lsh_index_storage s(4, 1, 0);
   s.set_row("r1", make_hash("1 1 1 1"), 1);
 
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("1 1 1 2"), 1, 0, 1, res);
 
   EXPECT_TRUE(res.empty());
@@ -112,16 +112,16 @@ TEST(lsh_index_storage, set_row_to_multiple_table) {
   lsh_index_storage s(2, 2, 0);
   s.set_row("r1", make_hash("1 1 1 1"), 1);
 
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("1 -1 1 1"), 1, 0, 1, res);
 
-  vector<pair<string, float> > expect;
+  vector<pair<string, double> > expect;
   expect.push_back(make_pair("r1", -distance(1, 1, 0.25f)));
 
   EXPECT_EQ(expect.size(), res.size());
   for (std::size_t i = 0; i < expect.size(); ++i) {
     EXPECT_EQ(expect[i].first, res[i].first);
-    EXPECT_FLOAT_EQ(expect[i].second, res[i].second);
+    EXPECT_DOUBLE_EQ(expect[i].second, res[i].second);
   }
 }
 
@@ -129,7 +129,7 @@ TEST(lsh_index_storage, try_removing_empty_row) {
   lsh_index_storage s(4, 1, 0);
   s.remove_row("r1");
 
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("1 1 1 1"), 1, 0, 1, res);
 
   EXPECT_TRUE(res.empty());
@@ -142,7 +142,7 @@ TEST(lsh_index_storage, set_row_and_remove_the_row) {
   s.set_row("r3", make_hash("1 1 2 1"), 1);
   s.remove_row("r2");
 
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("1 1 1 1"), 1, 0, 1, res);
 
   EXPECT_TRUE(res.empty());
@@ -159,10 +159,10 @@ TEST(lsh_index_storage, remove_row_and_get_another_row) {
   s.remove_row("r2");
   s.remove_row("r4");
 
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("1 1 1 2"), 1, 0, 1, res);
 
-  vector<pair<string, float> > expect;
+  vector<pair<string, double> > expect;
   expect.push_back(make_pair("r3", 0));
 
   EXPECT_EQ(expect, res);
@@ -176,7 +176,7 @@ TEST(lsh_index_storage, clear) {
 
   s.clear();
 
-  vector<pair<string, float> > res;
+  vector<pair<string, double> > res;
   s.similar_row(make_hash("1 1 1 1"), 1, 0, 3, res);
 
   EXPECT_TRUE(res.empty());
@@ -210,7 +210,7 @@ TEST(lsh_index_storage, multi_probe_lsh) {
   s.set_row("r4", make_hash(" 0 2 2 2"), 1);
   s.set_row("r5", make_hash("-1 2 3 2"), 1);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   s.similar_row(make_hash("0.125, 1.75, 1.25, 2.375"), 1, 3, 4, ids);
 
   //  0 1 1 2  (base)    -> r3
@@ -219,7 +219,7 @@ TEST(lsh_index_storage, multi_probe_lsh) {
   //  * * 0 2  (probe 3)
   // -1 2 * *  (probe 4) -> r5 (not included)
 
-  vector<pair<string, float> > expect;
+  vector<pair<string, double> > expect;
   expect.push_back(make_pair("r3", 0));
   expect.push_back(make_pair("r4", -distance(1, 1, 0.25f)));
   expect.push_back(make_pair("r2", -distance(1, 1, 0.5f)));
@@ -237,10 +237,10 @@ TEST(lsh_index_storage, get_and_set_diff) {
 
   s2.put_diff(d1);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   s2.similar_row(make_hash("1 2 3 4"), 1, 0, 1, ids);
 
-  vector<pair<string, float> > expect;
+  vector<pair<string, double> > expect;
   expect.push_back(make_pair("r1", 0));
 
   EXPECT_EQ(expect, ids);
@@ -319,7 +319,7 @@ TEST(lsh_index_storage, mix) {
 
   // r1, r2 and r3 are overwritten by d2
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
 
   s3.similar_row(h1, 1, 0, 1, ids);
   EXPECT_EQ("r1", ids[0].first);
@@ -334,7 +334,7 @@ TEST(lsh_index_storage, mix) {
   ids.clear();
 
   s3.similar_row(h0, 1, 0, 4, ids);
-  vector<pair<string, float> > expect;
+  vector<pair<string, double> > expect;
   EXPECT_EQ(expect, ids);
 }
 
@@ -360,7 +360,7 @@ TEST(lsh_index_storage, set_and_remove_around_mix) {
   s1.put_diff(d2);
   s1.remove_row("r3");
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
 
   s1.similar_row(h1, 1, 80, 3, ids);
   EXPECT_EQ(2u, ids.size());
