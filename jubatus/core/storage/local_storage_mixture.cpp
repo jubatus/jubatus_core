@@ -140,10 +140,10 @@ void local_storage_mixture::inp(const common::sfv_t& sfv,
 
   util::concurrent::scoped_rlock lk(mutex_);
   // Use uin64_t map instead of string map as hash function for string is slow
-  jubatus::util::data::unordered_map<uint64_t, float> ret_id;
+  jubatus::util::data::unordered_map<uint64_t, double> ret_id;
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
-    const float val = it->second;
+    const double val = it->second;
     id_feature_val3_t m;
     get_internal(feature, m);
     for (id_feature_val3_t::const_iterator it3 = m.begin(); it3 != m.end();
@@ -176,7 +176,7 @@ void local_storage_mixture::set_nolock(
     const string& klass,
     const val1_t& w) {
   uint64_t class_id = class2id_.get_id(klass);
-  float w_in_table = tbl_[feature][class_id].v1;
+  double w_in_table = tbl_[feature][class_id].v1;
   tbl_diff_[feature][class_id].v1 = w - w_in_table;
 }
 
@@ -192,8 +192,8 @@ void local_storage_mixture::set2_nolock(
     const string& klass,
     const val2_t& w) {
   uint64_t class_id = class2id_.get_id(klass);
-  float w1_in_table = tbl_[feature][class_id].v1;
-  float w2_in_table = tbl_[feature][class_id].v2;
+  double w1_in_table = tbl_[feature][class_id].v1;
+  double w2_in_table = tbl_[feature][class_id].v2;
 
   val3_t& triple = tbl_diff_[feature][class_id];
   triple.v1 = w.v1 - w1_in_table;
@@ -242,7 +242,7 @@ void local_storage_mixture::update(
 
 void local_storage_mixture::bulk_update(
     const common::sfv_t& sfv,
-    float step_width,
+    double step_width,
     const string& inc_class,
     const string& dec_class) {
   util::concurrent::scoped_wlock lk(mutex_);
@@ -251,14 +251,14 @@ void local_storage_mixture::bulk_update(
   if (dec_class != "") {
     uint64_t dec_id = class2id_.get_id(dec_class);
     for (iter_t it = sfv.begin(); it != sfv.end(); ++it) {
-      float val = it->second * step_width;
+      double val = it->second * step_width;
       id_feature_val3_t& feature_row = tbl_diff_[it->first];
       feature_row[inc_id].v1 += val;
       feature_row[dec_id].v1 -= val;
     }
   } else {
     for (iter_t it = sfv.begin(); it != sfv.end(); ++it) {
-      float val = it->second * step_width;
+      double val = it->second * step_width;
       id_feature_val3_t& feature_row = tbl_diff_[it->first];
       feature_row[inc_id].v1 += val;
     }

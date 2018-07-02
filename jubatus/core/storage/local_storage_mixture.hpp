@@ -83,7 +83,7 @@ class local_storage_mixture : public storage_base {
 
   void bulk_update(
       const common::sfv_t& sfv,
-      float step_width,
+      double step_width,
       const std::string& inc_class,
       const std::string& dec_class);
 
