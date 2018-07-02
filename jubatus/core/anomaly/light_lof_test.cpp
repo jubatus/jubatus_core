@@ -155,11 +155,11 @@ TYPED_TEST_P(light_lof_test, calc_anomaly_score_on_gaussian_random_samples) {
 
   // Mean should be treated as normal.
   const common::sfv_t normal_query = create_2d_point(3, 1);
-  EXPECT_GT(1.25f, this->light_lof_->calc_anomaly_score(normal_query));
+  EXPECT_GT(1.25, this->light_lof_->calc_anomaly_score(normal_query));
 
   // Outlier point should be treated as anomaly.
   const common::sfv_t outlier_query = create_2d_point(0, 3);
-  EXPECT_LT(2.f, this->light_lof_->calc_anomaly_score(outlier_query));
+  EXPECT_LT(2.0, this->light_lof_->calc_anomaly_score(outlier_query));
 }
 
 TYPED_TEST_P(light_lof_with_ignore_kth_test, ignore_kth_same_point) {
