@@ -66,13 +66,13 @@ double sum2(const common::sfv_t& p) {
 
 void scalar_mul_and_add(
     const common::sfv_t& left,
-    float s,
+    double s,
     common::sfv_t& right) {
   common::sfv_t::const_iterator l = left.begin();
   common::sfv_t::iterator r = right.begin();
   while (l != left.end() && r != right.end()) {
     if (l->first < r->first) {
-      std::pair<std::string, float> p = *l;
+      std::pair<std::string, double> p = *l;
       p.second *= s;
       r = right.insert(r, p);
       ++l;
@@ -85,7 +85,7 @@ void scalar_mul_and_add(
     }
   }
   for (; l != left.end(); ++l) {
-    std::pair<std::string, float> p = *l;
+    std::pair<std::string, double> p = *l;
     p.second *= s;
     right.push_back(p);
   }

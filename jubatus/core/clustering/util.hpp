@@ -34,7 +34,7 @@ double sum2(const common::sfv_t& p);
 
 void scalar_mul_and_add(
     const common::sfv_t& left,
-    float s,
+    double s,
     common::sfv_t& right);
 common::sfv_t add(const common::sfv_t& p1, const common::sfv_t& p2);
 common::sfv_t sub(const common::sfv_t& p1, const common::sfv_t& p2);
