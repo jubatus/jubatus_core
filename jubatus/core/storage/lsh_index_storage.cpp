@@ -483,7 +483,7 @@ void lsh_index_storage::get_sorted_similar_rows(
     uint64_t ret_num,
     vector<pair<string, double> >& ids) const {
   // Avoid string copy as far as possible
-  vector<pair<uint64_t, float> > scored;
+  vector<pair<uint64_t, double> > scored;
   scored.reserve(cands.size());
   for (unordered_set<uint64_t>::const_iterator it = cands.begin();
       it != cands.end(); ++it) {
