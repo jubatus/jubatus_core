@@ -121,7 +121,7 @@ TEST(lsh_index_storage, set_row_to_multiple_table) {
   EXPECT_EQ(expect.size(), res.size());
   for (std::size_t i = 0; i < expect.size(); ++i) {
     EXPECT_EQ(expect[i].first, res[i].first);
-    EXPECT_FLOAT_EQ(expect[i].second, res[i].second);
+    EXPECT_DOUBLE_EQ(expect[i].second, res[i].second);
   }
 }
 

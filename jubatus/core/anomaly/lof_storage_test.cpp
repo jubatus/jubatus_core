@@ -170,37 +170,37 @@ class lof_storage_one_dimensional_test : public ::testing::Test {
 };
 
 TEST_F(lof_storage_one_dimensional_test, get_kdist) {
-  EXPECT_FLOAT_EQ(2.0, storage_->get_kdist("-1"));
-  EXPECT_FLOAT_EQ(1.0, storage_->get_kdist("0"));
-  EXPECT_FLOAT_EQ(2.0, storage_->get_kdist("1"));
-  EXPECT_FLOAT_EQ(10.0, storage_->get_kdist("10"));
+  EXPECT_DOUBLE_EQ(2.0, storage_->get_kdist("-1"));
+  EXPECT_DOUBLE_EQ(1.0, storage_->get_kdist("0"));
+  EXPECT_DOUBLE_EQ(2.0, storage_->get_kdist("1"));
+  EXPECT_DOUBLE_EQ(10.0, storage_->get_kdist("10"));
 }
 
 TEST_F(lof_storage_one_dimensional_test, get_lrd) {
-  EXPECT_FLOAT_EQ(2/3.0, storage_->get_lrd("-1"));
-  EXPECT_FLOAT_EQ(1/2.0, storage_->get_lrd("0"));
-  EXPECT_FLOAT_EQ(2/3.0, storage_->get_lrd("1"));
-  EXPECT_FLOAT_EQ(2/19.0, storage_->get_lrd("10"));
+  EXPECT_DOUBLE_EQ(2/3.0, storage_->get_lrd("-1"));
+  EXPECT_DOUBLE_EQ(1/2.0, storage_->get_lrd("0"));
+  EXPECT_DOUBLE_EQ(2/3.0, storage_->get_lrd("1"));
+  EXPECT_DOUBLE_EQ(2/19.0, storage_->get_lrd("10"));
 }
 
 TEST_F(lof_storage_one_dimensional_test, collect_lrds) {
   unordered_map<string, double> lrds;
   double lrd = storage_->collect_lrds(make_sfv("1:0"), lrds);
-  EXPECT_FLOAT_EQ(1/2.0, lrd);
+  EXPECT_DOUBLE_EQ(1/2.0, lrd);
 
   EXPECT_EQ(2u, lrds.size());
-  EXPECT_FLOAT_EQ(2/3.0, lrds["-1"]);
-  EXPECT_FLOAT_EQ(2/3.0, lrds["1"]);
+  EXPECT_DOUBLE_EQ(2/3.0, lrds["-1"]);
+  EXPECT_DOUBLE_EQ(2/3.0, lrds["1"]);
 }
 
 TEST_F(lof_storage_one_dimensional_test, collect_lrds_novel_input) {
   unordered_map<string, double> lrds;
   double lrd = storage_->collect_lrds(make_sfv("1:2"), lrds);
-  EXPECT_FLOAT_EQ(1/2.0, lrd);
+  EXPECT_DOUBLE_EQ(1/2.0, lrd);
 
   EXPECT_EQ(2u, lrds.size());
-  EXPECT_FLOAT_EQ(2/3.0, lrds["1"]);
-  EXPECT_FLOAT_EQ(1/2.0, lrds["0"]);
+  EXPECT_DOUBLE_EQ(2/3.0, lrds["1"]);
+  EXPECT_DOUBLE_EQ(1/2.0, lrds["0"]);
 }
 
 class lof_storage_mix_test : public ::testing::TestWithParam<
@@ -322,12 +322,12 @@ TEST_P(lof_storage_mix_test, consistency) {
 
     for (size_t j = 0; j < storages_.size(); ++j) {
       actual_lrd = storages_[j]->collect_lrds(x, actual_lrds);
-      EXPECT_FLOAT_EQ(expect_lrd, actual_lrd);
+      EXPECT_DOUBLE_EQ(expect_lrd, actual_lrd);
 
       for (unordered_map<string, double>::const_iterator it =
              expect_lrds.begin(); it != expect_lrds.end(); ++it) {
         EXPECT_TRUE(actual_lrds.count(it->first));
-        EXPECT_FLOAT_EQ(it->second, actual_lrds[it->first]);
+        EXPECT_DOUBLE_EQ(it->second, actual_lrds[it->first]);
       }
     }
   }

@@ -463,8 +463,8 @@ TYPED_TEST_P(storage_test, inp) {
   ASSERT_LT(0u, ret.count("class_y"));
   ASSERT_LT(0u, ret.count("class_z"));
 
-  EXPECT_FLOAT_EQ(24.0, ret["class_x"]);
-  EXPECT_FLOAT_EQ(90.0, ret["class_z"]);
+  EXPECT_DOUBLE_EQ(24.0, ret["class_x"]);
+  EXPECT_DOUBLE_EQ(90.0, ret["class_z"]);
 
   fv.push_back(make_pair("f1", 3.0));
   ret.clear();
@@ -475,9 +475,9 @@ TYPED_TEST_P(storage_test, inp) {
   ASSERT_LT(0u, ret.count("class_y"));
   ASSERT_LT(0u, ret.count("class_z"));
 
-  EXPECT_FLOAT_EQ(27.0, ret["class_x"]);
-  EXPECT_FLOAT_EQ(6.0, ret["class_y"]);
-  EXPECT_FLOAT_EQ(99.0, ret["class_z"]);
+  EXPECT_DOUBLE_EQ(27.0, ret["class_x"]);
+  EXPECT_DOUBLE_EQ(6.0, ret["class_y"]);
+  EXPECT_DOUBLE_EQ(99.0, ret["class_z"]);
 }
 
 template <typename T>

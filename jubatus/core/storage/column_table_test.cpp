@@ -628,9 +628,9 @@ TEST(table, unpack) {
   ASSERT_EQ(ic[loaded.exact_match("aa").second], 54);
   ASSERT_EQ(ic[loaded.exact_match("bb").second], 899);
   ASSERT_EQ(ic[loaded.exact_match("cc").second], 21);
-  ASSERT_FLOAT_EQ(fc[loaded.exact_match("aa").second], 21.1f);
-  ASSERT_FLOAT_EQ(fc[loaded.exact_match("bb").second], 232.1f);
-  ASSERT_FLOAT_EQ(fc[loaded.exact_match("cc").second], 2.0f);
+  ASSERT_DOUBLE_EQ(fc[loaded.exact_match("aa").second], 21.1);
+  ASSERT_DOUBLE_EQ(fc[loaded.exact_match("bb").second], 232.1);
+  ASSERT_DOUBLE_EQ(fc[loaded.exact_match("cc").second], 2.0);
 }
 
 TEST(table, bv_unpack) {
