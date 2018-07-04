@@ -509,7 +509,7 @@ class combination_div_feature : public combination_feature {
                    double value_right,
                    common::sfv_t& ret_fv) const {
     ret_fv.push_back(
-        std::make_pair(key, static_cast<double>(value_left / value_right)));
+        std::make_pair(key, value_left / value_right));
   }
 
   bool is_commutative() const {

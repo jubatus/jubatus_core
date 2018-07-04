@@ -65,7 +65,7 @@ TYPED_TEST_P(lof_test, update_bulk) {
     common::sfv_t v;
     std::ostringstream id;
     id << i;
-    v.push_back(make_pair("x", static_cast<float>(i)));
+    v.push_back(make_pair("x", static_cast<double>(i)));
     data.push_back(make_pair(id.str(), v));
   }
   ids = l.update_bulk(data);
