@@ -92,7 +92,7 @@ void scalar_mul_and_add(
 }
 
 double calc_l2norm(const common::sfv_t& point) {
-  double ret = 0.f;
+  double ret = 0.0;
   for (size_t i = 0; i < point.size(); ++i) {
     ret += point[i].second * point[i].second;
   }

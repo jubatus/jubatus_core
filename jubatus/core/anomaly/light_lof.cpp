@@ -68,7 +68,7 @@ double calculate_lof(double lrd, const vector<double>& neighbor_lrds) {
   }
 
   const double sum_neighbor_lrd = std::accumulate(
-      neighbor_lrds.begin(), neighbor_lrds.end(), 0.0f);
+      neighbor_lrds.begin(), neighbor_lrds.end(), 0.0);
 
   if (std::isinf(sum_neighbor_lrd) && std::isinf(lrd)) {
     return 1;
