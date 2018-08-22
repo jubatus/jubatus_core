@@ -48,11 +48,11 @@ class bit_vector_nearest_neighbor_base : public nearest_neighbor_base {
   virtual void set_row(const std::string& id, const common::sfv_t& sfv);
   virtual void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const;
   virtual void neighbor_row(
       const std::string& query_id,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const;
 
  private:
@@ -63,7 +63,7 @@ class bit_vector_nearest_neighbor_base : public nearest_neighbor_base {
 
   void neighbor_row_from_hash(
       const storage::bit_vector& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const;
 
   uint64_t bit_vector_column_id_;

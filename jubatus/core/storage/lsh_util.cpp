@@ -37,7 +37,7 @@ namespace storage {
 
 namespace {
 
-typedef pair<float, pair<int, vector<int> > > diff_type;
+typedef pair<double, pair<int, vector<int> > > diff_type;
 typedef priority_queue<
     diff_type,
     vector<diff_type>,
@@ -148,17 +148,17 @@ void lsh_probe_generator::next_perturbations() {
   vector<int> expanded = heap_.top().second.second;
   expanded.push_back(expanded.back() + 1);
 
-  const float score_base = heap_.top().first;
+  const double score_base = heap_.top().first;
   heap_.pop();
 
   if ((size_t) shifted.back() < cands.size()) {
-    const float score_diff = cands[shifted.back()].first
+    const double score_diff = cands[shifted.back()].first
         - cands[shifted.back() - 1].first;
     heap_.push(make_pair(score_base + score_diff, make_pair(index, shifted)));
   }
 
   if ((size_t) expanded.back() < cands.size()) {
-    const float score_diff = cands[expanded.back()].first;
+    const double score_diff = cands[expanded.back()].first;
     heap_.push(make_pair(score_base + score_diff, make_pair(index, expanded)));
   }
 }

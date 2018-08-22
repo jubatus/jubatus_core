@@ -53,10 +53,10 @@ void normal_herd::train(const common::sfv_t& sfv, const string& label) {
   labels_.get_model()->increment(label);
 
   string incorrect_label;
-  float variance = 0.f;
-  float margin = -calc_margin_and_variance(sfv, label, incorrect_label,
+  double variance = 0.0;
+  double margin = -calc_margin_and_variance(sfv, label, incorrect_label,
                                            variance);
-  if (margin >= 1.f) {
+  if (margin >= 1.0) {
     storage_->register_label(label);
     return;
   }
@@ -65,23 +65,23 @@ void normal_herd::train(const common::sfv_t& sfv, const string& label) {
 
 void normal_herd::update(
     const common::sfv_t& sfv,
-    float margin,
-    float variance,
+    double margin,
+    double variance,
     const string& pos_label,
     const string& neg_label) {
   util::concurrent::scoped_wlock lk(storage_->get_lock());
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
-    float val = it->second;
+    double val = it->second;
     storage::feature_val2_t ret;
     storage_->get2_nolock(feature, ret);
 
-    storage::val2_t pos_val(0.f, 1.f);
-    storage::val2_t neg_val(0.f, 1.f);
+    storage::val2_t pos_val(0.0, 1.0);
+    storage::val2_t neg_val(0.0, 1.0);
     ClassifierUtil::get_two(ret, pos_label, neg_label, pos_val, neg_val);
 
-    float val_covariance_pos = val * pos_val.v2;
-    float val_covariance_neg = val * neg_val.v2;
+    double val_covariance_pos = val * pos_val.v2;
+    double val_covariance_neg = val * neg_val.v2;
 
     const float C = config_.regularization_weight;
     storage_->set2_nolock(
@@ -89,10 +89,10 @@ void normal_herd::update(
         pos_label,
         storage::val2_t(
             pos_val.v1
-                + (1.f - margin) * val_covariance_pos
-                    / (variance + 1.f / C),
-            1.f
-                / ((1.f / pos_val.v2) + (2 * C + C * C * variance)
+                + (1.0 - margin) * val_covariance_pos
+                    / (variance + 1.0 / C),
+            1.0
+                / ((1.0 / pos_val.v2) + (2 * C + C * C * variance)
                     * val * val)));
     if (neg_label != "") {
       storage_->set2_nolock(
@@ -100,10 +100,10 @@ void normal_herd::update(
           neg_label,
           storage::val2_t(
               neg_val.v1
-                  - (1.f - margin) * val_covariance_neg
-                      / (variance + 1.f / C),
-              1.f
-                  / ((1.f / neg_val.v2) + (2 * C + C * C * variance)
+                  - (1.0 - margin) * val_covariance_neg
+                      / (variance + 1.0 / C),
+              1.0
+                  / ((1.0 / neg_val.v2) + (2 * C + C * C * variance)
                       * val * val)));
     }
   }

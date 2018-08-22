@@ -52,11 +52,11 @@ class inverted_index_euclid : public inverted_index {
 
   void similar_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
 
   std::string type() const;

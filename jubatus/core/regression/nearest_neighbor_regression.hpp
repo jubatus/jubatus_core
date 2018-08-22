@@ -75,8 +75,8 @@ class nearest_neighbor_regression : public regression_base {
         nearest_neighbor_engine,
       const config& config);
 
-  void train(const common::sfv_t& fv, const float value);
-  float estimate(const common::sfv_t& fv) const;
+  void train(const common::sfv_t& fv, const double value);
+  double estimate(const common::sfv_t& fv) const;
   void clear();
 
   std::string name() const;

@@ -59,23 +59,23 @@ class nearest_neighbor_base {
   virtual void set_row(const std::string& id, const common::sfv_t& sfv) = 0;
   virtual void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const = 0;
   virtual void neighbor_row(
       const std::string& query_id,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const = 0;
-  virtual float calc_similarity(float distance) const {
+  virtual double calc_similarity(double distance) const {
     return 1 - distance;
   }
 
   virtual void similar_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const;
   virtual void similar_row(
       const std::string& query_id,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       uint64_t ret_num) const;
 
   void pack(framework::packer& packer) const;

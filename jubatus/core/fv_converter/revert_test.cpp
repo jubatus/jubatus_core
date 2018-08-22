@@ -26,21 +26,21 @@ namespace core {
 namespace fv_converter {
 
 TEST(revert_num_value, str) {
-  std::pair<std::string, float> value;
+  std::pair<std::string, double> value;
   ASSERT_TRUE(revert_num_value(std::make_pair("age@str$25", 1), value));
   EXPECT_EQ("age", value.first);
-  EXPECT_EQ(25.f, value.second);
+  EXPECT_EQ(25, value.second);
 }
 
 TEST(revert_num_value, num) {
-  std::pair<std::string, float> value;
-  ASSERT_TRUE(revert_num_value(std::make_pair("age@num", 25.f), value));
+  std::pair<std::string, double> value;
+  ASSERT_TRUE(revert_num_value(std::make_pair("age@num", 25), value));
   EXPECT_EQ("age", value.first);
-  EXPECT_EQ(25.f, value.second);
+  EXPECT_EQ(25, value.second);
 }
 
 TEST(revert_num_value, error) {
-  std::pair<std::string, float> value;
+  std::pair<std::string, double> value;
   ASSERT_FALSE(revert_num_value(std::make_pair("age", 1), value));
   ASSERT_FALSE(revert_num_value(std::make_pair("age@log", 1), value));
   ASSERT_FALSE(revert_num_value(std::make_pair("age@str$hoge", 1), value));
@@ -71,7 +71,7 @@ TEST(revert_feature, trivial) {
 
   fv.push_back(std::make_pair("name$doc1@str#bin/bin", 1.0));
   fv.push_back(std::make_pair("message$hello@space#bin/bin", 1.0));
-  fv.push_back(std::make_pair("age@num", 25.f));
+  fv.push_back(std::make_pair("age@num", 25));
   fv.push_back(std::make_pair("id@str$12345", 1.0));
   fv.push_back(std::make_pair("age@log", 3.0));
 
@@ -83,7 +83,7 @@ TEST(revert_feature, trivial) {
   ASSERT_EQ(2u, data.num_values_.size());
   std::sort(data.num_values_.begin(), data.num_values_.end());
   EXPECT_EQ("age", data.num_values_[0].first);
-  EXPECT_EQ(25.f, data.num_values_[0].second);
+  EXPECT_EQ(25, data.num_values_[0].second);
   EXPECT_EQ("id", data.num_values_[1].first);
   EXPECT_EQ(12345, data.num_values_[1].second);
 }

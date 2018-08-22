@@ -27,7 +27,7 @@ namespace regression {
 class cosine_similarity_regression : public inverted_index_regression {
  public:
   explicit cosine_similarity_regression(const config& conf);
-  float estimate(
+  double estimate(
       const common::sfv_t& fv) const;
 
   std::string name() const;

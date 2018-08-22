@@ -30,11 +30,11 @@ struct datum;
 void revert_feature(const common::sfv_t& fv, datum& data);
 
 bool revert_num_value(
-    const std::pair<std::string, float>& feature,
-    std::pair<std::string, float>& num_value);
+    const std::pair<std::string, double>& feature,
+    std::pair<std::string, double>& num_value);
 
 bool revert_string_value(
-    const std::pair<std::string, float>& feature,
+    const std::pair<std::string, double>& feature,
     std::pair<std::string, std::string>& string_value);
 
 }  // namespace fv_converter

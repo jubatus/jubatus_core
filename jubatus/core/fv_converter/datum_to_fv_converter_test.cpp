@@ -76,7 +76,7 @@ TEST(datum_to_fv_converter, DISABLED_benchmark) {
   }
 
   for (size_t i = 0; i < bench_count; ++i) {
-    std::vector<std::pair<std::string, float> > feature;
+    std::vector<std::pair<std::string, double> > feature;
     conv.convert_and_update_weight(datum, feature);
   }
 }
@@ -92,10 +92,10 @@ TEST(datum_to_fv_converter, num_feature) {
 
   conv.register_num_rule("num", a, num_feature_t(new num_value_feature()));
   conv.register_num_rule("log", a, num_feature_t(new num_log_feature()));
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert(datum, feature);
 
-  std::vector<std::pair<std::string, float> > expected;
+  std::vector<std::pair<std::string, double> > expected;
   expected.push_back(std::make_pair("/val1@num", 1.1));
   expected.push_back(std::make_pair("/val1@log", std::log(1.1)));
   // elements with zero are removed
@@ -137,7 +137,7 @@ TEST(datum_to_fv_converter, string_feature) {
     conv.register_string_rule("str", match, splitter_t(new without_split()), p);
   }
 
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   {
     datum datum;
     datum.string_values_.push_back(std::make_pair("/name", "doc0"));
@@ -152,7 +152,7 @@ TEST(datum_to_fv_converter, string_feature) {
     conv.convert_and_update_weight(datum, feature);
   }
 
-  std::vector<std::pair<std::string, float> > expected;
+  std::vector<std::pair<std::string, double> > expected;
   expected.push_back(std::make_pair("/name$doc1@str#bin/bin", 1.));
   expected.push_back(
       std::make_pair("/title$ this is it . it is it .@str#bin/bin", 1.));
@@ -204,7 +204,7 @@ TEST(datum_to_fv_converter, weight) {
   datum datum;
   datum.string_values_.push_back(std::make_pair("/id", "a b"));
 
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert_and_update_weight(datum, feature);
 
   ASSERT_EQ(1u, feature.size());
@@ -225,10 +225,10 @@ TEST(datum_to_fv_converter, register_string_rule) {
   datum datum;
   datum.string_values_.push_back(std::make_pair("/id", "a b"));
 
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert(datum, feature);
 
-  std::vector<std::pair<std::string, float> > exp;
+  std::vector<std::pair<std::string, double> > exp;
   exp.push_back(std::make_pair("/id$a@1gram#bin/bin", 1.));
   exp.push_back(std::make_pair("/id$ @1gram#bin/bin", 1.));
   exp.push_back(std::make_pair("/id$b@1gram#bin/bin", 1.));
@@ -245,7 +245,7 @@ TEST(datum_to_fv_converter, register_num_rule) {
   datum.num_values_.push_back(std::make_pair("/age", 20));
 
   {
-    std::vector<std::pair<std::string, float> > feature;
+    std::vector<std::pair<std::string, double> > feature;
     conv.convert(datum, feature);
     EXPECT_EQ(0u, feature.size());
   }
@@ -255,11 +255,11 @@ TEST(datum_to_fv_converter, register_num_rule) {
   conv.register_num_rule("str", a, f);
 
   {
-    std::vector<std::pair<std::string, float> > feature;
+    std::vector<std::pair<std::string, double> > feature;
     conv.convert(datum, feature);
     EXPECT_EQ(1u, feature.size());
 
-    std::vector<std::pair<std::string, float> > exp;
+    std::vector<std::pair<std::string, double> > exp;
     exp.push_back(std::make_pair("/age@str$20", 1.));
 
     std::sort(feature.begin(), feature.end());
@@ -275,7 +275,7 @@ class binary_length_feature : public binary_feature {
   void add_feature(
       const std::string& key,
       const std::string& value,
-      std::vector<std::pair<std::string, float> >& ret_fv) const {
+      std::vector<std::pair<std::string, double> >& ret_fv) const {
     ret_fv.push_back(std::make_pair(key, value.size()));
   }
 };
@@ -289,7 +289,7 @@ TEST(datum_to_fv_converter, register_binary_rule) {
   datum.binary_values_.push_back(std::make_pair("/bin", "0101"));
 
   {
-    std::vector<std::pair<std::string, float> > feature;
+    std::vector<std::pair<std::string, double> > feature;
     conv.convert(datum, feature);
     EXPECT_EQ(0u, feature.size());
   }
@@ -299,11 +299,11 @@ TEST(datum_to_fv_converter, register_binary_rule) {
   conv.register_binary_rule("len", a, f);
 
   {
-    std::vector<std::pair<std::string, float> > feature;
+    std::vector<std::pair<std::string, double> > feature;
     conv.convert(datum, feature);
     EXPECT_EQ(1u, feature.size());
 
-    std::vector<std::pair<std::string, float> > exp;
+    std::vector<std::pair<std::string, double> > exp;
     exp.push_back(std::make_pair("/bin@len", 4.));
 
     std::sort(feature.begin(), feature.end());
@@ -325,7 +325,7 @@ TEST(datum_to_fv_converter, register_string_filter) {
       shared_ptr<word_splitter>(new without_split()),
       p);
   {
-    std::vector<std::pair<std::string, float> > feature;
+    std::vector<std::pair<std::string, double> > feature;
     conv.convert(datum, feature);
     EXPECT_EQ(1u, feature.size());
   }
@@ -336,7 +336,7 @@ TEST(datum_to_fv_converter, register_string_filter) {
       "_filtered");
 
   {
-    std::vector<std::pair<std::string, float> > feature;
+    std::vector<std::pair<std::string, double> > feature;
     conv.convert(datum, feature);
     EXPECT_EQ(2u, feature.size());
     EXPECT_EQ("/text_filtered$aaa@str#bin/bin", feature[1].first);
@@ -359,7 +359,7 @@ TEST(datum_to_fv_converter, register_num_filter) {
       shared_ptr<num_filter>(new add_filter(5)),
       "+5");
 
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert(datum, feature);
 
   EXPECT_EQ(2u, feature.size());
@@ -384,7 +384,7 @@ TEST(datum_to_fv_converter, recursive_filter) {
       shared_ptr<num_filter>(new add_filter(2)),
       "+2");
 
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert(datum, feature);
 
   EXPECT_EQ(4u, feature.size());
@@ -403,7 +403,7 @@ TEST(datum_to_fv_converter, hasher) {
   for (int i = 0; i < 10; ++i)
   d.num_values_.push_back(std::make_pair("age", i));
 
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert(d, feature);
 
   for (size_t i = 0; i < feature.size(); ++i)
@@ -425,7 +425,7 @@ TEST(datum_to_fv_converter, check_datum_key_in_string) {
 
   datum datum;
   datum.string_values_.push_back(std::make_pair("bad$key", "doc0"));
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   ASSERT_THROW(conv.convert(datum, feature), converter_exception);
 }
 
@@ -439,7 +439,7 @@ TEST(datum_to_fv_converter, check_datum_key_in_number) {
   datum datum;
   datum.num_values_.push_back(std::make_pair("bad$key", 20));
 
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   ASSERT_THROW(conv.convert(datum, feature), converter_exception);
 }
 
@@ -452,7 +452,7 @@ TEST(datum_to_fv_converter, check_datum_key_in_binary) {
 
   datum datum;
   datum.binary_values_.push_back(std::make_pair("bad$key", "0101"));
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   ASSERT_THROW(conv.convert(datum, feature), converter_exception);
 }
 
@@ -480,10 +480,10 @@ TEST(datum_to_fv_converter, combination_feature_num) {
       all_matcher,
       all_matcher,
       combination_feature_t(new combination_mul_feature()));
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert(d, feature);
 
-  std::vector<std::pair<std::string, float> > expected;
+  std::vector<std::pair<std::string, double> > expected;
   expected.push_back(std::make_pair("val1@num", 1.0));
   expected.push_back(std::make_pair("val2@num", 1.1));
   expected.push_back(std::make_pair("val1@num&val2@num/add", 2.1));
@@ -509,7 +509,7 @@ class combination_div_feature : public combination_feature {
                    double value_right,
                    common::sfv_t& ret_fv) const {
     ret_fv.push_back(
-        std::make_pair(key, static_cast<float>(value_left / value_right)));
+        std::make_pair(key, value_left / value_right));
   }
 
   bool is_commutative() const {
@@ -538,10 +538,10 @@ TEST(datum_to_fv_converter, combination_feature_num_non_commutative) {
       all_matcher,
       all_matcher,
       combination_feature_t(new combination_div_feature()));
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert(d, feature);
 
-  std::vector<std::pair<std::string, float> > expected;
+  std::vector<std::pair<std::string, double> > expected;
   expected.push_back(std::make_pair("val1@num", 2.0));
   expected.push_back(std::make_pair("val2@num", 0.5));
   expected.push_back(std::make_pair("val1@num&val2@num/div", 4.0));
@@ -580,10 +580,10 @@ TEST(datum_to_fv_converter, combination_feature_string) {
       title_matcher,
       title_matcher,
       combination_feature_t(new combination_mul_feature()));
-  std::vector<std::pair<std::string, float> > feature;
+  std::vector<std::pair<std::string, double> > feature;
   conv.convert(datum, feature);
 
-  std::vector<std::pair<std::string, float> > expected;
+  std::vector<std::pair<std::string, double> > expected;
   expected.push_back(std::make_pair("name$xyz@space#bin/bin", 1.0));
   expected.push_back(std::make_pair("name$abc@space#bin/bin", 1.0));
   expected.push_back(std::make_pair("title$bar@space#bin/bin", 1.0));

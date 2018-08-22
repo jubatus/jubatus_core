@@ -66,13 +66,13 @@ inverted_index_regression::inverted_index_regression(
   std::vector<column_type> schema;
   values_.reset(new mixable_versioned_table);
   values_->set_model(shared_ptr<column_table> (new column_table));
-  schema.push_back(column_type(column_type::float_type));
+  schema.push_back(column_type(column_type::double_type));
   values_->get_model()->init(schema);
 }
 
 void inverted_index_regression::train(
     const common::sfv_t& fv,
-    const float value) {
+    const double value) {
   std::string id;
   {
     util::concurrent::scoped_lock lk(rand_mutex_);

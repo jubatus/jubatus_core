@@ -61,7 +61,7 @@ class weight_manager : public framework::model {
       bool contains_bm25);
   void get_weight(common::sfv_t& fv) const;
 
-  void add_weight(const std::string& key, float weight);
+  void add_weight(const std::string& key, double weight);
 
   void get_diff(versioned_weight_diff& diff) const {
     util::concurrent::scoped_lock lk(mutex_);

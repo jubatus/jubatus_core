@@ -41,7 +41,7 @@ namespace nearest_neighbor {
 void ranking_hamming_bit_vectors(
     const storage::bit_vector& query,
     const storage::const_bit_vector_column& bvs,
-    std::vector<std::pair<uint64_t, float> >& ret,
+    std::vector<std::pair<uint64_t, double> >& ret,
     uint64_t ret_num, uint32_t threads);
 
 template <typename Function, typename THeap>

@@ -29,7 +29,7 @@ class my_num_feature : public core::fv_converter::num_feature {
   void add_feature(
       const std::string& key,
       double value,
-      std::vector<std::pair<std::string, float> >& ret_fv) const {
+      std::vector<std::pair<std::string, double> >& ret_fv) const {
     ret_fv.push_back(std::make_pair(key, value + 1));
   }
 };

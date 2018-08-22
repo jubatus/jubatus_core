@@ -53,31 +53,31 @@ TEST(weight_manager, trivial) {
     ASSERT_EQ(7u, fv.size());
 
     // String features without weighting
-    EXPECT_FLOAT_EQ(1.0, fv[0].second);
+    EXPECT_DOUBLE_EQ(1.0, fv[0].second);
 
     // String features weighted by bin-idf
-    EXPECT_FLOAT_EQ(1.0 * std::log((3.0 + 1) / (1.0 + 1)), fv[1].second);
+    EXPECT_DOUBLE_EQ(1.0 * std::log((3.0 + 1) / (1.0 + 1)), fv[1].second);
 
     // Non-string features
-    EXPECT_FLOAT_EQ(1.0, fv[2].second);
+    EXPECT_DOUBLE_EQ(1.0, fv[2].second);
 
     // String features weighted by bin-weight
-    EXPECT_FLOAT_EQ(1.5, fv[3].second);
+    EXPECT_DOUBLE_EQ(1.5, fv[3].second);
 
     // String features weighted by tf-bm25
-    EXPECT_FLOAT_EQ(
+    EXPECT_DOUBLE_EQ(
         std::log((3.0 - 1.0 + 0.5) / (1.0 + 0.5)) *
         ((/* tf = */ 5.0 * (1.2 + 1)) /
         (/* tf = */ 5.0 + 1.2 * (1 - 0.75 + 0.75 *
         (9.0 / 9.0)))), fv[4].second);
-    EXPECT_FLOAT_EQ(
+    EXPECT_DOUBLE_EQ(
         std::log((3.0 - 1.0 + 0.5) / (1.0 + 0.5)) *
         ((/* tf = */ 4.0 * (1.2 + 1)) /
         (/* tf = */ 4.0 + 1.2 * (1 - 0.75 + 0.75 *
         (9.0 / 9.0)))), fv[5].second);
 
     // String features weighted by bin-idf1
-    EXPECT_FLOAT_EQ(
+    EXPECT_DOUBLE_EQ(
         1.0 * (std::log((3.0 + 1) / (1.0 + 1)) + 1.0), fv[6].second);
   }
 
@@ -104,7 +104,7 @@ TEST(weight_manager, trivial) {
     m.update_weight(fv, true, false);
     m.get_weight(fv);
     EXPECT_EQ(1u, fv.size());
-    EXPECT_FLOAT_EQ(1.0 * std::log((5.0 + 1) / (3.0 + 1)), fv[0].second);
+    EXPECT_DOUBLE_EQ(1.0 * std::log((5.0 + 1) / (3.0 + 1)), fv[0].second);
   }
 }
 

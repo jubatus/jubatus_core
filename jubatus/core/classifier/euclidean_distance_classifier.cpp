@@ -39,14 +39,14 @@ euclidean_distance_classifier::euclidean_distance_classifier(
 void euclidean_distance_classifier::classify_with_scores(
     const common::sfv_t& fv,
     classify_result& scores) const {
-  std::vector<std::pair<std::string, float> > ids;
+  std::vector<std::pair<std::string, double> > ids;
   {
     util::concurrent::scoped_rlock lk(storage_mutex_);
     mixable_storage_->get_model()->calc_euclid_scores(fv, ids, k_);
   }
 
   labels_t labels = labels_.get_model()->get_labels();
-  std::map<std::string, float> m;
+  std::map<std::string, double> m;
   for (labels_t::const_iterator iter = labels.begin();
        iter != labels.end(); ++iter) {
     m.insert(std::make_pair(iter->first, 0));
@@ -58,7 +58,7 @@ void euclidean_distance_classifier::classify_with_scores(
   }
 
   scores.clear();
-  for (std::map<std::string, float>::const_iterator iter = m.begin();
+  for (std::map<std::string, double>::const_iterator iter = m.begin();
        iter != m.end(); ++iter) {
     classify_result_elem elem(iter->first, iter->second);
     scores.push_back(elem);

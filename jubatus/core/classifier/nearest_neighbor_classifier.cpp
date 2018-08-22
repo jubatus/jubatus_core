@@ -107,7 +107,7 @@ std::string nearest_neighbor_classifier::classify(
     const common::sfv_t& fv) const {
   classify_result result;
   classify_with_scores(fv, result);
-  float max_score = -FLT_MAX;
+  double max_score = -DBL_MAX;
   std::string max_class;
   for (std::vector<classify_result_elem>::const_iterator it = result.begin();
       it != result.end(); ++it) {
@@ -121,13 +121,13 @@ std::string nearest_neighbor_classifier::classify(
 
 void nearest_neighbor_classifier::classify_with_scores(
     const common::sfv_t& fv, classify_result& scores) const {
-  std::vector<std::pair<std::string, float> > ids;
+  std::vector<std::pair<std::string, double> > ids;
 
   // lock acquired inside
   nearest_neighbor_engine_->neighbor_row(fv, ids, k_);
   const labels_t labels = labels_.get_labels();
 
-  std::map<std::string, float> m;
+  std::map<std::string, double> m;
   for (labels_t::const_iterator iter = labels.begin();
        iter != labels.end(); ++iter) {
     m.insert(std::make_pair(iter->first, 0));
@@ -139,7 +139,7 @@ void nearest_neighbor_classifier::classify_with_scores(
   }
 
   scores.clear();
-  for (std::map<std::string, float>::const_iterator iter = m.begin();
+  for (std::map<std::string, double>::const_iterator iter = m.begin();
        iter != m.end(); ++iter) {
     classify_result_elem elem(iter->first, iter->second);
     scores.push_back(elem);

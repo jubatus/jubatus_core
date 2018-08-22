@@ -29,36 +29,36 @@
 
 void make_random(
     jubatus::util::math::random::mtrand& rand,
-    float mu,
-    float sigma,
+    double mu,
+    double sigma,
     size_t dim,
     std::vector<double>& v) {
   for (size_t i = 0; i < dim; i++) {
-    float value = rand.next_gaussian(mu, sigma);
+    double value = rand.next_gaussian(mu, sigma);
     v.push_back(value);
   }
 }
 
 void make_random(
     jubatus::util::math::random::mtrand& rand,
-    const std::vector<float>& mus,
-    float sigma,
+    const std::vector<double>& mus,
+    double sigma,
     size_t dim,
     std::vector<double>& v) {
   for (size_t i = 0; i < dim; i++) {
-    float value = rand.next_gaussian(mus[i % mus.size()], sigma);
+    double value = rand.next_gaussian(mus[i % mus.size()], sigma);
     v.push_back(value);
   }
 }
 
 std::pair<std::string, std::vector<double> > gen_random_data(
     jubatus::util::math::random::mtrand& rand) {
-  const float mu_pos = 1.0;
-  const float mu_neg = -1.0;
-  const float sigma = 1.5;
+  const double mu_pos = 1.0;
+  const double mu_neg = -1.0;
+  const double sigma = 1.5;
   const size_t dim = 10;
 
-  float mu;
+  double mu;
   std::pair<std::string, std::vector<double> > p;
   if (rand() % 2 == 0) {
     p.first = "OK";
@@ -74,12 +74,12 @@ std::pair<std::string, std::vector<double> > gen_random_data(
 std::pair<std::string, std::vector<double> > gen_random_data3(
     jubatus::util::math::random::mtrand& rand) {
   const char* labels[] = { "1", "2", "3" };
-  std::vector<float> mus;
+  std::vector<double> mus;
   mus.push_back(3);
   mus.push_back(0);
   mus.push_back(-3);
 
-  const float sigma = 1.0;
+  const double sigma = 1.0;
   const size_t dim = 10;
 
   std::pair<std::string, std::vector<double> > p;

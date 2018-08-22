@@ -80,10 +80,10 @@ class light_lof : public anomaly_base {
 
   // anomaly_base interface
 
-  float calc_anomaly_score(const common::sfv_t& query) const;
-  float calc_anomaly_score(const std::string& id) const;
+  double calc_anomaly_score(const common::sfv_t& query) const;
+  double calc_anomaly_score(const std::string& id) const;
   // calc_anomaly_score(string, sfv_t) is not supported in light_lof
-  float calc_anomaly_score(
+  double calc_anomaly_score(
       const std::string& id,
       const common::sfv_t& query) const;
 
@@ -112,22 +112,22 @@ class light_lof : public anomaly_base {
  private:
   // Parameters of each data point.
   struct parameter {
-    float kdist;
-    float lrd;
+    double kdist;
+    double lrd;
   };
 
   void touch(const std::string& id);
   void unlearn(const std::string& id);
 
-  float collect_lrds(
+  double collect_lrds(
       const common::sfv_t& query,
-      std::vector<float>& neighbor_lrds) const;
-  float collect_lrds(
+      std::vector<double>& neighbor_lrds) const;
+  double collect_lrds(
       const std::string& query,
-      std::vector<float>& neighbor_lrds) const;
-  float collect_lrds_from_neighbors(
-      const std::vector<std::pair<std::string, float> >& neighbors,
-      std::vector<float>& neighbor_lrd) const;
+      std::vector<double>& neighbor_lrds) const;
+  double collect_lrds_from_neighbors(
+      const std::vector<std::pair<std::string, double> >& neighbors,
+      std::vector<double>& neighbor_lrd) const;
 
   void collect_neighbors(
       const std::string& query,

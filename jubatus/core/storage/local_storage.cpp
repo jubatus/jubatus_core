@@ -99,10 +99,10 @@ void local_storage::inp(const common::sfv_t& sfv, map_feature_val1_t& ret)
 
   scoped_rlock lk(mutex_);
   // Use uin64_t map instead of string map as hash function for string is slow
-  jubatus::util::data::unordered_map<uint64_t, float> ret_id;
+  jubatus::util::data::unordered_map<uint64_t, double> ret_id;
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
-    const float val = it->second;
+    const double val = it->second;
     id_features3_t::const_iterator it2 = tbl_.find(feature);
     if (it2 == tbl_.end()) {
       continue;
@@ -181,8 +181,8 @@ void local_storage::get_status(std::map<string, std::string>& status) const {
     jubatus::util::lang::lexical_cast<std::string>(class2id_.size());
 }
 
-float feature_fabssum(const id_feature_val3_t& f) {
-  float sum = 0.f;
+double feature_fabssum(const id_feature_val3_t& f) {
+  double sum = 0.0;
   for (id_feature_val3_t::const_iterator it = f.begin(); it != f.end(); ++it) {
     sum += std::fabs(it->second.v1);
   }
@@ -191,7 +191,7 @@ float feature_fabssum(const id_feature_val3_t& f) {
 
 void local_storage::bulk_update(
     const common::sfv_t& sfv,
-    float step_width,
+    double step_width,
     const string& inc_class,
     const string& dec_class) {
   scoped_wlock lk(mutex_);
@@ -200,14 +200,14 @@ void local_storage::bulk_update(
   if (dec_class != "") {
     uint64_t dec_id = class2id_.get_id(dec_class);
     for (iter_t it = sfv.begin(); it != sfv.end(); ++it) {
-      float val = it->second * step_width;
+      double val = it->second * step_width;
       id_feature_val3_t& feature_row = tbl_[it->first];
       feature_row[inc_id].v1 += val;
       feature_row[dec_id].v1 -= val;
     }
   } else {
     for (iter_t it = sfv.begin(); it != sfv.end(); ++it) {
-      float val = it->second * step_width;
+      double val = it->second * step_width;
       id_feature_val3_t& feature_row = tbl_[it->first];
       feature_row[inc_id].v1 += val;
     }

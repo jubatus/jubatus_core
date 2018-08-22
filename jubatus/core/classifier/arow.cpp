@@ -52,34 +52,34 @@ void arow::train(const common::sfv_t& sfv, const string& label) {
   labels_.get_model()->increment(label);
 
   string incorrect_label;
-  float variance = 0.f;
-  float margin = -calc_margin_and_variance(sfv, label, incorrect_label,
-                                           variance);
-  if (margin >= 1.f) {
+  double variance = 0.0;
+  double margin = -calc_margin_and_variance(sfv, label, incorrect_label,
+                                            variance);
+  if (margin >= 1.0) {
     storage_->register_label(label);
     return;
   }
 
-  float beta = 1.f / (variance + 1.f / config_.regularization_weight);
-  float alpha = (1.f - margin) * beta;  // max(0, 1 - margin) = 1 - margin
+  double beta = 1.0 / (variance + 1.0 / config_.regularization_weight);
+  double alpha = (1.0 - margin) * beta;  // max(0, 1 - margin) = 1 - margin
   update(sfv, alpha, beta, label, incorrect_label);
 }
 
 void arow::update(
     const common::sfv_t& sfv,
-    float alpha,
-    float beta,
+    double alpha,
+    double beta,
     const std::string& pos_label,
     const std::string& neg_label) {
   util::concurrent::scoped_wlock lk(storage_->get_lock());
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
-    float val = it->second;
+    double val = it->second;
     storage::feature_val2_t ret;
     storage_->get2_nolock(feature, ret);
 
-    storage::val2_t pos_val(0.f, 1.f);
-    storage::val2_t neg_val(0.f, 1.f);
+    storage::val2_t pos_val(0.0, 1.0);
+    storage::val2_t neg_val(0.0, 1.0);
     ClassifierUtil::get_two(ret, pos_label, neg_label, pos_val, neg_val);
 
     storage_->set2_nolock(

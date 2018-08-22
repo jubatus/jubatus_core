@@ -39,7 +39,7 @@ namespace jubatus {
 namespace core {
 namespace recommender {
 
-sfv_diff_t make_vec(float v1, float v2, float v3) {
+sfv_diff_t make_vec(double v1, double v2, double v3) {
   sfv_diff_t v;
   v.push_back(make_pair("c1", v1));
   v.push_back(make_pair("c2", v2));
@@ -72,7 +72,7 @@ TYPED_TEST_P(recommender_random_test, trivial) {
   r.update_row("r1", make_vec("c1", "c2", "c3"));
   r.update_row("r2", make_vec("c4", "c5", "c6"));
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   r.similar_row(make_vec("c1", "c2", "c3"), ids, 1);
   ASSERT_EQ(1u, ids.size());
   EXPECT_EQ("r1", ids[0].first);
@@ -83,7 +83,7 @@ TYPED_TEST_P(recommender_random_test, random) {
   TypeParam r;
 
   // Generate random data from two norma distributions, N1 and N2.
-  vector<float> mu1;
+  vector<double> mu1;
   mu1.push_back(1.0);
   mu1.push_back(1.0);
   mu1.push_back(1.0);
@@ -94,7 +94,7 @@ TYPED_TEST_P(recommender_random_test, random) {
     r.update_row(row_name, make_vec(v[0], v[1], v[2]));
   }
 
-  vector<float> mu2;
+  vector<double> mu2;
   mu2.push_back(-1.0);
   mu2.push_back(-1.0);
   mu2.push_back(-1.0);
@@ -106,7 +106,7 @@ TYPED_TEST_P(recommender_random_test, random) {
   }
 
   // Then, recommend to mean of N1
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   r.similar_row(make_vec(1.0, 1.0, 1.0), ids, 10);
   ASSERT_EQ(10u, ids.size());
   size_t correct = 0;
@@ -141,7 +141,7 @@ TYPED_TEST_P(recommender_random_test, random) {
 
 void update_random(recommender_base& r) {
   jubatus::util::math::random::mtrand rand(0);
-  vector<float> mu(3);
+  vector<double> mu(3);
   for (size_t i = 0; i < 100; ++i) {
     vector<double> v;
     make_random(rand, mu, 1.0, 3, v);
@@ -156,13 +156,13 @@ void compare_recommenders(recommender_base& r1, recommender_base& r2,
   common::sfv_t q = make_vec(0.5, 0.3, 1.0);
 
   // Get result before saving
-  vector<pair<string, float> > ids1;
+  vector<pair<string, double> > ids1;
   r1.similar_row(q, ids1, 10);
   common::sfv_t comp1;
   r1.complete_row("r1_0", comp1);
 
   // Get result from loaded data
-  vector<pair<string, float> > ids2;
+  vector<pair<string, double> > ids2;
   r2.similar_row(q, ids2, 10);
   common::sfv_t comp2;
   r2.complete_row("r1_0", comp2);
@@ -174,7 +174,7 @@ void compare_recommenders(recommender_base& r1, recommender_base& r2,
 
   for (size_t i = 0; i < ids1.size(); ++i) {
     EXPECT_EQ(ids1[i].first, ids2[i].first);
-    EXPECT_FLOAT_EQ(ids1[i].second, ids2[i].second);
+    EXPECT_DOUBLE_EQ(ids1[i].second, ids2[i].second);
   }
 
   if (compare_complete_row) {
@@ -265,7 +265,7 @@ TYPED_TEST_P(recommender_random_test, diff) {
 TYPED_TEST_P(recommender_random_test, mix) {
   jubatus::util::math::random::mtrand rand(0);
   TypeParam r1, r2, expect;
-  vector<float> mu(10);
+  vector<double> mu(10);
   for (size_t i = 0; i < 100; ++i) {
     vector<double> v;
     make_random(rand, mu, 1.0, 3, v);

@@ -51,8 +51,8 @@ TEST_F(util_test, cosine_test) {
   p2.push_back(make_pair("x", 1));
   p2.push_back(make_pair("y", 0));
 
-  EXPECT_FLOAT_EQ(0., sfv_cosine_dist(p1, p1));
-  EXPECT_FLOAT_EQ(1., sfv_cosine_dist(p1, p2));
+  EXPECT_DOUBLE_EQ(0., sfv_cosine_dist(p1, p1));
+  EXPECT_DOUBLE_EQ(1., sfv_cosine_dist(p1, p2));
 }
 
 

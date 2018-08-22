@@ -53,19 +53,19 @@ class anomaly : public driver_base {
   bool is_updatable() const;
 
   void clear_row(const std::string& id);
-  std::pair<std::string, float> add(
+  std::pair<std::string, double> add(
       const std::string& id,
       const fv_converter::datum& d);
   std::vector<std::string> add_bulk(
       const std::vector<std::pair<std::string, fv_converter::datum> >& data);
 
-  float update(const std::string& id, const fv_converter::datum& d);
-  float overwrite(const std::string& id, const fv_converter::datum& d);
+  double update(const std::string& id, const fv_converter::datum& d);
+  double overwrite(const std::string& id, const fv_converter::datum& d);
   void get_status(std::map<std::string, std::string>& status) const;
   void clear();
   void pack(framework::packer& pk) const;
   void unpack(msgpack::object o);
-  float calc_score(const fv_converter::datum& d) const;
+  double calc_score(const fv_converter::datum& d) const;
   std::vector<std::string> get_all_rows() const;
   uint64_t find_max_int_id() const;
 

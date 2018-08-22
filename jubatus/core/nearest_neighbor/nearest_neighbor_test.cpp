@@ -157,7 +157,7 @@ TEST_P(nearest_neighbor_test, size) {
 TEST_P(nearest_neighbor_test, empty_neighbor_row) {
   nearest_neighbor_base* nn = get_nn();
 
-  vector<std::pair<string, float> > ids;
+  vector<std::pair<string, double> > ids;
   nn->neighbor_row("", ids, 1);
   EXPECT_TRUE(ids.empty());
 

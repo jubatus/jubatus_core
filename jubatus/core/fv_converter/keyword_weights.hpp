@@ -54,9 +54,9 @@ class keyword_weights {
     return group_total_lengths_[group_key];
   }
 
-  void add_weight(const std::string& key, float weight);
+  void add_weight(const std::string& key, double weight);
 
-  float get_user_weight(const std::string& key) const;
+  double get_user_weight(const std::string& key) const;
 
   void merge(const keyword_weights& w);
 
@@ -91,7 +91,7 @@ class keyword_weights {
   // Total value of each feature group.
   counter<std::string> group_total_lengths_;
 
-  typedef jubatus::util::data::unordered_map<std::string, float> weight_t;
+  typedef jubatus::util::data::unordered_map<std::string, double> weight_t;
   weight_t weights_;
 };
 

@@ -65,7 +65,7 @@ inverted_index::~inverted_index() {
 
 void inverted_index::similar_row(
     const common::sfv_t& query,
-    std::vector<std::pair<std::string, float> >& ids,
+    std::vector<std::pair<std::string, double> >& ids,
     size_t ret_num) const {
   ids.clear();
   if (ret_num == 0) {
@@ -76,7 +76,7 @@ void inverted_index::similar_row(
 
 void inverted_index::neighbor_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   similar_row(query, ids, ret_num);
   for (size_t i = 0; i < ids.size(); ++i) {
@@ -100,7 +100,7 @@ void inverted_index::clear_row(const std::string& id) {
 }
 
 void inverted_index::remove_row(const std::string& id) {
-  vector<pair<string, float> > columns;
+  vector<pair<string, double> > columns;
   orig_.get_row(id, columns);
   storage::inverted_index_storage& inv = *mixable_storage_->get_model();
   for (size_t i = 0; i < columns.size(); ++i) {

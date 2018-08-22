@@ -38,24 +38,24 @@ class recommender_mock : public recommender_base {
 
   void set_similar_relation(
       const common::sfv_t& query,
-      const std::vector<std::pair<std::string, float> >& ids);
+      const std::vector<std::pair<std::string, double> >& ids);
   void set_similar_relation(
       const std::string& id,
-      const std::vector<std::pair<std::string, float> >& ids);
+      const std::vector<std::pair<std::string, double> >& ids);
   void set_neighbor_relation(
       const common::sfv_t& query,
-      const std::vector<std::pair<std::string, float> >& ids);
+      const std::vector<std::pair<std::string, double> >& ids);
   void set_neighbor_relation(
       const std::string& id,
-      const std::vector<std::pair<std::string, float> >& ids);
+      const std::vector<std::pair<std::string, double> >& ids);
 
   virtual void similar_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   virtual void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   virtual void clear();
   virtual void clear_row(const std::string& id);

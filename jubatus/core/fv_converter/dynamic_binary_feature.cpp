@@ -38,7 +38,7 @@ dynamic_binary_feature::dynamic_binary_feature(
 void dynamic_binary_feature::add_feature(
     const string& key,
     const string& value,
-    std::vector<std::pair<string, float> >& ret_fv) const {
+    std::vector<std::pair<string, double> >& ret_fv) const {
   impl_->add_feature(key, value, ret_fv);
 }
 

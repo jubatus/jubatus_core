@@ -37,7 +37,7 @@ void dynamic_combination_feature::add_feature(
       const std::string& key,
       double value_left,
       double value_right,
-      std::vector<std::pair<std::string, float> >& ret_fv) const {
+      std::vector<std::pair<std::string, double> >& ret_fv) const {
   impl_->add_feature(key, value_left, value_right, ret_fv);
 }
 

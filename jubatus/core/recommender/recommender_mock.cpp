@@ -41,13 +41,13 @@ recommender_mock::~recommender_mock() {
 
 void recommender_mock::set_similar_relation(
     const common::sfv_t& query,
-    const vector<pair<string, float> >& ids) {
+    const vector<pair<string, double> >& ids) {
   mixable_storage_->get_model()->set_similar_items(query, ids);
 }
 
 void recommender_mock::set_similar_relation(
     const string& id,
-    const vector<pair<string, float> >& ids) {
+    const vector<pair<string, double> >& ids) {
   common::sfv_t query;
   decode_row(id, query);
   set_similar_relation(query, ids);
@@ -55,13 +55,13 @@ void recommender_mock::set_similar_relation(
 
 void recommender_mock::set_neighbor_relation(
     const common::sfv_t& query,
-    const vector<pair<string, float> >& ids) {
+    const vector<pair<string, double> >& ids) {
   mixable_storage_->get_model()->set_neighbor_items(query, ids);
 }
 
 void recommender_mock::set_neighbor_relation(
     const string& id,
-    const vector<pair<string, float> >& ids) {
+    const vector<pair<string, double> >& ids) {
   common::sfv_t query;
   decode_row(id, query);
   set_neighbor_relation(query, ids);
@@ -69,14 +69,14 @@ void recommender_mock::set_neighbor_relation(
 
 void recommender_mock::similar_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   mixable_storage_->get_model()->similar_items_similarity(query, ids, ret_num);
 }
 
 void recommender_mock::neighbor_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     size_t ret_num) const {
   mixable_storage_->get_model()->neighbor_items_distance(query, ids, ret_num);
 }

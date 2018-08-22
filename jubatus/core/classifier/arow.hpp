@@ -34,8 +34,8 @@ class arow : public linear_classifier {
  private:
   void update(
       const common::sfv_t& fv,
-      float alpha,
-      float beta,
+      double alpha,
+      double beta,
       const std::string& pos_label,
       const std::string& neg_label);
   classifier_config config_;

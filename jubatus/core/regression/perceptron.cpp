@@ -39,10 +39,10 @@ perceptron::perceptron(
     config_(config()) {
 }
 
-void perceptron::train(const common::sfv_t& fv, float value) {
-  float predict = estimate(fv);
+void perceptron::train(const common::sfv_t& fv, double value) {
+  double predict = estimate(fv);
   std::cerr << "predict:" << predict << std::endl;
-  float error = value - predict;
+  double error = value - predict;
   update(fv, error * config_.learning_rate);
 }
 

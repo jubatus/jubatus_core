@@ -31,12 +31,12 @@ namespace classifier {
 
 // TODO(unknown): namespace should be classifier
 struct classify_result_elem {
-  classify_result_elem(const std::string& label, float score)
+  classify_result_elem(const std::string& label, double score)
       : label(label),
         score(score) {
   };
   std::string label;
-  float score;
+  double score;
 };
 
 typedef std::vector<classify_result_elem> classify_result;

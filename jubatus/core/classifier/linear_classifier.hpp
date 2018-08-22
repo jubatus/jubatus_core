@@ -77,24 +77,24 @@ class linear_classifier : public classifier_base {
  protected:
   void update_weight(
       const common::sfv_t& sfv,
-      float step_weigth,
+      double step_weigth,
       const std::string& pos_label,
       const std::string& neg_class);
-  float calc_margin(
+  double calc_margin(
       const common::sfv_t& sfv,
       const std::string& label,
       std::string& incorrect_label) const;
-  float calc_margin_and_variance(
+  double calc_margin_and_variance(
       const common::sfv_t& sfv,
       const std::string& label,
       std::string& incorrect_label,
-      float& variance) const;
+      double& variance) const;
   std::string get_largest_incorrect_label(
       const common::sfv_t& sfv,
       const std::string& label,
       classify_result& scores) const;
 
-  static float squared_norm(const common::sfv_t& sfv);
+  static double squared_norm(const common::sfv_t& sfv);
   void check_touchable(const std::string& label);
   void touch(const std::string& label);
 

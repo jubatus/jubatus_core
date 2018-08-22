@@ -51,21 +51,22 @@ void passive_aggressive_1::train(const common::sfv_t& sfv,
   labels_.get_model()->increment(label);
 
   string incorrect_label;
-  float margin = calc_margin(sfv, label, incorrect_label);
-  float loss = 1.f + margin;
-  if (loss < 0.f) {
+  double margin = calc_margin(sfv, label, incorrect_label);
+  double loss = 1.0 + margin;
+  if (loss < 0.0) {
     storage_->register_label(label);
     return;
   }
-  float sfv_norm = squared_norm(sfv);
-  if (sfv_norm == 0.f) {
+  double sfv_norm = squared_norm(sfv);
+  if (sfv_norm == 0.0) {
     storage_->register_label(label);
     return;
   }
 
+  const double C = config_.regularization_weight;
   update_weight(
       sfv,
-      min(config_.regularization_weight, loss / (2 * sfv_norm)),
+      min(C, loss / (2 * sfv_norm)),
       label,
       incorrect_label);
   touch(label);

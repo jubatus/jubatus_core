@@ -37,7 +37,7 @@ namespace fv_converter {
 namespace {
 
 struct is_zero {
-  bool operator()(const pair<string, float>& p) {
+  bool operator()(const pair<string, double>& p) {
     return p.second == 0;
   }
 };
@@ -71,11 +71,11 @@ void keyword_weights::update_document_frequency(
   }
 }
 
-void keyword_weights::add_weight(const string& key, float weight) {
+void keyword_weights::add_weight(const string& key, double weight) {
   weights_[key] = weight;
 }
 
-float keyword_weights::get_user_weight(const string& key) const {
+double keyword_weights::get_user_weight(const string& key) const {
   weight_t::const_iterator wit = weights_.find(key);
   if (wit != weights_.end()) {
     return wit->second;

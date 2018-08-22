@@ -47,8 +47,8 @@ class regression : public driver_base {
           converter);
   virtual ~regression();
 
-  void train(const std::pair<float, fv_converter::datum>& data);
-  float estimate(const fv_converter::datum& data) const;
+  void train(const std::pair<double, fv_converter::datum>& data);
+  double estimate(const fv_converter::datum& data) const;
 
   void get_status(std::map<std::string, std::string>& status) const;
   void clear();

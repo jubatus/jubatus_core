@@ -37,10 +37,10 @@ TEST(recommender_mock, similar_row_by_id) {
   recommender_mock r;
   r.update_row("r1", make_sfv("f1:1 f2:1"));
 
-  const vector<pair<string, float> > expect = make_ids("r2:2 r3:1");
+  const vector<pair<string, double> > expect = make_ids("r2:2 r3:1");
   r.set_similar_relation("r1", expect);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   r.similar_row("r1", ids, 2);
 
   EXPECT_EQ(expect, ids);
@@ -50,10 +50,10 @@ TEST(recommender_mock, neighbor_row_by_id) {
   recommender_mock r;
   r.update_row("r1", make_sfv("f1:1 f2:1"));
 
-  const vector<pair<string, float> > expect = make_ids("r2:1 r3:2");
+  const vector<pair<string, double> > expect = make_ids("r2:1 r3:2");
   r.set_neighbor_relation("r1", expect);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   r.neighbor_row("r1", ids, 2);
 
   EXPECT_EQ(expect, ids);
@@ -63,10 +63,10 @@ TEST(recommender_mock, similar_row_by_query) {
   recommender_mock r;
 
   const common::sfv_t query = make_sfv("f1:1 f2:1");
-  const vector<pair<string, float> > expect = make_ids("r2:2 r3:1");
+  const vector<pair<string, double> > expect = make_ids("r2:2 r3:1");
   r.set_similar_relation(query, expect);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   r.similar_row(query, ids, 2);
 
   EXPECT_EQ(expect, ids);
@@ -76,10 +76,10 @@ TEST(recommender_mock, neighbor_row_by_query) {
   recommender_mock r;
 
   const common::sfv_t query = make_sfv("f1:1 f2:1");
-  const vector<pair<string, float> > expect = make_ids("r2:1 r3:2");
+  const vector<pair<string, double> > expect = make_ids("r2:1 r3:2");
   r.set_neighbor_relation(query, expect);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   r.neighbor_row(query, ids, 2);
 
   EXPECT_EQ(expect, ids);

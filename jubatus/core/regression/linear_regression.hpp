@@ -38,8 +38,8 @@ class linear_regression : public regression_base {
  public:
   explicit linear_regression(storage_ptr storage);
 
-  virtual void train(const common::sfv_t& fv, const float value) = 0;
-  float estimate(const common::sfv_t& fv) const;
+  virtual void train(const common::sfv_t& fv, const double value) = 0;
+  double estimate(const common::sfv_t& fv) const;
 
   void clear();
 
@@ -53,8 +53,8 @@ class linear_regression : public regression_base {
   void unpack(msgpack::object o);
 
  protected:
-  void update(const common::sfv_t& fv, float coeff);
-  float calc_variance(const common::sfv_t& sfv) const;
+  void update(const common::sfv_t& fv, double coeff);
+  double calc_variance(const common::sfv_t& sfv) const;
   storage_ptr storage_;
   framework::linear_function_mixer mixable_storage_;
 };

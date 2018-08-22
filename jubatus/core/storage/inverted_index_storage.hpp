@@ -46,7 +46,7 @@ class inverted_index_storage {
  public:
   struct diff_type {
     sparse_matrix_storage inv;
-    map_float_t column2norm;
+    map_double_t column2norm;
 
     MSGPACK_DEFINE(inv, column2norm);
   };
@@ -58,8 +58,8 @@ class inverted_index_storage {
     unlearner_ = unlearner;
   }
 
-  void set(const std::string& row, const std::string& column, float val);
-  float get(const std::string& row, const std::string& column) const;
+  void set(const std::string& row, const std::string& column, double val);
+  double get(const std::string& row, const std::string& column) const;
   void remove(const std::string& row, const std::string& column);
   void mark_column_removed(const std::string& column);
   void clear();
@@ -67,17 +67,17 @@ class inverted_index_storage {
 
   void calc_scores(
       const common::sfv_t& sfv,
-      std::vector<std::pair<std::string, float> >& scores,
+      std::vector<std::pair<std::string, double> >& scores,
       size_t ret_num) const;
 
   void calc_euclid_scores(
       const common::sfv_t& sfv,
-      std::vector<std::pair<std::string, float> >& scores,
+      std::vector<std::pair<std::string, double> >& scores,
       size_t ret_num) const;
 
   void calc_euclid_scores_ignore_orthogonal(
       const common::sfv_t& sfv,
-      std::vector<std::pair<std::string, float> >& scores,
+      std::vector<std::pair<std::string, double> >& scores,
       size_t ret_num) const;
 
   void get_diff(diff_type& diff_str) const;
@@ -96,11 +96,11 @@ class inverted_index_storage {
   MSGPACK_DEFINE(inv_, inv_diff_, column2norm_, column2norm_diff_, column2id_);
 
  private:
-  static float calc_l2norm(const common::sfv_t& sfv);
-  static float calc_squared_l2norm(const common::sfv_t& sfv);
-  float calc_columnl2norm(uint64_t column_id) const;
-  float calc_column_squared_l2norm(uint64_t column_id) const;
-  float get_from_tbl(
+  static double calc_l2norm(const common::sfv_t& sfv);
+  static double calc_squared_l2norm(const common::sfv_t& sfv);
+  double calc_columnl2norm(uint64_t column_id) const;
+  double calc_column_squared_l2norm(uint64_t column_id) const;
+  double get_from_tbl(
       const std::string& row,
       uint64_t column_id,
       const tbl_t& tbl,
@@ -108,20 +108,20 @@ class inverted_index_storage {
 
   void add_inp_scores(
       const std::string& row,
-      float val,
-      std::vector<float>& scores) const;
+      double val,
+      std::vector<double>& scores) const;
 
   void add_inp_scores(
       const std::string& row,
-      float val,
-      std::vector<float>& scores,
+      double val,
+      std::vector<double>& scores,
       util::data::unordered_set<int>& score_index_set) const;
 
   /**
    * inv_ / inv_diff_ is a master / diff table of the inverted index.
-   * It is a data structure like ``map<string, list<int, float>>``, where
+   * It is a data structure like ``map<string, list<int, double>>``, where
    * the ``string`` is a row ID, ``int`` is a local column ID and
-   * ``float`` value is the weight.
+   * ``double`` value is the weight.
    */
   tbl_t inv_;
   tbl_t inv_diff_;
@@ -137,7 +137,7 @@ class inverted_index_storage {
    * If the value became zero or negative on put_diff, it means that the
    * column was removed from the model (in whole cluster).
    */
-  imap_float_t column2norm_;
+  imap_double_t column2norm_;
 
   /**
    * column2norm_diff_ is a diff table of norm index.  The key of this table
@@ -155,7 +155,7 @@ class inverted_index_storage {
    * The values are updated on every record updates, and be cleared on put_diff
    * in distributed mode.
    */
-  imap_float_t column2norm_diff_;
+  imap_double_t column2norm_diff_;
 
   /**
    * column2id_ holds the mapping of global column IDs and local column IDs.

@@ -50,44 +50,44 @@ sparse_matrix_storage& sparse_matrix_storage::operator =(
 void sparse_matrix_storage::set(
     const string& row,
     const string& column,
-    float val) {
+    double val) {
   tbl_[row][column2id_.get_id(column)] = val;
 }
 
 void sparse_matrix_storage::set_row(
     const string& row,
-    const vector<pair<string, float> >& columns) {
+    const vector<pair<string, double> >& columns) {
   row_t& row_v = tbl_[row];
   for (size_t i = 0; i < columns.size(); ++i) {
-    float& v = row_v[column2id_.get_id(columns[i].first)];
+    double& v = row_v[column2id_.get_id(columns[i].first)];
     // norm_ptr_->notify(row, v, columns[i].second);
     v = columns[i].second;
   }
 }
 
-float sparse_matrix_storage::get(
+double sparse_matrix_storage::get(
     const string& row,
     const string& column) const {
   tbl_t::const_iterator it = tbl_.find(row);
   if (it == tbl_.end()) {
-    return 0.f;
+    return 0.0;
   }
 
   uint64_t id = column2id_.get_id_const(column);
   if (id == common::key_manager::NOTFOUND) {
-    return 0.f;
+    return 0.0;
   }
 
   row_t::const_iterator cit = it->second.find(id);
   if (cit == it->second.end()) {
-    return 0.f;
+    return 0.0;
   }
   return cit->second;
 }
 
 void sparse_matrix_storage::get_row(
     const string& row,
-    vector<pair<string, float> >& columns) const {
+    vector<pair<string, double> >& columns) const {
   columns.clear();
   tbl_t::const_iterator it = tbl_.find(row);
   if (it == tbl_.end()) {
@@ -101,12 +101,12 @@ void sparse_matrix_storage::get_row(
   }
 }
 
-float sparse_matrix_storage::calc_l2norm(const string& row) const {
+double sparse_matrix_storage::calc_l2norm(const string& row) const {
   tbl_t::const_iterator it = tbl_.find(row);
   if (it == tbl_.end()) {
-    return 0.f;
+    return 0.0;
   }
-  float sq_norm = 0.f;
+  double sq_norm = 0.0;
   const row_t& row_v = it->second;
   for (row_t::const_iterator row_it = row_v.begin(); row_it != row_v.end();
       ++row_it) {

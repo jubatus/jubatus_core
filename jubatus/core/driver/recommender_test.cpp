@@ -105,7 +105,7 @@ TEST_F(recommender_test, similar_row_from) {
   recommender_->update_row("id4", d2);
   recommender_->update_row("id5", d2);
 
-  vector<pair<string, float> > ret;
+  vector<pair<string, double> > ret;
 
   ret = recommender_->similar_row_from_datum(d1, 5);
   ASSERT_EQ(5, ret.size());
@@ -232,7 +232,7 @@ TEST_P(nn_recommender_test, update) {
     recommender_->update_row("id7", create_datum_str("a", "j a b"));
   }
 
-  vector<pair<string, float> > ret =
+  vector<pair<string, double> > ret =
       recommender_->similar_row_from_datum(d, 10);
   ASSERT_EQ("id4", ret[0].first);
 }
@@ -240,7 +240,7 @@ TEST_P(nn_recommender_test, update) {
 TEST_P(nn_recommender_test, missing_id) {
   recommender_->update_row("id1", create_datum_str("a", "a b c"));
 
-  vector<pair<string, float> > ret =
+  vector<pair<string, double> > ret =
       recommender_->similar_row_from_id("id2", 10);
   ASSERT_EQ(0, ret.size());
 }
@@ -330,7 +330,7 @@ TEST_P(recommender_with_unlearning_test, update_row) {
   recommender_->update_row("id6", create_datum_str("a", "g h"));
   recommender_->update_row("id7", create_datum_str("a", "h i"));
 
-  vector<pair<string, float> > ret =
+  vector<pair<string, double> > ret =
     recommender_->similar_row_from_id("id6", MAX_SIZE + 1);
   ASSERT_EQ(MAX_SIZE, ret.size());
 }
@@ -345,7 +345,7 @@ TEST_P(recommender_with_unlearning_test, clear_row) {
   recommender_->update_row("id6", create_datum_str("a", "g h"));
   recommender_->update_row("id7", create_datum_str("a", "h i"));
 
-  vector<pair<string, float> > ret =
+  vector<pair<string, double> > ret =
     recommender_->similar_row_from_id("id6", MAX_SIZE + 1);
   ASSERT_EQ(MAX_SIZE, ret.size());
 
@@ -356,7 +356,7 @@ TEST_P(recommender_with_unlearning_test, clear_row) {
 TEST_P(recommender_with_unlearning_test, missing_id) {
   recommender_->update_row("id1", create_datum_str("a", "b c"));
 
-  vector<pair<string, float> > ret =
+  vector<pair<string, double> > ret =
     recommender_->similar_row_from_id("id2", MAX_SIZE + 1);
   ASSERT_EQ(0, ret.size());
 }

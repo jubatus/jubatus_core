@@ -47,8 +47,8 @@ class confidence_weighted : public linear_regression {
       storage_ptr storage);
   explicit confidence_weighted(storage_ptr storage);
 
-  void train(const common::sfv_t& fv, float value);
-  void update(const common::sfv_t& sfv, float step_width, float sign_error);
+  void train(const common::sfv_t& fv, double value);
+  void update(const common::sfv_t& sfv, double step_width, double sign_error);
 
   void clear();
 

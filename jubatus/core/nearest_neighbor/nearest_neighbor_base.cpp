@@ -70,7 +70,7 @@ void nearest_neighbor_base::clear() {
 
 void nearest_neighbor_base::similar_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   neighbor_row(query, ids, ret_num);  // lock acquired inside
   for (size_t i = 0; i < ids.size(); ++i) {
@@ -80,7 +80,7 @@ void nearest_neighbor_base::similar_row(
 
 void nearest_neighbor_base::similar_row(
     const string& query_id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   neighbor_row(query_id, ids, ret_num);  // lock acquired inside
   for (size_t i = 0; i < ids.size(); ++i) {

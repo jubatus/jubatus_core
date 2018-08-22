@@ -35,7 +35,7 @@ class num_feature {
   virtual void add_feature(
       const std::string& key,
       double value,
-      std::vector<std::pair<std::string, float> >& ret_fv) const = 0;
+      std::vector<std::pair<std::string, double> >& ret_fv) const = 0;
 };
 
 }  // namespace fv_converter

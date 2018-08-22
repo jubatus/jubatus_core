@@ -43,7 +43,7 @@ class perceptron : public linear_regression {
       const config& config,
       storage_ptr storage);
   explicit perceptron(storage_ptr storage);
-  void train(const common::sfv_t& sfv, const float value);
+  void train(const common::sfv_t& sfv, const double value);
   void clear();
 
  private:

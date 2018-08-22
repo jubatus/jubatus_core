@@ -116,22 +116,22 @@ TEST_F(bit_vector_nearest_neighbor_base_test, neighbor_row_from_datum) {
   mock_->add_bv("C", make_bv("0111"));
   mock_->add_bv("D", make_bv("1100"));
 
-  vector<pair<string, float> > actual_neighbors, expect_neighbors;
+  vector<pair<string, double> > actual_neighbors, expect_neighbors;
   mock_->set_next_bv(make_bv("1111"));
   mock_->neighbor_row(common::sfv_t(), actual_neighbors, 3);
 
-  expect_neighbors.push_back(make_pair("C", .25f));
-  expect_neighbors.push_back(make_pair("D", .5f));
-  expect_neighbors.push_back(make_pair("B", .75f));
+  expect_neighbors.push_back(make_pair("C", .25));
+  expect_neighbors.push_back(make_pair("D", .5));
+  expect_neighbors.push_back(make_pair("B", .75));
 
   EXPECT_EQ(expect_neighbors, actual_neighbors);
 
-  vector<pair<string, float> > actual_similars, expect_similars;
+  vector<pair<string, double> > actual_similars, expect_similars;
 
   mock_->similar_row(common::sfv_t(), actual_similars, 3);
-  expect_similars.push_back(make_pair("C", .75f));
-  expect_similars.push_back(make_pair("D", .5f));
-  expect_similars.push_back(make_pair("B", .25f));
+  expect_similars.push_back(make_pair("C", .75));
+  expect_similars.push_back(make_pair("D", .5));
+  expect_similars.push_back(make_pair("B", .25));
 
   EXPECT_EQ(expect_similars, actual_similars);
 }
@@ -143,19 +143,19 @@ TEST_F(bit_vector_nearest_neighbor_base_test, neighbor_row_from_id) {
   mock_->add_bv("C", make_bv("1111"));
   mock_->add_bv("D", make_bv("1100"));
 
-  vector<pair<string, float> > actual_neighbors, expect_neighbors;
+  vector<pair<string, double> > actual_neighbors, expect_neighbors;
   mock_->neighbor_row("C", actual_neighbors, 3);
-  expect_neighbors.push_back(make_pair("C", .0f));
-  expect_neighbors.push_back(make_pair("D", .5f));
-  expect_neighbors.push_back(make_pair("B", .75f));
+  expect_neighbors.push_back(make_pair("C", .0));
+  expect_neighbors.push_back(make_pair("D", .5));
+  expect_neighbors.push_back(make_pair("B", .75));
 
   EXPECT_EQ(expect_neighbors, actual_neighbors);
 
-  vector<pair<string, float> > actual_similars, expect_similars;
+  vector<pair<string, double> > actual_similars, expect_similars;
   mock_->similar_row("C", actual_similars, 3);
-  expect_similars.push_back(make_pair("C", 1.f));
-  expect_similars.push_back(make_pair("D", .5f));
-  expect_similars.push_back(make_pair("B", .25f));
+  expect_similars.push_back(make_pair("C", 1.0));
+  expect_similars.push_back(make_pair("D", .5));
+  expect_similars.push_back(make_pair("B", .25));
 
   EXPECT_EQ(expect_similars, actual_similars);
 }

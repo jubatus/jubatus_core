@@ -111,7 +111,7 @@ class datum_to_fv_converter {
       jubatus::util::lang::shared_ptr<key_matcher> matcher_right,
       jubatus::util::lang::shared_ptr<combination_feature> feature_func);
 
-  void add_weight(const std::string& key, float weight);
+  void add_weight(const std::string& key, double weight);
 
   void set_hash_max_size(uint64_t hash_max_size);
 

@@ -68,7 +68,7 @@ void bit_vector_nearest_neighbor_base::set_row(
 
 void bit_vector_nearest_neighbor_base::neighbor_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   const bit_vector query_hash = hash(query);
   util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
@@ -80,7 +80,7 @@ void bit_vector_nearest_neighbor_base::neighbor_row(
 
 void bit_vector_nearest_neighbor_base::neighbor_row(
     const string& query_id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
 
@@ -110,11 +110,11 @@ const_bit_vector_column& bit_vector_nearest_neighbor_base::bit_vector_column()
 
 void bit_vector_nearest_neighbor_base::neighbor_row_from_hash(
     const bit_vector& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   // this function is not thread safe.
   // take lock out of this function
-  vector<pair<uint64_t, float> > scores;
+  vector<pair<uint64_t, double> > scores;
 
   ranking_hamming_bit_vectors(
     query, bit_vector_column(), scores, ret_num, threads_);
