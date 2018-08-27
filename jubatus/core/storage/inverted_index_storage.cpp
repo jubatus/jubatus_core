@@ -53,13 +53,13 @@ inverted_index_storage::~inverted_index_storage() {
 void inverted_index_storage::set(
     const std::string& row,
     const std::string& column,
-    float val) {
+    double val) {
   uint64_t column_id = column2id_.get_id_const(column);
 
   if (column_id == common::key_manager::NOTFOUND) {
     column_id = column2id_.get_id(column);
   } else {
-    float cur_val = get(row, column);
+    double cur_val = get(row, column);
     column2norm_diff_[column_id] -= cur_val * cur_val;
   }
   inv_diff_[row][column_id] = val;
@@ -69,23 +69,23 @@ void inverted_index_storage::set(
   }
 }
 
-float inverted_index_storage::get(
+double inverted_index_storage::get(
     const string& row,
     const string& column) const {
   uint64_t column_id = column2id_.get_id_const(column);
   if (column_id == common::key_manager::NOTFOUND) {
-    return 0.f;
+    return 0.0;
   }
   {
     bool exist = false;
-    float ret = get_from_tbl(row, column_id, inv_diff_, exist);
+    double ret = get_from_tbl(row, column_id, inv_diff_, exist);
     if (exist) {
       return ret;
     }
   }
   {
     bool exist = false;
-    float ret = get_from_tbl(row, column_id, inv_, exist);
+    double ret = get_from_tbl(row, column_id, inv_, exist);
     if (exist) {
       return ret;
     }
@@ -93,7 +93,7 @@ float inverted_index_storage::get(
   return 0.0;
 }
 
-float inverted_index_storage::get_from_tbl(
+double inverted_index_storage::get_from_tbl(
     const std::string& row,
     uint64_t column_id,
     const tbl_t& tbl,
@@ -101,15 +101,15 @@ float inverted_index_storage::get_from_tbl(
   exist = false;
 
   if (column_id == common::key_manager::NOTFOUND) {
-    return 0.f;
+    return 0.0;
   }
   tbl_t::const_iterator it = tbl.find(row);
   if (it == tbl.end()) {
-    return 0.f;
+    return 0.0;
   } else {
     row_t::const_iterator it_row = it->second.find(column_id);
     if (it_row == it->second.end()) {
-      return 0.f;
+      return 0.0;
     } else {
       exist = true;
       return it_row->second;
@@ -131,7 +131,7 @@ void inverted_index_storage::remove(
     return;
   }
 
-  set(row, column, 0.f);
+  set(row, column, 0.0);
 
   // Test if the data exists in the master table.
   bool exist = false;
@@ -182,22 +182,22 @@ void inverted_index_storage::mark_column_removed(const std::string& column) {
 void inverted_index_storage::clear() {
   tbl_t().swap(inv_);
   tbl_t().swap(inv_diff_);
-  imap_float_t().swap(column2norm_);
-  imap_float_t().swap(column2norm_diff_);
+  imap_double_t().swap(column2norm_);
+  imap_double_t().swap(column2norm_diff_);
   common::key_manager().swap(column2id_);
 }
 
 void inverted_index_storage::get_all_column_ids(
     std::vector<std::string>& ids) const {
   ids.clear();
-  for (imap_float_t::const_iterator it = column2norm_.begin();
+  for (imap_double_t::const_iterator it = column2norm_.begin();
       it != column2norm_.end(); ++it) {
     ids.push_back(column2id_.get_key(it->first));
   }
-  for (imap_float_t::const_iterator it = column2norm_diff_.begin();
+  for (imap_double_t::const_iterator it = column2norm_diff_.begin();
       it != column2norm_diff_.end(); ++it) {
     if (column2norm_.find(it->first) == column2norm_.end()) {
-      if (0.f < it->second) {  // recently removed row has zero value
+      if (0.0 < it->second) {  // recently removed row has zero value
         ids.push_back(column2id_.get_key(it->first));
       } else {
         // remove if diff specify 0.0
@@ -218,7 +218,7 @@ void inverted_index_storage::get_all_column_ids(
 void inverted_index_storage::get_diff(diff_type& diff) const {
   for (tbl_t::const_iterator it = inv_diff_.begin(); it != inv_diff_.end();
       ++it) {
-    vector<pair<string, float> > columns;
+    vector<pair<string, double> > columns;
     for (row_t::const_iterator it2 = it->second.begin();
         it2 != it->second.end(); ++it2) {
       columns.push_back(make_pair(column2id_.get_key(it2->first), it2->second));
@@ -226,7 +226,7 @@ void inverted_index_storage::get_diff(diff_type& diff) const {
     diff.inv.set_row(it->first, columns);
   }
 
-  for (imap_float_t::const_iterator it = column2norm_diff_.begin();
+  for (imap_double_t::const_iterator it = column2norm_diff_.begin();
       it != column2norm_diff_.end(); ++it) {
     diff.column2norm[column2id_.get_key(it->first)] = it->second;
   }
@@ -241,7 +241,7 @@ bool inverted_index_storage::put_diff(
   if (unlearner_) {
     for (size_t i = 0; i < ids.size(); ++i) {
       const string& row = ids[i];
-      vector<pair<string, float> > columns;
+      vector<pair<string, double> > columns;
       mixed_diff.inv.get_row(row, columns);
       for (size_t j = 0; j < columns.size(); ++j) {
         if (unlearner_->can_touch(columns[j].first)) {
@@ -280,12 +280,12 @@ bool inverted_index_storage::put_diff(
   for (size_t i = 0; i < ids.size(); ++i) {
     const string& row = ids[i];
     row_t& v = inv_[row];
-    vector<pair<string, float> > columns;
+    vector<pair<string, double> > columns;
     mixed_diff.inv.get_row(row, columns);
 
     for (size_t j = 0; j < columns.size(); ++j) {
       size_t id = column2id_.get_id(columns[j].first);
-      if (columns[j].second == 0.f) {
+      if (columns[j].second == 0.0) {
         v.erase(id);
       } else {
         if (unlearner_) {
@@ -302,7 +302,7 @@ bool inverted_index_storage::put_diff(
   inv_diff_.clear();
 
   if (unlearner_) {
-    for (map_float_t::const_iterator it = mixed_diff.column2norm.begin();
+    for (map_double_t::const_iterator it = mixed_diff.column2norm.begin();
          it != mixed_diff.column2norm.end(); ++it) {
       unordered_map<string, bool>::const_iterator target =
           update_list.find(it->first);
@@ -310,7 +310,7 @@ bool inverted_index_storage::put_diff(
       if (target != update_list.end() && target->second) {
         // unlearner admit to update
         column2norm_[column_index] += it->second;
-        if (column2norm_[column_index] <= 0.f) {
+        if (column2norm_[column_index] <= 0.0) {
           column2norm_.erase(column_index);
         }
       } else {
@@ -318,11 +318,11 @@ bool inverted_index_storage::put_diff(
       }
     }
   } else {
-    for (map_float_t::const_iterator it = mixed_diff.column2norm.begin();
+    for (map_double_t::const_iterator it = mixed_diff.column2norm.begin();
          it != mixed_diff.column2norm.end(); ++it) {
       uint64_t column_index = column2id_.get_id(it->first);
       column2norm_[column_index] += it->second;
-      if (column2norm_[column_index] <= 0.f) {
+      if (column2norm_[column_index] <= 0.0) {
         column2norm_.erase(column_index);
       }
     }
@@ -338,13 +338,13 @@ void inverted_index_storage::mix(const diff_type& lhs, diff_type& rhs) const {
   for (size_t i = 0; i < ids.size(); ++i) {
     const string& row = ids[i];
 
-    vector<pair<string, float> > columns;
+    vector<pair<string, double> > columns;
     lhs.inv.get_row(row, columns);
     rhs.inv.set_row(row, columns);
   }
 
   // merge norm diffs
-  for (map_float_t::const_iterator it = lhs.column2norm.begin();
+  for (map_double_t::const_iterator it = lhs.column2norm.begin();
       it != lhs.column2norm.end(); ++it) {
     rhs.column2norm[it->first] += it->second;
   }
@@ -360,30 +360,32 @@ void inverted_index_storage::unpack(msgpack::object o) {
 
 void inverted_index_storage::calc_scores(
     const common::sfv_t& query,
-    vector<pair<string, float> >& scores,
+    vector<pair<string, double> >& scores,
     size_t ret_num) const {
-  float query_squared_norm = calc_squared_l2norm(query);
-  if (query_squared_norm == 0.f) {
+  double query_squared_norm = calc_squared_l2norm(query);
+  if (query_squared_norm == 0.0) {
     return;
   }
 
-  std::vector<float> i_scores(column2id_.get_max_id() + 1, 0.0);
+  std::vector<double> i_scores(column2id_.get_max_id() + 1, 0.0);
   for (size_t i = 0; i < query.size(); ++i) {
     const string& fid = query[i].first;
-    float val = query[i].second;
+    double val = query[i].second;
     add_inp_scores(fid, val, i_scores);
   }
 
-  storage::fixed_size_heap<pair<float, uint64_t>,
-                           std::greater<pair<float, uint64_t> > > heap(ret_num);
+  storage::fixed_size_heap<
+      pair<double, uint64_t>,
+      std::greater<pair<double, uint64_t> > > heap(ret_num);
+
   for (size_t i = 0; i < i_scores.size(); ++i) {
-    float score = i_scores[i];
-    if (score == 0.f)
+    double score = i_scores[i];
+    if (score == 0.0)
       continue;
-    float squared_norm = calc_column_squared_l2norm(i);
-    if (squared_norm == 0.f)
+    double squared_norm = calc_column_squared_l2norm(i);
+    if (squared_norm == 0.0)
       continue;
-    float cosine_similarity = 1.f;
+    double cosine_similarity = 1.0;
     if (squared_norm != query_squared_norm || squared_norm != score) {
       cosine_similarity = score
                           / std::sqrt(squared_norm)
@@ -391,13 +393,13 @@ void inverted_index_storage::calc_scores(
     }
     heap.push(make_pair(cosine_similarity, i));
   }
-  vector<pair<float, uint64_t> > sorted_scores;
+  vector<pair<double, uint64_t> > sorted_scores;
   heap.get_sorted(sorted_scores);
 
   for (size_t i = 0; i < sorted_scores.size() && i < ret_num; ++i) {
     scores.push_back(
         make_pair(column2id_.get_key(sorted_scores[i].second),
-                  std::min(std::max(-1.f, sorted_scores[i].first), 1.f)));
+                  std::min(std::max(-1.0, sorted_scores[i].first), 1.0)));
   }
 }
 
@@ -408,23 +410,24 @@ void inverted_index_storage::calc_scores(
  */
 void inverted_index_storage::calc_euclid_scores(
     const common::sfv_t& query,
-    vector<pair<string, float> >& scores,
+    vector<pair<string, double> >& scores,
     size_t ret_num) const {
-  std::vector<float> i_scores(column2id_.get_max_id() + 1, 0.0);
+  std::vector<double> i_scores(column2id_.get_max_id() + 1, 0.0);
   for (size_t i = 0; i < query.size(); ++i) {
     const string& fid = query[i].first;
-    float val = query[i].second;
+    double val = query[i].second;
     add_inp_scores(fid, val, i_scores);
   }
 
-  storage::fixed_size_heap<pair<float, uint64_t>,
-                           std::greater<pair<float, uint64_t> > > heap(ret_num);
+  storage::fixed_size_heap<
+      pair<double, uint64_t>,
+      std::greater<pair<double, uint64_t> > > heap(ret_num);
 
-  float squared_query_norm = calc_squared_l2norm(query);
+  double squared_query_norm = calc_squared_l2norm(query);
   for (size_t i = 0; i < i_scores.size(); ++i) {
-    float squared_norm = calc_column_squared_l2norm(i);
+    double squared_norm = calc_column_squared_l2norm(i);
 
-    if (squared_norm == 0.f) {
+    if (squared_norm == 0.0) {
       // The column is already removed.
       continue;
     }
@@ -434,11 +437,11 @@ void inverted_index_storage::calc_euclid_scores(
     // expected to be 0) due to the floating point precision problem.
     // This cause `sqrt(d2)` to return NaN, which is not what we want.
     // To avoid this we use `sqrt(max(0, d2))`.
-    float d2 = squared_query_norm + squared_norm - 2 * i_scores[i];
-    heap.push(make_pair(-std::sqrt(std::max(0.f, d2)), i));
+    double d2 = squared_query_norm + squared_norm - 2 * i_scores[i];
+    heap.push(make_pair(-std::sqrt(std::max(0.0, d2)), i));
   }
 
-  vector<pair<float, uint64_t> > sorted_scores;
+  vector<pair<double, uint64_t> > sorted_scores;
   heap.get_sorted(sorted_scores);
 
   for (size_t i = 0; i < sorted_scores.size() && i < ret_num; ++i) {
@@ -450,27 +453,28 @@ void inverted_index_storage::calc_euclid_scores(
 
 void inverted_index_storage::calc_euclid_scores_ignore_orthogonal(
     const common::sfv_t& query,
-    vector<pair<string, float> >& scores,
+    vector<pair<string, double> >& scores,
     size_t ret_num) const {
-  std::vector<float> i_scores(column2id_.get_max_id() + 1, 0.0);
+  std::vector<double> i_scores(column2id_.get_max_id() + 1, 0.0);
   unordered_set<int> i_scores_index_set;
   for (size_t i = 0; i < query.size(); ++i) {
     const string& fid = query[i].first;
-    float val = query[i].second;
+    double val = query[i].second;
     add_inp_scores(fid, val, i_scores, i_scores_index_set);
   }
 
-  storage::fixed_size_heap<pair<float, uint64_t>,
-                           std::greater<pair<float, uint64_t> > > heap(ret_num);
+  storage::fixed_size_heap<
+      pair<double, uint64_t>,
+      std::greater<pair<double, uint64_t> > > heap(ret_num);
 
-  float squared_query_norm = calc_squared_l2norm(query);
+  double squared_query_norm = calc_squared_l2norm(query);
 
   for (unordered_set<int>::const_iterator it = i_scores_index_set.begin();
        it != i_scores_index_set.end();
        ++it) {
-    float squared_norm = calc_column_squared_l2norm(*(it));
+    double squared_norm = calc_column_squared_l2norm(*(it));
 
-    if (squared_norm == 0.f) {
+    if (squared_norm == 0.0) {
       // The column is already removed.
       continue;
     }
@@ -480,11 +484,11 @@ void inverted_index_storage::calc_euclid_scores_ignore_orthogonal(
     // expected to be 0) due to the floating point precision problem.
     // This cause `sqrt(d2)` to return NaN, which is not what we want.
     // To avoid this we use `sqrt(max(0, d2))`.
-    float d2 = squared_query_norm + squared_norm - 2 * i_scores[*(it)];
-    heap.push(make_pair(-std::sqrt(std::max(0.f, d2)), *(it)));
+    double d2 = squared_query_norm + squared_norm - 2 * i_scores[*(it)];
+    heap.push(make_pair(-std::sqrt(std::max(0.0, d2)), *(it)));
   }
 
-  vector<pair<float, uint64_t> > sorted_scores;
+  vector<pair<double, uint64_t> > sorted_scores;
   heap.get_sorted(sorted_scores);
 
   for (size_t i = 0; i < sorted_scores.size() && i < ret_num; ++i) {
@@ -495,30 +499,30 @@ void inverted_index_storage::calc_euclid_scores_ignore_orthogonal(
 }
 
 
-float inverted_index_storage::calc_l2norm(const common::sfv_t& sfv) {
+double inverted_index_storage::calc_l2norm(const common::sfv_t& sfv) {
   return std::sqrt(calc_squared_l2norm(sfv));
 }
 
-float inverted_index_storage::calc_squared_l2norm(const common::sfv_t& sfv) {
-  float ret = 0.f;
+double inverted_index_storage::calc_squared_l2norm(const common::sfv_t& sfv) {
+  double ret = 0.0;
   for (size_t i = 0; i < sfv.size(); ++i) {
     ret += sfv[i].second * sfv[i].second;
   }
   return ret;
 }
 
-float inverted_index_storage::calc_columnl2norm(uint64_t column_id) const {
+double inverted_index_storage::calc_columnl2norm(uint64_t column_id) const {
   return std::sqrt(calc_column_squared_l2norm(column_id));
 }
 
-float inverted_index_storage::calc_column_squared_l2norm(
+double inverted_index_storage::calc_column_squared_l2norm(
     uint64_t column_id) const {
-  float ret = 0.f;
-  imap_float_t::const_iterator it_diff = column2norm_diff_.find(column_id);
+  double ret = 0.0;
+  imap_double_t::const_iterator it_diff = column2norm_diff_.find(column_id);
   if (it_diff != column2norm_diff_.end()) {
     ret += it_diff->second;
   }
-  imap_float_t::const_iterator it = column2norm_.find(column_id);
+  imap_double_t::const_iterator it = column2norm_.find(column_id);
   if (it != column2norm_.end()) {
     ret += it->second;
   }
@@ -527,8 +531,8 @@ float inverted_index_storage::calc_column_squared_l2norm(
 
 void inverted_index_storage::add_inp_scores(
     const std::string& row,
-    float val,
-    std::vector<float>& scores) const {
+    double val,
+    std::vector<double>& scores) const {
   tbl_t::const_iterator it_diff = inv_diff_.find(row);
   if (it_diff != inv_diff_.end()) {
     const row_t& row_v = it_diff->second;
@@ -560,8 +564,8 @@ void inverted_index_storage::add_inp_scores(
 
 void inverted_index_storage::add_inp_scores(
     const std::string& row,
-    float val,
-    std::vector<float>& scores,
+    double val,
+    std::vector<double>& scores,
     unordered_set<int>& scores_index_set) const {
   tbl_t::const_iterator it_diff = inv_diff_.find(row);
   if (it_diff != inv_diff_.end()) {

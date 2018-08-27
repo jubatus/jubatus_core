@@ -57,15 +57,15 @@ vector<common::sfv_t> draw_2d_points_from_gaussian(
     jubatus::util::math::random::mtrand& mtr) {
   vector<common::sfv_t> points(num_points);
   for (size_t i = 0; i < points.size(); ++i) {
-    const float x = mtr.next_gaussian(x_mean, x_deviation);
-    const float y = mtr.next_gaussian(y_mean, y_deviation);
+    const double x = mtr.next_gaussian(x_mean, x_deviation);
+    const double y = mtr.next_gaussian(y_mean, y_deviation);
     points[i].push_back(make_pair("x", x));
     points[i].push_back(make_pair("y", y));
   }
   return points;
 }
 
-common::sfv_t create_2d_point(float x, float y) {
+common::sfv_t create_2d_point(double x, double y) {
   common::sfv_t point;
   point.push_back(make_pair("x", x));
   point.push_back(make_pair("y", y));
@@ -155,11 +155,11 @@ TYPED_TEST_P(light_lof_test, calc_anomaly_score_on_gaussian_random_samples) {
 
   // Mean should be treated as normal.
   const common::sfv_t normal_query = create_2d_point(3, 1);
-  EXPECT_GT(1.25f, this->light_lof_->calc_anomaly_score(normal_query));
+  EXPECT_GT(1.25, this->light_lof_->calc_anomaly_score(normal_query));
 
   // Outlier point should be treated as anomaly.
   const common::sfv_t outlier_query = create_2d_point(0, 3);
-  EXPECT_LT(2.f, this->light_lof_->calc_anomaly_score(outlier_query));
+  EXPECT_LT(2.0, this->light_lof_->calc_anomaly_score(outlier_query));
 }
 
 TYPED_TEST_P(light_lof_with_ignore_kth_test, ignore_kth_same_point) {
@@ -232,7 +232,7 @@ TYPED_TEST_P(light_lof_test, set_bulk) {
     common::sfv_t v;
     std::ostringstream id;
     id << i;
-    v.push_back(make_pair("x", static_cast<float>(i)));
+    v.push_back(make_pair("x", static_cast<double>(i)));
     data.push_back(make_pair(id.str(), v));
   }
   ids = this->light_lof_->set_bulk(data);

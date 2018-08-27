@@ -53,13 +53,13 @@ void confidence_weighted::train(const common::sfv_t& sfv, const string& label) {
 
   const float C = config_.regularization_weight;
   string incorrect_label;
-  float variance = 0.f;
-  float margin = -calc_margin_and_variance(sfv, label, incorrect_label,
-                                           variance);
-  float b = 1.f + 2 * C * margin;
-  float gamma = -b + std::sqrt(b * b - 8 * C * (margin - C * variance));
+  double variance = 0.0;
+  double margin = -calc_margin_and_variance(sfv, label, incorrect_label,
+                                            variance);
+  double b = 1.0 + 2 * C * margin;
+  double gamma = -b + std::sqrt(b * b - 8 * C * (margin - C * variance));
 
-  if (gamma <= 0.f) {
+  if (gamma <= 0.0) {
     storage_->register_label(label);
     return;
   }
@@ -69,35 +69,35 @@ void confidence_weighted::train(const common::sfv_t& sfv, const string& label) {
 
 void confidence_weighted::update(
     const common::sfv_t& sfv,
-    float step_width,
+    double step_width,
     const string& pos_label,
     const string& neg_label) {
   util::concurrent::scoped_wlock lk(storage_->get_lock());
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const string& feature = it->first;
-    float val = it->second;
+    double val = it->second;
     storage::feature_val2_t val2;
     storage_->get2_nolock(feature, val2);
 
-    storage::val2_t pos_val(0.f, 1.f);
-    storage::val2_t neg_val(0.f, 1.f);
+    storage::val2_t pos_val(0.0, 1.0);
+    storage::val2_t neg_val(0.0, 1.0);
     ClassifierUtil::get_two(val2, pos_label, neg_label, pos_val, neg_val);
 
     const float C = config_.regularization_weight;
-    float covar_pos_step = 2.f * step_width * val * val * C;
-    float covar_neg_step = 2.f * step_width * val * val * C;
+    double covar_pos_step = 2.0 * step_width * val * val * C;
+    double covar_neg_step = 2.0 * step_width * val * val * C;
 
     storage_->set2_nolock(
         feature,
         pos_label,
         storage::val2_t(pos_val.v1 + step_width * pos_val.v2 * val,
-                        1.f / (1.f / pos_val.v2 + covar_pos_step)));
+                        1.0 / (1.0 / pos_val.v2 + covar_pos_step)));
     if (neg_label != "") {
       storage_->set2_nolock(
           feature,
           neg_label,
           storage::val2_t(neg_val.v1 - step_width * neg_val.v2 * val,
-                          1.f / (1.f / neg_val.v2 + covar_neg_step)));
+                          1.0 / (1.0 / neg_val.v2 + covar_neg_step)));
     }
   }
   touch(pos_label);

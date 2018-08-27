@@ -83,7 +83,7 @@ void linear_classifier::classify_with_scores(
 string linear_classifier::classify(const common::sfv_t& fv) const {
   classify_result result;
   classify_with_scores(fv, result);
-  float max_score = -FLT_MAX;
+  double max_score = -DBL_MAX;
   string max_class;
   for (vector<classify_result_elem>::const_iterator it = result.begin();
       it != result.end(); ++it) {
@@ -133,7 +133,7 @@ void linear_classifier::get_status(std::map<string, string>& status) const {
 
 void linear_classifier::update_weight(
     const common::sfv_t& sfv,
-    float step_width,
+    double step_width,
     const string& pos_label,
     const string& neg_label) {
   storage_->bulk_update(sfv, step_width, pos_label, neg_label);
@@ -144,7 +144,7 @@ string linear_classifier::get_largest_incorrect_label(
     const string& label,
     classify_result& scores) const {
   classify_with_scores(fv, scores);
-  float max_score = -FLT_MAX;
+  double max_score = -DBL_MAX;
   string max_class;
   for (vector<classify_result_elem>::const_iterator it = scores.begin();
       it != scores.end(); ++it) {
@@ -159,14 +159,14 @@ string linear_classifier::get_largest_incorrect_label(
   return max_class;
 }
 
-float linear_classifier::calc_margin(
+double linear_classifier::calc_margin(
     const common::sfv_t& fv,
     const string& label,
     string& incorrect_label) const {
   classify_result scores;
   incorrect_label = get_largest_incorrect_label(fv, label, scores);
-  float correct_score = 0.f;
-  float incorrect_score = 0.f;
+  double correct_score = 0.0;
+  double incorrect_score = 0.0;
   for (vector<classify_result_elem>::const_iterator it = scores.begin();
       it != scores.end(); ++it) {
     if (it->label == label) {
@@ -178,22 +178,22 @@ float linear_classifier::calc_margin(
   return incorrect_score - correct_score;
 }
 
-float linear_classifier::calc_margin_and_variance(
+double linear_classifier::calc_margin_and_variance(
     const common::sfv_t& sfv,
     const string& label,
     string& incorrect_label,
-    float& var) const {
-  float margin = calc_margin(sfv, label, incorrect_label);
-  var = 0.f;
+    double& var) const {
+  double margin = calc_margin(sfv, label, incorrect_label);
+  var = 0.0;
 
   util::concurrent::scoped_rlock lk(storage_->get_lock());
   for (size_t i = 0; i < sfv.size(); ++i) {
     const string& feature = sfv[i].first;
-    const float val = sfv[i].second;
+    const double val = sfv[i].second;
     feature_val2_t weight_covars;
     storage_->get2_nolock(feature, weight_covars);
-    float label_covar = 1.f;
-    float incorrect_label_covar = 1.f;
+    double label_covar = 1.0;
+    double incorrect_label_covar = 1.0;
     for (size_t j = 0; j < weight_covars.size(); ++j) {
       if (weight_covars[j].first == label) {
         label_covar = weight_covars[j].second.v2;
@@ -206,8 +206,8 @@ float linear_classifier::calc_margin_and_variance(
   return margin;
 }
 
-float linear_classifier::squared_norm(const common::sfv_t& fv) {
-  float ret = 0.f;
+double linear_classifier::squared_norm(const common::sfv_t& fv) {
+  double ret = 0.0;
   for (size_t i = 0; i < fv.size(); ++i) {
     ret += fv[i].second * fv[i].second;
   }

@@ -49,7 +49,7 @@ class recommender_impl : public recommender_base {
 
   void similar_row(
       const common::sfv_t& query,
-      vector<pair<string, float> >& ids,
+      vector<pair<string, double> >& ids,
       size_t ret_num) const {
     ids.clear();
     ids.push_back(make_pair("r1", 2.0));
@@ -58,7 +58,7 @@ class recommender_impl : public recommender_base {
 
   void neighbor_row(
       const common::sfv_t& query,
-      vector<pair<string, float> >& ids,
+      vector<pair<string, double> >& ids,
       size_t ret_num) const {
     ids.clear();
     ids.push_back(make_pair("r1", 1.0));
@@ -139,7 +139,7 @@ TEST(recommender_base, calc_l2norm) {
   q.push_back(make_pair("a2", 2.0));
   q.push_back(make_pair("a3", 3.0));
 
-  EXPECT_FLOAT_EQ(std::sqrt(1.0 + 4.0 + 9.0), r.calc_l2norm(q));
+  EXPECT_DOUBLE_EQ(std::sqrt(1.0 + 4.0 + 9.0), r.calc_l2norm(q));
 }
 
 TEST(recommender_base, calc_similarity) {
@@ -155,7 +155,7 @@ TEST(recommender_base, calc_similarity) {
   q2.push_back(make_pair("c3", 3.0));
   q2.push_back(make_pair("c2", 3.0));
 
-  EXPECT_FLOAT_EQ(
+  EXPECT_DOUBLE_EQ(
       (2.0 * 3.0 + 3.0 * 3.0) / r.calc_l2norm(q1) / r.calc_l2norm(q2),
       r.calc_similarity(q1, q2));
 }

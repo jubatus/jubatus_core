@@ -56,29 +56,29 @@ class recommender : public driver_base {
 
   fv_converter::datum complete_row_from_id(const std::string& id);
   fv_converter::datum complete_row_from_datum(const fv_converter::datum& dat);
-  std::vector<std::pair<std::string, float> > similar_row_from_id(
+  std::vector<std::pair<std::string, double> > similar_row_from_id(
       const std::string& id,
       size_t ret_num);
-  std::vector<std::pair<std::string, float> > similar_row_from_id_and_score(
+  std::vector<std::pair<std::string, double> > similar_row_from_id_and_score(
       const std::string& id,
-      float score);
-  std::vector<std::pair<std::string, float> > similar_row_from_id_and_rate(
+      double score);
+  std::vector<std::pair<std::string, double> > similar_row_from_id_and_rate(
       const std::string& id,
       float rate);
-  std::vector<std::pair<std::string, float> > similar_row_from_datum(
+  std::vector<std::pair<std::string, double> > similar_row_from_datum(
       const fv_converter::datum& data,
       size_t size);
-  std::vector<std::pair<std::string, float> > similar_row_from_datum_and_score(
+  std::vector<std::pair<std::string, double> > similar_row_from_datum_and_score(
       const fv_converter::datum& data,
-      float score);
-  std::vector<std::pair<std::string, float> > similar_row_from_datum_and_rate(
+      double score);
+  std::vector<std::pair<std::string, double> > similar_row_from_datum_and_rate(
       const fv_converter::datum& data,
       float rate);
 
-  float calc_similarity(
+  double calc_similarity(
       const fv_converter::datum& l,
       const fv_converter::datum& r);
-  float calc_l2norm(const fv_converter::datum& q);
+  double calc_l2norm(const fv_converter::datum& q);
 
   fv_converter::datum decode_row(const std::string& id);
   std::vector<std::string> get_all_rows();

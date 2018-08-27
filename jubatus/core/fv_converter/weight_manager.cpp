@@ -34,7 +34,7 @@ namespace fv_converter {
 namespace {
 
 struct is_zero {
-  bool operator()(const std::pair<std::string, float>& p) {
+  bool operator()(const std::pair<std::string, double>& p) {
     return p.second == 0;
   }
 };
@@ -118,7 +118,7 @@ void weight_manager::get_weight(common::sfv_t& fv) const {
       // Unknown weighting; ignored.
     }
 
-    it->second = static_cast<float>(weight);
+    it->second = weight;
   }
   fv.erase(remove_if(fv.begin(), fv.end(), is_zero()), fv.end());
 }
@@ -161,7 +161,7 @@ double weight_manager::get_global_weight_user(
   }
 }
 
-void weight_manager::add_weight(const std::string& key, float weight) {
+void weight_manager::add_weight(const std::string& key, double weight) {
   scoped_lock lk(mutex_);
   diff_weights_.add_weight(key, weight);
 }

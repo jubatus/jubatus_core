@@ -45,12 +45,12 @@ class recommender_base : public framework::model {
   // return similar row for query with similarity scores.
   virtual void similar_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const = 0;
   // return similar row for query with distance scores.
   virtual void neighbor_row(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const = 0;
   virtual void clear() = 0;
   virtual void clear_row(const std::string& id) = 0;
@@ -86,7 +86,7 @@ class recommender_base : public framework::model {
    */
   virtual void similar_row(
       const std::string& id,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
 
   /**
@@ -96,7 +96,7 @@ class recommender_base : public framework::model {
    */
   virtual void neighbor_row(
       const std::string& id,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
 
   void complete_row(const std::string& id, common::sfv_t& ret) const;
@@ -105,8 +105,8 @@ class recommender_base : public framework::model {
 
   virtual framework::mixable* get_mixable() const = 0;
 
-  static float calc_similarity(common::sfv_t& q1, common::sfv_t& q2);
-  static float calc_l2norm(const common::sfv_t& query);
+  static double calc_similarity(common::sfv_t& q1, common::sfv_t& q2);
+  static double calc_l2norm(const common::sfv_t& query);
 
  protected:
   static const uint64_t complete_row_similar_num_;

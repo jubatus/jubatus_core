@@ -48,12 +48,12 @@ void mix(recommender_mock_storage& s1, recommender_mock_storage& s2) {
 
 TEST(recommender_mock_storage, similar_items) {
   const common::sfv_t query = make_sfv("f1:1 f2:1");
-  const vector<pair<string, float> > expect = make_ids("r1:2 r2:1");
+  const vector<pair<string, double> > expect = make_ids("r1:2 r2:1");
 
   recommender_mock_storage storage;
   storage.set_similar_items(query, expect);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   storage.similar_items_similarity(query, ids, 2);
 
   EXPECT_EQ(expect, ids);
@@ -61,12 +61,12 @@ TEST(recommender_mock_storage, similar_items) {
 
 TEST(recommender_mock_storage, neighbor_items) {
   const common::sfv_t query = make_sfv("f1:1 f2:1");
-  const vector<pair<string, float> > expect = make_ids("r1:1 r2:2");
+  const vector<pair<string, double> > expect = make_ids("r1:1 r2:2");
 
   recommender_mock_storage storage;
   storage.set_neighbor_items(query, expect);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   storage.neighbor_items_distance(query, ids, 2);
 
   EXPECT_EQ(expect, ids);
@@ -78,7 +78,7 @@ TEST(recommender_mock_storage, similar_items_with_small_ret_num) {
   recommender_mock_storage storage;
   storage.set_similar_items(query, make_ids("d1:3 d2:2 d3:1 d4:0.5"));
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   storage.similar_items_similarity(query, ids, 3);
 
   EXPECT_EQ(make_ids("d1:3 d2:2 d3:1"), ids);
@@ -90,7 +90,7 @@ TEST(recommender_mock_storage, neighbor_items_with_small_ret_num) {
   recommender_mock_storage storage;
   storage.set_neighbor_items(query, make_ids("d1:0.5 d2:1 d3:2 d4:3"));
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   storage.neighbor_items_distance(query, ids, 3);
 
   EXPECT_EQ(make_ids("d1:0.5 d2:1 d3:2"), ids);
@@ -103,7 +103,7 @@ TEST(recommender_mock_storage, mix_with_similarity_relation) {
 
   mix(s1, s2);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   s1.similar_items_similarity(make_sfv("f2:1"), ids, 3);
   EXPECT_EQ(make_ids("d3:3 d2:2 d1:1"), ids);
 
@@ -118,7 +118,7 @@ TEST(recommender_mock_storage, mix_with_neighbor_relation) {
 
   mix(s1, s2);
 
-  vector<pair<string, float> > ids;
+  vector<pair<string, double> > ids;
   s1.neighbor_items_distance(make_sfv("f2:1"), ids, 3);
   EXPECT_EQ(make_ids("d3:1 d2:2 d1:3"), ids);
 

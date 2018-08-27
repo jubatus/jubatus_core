@@ -41,14 +41,14 @@ class anomaly_base : public framework::model {
   virtual ~anomaly_base();
 
   // Calculates and returns anomaly score of given query.
-  virtual float calc_anomaly_score(const common::sfv_t& query) const = 0;
+  virtual double calc_anomaly_score(const common::sfv_t& query) const = 0;
 
   // Returns anomaly score of the row corresponding to given id.
-  virtual float calc_anomaly_score(const std::string& id) const = 0;
+  virtual double calc_anomaly_score(const std::string& id) const = 0;
 
   // Returns anomaly score of the merged vector of
   // given query and the row corresponding to given id.
-  virtual float calc_anomaly_score(
+  virtual double calc_anomaly_score(
       const std::string& id,
       const common::sfv_t& query) const = 0;
 

@@ -46,7 +46,7 @@ void libsvm_converter::convert(
           converter_exception("invalid libsvm format: " + s));
     }
     std::string id = s.substr(0, p);
-    float val = jubatus::util::lang::lexical_cast<float>(s.substr(p + 1));
+    double val = jubatus::util::lang::lexical_cast<double>(s.substr(p + 1));
     num_values.push_back(make_pair(id, val));
   }
 

@@ -37,12 +37,12 @@ common::sfv_t make_sfv(const string& repr) {
     vector<string> parts = split(elems[i], ':');
     sfv[i] = make_pair(
         parts[0],
-        jubatus::util::lang::lexical_cast<float>(parts[1]));
+        jubatus::util::lang::lexical_cast<double>(parts[1]));
   }
   return sfv;
 }
 
-vector<pair<string, float> > make_ids(const string& repr) {
+vector<pair<string, double> > make_ids(const string& repr) {
   return make_sfv(repr);
 }
 

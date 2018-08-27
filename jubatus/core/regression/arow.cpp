@@ -46,30 +46,30 @@ arow::arow(storage_ptr storage)
   : linear_regression(storage) {
 }
 
-void arow::train(const common::sfv_t& fv, float value) {
-  float predict = estimate(fv);
-  float error = value - predict;
-  float sign_error = error > 0.f ? 1.0f : -1.0f;
-  float loss = sign_error * error - config_.sensitivity;
-  if (loss > 0.f) {
-    float variance = calc_variance(fv);
-    float beta = 1.f / (variance + 1.f / config_.regularization_weight);
-    float alpha = sign_error * loss * beta;
+void arow::train(const common::sfv_t& fv, double value) {
+  double predict = estimate(fv);
+  double error = value - predict;
+  double sign_error = error > 0.0 ? 1.0 : -1.0;
+  double loss = sign_error * error - config_.sensitivity;
+  if (loss > 0.0) {
+    double variance = calc_variance(fv);
+    double beta = 1.0 / (variance + 1.0 / config_.regularization_weight);
+    double alpha = sign_error * loss * beta;
     update(fv, alpha, beta);
   }
 }
 
 void arow::update(
     const common::sfv_t& sfv,
-    float alpha,
-    float beta) {
+    double alpha,
+    double beta) {
   util::concurrent::scoped_wlock lk(storage_->get_lock());
   for (common::sfv_t::const_iterator it = sfv.begin(); it != sfv.end(); ++it) {
     const std::string& feature = it->first;
-    float val = it->second;
+    double val = it->second;
     storage::feature_val2_t val2;
     storage_->get2_nolock(feature, val2);
-    storage::val2_t current_val(0.f, 1.f);
+    storage::val2_t current_val(0.0, 1.0);
     if (val2.size() > 0) {
       current_val = val2[0].second;
     }

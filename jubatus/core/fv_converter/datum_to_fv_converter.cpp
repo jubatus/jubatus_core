@@ -47,7 +47,7 @@ namespace fv_converter {
 
 class datum_to_fv_converter_impl {
  private:
-  typedef jubatus::util::data::unordered_map<std::string, float> weight_t;
+  typedef jubatus::util::data::unordered_map<std::string, double> weight_t;
 
   struct string_filter_rule {
     jubatus::util::lang::shared_ptr<key_matcher> matcher_;
@@ -243,7 +243,7 @@ class datum_to_fv_converter_impl {
             feature_func));
   }
 
-  void add_weight(const std::string& key, float weight) {
+  void add_weight(const std::string& key, double weight) {
     jubatus::util::lang::shared_ptr<weight_manager> weights =
         mixable_weights_->get_model();
     if (weights) {
@@ -503,12 +503,12 @@ class datum_to_fv_converter_impl {
 
       std::string global_weight_name = get_global_weight_name(
           weight_type.term_weight_type_);
-      float v = static_cast<float>(sample_weight);
-      if (v != 0.0) {
+
+      if (sample_weight != 0.0) {
         std::string f = make_feature(
             key, it->first, splitter_name, sample_weight_name,
             global_weight_name);
-        ret_fv.push_back(std::make_pair(f, v));
+        ret_fv.push_back(std::make_pair(f, sample_weight));
       }
     }
   }
@@ -652,7 +652,7 @@ void datum_to_fv_converter::register_combination_rule(
       feature_func);
 }
 
-void datum_to_fv_converter::add_weight(const std::string& key, float weight) {
+void datum_to_fv_converter::add_weight(const std::string& key, double weight) {
   pimpl_->add_weight(key, weight);
 }
 

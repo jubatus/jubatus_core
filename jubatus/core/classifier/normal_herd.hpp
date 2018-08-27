@@ -36,8 +36,8 @@ class normal_herd : public linear_classifier {
  private:
   void update(
       const common::sfv_t& sfv,
-      float margin,
-      float variance,
+      double margin,
+      double variance,
       const std::string& pos_label,
       const std::string& neg_label);
   classifier_config config_;

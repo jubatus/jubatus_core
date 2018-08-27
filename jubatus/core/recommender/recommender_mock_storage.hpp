@@ -36,18 +36,18 @@ class recommender_mock_storage {
 
   void set_similar_items(
       const common::sfv_t& query,
-      const std::vector<std::pair<std::string, float> >& ids);
+      const std::vector<std::pair<std::string, double> >& ids);
   void set_neighbor_items(
       const common::sfv_t& query,
-      const std::vector<std::pair<std::string, float> >& ids);
+      const std::vector<std::pair<std::string, double> >& ids);
 
   void similar_items_similarity(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
   void neighbor_items_distance(
       const common::sfv_t& query,
-      std::vector<std::pair<std::string, float> >& ids,
+      std::vector<std::pair<std::string, double> >& ids,
       size_t ret_num) const;
 
   void update(const common::sfv_t& from, const common::sfv_t& to);
@@ -69,14 +69,14 @@ class recommender_mock_storage {
       const;
 
  private:
-  typedef std::map<common::sfv_t, std::vector<std::pair<std::string, float> > >
+  typedef std::map<common::sfv_t, std::vector<std::pair<std::string, double> > >
     relation_type;
 
   static void get_relation(
       const common::sfv_t& query,
       const relation_type& relmap,
       size_t ret_num,
-      std::vector<std::pair<std::string, float> >& ids);
+      std::vector<std::pair<std::string, double> >& ids);
 
   static void update_relation_key(
       const common::sfv_t& from,

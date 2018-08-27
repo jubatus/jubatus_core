@@ -80,38 +80,38 @@ void nearest_neighbor::set_row(
   nn_->set_row(id, v);
 }
 
-std::vector<std::pair<std::string, float> >
+std::vector<std::pair<std::string, double> >
 nearest_neighbor::neighbor_row_from_id(const std::string& id, size_t size) {
-  std::vector<std::pair<std::string, float> > ret;
+  std::vector<std::pair<std::string, double> > ret;
   nn_->neighbor_row(id, ret, size);
   return ret;
 }
 
-std::vector<std::pair<std::string, float> >
+std::vector<std::pair<std::string, double> >
 nearest_neighbor::neighbor_row_from_datum(
     const fv_converter::datum& datum,
     size_t size) {
   common::sfv_t v;
   converter_->convert(datum, v);
-  std::vector<std::pair<std::string, float> > ret;
+  std::vector<std::pair<std::string, double> > ret;
   nn_->neighbor_row(v, ret, size);
   return ret;
 }
 
-std::vector<std::pair<std::string, float> >
+std::vector<std::pair<std::string, double> >
 nearest_neighbor::similar_row(const std::string& id, size_t ret_num) {
-  std::vector<std::pair<std::string, float> > ret;
+  std::vector<std::pair<std::string, double> > ret;
   nn_->similar_row(id, ret, ret_num);
   return ret;
 }
 
-std::vector<std::pair<std::string, float> >
+std::vector<std::pair<std::string, double> >
 nearest_neighbor::similar_row(
     const core::fv_converter::datum& datum,
     size_t ret_num) {
   common::sfv_t v;
   converter_->convert(datum, v);
-  std::vector<std::pair<std::string, float> > ret;
+  std::vector<std::pair<std::string, double> > ret;
   nn_->similar_row(v, ret, ret_num);
   return ret;
 }

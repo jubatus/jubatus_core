@@ -37,7 +37,7 @@ TEST(sparse_matrix_storage, empty) {
   sparse_matrix_storage s;
   EXPECT_EQ(0.0, s.get("row", "column"));
 
-  vector<pair<string, float> > row;
+  vector<pair<string, double> > row;
   s.get_row("row", row);
   EXPECT_TRUE(row.empty());
 
@@ -48,7 +48,7 @@ TEST(sparse_matrix_storage, empty) {
 
 TEST(sparse_matrix_storage, set_row) {
   sparse_matrix_storage s;
-  vector<pair<string, float> > r1, r2;
+  vector<pair<string, double> > r1, r2;
   r1.push_back(make_pair("c1", 1.0));
   r1.push_back(make_pair("c2", 2.0));
 
@@ -57,7 +57,7 @@ TEST(sparse_matrix_storage, set_row) {
   r2.push_back(make_pair("c3", 5.0));
   s.set_row("r2", r2);
 
-  vector<pair<string, float> > p;
+  vector<pair<string, double> > p;
   s.get_row("r1", p);
   std::sort(p.begin(), p.end());
   ASSERT_EQ(r1, p);
@@ -94,7 +94,7 @@ TEST(sparse_matrix_storage, set) {
   EXPECT_EQ(0.0, s.get("r0", "c0"));
   EXPECT_EQ(0.0, s.get("r1", "c0"));
 
-  vector<pair<string, float> > p;
+  vector<pair<string, double> > p;
   s.get_row("r1", p);
   ASSERT_EQ(2u, p.size());
   sort(p.begin(), p.end());
@@ -116,11 +116,11 @@ TEST(sparse_matrix_storage, set) {
 
 TEST(sparse_matrix_storage, calc_l2norm) {
   sparse_matrix_storage s;
-  EXPECT_FLOAT_EQ(0.0, s.calc_l2norm("unknown"));
+  EXPECT_DOUBLE_EQ(0.0, s.calc_l2norm("unknown"));
   s.set("r1", "c1", 1.0);
   s.set("r1", "c2", 2.0);
   s.set("r1", "c3", 3.0);
-  EXPECT_FLOAT_EQ(std::sqrt(14.0), s.calc_l2norm("r1"));
+  EXPECT_DOUBLE_EQ(std::sqrt(14.0), s.calc_l2norm("r1"));
 }
 
 TEST(sparse_matrix_storage, pack_and_unpack) {
@@ -133,7 +133,7 @@ TEST(sparse_matrix_storage, pack_and_unpack) {
   msgpack::unpacked unpacked;
   msgpack::unpack(&unpacked, buf.data(), buf.size());
   unpacked.get().convert(&s2);
-  EXPECT_FLOAT_EQ(1.0, s2.get("r1", "c1"));
+  EXPECT_DOUBLE_EQ(1.0, s2.get("r1", "c1"));
 }
 
 TEST(sparse_matrix_storage, remove) {

@@ -54,17 +54,17 @@ regression::regression(
 regression::~regression() {
 }
 
-void regression::train(const pair<float, fv_converter::datum>& data) {
+void regression::train(const pair<double, fv_converter::datum>& data) {
   common::sfv_t v;
   converter_->convert_and_update_weight(data.second, v);
   regression_->train(v, data.first);
 }
 
-float regression::estimate(
+double regression::estimate(
     const fv_converter::datum& data) const {
   common::sfv_t v;
   converter_->convert(data, v);
-  float value = regression_->estimate(v);
+  double value = regression_->estimate(v);
   return value;
 }
 

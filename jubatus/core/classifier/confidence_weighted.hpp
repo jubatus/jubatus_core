@@ -36,7 +36,7 @@ class confidence_weighted : public linear_classifier {
  private:
   void update(
     const common::sfv_t& fv,
-    float step_weigth,
+    double step_weigth,
     const std::string& pos_label,
     const std::string& neg_label);
   classifier_config config_;

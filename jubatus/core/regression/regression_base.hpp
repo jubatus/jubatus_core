@@ -43,8 +43,8 @@ class regression_base {
   virtual ~regression_base() {
   }
 
-  virtual void train(const common::sfv_t& fv, const float value) = 0;
-  virtual float estimate(const common::sfv_t& fv) const = 0;
+  virtual void train(const common::sfv_t& fv, const double value) = 0;
+  virtual double estimate(const common::sfv_t& fv) const = 0;
 
   virtual void clear() = 0;
 

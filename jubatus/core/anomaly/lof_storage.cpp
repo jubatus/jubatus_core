@@ -98,10 +98,10 @@ lof_storage::~lof_storage() {
 /**
  * Collect neighbor LRDs for the given query.
  */
-float lof_storage::collect_lrds(
+double lof_storage::collect_lrds(
     const common::sfv_t& query,
-    unordered_map<string, float>& neighbor_lrd) const {
-  vector<pair<string, float> > neighbors;
+    unordered_map<string, double>& neighbor_lrd) const {
+  vector<pair<string, double> > neighbors;
   nn_engine_->neighbor_row(query, neighbors, neighbor_num_);
 
   return collect_lrds_from_neighbors(neighbors, neighbor_lrd);
@@ -111,10 +111,10 @@ float lof_storage::collect_lrds(
  * Collect neighbor LRDs for the given ID.
  * Note that returned `neighbor_lrd` does not contain the ID being queried.
  */
-float lof_storage::collect_lrds(
+double lof_storage::collect_lrds(
     const string& id,
-    unordered_map<string, float>& neighbor_lrd) const {
-  vector<pair<string, float> > neighbors;
+    unordered_map<string, double>& neighbor_lrd) const {
+  vector<pair<string, double> > neighbors;
   nn_engine_->neighbor_row(id, neighbors, neighbor_num_ + 1);
 
   // neighbor_row returns id itself, so we remove it from the list
@@ -129,10 +129,10 @@ float lof_storage::collect_lrds(
   return collect_lrds_from_neighbors(neighbors, neighbor_lrd);
 }
 
-float lof_storage::collect_lrds(
+double lof_storage::collect_lrds(
     const string& id,
     const common::sfv_t& query,
-    jubatus::util::data::unordered_map<string, float>&
+    jubatus::util::data::unordered_map<string, double>&
     neighbor_lrd) const {
   common::sfv_t updated_row;
   nn_engine_->decode_row(id, updated_row);
@@ -179,7 +179,7 @@ bool lof_storage::update_row(
     const pair<string, common::sfv_t>& data,
     unordered_set<string>& update_set) {
   if (ignore_kth_same_point_) {
-    vector<pair<string, float> > nn_result;
+    vector<pair<string, double> > nn_result;
 
     // Find k-1 NNs for the given sfv.
     // If the distance to the (k-1) th neighbor is 0, the model already
@@ -214,7 +214,7 @@ bool lof_storage::update_row(
 
 bool lof_storage::update_row(const string& row, const common::sfv_t& diff) {
   if (ignore_kth_same_point_) {
-    vector<pair<string, float> > nn_result;
+    vector<pair<string, double> > nn_result;
 
     // Find k-1 NNs for the given sfv.
     // If the distance to the (k-1) th neighbor is 0, the model already
@@ -255,7 +255,7 @@ string lof_storage::name() const {
   return "lof_storage";
 }
 
-float lof_storage::get_kdist(const string& row) const {
+double lof_storage::get_kdist(const string& row) const {
   lof_table_t::const_iterator it = lof_table_diff_.find(row);
   if (it == lof_table_diff_.end()) {
     it = lof_table_.find(row);
@@ -272,7 +272,7 @@ float lof_storage::get_kdist(const string& row) const {
   return it->second.kdist;
 }
 
-float lof_storage::get_lrd(const string& row) const {
+double lof_storage::get_lrd(const string& row) const {
   lof_table_t::const_iterator it = lof_table_diff_.find(row);
   if (it == lof_table_diff_.end()) {
     it = lof_table_.find(row);
@@ -393,11 +393,11 @@ bool lof_storage::is_removed(const lof_entry& entry) {
  * LRD for the point.
  * `neighbors` donesn't have to be sorted.
  */
-float lof_storage::collect_lrds_from_neighbors(
-    const vector<pair<string, float> >& neighbors,
-    unordered_map<string, float>& neighbor_lrd) const {
+double lof_storage::collect_lrds_from_neighbors(
+    const vector<pair<string, double> >& neighbors,
+    unordered_map<string, double>& neighbor_lrd) const {
   if (neighbors.empty()) {
-    return numeric_limits<float>::infinity();
+    return numeric_limits<double>::infinity();
   }
 
   // collect lrd values of the nearest neighbors
@@ -407,14 +407,14 @@ float lof_storage::collect_lrds_from_neighbors(
   }
 
   // return lrd of the query
-  float sum_reachability = 0;
+  double sum_reachability = 0;
   for (size_t i = 0; i < neighbors.size(); ++i) {
     sum_reachability += max(neighbors[i].second, get_kdist(neighbors[i].first));
   }
 
   // All the neighbors seem to have a same feature vector.
   if (sum_reachability == 0) {
-    return numeric_limits<float>::infinity();
+    return numeric_limits<double>::infinity();
   }
 
   return neighbors.size() / sum_reachability;
@@ -426,7 +426,7 @@ float lof_storage::collect_lrds_from_neighbors(
 void lof_storage::collect_neighbors(
     const string& row,
     unordered_set<string>& nn) const {
-  vector<pair<string, float> > neighbors;
+  vector<pair<string, double> > neighbors;
   nn_engine_->neighbor_row(row, neighbors, reverse_nn_num_);
 
   for (size_t i = 0; i < neighbors.size(); ++i) {
@@ -440,7 +440,7 @@ void lof_storage::collect_neighbors(
 void lof_storage::update_entries(const unordered_set<string>& rows) {
   // NOTE: These two loops are separated, since update_lrd requires new kdist
   // values of k-NN.
-  typedef unordered_map<string, vector<pair<string, float> > >
+  typedef unordered_map<string, vector<pair<string, double> > >
     rows_to_neighbors_type;
 
   rows_to_neighbors_type rows_to_neighbors;
@@ -463,7 +463,7 @@ void lof_storage::update_entries(const unordered_set<string>& rows) {
  * Update kdist for the row.
  */
 void lof_storage::update_kdist(const string& row) {
-  vector<pair<string, float> > neighbors;
+  vector<pair<string, double> > neighbors;
   nn_engine_->neighbor_row(row, neighbors, neighbor_num_);
   update_kdist_with_neighbors(row, neighbors);
 }
@@ -474,7 +474,7 @@ void lof_storage::update_kdist(const string& row) {
  */
 void lof_storage::update_kdist_with_neighbors(
     const string& row,
-    const vector<pair<string, float> >& neighbors) {
+    const vector<pair<string, double> >& neighbors) {
   if (!neighbors.empty()) {
     lof_table_diff_[row].kdist = neighbors.back().second;
   }
@@ -484,7 +484,7 @@ void lof_storage::update_kdist_with_neighbors(
  * Update LRD for the row.
  */
 void lof_storage::update_lrd(const string& row) {
-  vector<pair<string, float> > neighbors;
+  vector<pair<string, double> > neighbors;
   nn_engine_->neighbor_row(row, neighbors, neighbor_num_);
   update_lrd_with_neighbors(row, neighbors);
 }
@@ -493,22 +493,22 @@ void lof_storage::update_lrd(const string& row) {
  * Update LRD for the row using given NN search result (`neighbors`).
  */
 void lof_storage::update_lrd_with_neighbors(
-    const string& row, const vector<pair<string, float> >& neighbors) {
+    const string& row, const vector<pair<string, double> >& neighbors) {
   if (neighbors.empty()) {
     lof_table_diff_[row].lrd = 1;
     return;
   }
 
   const size_t length = min(neighbors.size(), size_t(neighbor_num_));
-  float sum_reachability = 0;
+  double sum_reachability = 0;
   for (size_t i = 0; i < length; ++i) {
     sum_reachability += max(neighbors[i].second, get_kdist(neighbors[i].first));
   }
 
   // NOTE : `sum_reachability` can be zero due to a numerical error,
   // which will cause the lof score inf.
-  // To avoid inf score, a small number 1e-10 is added to `sum_reachability`.
-  lof_table_diff_[row].lrd = length / (sum_reachability + 1e-10f);
+  // To avoid inf score, a small number 1e-15 is added to `sum_reachability`.
+  lof_table_diff_[row].lrd = length / (sum_reachability + 1e-15);
 }
 
 }  // namespace anomaly

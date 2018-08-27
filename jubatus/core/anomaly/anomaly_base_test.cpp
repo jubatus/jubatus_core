@@ -40,16 +40,16 @@ class anomaly_impl : public anomaly_base {
   anomaly_impl() : anomaly_base() {
   }
 
-  float calc_anomaly_score(
+  double calc_anomaly_score(
       const common::sfv_t& query) const {
     return 1.0;
   }
 
-  float calc_anomaly_score(const std::string& id) const {
+  double calc_anomaly_score(const std::string& id) const {
     return 1.0;
   }
 
-  float calc_anomaly_score(
+  double calc_anomaly_score(
       const std::string& id,
       const common::sfv_t& query) const {
     return 1.0;

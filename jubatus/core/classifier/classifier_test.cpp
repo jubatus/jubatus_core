@@ -160,27 +160,27 @@ TYPED_TEST_P(classifier_test, delete_label) {
 
   {
     common::sfv_t fv;
-    fv.push_back(std::make_pair("f1", 1.f));
+    fv.push_back(std::make_pair("f1", 1.0));
     p->train(fv, "A");
   }
 
   {
     common::sfv_t fv;
-    fv.push_back(std::make_pair("f1", 1.f));
-    fv.push_back(std::make_pair("f2", 1.f));
+    fv.push_back(std::make_pair("f1", 1.0));
+    fv.push_back(std::make_pair("f2", 1.0));
     p->train(fv, "B");
   }
 
   {
     common::sfv_t fv;
-    fv.push_back(std::make_pair("f3", 1.f));
+    fv.push_back(std::make_pair("f3", 1.0));
     p->train(fv, "C");
   }
 
   {
     common::sfv_t fv;
-    fv.push_back(std::make_pair("f1", 1.f));
-    fv.push_back(std::make_pair("f2", 1.f));
+    fv.push_back(std::make_pair("f1", 1.0));
+    fv.push_back(std::make_pair("f2", 1.0));
     EXPECT_EQ("B", p->classify(fv));
   }
 
@@ -189,13 +189,13 @@ TYPED_TEST_P(classifier_test, delete_label) {
   for (size_t i = 0; i < 8; ++i) {
     common::sfv_t fv;
     if (i & 1) {
-      fv.push_back(std::make_pair("f1", 1.f));
+      fv.push_back(std::make_pair("f1", 1.0));
     }
     if (i & 2) {
-      fv.push_back(std::make_pair("f2", 1.f));
+      fv.push_back(std::make_pair("f2", 1.0));
     }
     if (i & 4) {
-      fv.push_back(std::make_pair("f3", 1.f));
+      fv.push_back(std::make_pair("f3", 1.0));
     }
     EXPECT_NE("B", p->classify(fv));
   }
@@ -212,19 +212,19 @@ TYPED_TEST_P(classifier_test, unlearning) {
 
   {
     common::sfv_t fv;
-    fv.push_back(std::make_pair("f1", 10.f));
+    fv.push_back(std::make_pair("f1", 10.0));
     p->train(fv, "A");
   }
 
   {
     common::sfv_t fv;
-    fv.push_back(std::make_pair("f2", 1.f));
+    fv.push_back(std::make_pair("f2", 1.0));
     p->train(fv, "B");
   }
 
   {
     common::sfv_t fv;
-    fv.push_back(std::make_pair("f1", 1.f));
+    fv.push_back(std::make_pair("f1", 1.0));
     p->train(fv, "C");
 
     EXPECT_EQ("C", p->classify(fv));

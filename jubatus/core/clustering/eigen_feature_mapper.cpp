@@ -105,7 +105,7 @@ eigen_wsvec_list_t eigen_feature_mapper::convert(
 common::sfv_t eigen_feature_mapper::revert(const eigen_svec_t& src) const {
   common::sfv_t ret;
   for (eigen_svec_t::InnerIterator it(src); it; ++it) {
-    rinsert(std::make_pair(it.row(), static_cast<float>(it.value())), ret);
+    rinsert(std::make_pair(it.row(), it.value()), ret);
   }
   return ret;
 }
@@ -145,7 +145,7 @@ wplist eigen_feature_mapper::revert(
 }
 
 void eigen_feature_mapper::insert(
-    const pair<std::string, float>& item,
+    const pair<std::string, double>& item,
     bool update_map,
     eigen_svec_t& dst) {
   if (dst.rows() < d_) {
@@ -161,7 +161,7 @@ void eigen_feature_mapper::insert(
 }
 
 void eigen_feature_mapper::insertc(
-    const pair<std::string, float>& item,
+    const pair<std::string, double>& item,
     eigen_svec_t& dst) const {
   if (dst.rows() < d_) {
     dst.resize(d_);
@@ -172,7 +172,7 @@ void eigen_feature_mapper::insertc(
 }
 
 void eigen_feature_mapper::rinsert(
-    const pair<int, float>& item,
+    const pair<int, double>& item,
     common::sfv_t& dst) const {
   if (rmap_.find(item.first) != rmap_.end()) {
     dst.push_back(

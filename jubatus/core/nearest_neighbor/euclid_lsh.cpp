@@ -38,24 +38,24 @@ using jubatus::core::storage::column_type;
 using jubatus::core::storage::owner;
 using jubatus::core::storage::bit_vector;
 using jubatus::core::storage::const_bit_vector_column;
-using jubatus::core::storage::const_float_column;
+using jubatus::core::storage::const_double_column;
 
-typedef jubatus::core::storage::fixed_size_heap<pair<float, size_t> > heap_t;
+typedef jubatus::core::storage::fixed_size_heap<pair<double, size_t> > heap_t;
 
 namespace jubatus {
 namespace core {
 namespace nearest_neighbor {
 namespace {
 
-float squared_l2norm(const common::sfv_t& sfv) {
-  float sqnorm = 0;
+double squared_l2norm(const common::sfv_t& sfv) {
+  double sqnorm = 0;
   for (size_t i = 0; i < sfv.size(); ++i) {
     sqnorm += sfv[i].second * sfv[i].second;
   }
   return sqnorm;
 }
 
-float l2norm(const common::sfv_t& sfv) {
+double l2norm(const common::sfv_t& sfv) {
   return std::sqrt(squared_l2norm(sfv));
 }
 
@@ -92,7 +92,7 @@ void euclid_lsh::set_row(const string& id, const common::sfv_t& sfv) {
 
 void euclid_lsh::neighbor_row(
     const common::sfv_t& query,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
 
@@ -107,7 +107,7 @@ void euclid_lsh::neighbor_row(
 
 void euclid_lsh::neighbor_row(
     const std::string& query_id,
-    vector<pair<string, float> >& ids,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   util::concurrent::scoped_rlock lk(get_const_table()->get_mutex());
 
@@ -121,7 +121,7 @@ void euclid_lsh::neighbor_row(
   }
 
   const bit_vector bv = lsh_column()[maybe_index.second];
-  const float norm = norm_column()[maybe_index.second];
+  const double norm = norm_column()[maybe_index.second];
   neighbor_row_from_hash(bv, norm, ids, ret_num);
 }
 
@@ -138,31 +138,31 @@ void euclid_lsh::set_config(const config& conf) {
 void euclid_lsh::fill_schema(vector<column_type>& schema) {
   first_column_id_ = schema.size();
   schema.push_back(column_type(column_type::bit_vector_type, hash_num_));
-  schema.push_back(column_type(column_type::float_type));
+  schema.push_back(column_type(column_type::double_type));
 }
 
 const_bit_vector_column& euclid_lsh::lsh_column() const {
   return get_const_table()->get_bit_vector_column(first_column_id_);
 }
 
-const_float_column& euclid_lsh::norm_column() const {
-  return get_const_table()->get_float_column(first_column_id_ + 1);
+const_double_column& euclid_lsh::norm_column() const {
+  return get_const_table()->get_double_column(first_column_id_ + 1);
 }
 
 static heap_t ranking_hamming_bit_vectors_worker(
     const bit_vector *bv, const_bit_vector_column *bv_col,
-    const_float_column *norm_col, float denom, float norm,
+    const_double_column *norm_col, double denom, double norm,
     uint64_t ret_num, size_t off, size_t end) {
   heap_t heap(ret_num);
   for (size_t i = off; i < end; ++i) {
     const size_t hamm_dist =
       bv->calc_hamming_distance_unsafe(bv_col->get_data_at_unsafe(i));
-    const float norm_i = (*norm_col)[i];
-    float score;
+    const double norm_i = (*norm_col)[i];
+    double score;
     if (hamm_dist == 0) {
       score = std::fabs(norm - norm_i);
     } else {
-      const float theta = hamm_dist * M_PI / denom;
+      const double theta = hamm_dist * M_PI / denom;
       score = std::sqrt(
           norm * norm + norm_i * norm_i - 2 * norm * norm_i * std::cos(theta));
     }
@@ -173,8 +173,8 @@ static heap_t ranking_hamming_bit_vectors_worker(
 
 void euclid_lsh::neighbor_row_from_hash(
     const bit_vector& bv,
-    float norm,
-    vector<pair<string, float> >& ids,
+    double norm,
+    vector<pair<string, double> >& ids,
     uint64_t ret_num) const {
   // This function is not thread safe.
   // Take lock out of this function.
@@ -185,8 +185,8 @@ void euclid_lsh::neighbor_row_from_hash(
     return;
   }
   const_bit_vector_column& bv_col = lsh_column();
-  const_float_column& norm_col = norm_column();
-  const float denom = bv.bit_num();
+  const_double_column& norm_col = norm_column();
+  const double denom = bv.bit_num();
   heap_t heap(ret_num);
   jubatus::util::lang::function<heap_t(size_t, size_t)> f =
     jubatus::util::lang::bind(
@@ -196,7 +196,7 @@ void euclid_lsh::neighbor_row_from_hash(
   ranking_hamming_bit_vectors_internal(
       f, table->size_nolock(), threads_, heap);
 
-  vector<pair<float, size_t> > sorted;
+  vector<pair<double, size_t> > sorted;
   heap.get_sorted(sorted);
 
   for (size_t i = 0; i < sorted.size(); ++i) {
