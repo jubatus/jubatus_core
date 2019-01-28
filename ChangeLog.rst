@@ -1,3 +1,9 @@
+Release 1.1.1 - 2019/01/28
+--------------------------
+
+* Improvements
+    * Suppress warnings at compile (#400, 401)
+
 Release 1.1.0 - 2018/08/27
 --------------------------
 
