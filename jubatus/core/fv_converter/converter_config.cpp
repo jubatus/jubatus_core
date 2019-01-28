@@ -345,7 +345,6 @@ void init_combination_rules(
     const vector<combination_rule>& combination_rules,
     const map<string, combination_feature_ptr>& combination_features,
     datum_to_fv_converter& conv) {
-  key_matcher_factory f;
   for (size_t i = 0; i < combination_rules.size(); ++i) {
     const combination_rule& rule = combination_rules[i];
     matcher_ptr m_left(create_key_matcher(rule.key_left, rule.except_left));

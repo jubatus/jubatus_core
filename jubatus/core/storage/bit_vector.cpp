@@ -64,7 +64,7 @@ size_t calc_hamming_distance_impl(const uint64_t *x,
     match_num += _mm_popcnt_u64(x[i + 2] ^ y[i + 2]);
     match_num += _mm_popcnt_u64(x[i + 3] ^ y[i + 3]);
   }
-  for (; i < blocks; ++i) {
+  for (; i < static_cast<ssize_t>(blocks); ++i) {
     match_num += _mm_popcnt_u64(x[i] ^ y[i]);
   }
 #else  // #ifdef __x86_64__
@@ -89,7 +89,7 @@ size_t bit_count_impl(const uint64_t *x, size_t blocks) {
     result += _mm_popcnt_u64(x[i + 2]);
     result += _mm_popcnt_u64(x[i + 3]);
   }
-  for (; i < blocks; ++i) {
+  for (; i < static_cast<ssize_t>(blocks); ++i) {
     result += _mm_popcnt_u64(x[i]);
   }
 #else  // #ifdef __x86_64__
