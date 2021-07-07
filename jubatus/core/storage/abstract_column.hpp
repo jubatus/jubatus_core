@@ -315,10 +315,41 @@ class typed_column<bit_vector> : public detail::abstract_column_base {
 
   template<class Buffer>
   void pack_array(msgpack::packer<Buffer>& packer) const {
-    packer.pack(array_);
+    static const uint64_t max_segment_size = (1ull << 32) - 1;
+    const uint64_t bytes = array_.size() * sizeof(uint64_t);
+    const uint64_t num_of_segments =
+      (bytes + max_segment_size - 1) / max_segment_size;
+    const char *p = reinterpret_cast<const char*>(array_.data());
+    packer.pack_array(num_of_segments);
+    for (uint64_t remains = bytes; remains > 0;) {
+      const uint64_t seg_size = std::min(remains, max_segment_size);
+      packer.pack_raw(seg_size);
+      packer.pack_raw_body(p, seg_size);
+      p += seg_size;
+      remains -= seg_size;
+    }
   }
   void unpack_array(msgpack::object o) {
-    o.convert(&array_);
+    if (o.type != msgpack::type::ARRAY) {
+      throw msgpack::type_error();
+    }
+    size_t bytes = 0;
+    msgpack::object_array& ary = o.via.array;
+    for (uint32_t i = 0; i < ary.size; ++i) {
+      if (ary.ptr[i].type != msgpack::type::RAW) {
+        throw msgpack::type_error();
+      }
+      bytes += ary.ptr[i].via.raw.size;
+    }
+    if (bytes % sizeof(uint64_t) != 0) {
+      throw msgpack::type_error();
+    }
+    array_.resize(bytes / sizeof(uint64_t));
+    char *p = reinterpret_cast<char*>(array_.data());
+    for (uint32_t i = 0; i < ary.size; ++i) {
+      std::memcpy(p, ary.ptr[i].via.raw.ptr, ary.ptr[i].via.raw.size);
+      p += ary.ptr[i].via.raw.size;
+    }
   }
 
  private:
